@@ -16,24 +16,24 @@ local function includeServer(f)
 	if SERVER then include(f..".lua") end
 end
 
-local function includeGuiFiles()
-	local tag = "ms.Ores.IncludeGui"
-	local files = file.Find("mining/gui/*.lua","LUA")
+local guiFiles = {}
 
+local function includeGuiFile()
 	if SERVER then
-		for k,v in next,files do
-			AddCSLuaFile("mining/gui/"..v..".lua")
-		end
+		AddCSLuaFile("mining/gui/"..v..".lua")
 	else
-		hook.Add("InitPostEntity",tag,function()
-			for k,v in next,files do
-				include("mining/gui/"..v..".lua")
-			end
-
-			hook.Remove("InitPostEntity",tag)
-		end)
+		guiFiles[#guiFiles+1] = "mining/gui/"..v..".lua"
 	end
 end
+
+local tag = "ms.Ores.IncludeGui"
+hook.Add("InitPostEntity",tag,function()
+	for k,v in next,guiFiles do
+		include(v)
+	end
+
+	hook.Remove("InitPostEntity",tag)
+end)
 
 -- File initialisation starts here...
 includeShared("mining/logic/sh_ores")
@@ -42,4 +42,4 @@ includeShared("mining/logic/sh_miner")
 includeServer("mining/logic/sv_miner")
 includeShared("mining/logic/sh_pickaxe")
 includeServer("mining/logic/sv_pickaxe")
-includeGuiFiles("mining/gui/miner_menu")
+includeGuiFile("mining/gui/miner_menu")
