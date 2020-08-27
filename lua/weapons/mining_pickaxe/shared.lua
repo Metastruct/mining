@@ -43,7 +43,6 @@ SWEP.StatsLoaded = false
 
 SWEP.NextVMIdle = nil
 
-local nwPrefix = "ms.Ores.Pickaxe."
 function SWEP:RefreshStats()
 	if not _G.ms then return end
 
@@ -51,7 +50,7 @@ function SWEP:RefreshStats()
 	if not (owner:IsValid() and owner:IsPlayer()) then return end
 
 	for k,v in next,ms.Ores.__PStats do
-		self.Stats[v.VarName] = v.VarBase+(v.VarStep*owner:GetNWInt(nwPrefix..v.VarName,0))
+		self.Stats[v.VarName] = v.VarBase+(v.VarStep*owner:GetNWInt(ms.Ores._nwPickaxePrefix..v.VarName,0))
 	end
 
 	self.StatsLoaded = true

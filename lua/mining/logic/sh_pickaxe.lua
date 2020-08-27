@@ -41,6 +41,10 @@ Ores.__PStats = {
 	}
 }
 
+Ores._nwPrefix = "ms.Ores."
+Ores._nwPoints = Ores._nwPrefix.."Points"
+Ores._nwPickaxePrefix = Ores._nwPrefix.."Pickaxe."
+
 function Ores.StatFormat(k,level)
 	local stat = Ores.__PStats[k]
 	if not stat then return "" end

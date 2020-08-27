@@ -2,13 +2,11 @@ module("ms",package.seeall)
 
 Ores = Ores or {}
 
-local nwPrefix = "ms.Ores.Pickaxe."
+function Ores.RefreshPlayerData(pl)
+	local data = Ores.GetSavedPlayerData(pl)
 
-function Ores.RefreshPickaxeValues(pl)
-	local sID = pl:AccountID()
-
+	pl:SetNWInt(Ores._nwPoints,data._points)
 	for k,v in next,Ores.__PStats do
-		local nw = nwPrefix..v.VarName
-		pl:SetNWInt(nw,tonumber(pl:GetPData(nw..sID,0)))
+		pl:SetNWInt(Ores._nwPickaxePrefix..v.VarName,data[v.VarName])
 	end
 end

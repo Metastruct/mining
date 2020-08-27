@@ -24,7 +24,6 @@ if CLIENT then
 end
 
 -- Ore Functions
-local nwPrefix = "ms.Ores."
 local function AddOre(
 		id,
 		name,
@@ -91,5 +90,5 @@ function Ores.GetPlayerOre(self,rarity)
 	assert(self and self:IsPlayer(),"[Ores] First argument is not a player")
 	assert(isnumber(rarity) and Ores.__R and Ores.__R[rarity],"[Ores] Rarity argument is invalid")
 
-	return self:GetNWInt(nwPrefix..Ores.__R[rarity].Name,0)
+	return self:GetNWInt(Ores._nwPrefix..Ores.__R[rarity].Name,0)
 end

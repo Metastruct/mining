@@ -121,7 +121,7 @@ function Ores.GenerateMiningRock(startPos,rarity)
 
 		local mult = 1-(traceTbl.start:DistToSqr(t.HitPos)/16384)
 		if mult < 0 then mult = 0 end
-		
+
 		t.HitPos = t.HitPos+(wallNormal*48*mult)
 	end
 
@@ -213,7 +213,7 @@ local function SpawnRock(rarity)
 	end
 
 	Ores.Print("Failed to spawn mining rock after 4 retries.")
-	
+
 	AdjustTimer(nextAttempt+attemptTime)
 end
 
@@ -341,9 +341,6 @@ end
 
 timer.Create(sdTag,((60-date.min)*60)-date.sec+10,0,specialDayTimer)
 
-local nwPrefix = "ms.Ores."
-local nwPoints = nwPrefix.."Points"
-
 hook.Add("PlayerInitialSpawn","ms.Ores",function(pl)
 	if Ores.SpecialDays.ActiveId then
 		Ores.SendSpecialDayInfo(pl)
@@ -358,8 +355,7 @@ hook.Add("PlayerInitialSpawn","ms.Ores",function(pl)
 	-- Loading pickaxe values on the same frame as PlayerInitialSpawn doesn't work, so...
 	timer.Simple(1,function()
 		if pl:IsValid() then
-			pl:SetNWInt(nwPoints,tonumber(pl:GetPData(nwPoints..pl:AccountID(),0)))
-			Ores.RefreshPickaxeValues(pl)
+			Ores.RefreshPlayerData(pl)
 		end
 	end)
 end)
@@ -412,11 +408,11 @@ function Ores.TradeOresForPoints(pl)
 
 	Ores.Print(pl,str("gave %s ore pieces for %s%s points",count,earnings,mult > 1 and str(" (x%s for %s)",mult,Ores.SpecialDays.Days[Ores.SpecialDays.ActiveId] and Ores.SpecialDays.Days[Ores.SpecialDays.ActiveId].Name or "some reason") or ""))
 
-	local nwSID = nwPoints..pl:AccountID()
-	local points = math.floor(pl:GetPData(nwSID,0)+earnings)
+	local savaData = Ores.GetSavedPlayerData(pl)
+	local points = math.floor(savaData._points+earnings)
 
-	pl:SetPData(nwSID,points)
-	pl:SetNWInt(nwPoints,points)
+	Ores.SetSavedPlayerData(pl,"points",points)
+	pl:SetNWInt(Ores._nwPoints,points)
 	pl:EmitSound(")physics/surfaces/underwater_impact_bullet3.wav",75,70)
 	return true
 end
@@ -433,7 +429,7 @@ function Ores.GivePlayerOre(pl,rarity,amount)
 
 	amount = math.floor(amount)
 
-	local nw = nwPrefix..Ores.__R[rarity].Name
+	local nw = Ores._nwPrefix..Ores.__R[rarity].Name
 	pl:SetNWInt(nw,pl:GetNWInt(nw,0)+amount)
 
 	hook.Run("PlayerReceivedOre",pl,amount,rarity)
@@ -446,7 +442,7 @@ function Ores.TakePlayerOre(pl,rarity,amount)
 
 	amount = math.floor(amount)
 
-	local nw = nwPrefix..Ores.__R[rarity].Name
+	local nw = Ores._nwPrefix..Ores.__R[rarity].Name
 	local current = pl:GetNWInt(nw,0)
 	pl:SetNWInt(nw,math.max(current-amount,0))
 

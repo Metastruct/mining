@@ -1,4 +1,4 @@
-module("ms", package.seeall)
+module("ms",package.seeall)
 
 Ores = Ores or {}
 
@@ -23,11 +23,9 @@ hook.Add("KeyPress", "ms.Ores_NPCUse", function(pl, key)
 	end
 end)
 
-local nwPoints = "ms.Ores.Points"
-local nwPickaxe = "ms.Ores.Pickaxe."
 local function animateMiner(npc)
 	npc:RemoveAllGestures()
-	npc:AddLayeredSequence(npc:LookupSequence("give"), 10)
+	npc:AddLayeredSequence(npc:LookupSequence("give"),10)
 end
 
 local function getCloseMiner(pl)
@@ -71,28 +69,26 @@ concommand.Add("mining_upgrade", function(pl, _, args)
 	local stat = Ores.__PStats[k]
 	if not stat then return end
 
-	local level = pl:GetNWInt(nwPickaxe .. stat.VarName, 0)
+	local level = pl:GetNWInt(Ores._nwPickaxePrefix..stat.VarName,0)
 
 	-- Stat is already at max level
 	if level >= 50 then return end
 
-	local points = pl:GetNWInt(nwPoints, 0)
-	local cost = Ores.StatPrice(k, level + 1)
+	local points = pl:GetNWInt(Ores._nwPoints,0)
+	local cost = Ores.StatPrice(k,level+1)
 
 	if points < cost then return end
 
 	local npc = getCloseMiner(pl)
 	if not npc:IsValid() then return end
 
-	points = math.floor(points - cost)
+	points = math.floor(points-cost)
 
-	local nwStat = nwPickaxe .. stat.VarName
-	local sID = pl:AccountID()
+	Ores.SetSavedPlayerData(pl,"points",points)
+	pl:SetNWInt(Ores._nwPoints,points)
 
-	pl:SetPData(nwPoints .. sID, points)
-	pl:SetNWInt(nwPoints, points)
-	pl:SetPData(nwStat .. sID, level + 1)
-	pl:SetNWInt(nwStat, level + 1)
+	Ores.SetSavedPlayerData(pl,stat.VarName,level+1)
+	pl:SetNWInt(Ores._nwPickaxePrefix..stat.VarName,level+1)
 
 	local wep = pl:GetActiveWeapon()
 	if wep:IsValid() and wep:GetClass() == "mining_pickaxe" then

@@ -1,7 +1,6 @@
 pcall(include, "autorun/translation.lua")
 local L = translation and translation.L or function(s) return s end
 
-
 if IsValid(g_MinerMenu) then
 	g_MinerMenu:Remove()
 end
@@ -45,9 +44,6 @@ local function DrawOutlinedRect(x,y,w,h,outlineColor,color)
 end
 
 local PANEL = {}
-
-local nwPickaxe = "ms.Ores.Pickaxe."
-local nwPoints = "ms.Ores.Points"
 
 local coinsIcon = Material("icon16/coins.png")
 local pointsIcon = Material("icon16/contrast_low.png")
@@ -261,7 +257,7 @@ function PANEL:Init()
 			surface.SetTextColor(defaultCol)
 			surface.DrawText(v.Name)
 
-			local level = pl:GetNWInt(nwPickaxe..v.VarName,0)
+			local level = pl:GetNWInt(Ores._nwPickaxePrefix..v.VarName,0)
 			txt = ms.Ores.StatFormat(k,level).."   -   Lvl "..level
 			txtW,txtH = surface.GetTextSize(txt)
 			surface.SetTextPos(width-txtW-68,y+4)
@@ -280,7 +276,7 @@ function PANEL:Init()
 		end
 
 		surface.SetFont("DermaDefault")
-		txt = string.Comma(pl:GetNWInt("ms.Ores.Points",0)).." points"
+		txt = string.Comma(pl:GetNWInt(Ores._nwPoints,0)).." points"
 		txtW,txtH = surface.GetTextSize(txt)
 		y = _:GetTall()-txtH-8
 		surface.SetTextPos((center-txtW*0.5)+10,y)
@@ -391,7 +387,7 @@ function PANEL:PerformLayout()
 		if not next(self.PickaxePanel.Buttons) then
 			local btnText = "Upgrade"
 			local x = width-64
-	
+
 			for k,v in next,ms.Ores.__PStats do
 				local yPos = y+32*i
 
@@ -415,7 +411,7 @@ function PANEL:PerformLayout()
 
 				self.PickaxePanel.TooltipAreas[i] = tooltipArea
 
-				local statLevel = LocalPlayer():GetNWInt(nwPickaxe..v.VarName,0)
+				local statLevel = LocalPlayer():GetNWInt(Ores._nwPickaxePrefix..v.VarName,0)
 				if statLevel < 50 then
 					btn:SetTooltip(ms.Ores.StatFormat(k,statLevel).."  ->  "..ms.Ores.StatFormat(k,statLevel+1))
 
@@ -424,8 +420,8 @@ function PANEL:PerformLayout()
 						_.NextClick = CurTime()+0.525
 
 						local pl = LocalPlayer()
-						local level = pl:GetNWInt(nwPickaxe..v.VarName,0)
-						local points = pl:GetNWInt(nwPoints,0)
+						local level = pl:GetNWInt(Ores._nwPickaxePrefix..v.VarName,0)
+						local points = pl:GetNWInt(Ores._nwPoints,0)
 						local cost = ms.Ores.StatPrice(k,level+1)
 
 						-- Check just in case
@@ -437,8 +433,8 @@ function PANEL:PerformLayout()
 						level = level+1
 
 						-- "Predict" the changes so we don't get buying lag
-						pl:SetNWInt(nwPoints,points-cost)
-						pl:SetNWInt(nwPickaxe..v.VarName,level)
+						pl:SetNWInt(Ores._nwPoints,points-cost)
+						pl:SetNWInt(Ores._nwPickaxePrefix..v.VarName,level)
 
 						if level >= 50 then
 							_:SetEnabled(false)
@@ -460,7 +456,7 @@ function PANEL:PerformLayout()
 					btn:SetText("Maxed")
 					btn.__maxed = true
 				end
-	
+
 				self.PickaxePanel.Buttons[k] = btn
 				i = i+1
 			end
@@ -551,8 +547,8 @@ function PANEL:Think()
 			local stat = ms.Ores.__PStats[k]
 			if not stat then continue end
 
-			local level = pl:GetNWInt(nwPickaxe..stat.VarName,0)
-			local points = pl:GetNWInt(nwPoints,0)
+			local level = pl:GetNWInt(Ores._nwPickaxePrefix..stat.VarName,0)
+			local points = pl:GetNWInt(Ores._nwPoints,0)
 			local cost = ms.Ores.StatPrice(k,level+1)
 
 			v:SetEnabled(points >= cost)
