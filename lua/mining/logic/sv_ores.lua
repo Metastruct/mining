@@ -412,7 +412,7 @@ function Ores.TradeOresForPoints(pl)
 	pl:EmitSound(loadingSound,45,120,0.6)
 
 	Ores.GetSavedPlayerDataAsync(pl,function(data)
-		local points = math.floor(savaData._points+earnings)
+		local points = math.floor(data._points+earnings)
 
 		Ores.SetSavedPlayerData(pl,"points",points)
 		pl:SetNWInt(Ores._nwPoints,points)
