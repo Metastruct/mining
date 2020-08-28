@@ -135,11 +135,11 @@ function ENT:OnTakeDamage(dmg)
 			local spotOffset = Vector(v.Pos)
 			spotOffset:Rotate(self:GetAngles())
 
-			if dmgPos:DistToSqr(pos+spotOffset) <= 6 then
+			if dmgPos:DistToSqr(pos+spotOffset) <= 9 then
 				v.Hit = true
 				self:SetBonusSpotHit(bit.bor(2^k,self:GetBonusSpotHit()))
 
-				self:EmitSound("ambient/machines/slicer1.wav",70,math.random(175,210))
+				self:EmitSound("physics/metal/metal_grenade_impact_hard2.wav",70,math.random(20,30))
 
 				createOre(dmgPos,attacker,rarity,foolsDay)
 			end
