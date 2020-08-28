@@ -8,6 +8,8 @@ local function checkLibraries()
 	assert(type(db) == "table","Helper library for using PostgreSQL 'db' is not present in '_G'. Mining savedata is unavailable!")
 end
 
+Ores = Ores or {}
+
 function Ores.GetSavedPlayerDataAsync(pl,callback)
 	checkLibraries()
 
