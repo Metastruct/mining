@@ -411,7 +411,7 @@ function Ores.TradeOresForPoints(pl)
 	local loadingSound = "ambient/levels/canals/headcrab_canister_ambient5.wav"
 	pl:EmitSound(loadingSound,45,120,0.6)
 
-	Ores.GetSavedPlayerData(pl,function(data)
+	Ores.GetSavedPlayerDataAsync(pl,function(data)
 		local points = math.floor(savaData._points+earnings)
 
 		Ores.SetSavedPlayerData(pl,"points",points)
