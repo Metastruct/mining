@@ -11,16 +11,17 @@ end
 function Ores.GetSavedPlayerData(pl)
 	checkLibraries()
 
-	local data
-	co(function()
-		data = db.Query(("SELECT * FROM %s WHERE accountId = %d"):format(sqlTableName,pl:AccountID()))[1]
+	local c = co(function()
+		co.yield(db.Query(("SELECT * FROM %s WHERE accountId = %d"):format(sqlTableName,pl:AccountID()))[1])
 	end)
+
+	local _,data = coroutine.resume(c)
 
 	if not data then
 		pl._noMiningData = true
 	end
 
-	local result = {_points = data.points or 0}
+	local result = {_points = data and data.points or 0}
 	for k,v in next,Ores.__PStats do
 		local value = data[sqlLevelPrefix..v.VarName]
 		result[v.VarName] = value and tonumber(value) or 0
