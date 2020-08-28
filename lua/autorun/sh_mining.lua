@@ -20,9 +20,9 @@ local guiFiles = {}
 
 local function includeGuiFile(f)
 	if SERVER then
-		AddCSLuaFile("mining/gui/"..f..".lua")
+		AddCSLuaFile(f..".lua")
 	else
-		guiFiles[#guiFiles+1] = "mining/gui/"..f..".lua"
+		guiFiles[#guiFiles+1] = f..".lua"
 	end
 end
 
