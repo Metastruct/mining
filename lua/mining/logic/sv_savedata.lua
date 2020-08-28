@@ -4,7 +4,7 @@ local sqlTableName = "Mining_Savedata"
 local sqlLevelPrefix = "lvl"
 
 local function checkLibraries()
-	assert(type(co) == "function","Helper function for coroutines 'co' is not present in '_G'. Mining savedata is unavailable!")
+	assert(type(co) == "table","Helper library/function for coroutines 'co' is not present in '_G'. Mining savedata is unavailable!")
 	assert(type(db) == "table","Helper library for using PostgreSQL 'db' is not present in '_G'. Mining savedata is unavailable!")
 end
 
