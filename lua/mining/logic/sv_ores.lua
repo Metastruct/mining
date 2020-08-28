@@ -408,12 +408,19 @@ function Ores.TradeOresForPoints(pl)
 
 	Ores.Print(pl,str("gave %s ore pieces for %s%s points",count,earnings,mult > 1 and str(" (x%s for %s)",mult,Ores.SpecialDays.Days[Ores.SpecialDays.ActiveId] and Ores.SpecialDays.Days[Ores.SpecialDays.ActiveId].Name or "some reason") or ""))
 
-	local savaData = Ores.GetSavedPlayerData(pl)
-	local points = math.floor(savaData._points+earnings)
+	local loadingSound = "ambient/levels/canals/headcrab_canister_ambient5.wav"
+	pl:EmitSound(loadingSound,45,120,0.6)
 
-	Ores.SetSavedPlayerData(pl,"points",points)
-	pl:SetNWInt(Ores._nwPoints,points)
-	pl:EmitSound(")physics/surfaces/underwater_impact_bullet3.wav",75,70)
+	Ores.GetSavedPlayerData(pl,function(data)
+		local points = math.floor(savaData._points+earnings)
+
+		Ores.SetSavedPlayerData(pl,"points",points)
+		pl:SetNWInt(Ores._nwPoints,points)
+
+		pl:StopSound(loadingSound)
+		pl:EmitSound(")physics/surfaces/underwater_impact_bullet3.wav",75,70)
+	end)
+
 	return true
 end
 

@@ -8,26 +8,22 @@ local function checkLibraries()
 	assert(type(db) == "table","Helper library for using PostgreSQL 'db' is not present in '_G'. Mining savedata is unavailable!")
 end
 
-function Ores.GetSavedPlayerData(pl)
+function Ores.GetSavedPlayerDataAsync(pl,callback)
 	checkLibraries()
 
-	local c = co(function()
-		co.yield(db.Query(("SELECT * FROM %s WHERE accountId = %d"):format(sqlTableName,pl:AccountID()))[1])
+	db.Query(("SELECT * FROM %s WHERE accountId = %d LIMIT 1"):format(sqlTableName,pl:AccountID()))[1],function(data)
+		if not data then
+			pl._noMiningData = true
+		end
+
+		local result = {_points = data and data.points or 0}
+		for k,v in next,Ores.__PStats do
+			local value = data[sqlLevelPrefix..v.VarName]
+			result[v.VarName] = value and tonumber(value) or 0
+		end
+
+		callback(result)
 	end)
-
-	local _,data = coroutine.resume(c)
-
-	if not data then
-		pl._noMiningData = true
-	end
-
-	local result = {_points = data and data.points or 0}
-	for k,v in next,Ores.__PStats do
-		local value = data[sqlLevelPrefix..v.VarName]
-		result[v.VarName] = value and tonumber(value) or 0
-	end
-
-	return result
 end
 
 function Ores.SetSavedPlayerData(pl,field,value)
