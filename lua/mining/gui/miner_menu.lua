@@ -257,7 +257,7 @@ function PANEL:Init()
 			surface.SetTextColor(defaultCol)
 			surface.DrawText(v.Name)
 
-			local level = pl:GetNWInt(Ores._nwPickaxePrefix..v.VarName,0)
+			local level = pl:GetNWInt(ms.Ores._nwPickaxePrefix..v.VarName,0)
 			txt = ms.Ores.StatFormat(k,level).."   -   Lvl "..level
 			txtW,txtH = surface.GetTextSize(txt)
 			surface.SetTextPos(width-txtW-68,y+4)
@@ -276,7 +276,7 @@ function PANEL:Init()
 		end
 
 		surface.SetFont("DermaDefault")
-		txt = string.Comma(pl:GetNWInt(Ores._nwPoints,0)).." points"
+		txt = string.Comma(pl:GetNWInt(ms.Ores._nwPoints,0)).." points"
 		txtW,txtH = surface.GetTextSize(txt)
 		y = _:GetTall()-txtH-8
 		surface.SetTextPos((center-txtW*0.5)+10,y)
@@ -411,7 +411,7 @@ function PANEL:PerformLayout()
 
 				self.PickaxePanel.TooltipAreas[i] = tooltipArea
 
-				local statLevel = LocalPlayer():GetNWInt(Ores._nwPickaxePrefix..v.VarName,0)
+				local statLevel = LocalPlayer():GetNWInt(ms.Ores._nwPickaxePrefix..v.VarName,0)
 				if statLevel < 50 then
 					btn:SetTooltip(ms.Ores.StatFormat(k,statLevel).."  ->  "..ms.Ores.StatFormat(k,statLevel+1))
 
@@ -420,8 +420,8 @@ function PANEL:PerformLayout()
 						_.NextClick = CurTime()+0.525
 
 						local pl = LocalPlayer()
-						local level = pl:GetNWInt(Ores._nwPickaxePrefix..v.VarName,0)
-						local points = pl:GetNWInt(Ores._nwPoints,0)
+						local level = pl:GetNWInt(ms.Ores._nwPickaxePrefix..v.VarName,0)
+						local points = pl:GetNWInt(ms.Ores._nwPoints,0)
 						local cost = ms.Ores.StatPrice(k,level+1)
 
 						-- Check just in case
@@ -433,8 +433,8 @@ function PANEL:PerformLayout()
 						level = level+1
 
 						-- "Predict" the changes so we don't get buying lag
-						pl:SetNWInt(Ores._nwPoints,points-cost)
-						pl:SetNWInt(Ores._nwPickaxePrefix..v.VarName,level)
+						pl:SetNWInt(ms.Ores._nwPoints,points-cost)
+						pl:SetNWInt(ms.Ores._nwPickaxePrefix..v.VarName,level)
 
 						if level >= 50 then
 							_:SetEnabled(false)
@@ -547,8 +547,8 @@ function PANEL:Think()
 			local stat = ms.Ores.__PStats[k]
 			if not stat then continue end
 
-			local level = pl:GetNWInt(Ores._nwPickaxePrefix..stat.VarName,0)
-			local points = pl:GetNWInt(Ores._nwPoints,0)
+			local level = pl:GetNWInt(ms.Ores._nwPickaxePrefix..stat.VarName,0)
+			local points = pl:GetNWInt(ms.Ores._nwPoints,0)
 			local cost = ms.Ores.StatPrice(k,level+1)
 
 			v:SetEnabled(points >= cost)
