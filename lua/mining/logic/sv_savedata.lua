@@ -13,10 +13,12 @@ Ores = Ores or {}
 function Ores.GetSavedPlayerDataAsync(pl,callback)
 	checkLibraries()
 
-	db.Query(("SELECT * FROM %s WHERE accountId = %d LIMIT 1"):format(sqlTableName,pl:AccountID()))[1],function(data)
+	db.Query(("SELECT * FROM %s WHERE accountId = %d LIMIT 1"):format(sqlTableName,pl:AccountID()),function(data)
 		if not data then
 			pl._noMiningData = true
 		end
+
+		data = data[1]
 
 		local result = {_points = data and data.points or 0}
 		for k,v in next,Ores.__PStats do
