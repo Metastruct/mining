@@ -20,7 +20,7 @@ function Ores.GetSavedPlayerDataAsync(pl,callback)
 
 		data = data[1]
 
-		local result = {_points = data and data.points or 0}
+		local result = {_points = data and tonumber(data.points) or 0}
 		for k,v in next,Ores.__PStats do
 			local value = data[sqlLevelPrefix..v.VarName:lower()]
 			result[v.VarName] = value and tonumber(value) or 0
