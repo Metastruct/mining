@@ -17,6 +17,7 @@ ENT.RenderGroup = RENDERGROUP_TRANSLUCENT
 
 ENT._nextRefresh = 0
 ENT._initialized = false
+ENT._drawn = false
 
 local function RandomModelMeshPos(self)
 	local modelMesh = util.GetModelMeshes(self:GetModel())[1]
@@ -46,6 +47,21 @@ local function RandomModelMeshPos(self)
 		Normal = verts[startId].normal,
 		Hit = false
 	}
+end
+local function SendBonusSpots(self)
+	self.BonusSpots = {}
+
+	math.randomseed(self:GetBonusSpotSeed())
+	for i=1,self:GetBonusSpotCount() do
+		self.BonusSpots[#self.BonusSpots+1] = RandomModelMeshPos(self)
+	end
+
+	net.Start("mining_rock.BonusSpot")
+	net.WriteEntity(self)
+	for k,v in next,self.BonusSpots do
+		net.WriteVector(v.Pos)
+	end
+	net.SendToServer()
 end
 
 function ENT:RecreateParticleEmitter()
@@ -105,26 +121,18 @@ function ENT:Initialize()
 		self.FadeTime = RealTime()+8
 	end
 
-	if not self._initialized and self:GetBonusSpotCount() > 0 then
-		self.BonusSpots = {}
-
-		math.randomseed(self:GetBonusSpotSeed())
-		for i=1,self:GetBonusSpotCount() do
-			self.BonusSpots[#self.BonusSpots+1] = RandomModelMeshPos(self)
-		end
-
-		net.Start("mining_rock.BonusSpot")
-		net.WriteEntity(self)
-		for k,v in next,self.BonusSpots do
-			net.WriteVector(v.Pos)
-		end
-		net.SendToServer()
-	end
-
 	self._initialized = true
 end
 
 function ENT:Draw()
+	if not self._drawn then
+		if self:GetBonusSpotCount() > 0 and not self.BonusSpots then
+			SendBonusSpots(self)
+		end
+
+		self._drawn = true
+	end
+
 	local now = RealTime()
 	local rCol = color_white
 
