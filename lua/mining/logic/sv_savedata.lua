@@ -48,10 +48,13 @@ function Ores.SetSavedPlayerData(pl,field,value)
 end
 
 function Ores.InitSavedPlayerData()
+
 	checkLibraries()
 
 	-- Auto-create and setup the mining savedata table in the database
 	co(function()
+		for i=0,3 do co.waittick() end -- let the database initialize (it requires server ticking or it cannot function)
+
 		db.Query(("CREATE TABLE IF NOT EXISTS %s(accountId integer NOT NULL PRIMARY KEY, points integer DEFAULT 0)"):format(sqlTableName))
 
 		local columns = ""
@@ -65,4 +68,4 @@ function Ores.InitSavedPlayerData()
 	end)
 end
 
-Ores.InitSavedPlayerData()
+util.OnInitialize(Ores.InitSavedPlayerData)
