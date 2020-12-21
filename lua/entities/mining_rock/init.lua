@@ -6,6 +6,18 @@ ENT.ms_nogoto = "No cheating!"
 ENT._initialized = false
 ENT._nextDamaged = 0
 
+local function getOreRarity(baseRarity,magicFindChance)
+	if magicFindChance and math.random() <= magicFindChance then
+		local rSettings = ms.Ores.__R[baseRarity]
+
+		if rSettings.NextRarityId and ms.Ores.__R[rSettings.NextRarityId] then
+			return rSettings.NextRarityId
+		end
+	end
+
+	return baseRarity
+end
+
 local function createOre(pos,owner,rarity,magicFindChance,foolsDay)
 	local oreRarity = getOreRarity(rarity)
 	local foolsTime = foolsDay and math.random() <= 0.2
@@ -37,18 +49,6 @@ local function createOre(pos,owner,rarity,magicFindChance,foolsDay)
 	end
 
 	return ore
-end
-
-local function getOreRarity(baseRarity,magicFindChance)
-	if magicFindChance and math.random() <= magicFindChance then
-		local rSettings = ms.Ores.__R[baseRarity]
-
-		if rSettings.NextRarityId and ms.Ores.__R[rSettings.NextRarityId] then
-			return rSettings.NextRarityId
-		end
-	end
-
-	return baseRarity
 end
 
 function ENT:Initialize()
