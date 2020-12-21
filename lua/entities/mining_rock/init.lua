@@ -24,7 +24,7 @@ local function createOre(pos,owner,rarity,magicFindChance,foolsDay)
 
 	local ore = ents.Create(foolsTime and "mining_ore_fools" or "mining_ore")
 	ore:SetRarity(oreRarity)
-	ore:AllowGracePeriod(owner,12.5)
+	ore:AllowGracePeriod(owner,20)
 	ore:SetPos(pos)
 	ore:SetAngles(AngleRand())
 
