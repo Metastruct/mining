@@ -25,7 +25,7 @@ local function RandomModelMeshPos(self)
 		return {
 			Pos = Vector(0, 0, 20),
 			Normal = Vector(0, 0, 1),
-			Hit = false,
+			Hit = false
 		}
 	end
 
@@ -110,7 +110,7 @@ function ENT:Initialize()
 		self.AmbientSettings = {
 			Path = rSettings.AmbientSound,
 			Pitch = rSettings.AmbientPitch or 100,
-			Volume = 0.2*math.Clamp(self:GetSize()+1,1,3)
+			Volume = (rSettings.AmbientVolume or 0.2)*math.Clamp(self:GetSize()+1,1,3)
 		}
 
 		self.AmbientSound = CreateSound(self,self.AmbientSettings.Path)

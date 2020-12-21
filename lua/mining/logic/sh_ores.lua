@@ -32,8 +32,10 @@ local function AddOre(
 		physicalCol,
 		hudCol,
 		sparkleInterval,
+		nextRarity,
 		ambSoundPath,
 		ambSoundPitch,
+		ambSoundVolume,
 		hidden)
 	Ores.__R[id] = {
 		Name = name,
@@ -42,8 +44,10 @@ local function AddOre(
 		PhysicalColor = physicalCol,
 		HudColor = hudCol,
 		SparkleInterval = sparkleInterval or 1, -- Doubled for mining_ore
+		NextRarityId = nextRarity,
 		AmbientSound = ambSoundPath,
 		AmbientPitch = ambSoundPitch,
+		AmbientVolume = ambSoundVolume and ambSoundVolume/3,
 		Hidden = hidden or false
 	}
 end
@@ -59,7 +63,8 @@ AddOre(0,
 	100,
 	Color(255,77,0),
 	Color(225,100,40),
-	0.7
+	0.7,
+	1
 )
 
 AddOre(1,
@@ -68,7 +73,8 @@ AddOre(1,
 	300,
 	Color(255,255,255),
 	Color(200,235,235),
-	0.5
+	0.5,
+	2
 )
 
 AddOre(2,
@@ -78,7 +84,20 @@ AddOre(2,
 	Color(255,255,0),
 	Color(225,225,0),
 	0.3,
-	"ambient/levels/labs/machine_ring_resonance_loop1.wav",30
+	3,
+	"ambient/levels/labs/machine_ring_resonance_loop1.wav",30,0.6
+)
+
+AddOre(3,
+	"Platinum",
+	110,
+	1800,
+	Color(153,255,237),
+	Color(140,255,235),
+	0.3,
+	nil,
+	"ambient/levels/citadel/field_loop3.wav",65,0.84
+	true
 )
 -- -- --
 

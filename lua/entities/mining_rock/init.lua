@@ -6,7 +6,7 @@ ENT.ms_nogoto = "No cheating!"
 ENT._initialized = false
 ENT._nextDamaged = 0
 
-local function createOre(pos,owner,rarity,foolsDay)
+local function createOre(pos,owner,rarity,magicFindUsed,foolsDay)
 	local foolsTime = foolsDay and math.random() <= 0.2
 
 	local ore = ents.Create(foolsTime and "mining_ore_fools" or "mining_ore")
@@ -28,6 +28,10 @@ local function createOre(pos,owner,rarity,foolsDay)
 		vec.z = math.abs(vec.z)
 
 		ophys:AddVelocity(vec)
+	end
+
+	if magicFindUsed then
+		ore:EmitSound(")ambient/levels/citadel/portal_beam_shoot1.wav",68,math.random(185,195),0.75)
 	end
 
 	return ore
@@ -122,7 +126,17 @@ function ENT:OnTakeDamage(dmg)
 	local hp = self:GetHealthEx()-dmg:GetDamage()
 	self:SetHealthEx(hp)
 
+	local magicFindUsed = false
 	local rarity = self:GetRarity()
+	if wep.Stats and wep.Stats.MagicFindChance and math.random() <= wep.Stats.MagicFindChance then
+		local rSettings = ms.Ores.__R[rarity]
+
+		if rSettings.NextRarityId and ms.Ores.__R[rSettings.NextRarityId] then
+			magicFindUsed = true
+			rarity = rSettings.NextRarityId
+		end
+	end
+
 	local foolsDay = ms.Ores.SpecialDays.ActiveId and ms.Ores.SpecialDays.Days[ms.Ores.SpecialDays.ActiveId].Name == "April Fools"
 
 	local dmgPos = dmg:GetDamagePosition()
@@ -141,7 +155,7 @@ function ENT:OnTakeDamage(dmg)
 
 				self:EmitSound("physics/metal/metal_grenade_impact_hard2.wav",70,math.random(20,30))
 
-				createOre(dmgPos,attacker,rarity,foolsDay)
+				createOre(dmgPos,attacker,rarity,magicFindUsed,foolsDay)
 			end
 		end
 	end
@@ -162,11 +176,11 @@ function ENT:OnTakeDamage(dmg)
 	for i=1,1+bonusAmount do
 		if i > 1 then
 			timer.Simple(i*0.175,function()
-				local ore = createOre(dmgPos,attacker,rarity,foolsDay)
+				local ore = createOre(dmgPos,attacker,rarity,magicFindUsed,foolsDay)
 				ore:EmitSound(")garrysmod/save_load4.wav",70,152+(i*12))
 			end)
 		else
-			createOre(dmgPos,attacker,rarity,foolsDay)
+			createOre(dmgPos,attacker,rarity,magicFindUsed,foolsDay)
 		end
 	end
 

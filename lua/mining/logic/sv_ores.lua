@@ -42,10 +42,11 @@ Available mining hooks:
 
 Ores = Ores or {}
 Ores.__S = {
-	-- Defines which ore rarities can spawn in the mine with defined chances
-	{Id = 0, Chance = 0.6},
-	{Id = 1, Chance = 0.3},
-	{Id = 2, Chance = 0.1}
+	-- Defines which ore rarities can spawn in the mine using weighted chance
+	{Id = 0, Chance = 24},
+	{Id = 1, Chance = 12},
+	{Id = 2, Chance = 4},
+	{Id = 3, Chance = 1}
 }
 
 function Ores.Print(...)

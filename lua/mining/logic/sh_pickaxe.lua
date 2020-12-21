@@ -38,8 +38,22 @@ Ores.__PStats = {
 		VarStep = 0.015,
 		VarFormat = "%p%%",
 		CostStep = 1200
+	},
+	{
+		Name = "Magic Find", -- 0.005 * 50 (max: 0.25)
+		Help = "The chance of a higher rarity ore being found from a rock.",
+		VarName = "MagicFindChance",
+		VarBase = 0,
+		VarStep = 0.005,
+		VarFormat = "%p%%",
+		CostStep = 1275
 	}
 }
+
+-- How to calculate total spending from Lvls 1-50:
+-- n = 50 (max level)
+-- total = n * (n + 1) * 0.5
+-- perma bonus = (costStep * total) * 0.00000012
 
 Ores._nwPrefix = "ms.Ores."
 Ores._nwPoints = Ores._nwPrefix.."Points"
