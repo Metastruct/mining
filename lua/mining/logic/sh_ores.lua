@@ -96,7 +96,7 @@ AddOre(3,
 	Color(140,255,235),
 	0.3,
 	nil,
-	"ambient/levels/citadel/field_loop3.wav",65,0.84
+	"ambient/levels/citadel/field_loop3.wav",65,0.84,
 	true
 )
 -- -- --
