@@ -19,7 +19,7 @@ local function getOreRarity(baseRarity,magicFindChance)
 end
 
 local function createOre(pos,owner,rarity,magicFindChance,foolsDay)
-	local oreRarity = getOreRarity(rarity)
+	local oreRarity = getOreRarity(rarity,magicFindChance)
 	local foolsTime = foolsDay and math.random() <= 0.2
 
 	local ore = ents.Create(foolsTime and "mining_ore_fools" or "mining_ore")

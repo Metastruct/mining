@@ -90,13 +90,13 @@ AddOre(2,
 
 AddOre(3,
 	"Platinum",
-	110,
-	1800,
+	115,
+	2000,
 	Color(153,255,237),
 	Color(140,255,235),
 	0.3,
 	nil,
-	"ambient/levels/citadel/field_loop3.wav",65,0.84,
+	"ambient/levels/citadel/field_loop3.wav",65,0.9,
 	true
 )
 -- -- --

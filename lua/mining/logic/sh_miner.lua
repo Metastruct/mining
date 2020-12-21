@@ -8,7 +8,8 @@ Ores.NPCMiners = {
 			"Hey, mate! Got any ores for trade?",
 			"Got your pickaxe handy? I can make some tweaks for ya.",
 			"So, mate... struck gold recently?",
-			"It's hard work being in the mines, mate. Don't burn yourself out."
+			"It's hard work being in the mines, mate. Don't burn yourself out.",
+			"Some rocks make noise! Keep ya ear out for 'em!"
 		}
 	}
 }
