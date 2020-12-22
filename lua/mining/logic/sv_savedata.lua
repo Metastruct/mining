@@ -63,7 +63,11 @@ function Ores.InitSavedPlayerData()
 
 		local columns = ""
 		for k,v in next,Ores.__PStats do
-			columns = columns..("ADD COLUMN IF NOT EXISTS %s%s integer DEFAULT 0,"):format(sqlLevelPrefix,v.VarName)
+			columns = columns..("ADD COLUMN IF NOT EXISTS %s%s integer DEFAULT 0"):format(sqlLevelPrefix,v.VarName)
+
+			if k != #Ores.__PStats then
+				columns = columns..", "
+			end
 		end
 
 		if columns != "" then
