@@ -57,6 +57,7 @@ Ores.__PStats = {
 
 Ores._nwPrefix = "ms.Ores."
 Ores._nwPoints = Ores._nwPrefix.."Points"
+Ores._nwMult = Ores._nwPrefix.."Mult"
 Ores._nwPickaxePrefix = Ores._nwPrefix.."Pickaxe."
 
 function Ores.StatFormat(k,level)

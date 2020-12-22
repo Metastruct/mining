@@ -183,7 +183,7 @@ local function SpawnRock(rarity)
 			if mapdata.minespots and next(mapdata.minespots) then
 				Ores.Print("Detected data in ms.mapdata.minespots - mining rock spawning resumed...")
 
-				timer.Create("ms.Ores_Spawn",90,0,SpawnRock)
+				timer.Create("ms.Ores_Spawn",attemptTime,0,SpawnRock)
 				hook.Add("PlayerDestroyedMiningRock","ms.Ores_Spawn",QuickCheckRocks)
 				return
 			end
@@ -387,10 +387,10 @@ function Ores.TradeOresForCoins(pl,leaving)
 	if leaving then
 		Ores.Print(pl,str("disconnected with %s ore pieces and received %s coins (no bonuses)",count,earnings))
 	else
-		local mult = math.Clamp(Ores.WorthMultiplier or 1,1,5)
+		local mult = Ores.GetPlayerMultiplier(pl)
 		earnings = math.ceil(earnings*mult)
 
-		Ores.Print(pl,str("gave %s ore pieces for %s%s coins",count,earnings,mult > 1 and str(" (x%s for %s)",mult,Ores.SpecialDays.Days[Ores.SpecialDays.ActiveId] and Ores.SpecialDays.Days[Ores.SpecialDays.ActiveId].Name or "some reason") or ""))
+		Ores.Print(pl,str("gave %s ore pieces for %s coins (x%s)",count,earnings,mult))
 	end
 
 	pl:GiveCoins(earnings,"Mining")
@@ -404,10 +404,10 @@ function Ores.TradeOresForPoints(pl)
 	local earnings,count = tradeOres(pl)
 	if earnings <= 0 then return false end
 
-	local mult = math.Clamp(Ores.WorthMultiplier or 1,1,5)
+	local mult = Ores.GetPlayerMultiplier(pl)
 	earnings = math.ceil(earnings*mult)
 
-	Ores.Print(pl,str("gave %s ore pieces for %s%s points",count,earnings,mult > 1 and str(" (x%s for %s)",mult,Ores.SpecialDays.Days[Ores.SpecialDays.ActiveId] and Ores.SpecialDays.Days[Ores.SpecialDays.ActiveId].Name or "some reason") or ""))
+	Ores.Print(pl,str("gave %s ore pieces for %s points (x%s)",count,earnings,mult))
 
 	local loadingSound = "ambient/levels/canals/headcrab_canister_ambient5.wav"
 	pl:EmitSound(loadingSound,45,120,0.6)

@@ -111,3 +111,9 @@ function Ores.GetPlayerOre(self,rarity)
 
 	return self:GetNWInt(Ores._nwPrefix..Ores.__R[rarity].Name,0)
 end
+
+function Ores.GetPlayerMultiplier(self)
+	assert(self and self:IsPlayer(),"[Ores] First argument is not a player")
+
+	return math.Clamp((SERVER and Ores.WorthMultiplier or (Ores.SpecialDay and Ores.SpecialDay.WorthMultiplier or 1)),1,5)+self:GetNWFloat(Ores._nwMult,0)
+end

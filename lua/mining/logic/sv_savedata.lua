@@ -20,7 +20,11 @@ function Ores.GetSavedPlayerDataAsync(pl,callback)
 
 		data = data[1]
 
-		local result = {_points = data and tonumber(data.points) or 0}
+		local result = {
+			_points = data and tonumber(data.points) or 0,
+			_mult = data and tonumber(data.mult) or 0
+		}
+
 		for k,v in next,Ores.__PStats do
 			local value = data and data[sqlLevelPrefix..v.VarName:lower()]
 			result[v.VarName] = value and tonumber(value) or 0
@@ -33,7 +37,7 @@ end
 function Ores.SetSavedPlayerData(pl,field,value)
 	checkLibraries()
 
-	if field != "points" then
+	if field != "points" and field != "mult" then
 		field = sqlLevelPrefix..field
 	end
 
@@ -55,7 +59,7 @@ function Ores.InitSavedPlayerData()
 		-- Let the database initialize (it requires server ticking or it cannot function)
 		for i=0,3 do co.waittick() end
 
-		db.Query(("CREATE TABLE IF NOT EXISTS %s(accountId integer NOT NULL PRIMARY KEY, points integer DEFAULT 0)"):format(sqlTableName))
+		db.Query(("CREATE TABLE IF NOT EXISTS %s(accountId integer NOT NULL PRIMARY KEY, points integer DEFAULT 0, mult double precision DEFAULT 0)"):format(sqlTableName))
 
 		local columns = ""
 		for k,v in next,Ores.__PStats do
