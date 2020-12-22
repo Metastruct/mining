@@ -45,8 +45,7 @@ Ores.__S = {
 	-- Defines which ore rarities can spawn in the mine using weighted chance
 	{Id = 0, Chance = 24},
 	{Id = 1, Chance = 12},
-	{Id = 2, Chance = 4},
-	{Id = 3, Chance = 1}
+	{Id = 2, Chance = 4}
 }
 
 function Ores.Print(...)
