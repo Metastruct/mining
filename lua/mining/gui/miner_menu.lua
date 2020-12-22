@@ -130,6 +130,7 @@ function PANEL:Init()
 		local center = width*0.5
 
 		local titlefont = tag.."Title"
+		local multiplier = ms.Ores.GetPlayerMultiplier(pl)
 
 		surface.SetFont(titlefont)
 		local txt = "Your Ores"
@@ -158,10 +159,9 @@ function PANEL:Init()
 			surface.SetTextColor(amount > 0 and v.HudColor or defaultCol)
 			surface.DrawText(txt)
 
-			local mult = ms.Ores.SpecialDay and ms.Ores.SpecialDay.WorthMultiplier or 1
 			if amount > 0 then
 				surface.SetFont("DermaDefault")
-				txt = "+ "..string.Comma((v.Worth*amount)*mult)
+				txt = "+ "..string.Comma(math.ceil((v.Worth*amount)*multiplier))
 				txtW,txtH = surface.GetTextSize(txt)
 
 				surface.SetTextPos(width-txtW-4,y+h*0.5-txtH*0.5)
@@ -172,35 +172,38 @@ function PANEL:Init()
 			i = i+1
 		end
 
-		if ms.Ores.SpecialDay then
-			local yh = y+h*1.5
+		y = _:GetTall()-_.TurnInCoinsBtn:GetTall()-h-8
 
+		local yh = y+h*0.5
+		local multTxtCol
+		if ms.Ores.SpecialDay then
 			surface.SetDrawColor(220,175+math.sin(RealTime()*4)*15,0)
-			surface.DrawRect(0,y+h,width,h)
+			surface.DrawRect(0,y,width,h)
 
 			surface.SetFont("DermaDefault")
-			txt = "Celebrating "..ms.Ores.SpecialDay.Name.."!"
+			txt = ("It's %s! (+%d%%)"):format(ms.Ores.SpecialDay.Name,(math.Clamp(ms.Ores.SpecialDay.WorthMultiplier,1,5)-1)*100)
 			txtW,txtH = surface.GetTextSize(txt)
+
+			multTxtCol = Color(40,40,40)
 
 			surface.SetTextPos(4,yh-txtH*0.5)
-			surface.SetTextColor(Color(40,40,40))
+			surface.SetTextColor(multTxtCol)
 			surface.DrawText(txt)
+		else
+			surface.SetDrawColor(bgCol1)
+			surface.DrawRect(0,y,width,h)
 
-			txt = "That's x"..tostring(math.Clamp(ms.Ores.SpecialDay.WorthMultiplier,1,5)).." payout!"
-			txtW,txtH = surface.GetTextSize(txt)
-
-			surface.SetTextPos(width-txtW-4,yh-txtH*0.5)
-			surface.DrawText(txt)
+			multTxtCol = defaultCol
 		end
 
-		if IsValid(_.TurnInCoinsBtn) and _.TurnInCoinsBtn:IsEnabled() then
-			surface.SetFont("DermaDefault")
-			txt = "Ready to turn in?"
-			txtW,txtH = surface.GetTextSize(txt)
-			surface.SetTextPos(center-txtW*0.5,_:GetTall()-_.TurnInCoinsBtn:GetTall()-txtH-8)
-			surface.SetTextColor(defaultCol)
-			surface.DrawText(txt)
-		end
+		txt = "x"..tostring(multiplier)
+
+		surface.SetFont(titlefont)
+		txtW,txtH = surface.GetTextSize(txt)
+
+		surface.SetTextPos(width-txtW-4,y+4)
+		surface.SetTextColor(multTxtCol)
+		surface.DrawText(txt)
 	end
 
 	self.OresPanel.TurnInCoinsBtn = vgui.Create("DButton",self.OresPanel)
@@ -542,7 +545,7 @@ function PANEL:Think()
 		end
 
 		for k,v in next,self.PickaxePanel.Buttons do
-			if v.__maxed then return end
+			if v.__maxed then continue end
 
 			local stat = ms.Ores.__PStats[k]
 			if not stat then continue end
