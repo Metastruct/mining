@@ -53,7 +53,7 @@ Ores.__PStats = {
 -- How to calculate total spending from Lvls 1-50:
 -- n = 50 (max level)
 -- total = n * (n + 1) * 0.5
--- perma bonus = (costStep * total) * 0.00000012
+-- perma bonus = (costStep * total) * 0.00000015 (rounded to 3 decs)
 
 Ores._nwPrefix = "ms.Ores."
 Ores._nwPoints = Ores._nwPrefix.."Points"
