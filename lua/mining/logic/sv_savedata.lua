@@ -20,6 +20,10 @@ function Ores.GetSavedPlayerDataAsync(pl,callback)
 
 		data = data[1]
 
+		if not data then
+			pl._noMiningData = true
+		end
+
 		local result = {
 			_points = data and tonumber(data.points) or 0,
 			_mult = data and tonumber(data.mult) or 0
