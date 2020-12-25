@@ -143,7 +143,7 @@ function ENT:OnTakeDamage(dmg)
 	local rarity = self:GetRarity()
 	local magicFindChance = wep.Stats and wep.Stats.MagicFindChance
 
-	local foolsDay = ms.Ores.SpecialDays.ActiveId and ms.Ores.SpecialDays.Days[ms.Ores.SpecialDays.ActiveId].Name == "April Fools"
+	local foolsDay = ms.Ores.SpecialDays and ms.Ores.SpecialDays.ActiveId and ms.Ores.SpecialDays.Days[ms.Ores.SpecialDays.ActiveId].Name == "April Fools"
 
 	local dmgPos = dmg:GetDamagePosition()
 	if self:GetBonusSpotCount() > 0 then
