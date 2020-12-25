@@ -18,7 +18,7 @@ function ENT:SetupDataTables()
 			if new != true then return end
 
 			ent:CreateBeamPoints(ent:GetPos(),true)
-			ent.FadeTime = RealTime()+0.6
+			ent.FadeTime = RealTime()+0.8
 
 			if ent.AmbientSound then
 				ent.AmbientSound:Stop()

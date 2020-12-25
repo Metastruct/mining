@@ -72,6 +72,7 @@ function ENT:OnTakeDamage(dmg)
 
 	if self.PhysObject then
 		self.PhysObject:EnableMotion(true)
+		self.PhysObject:Wake()
 
 		if self.WallNormal then
 			self.PhysObject:SetVelocity((self.WallNormal*128)+(attacker:GetAimVector()*16))
@@ -104,7 +105,7 @@ function ENT:Use(pl)
 		pl:SetNWFloat(ms.Ores._nwMult,newMult)
 		ms.Ores.SetSavedPlayerData(pl,"mult",newMult)
 
-		ms.Ores.SendChatMessage(pl,("The Xen Crystal's energy was taken - your multiplier is now x%.3f!"):format(newMult))
+		ms.Ores.SendChatMessage(pl,("The Xen Crystal's energy was taken - your multiplier is now x%.3f!"):format(1+newMult))
 	else
 		self:EmitSound("ambient/atmosphere/hole_hit4.wav",70,105)
 	end

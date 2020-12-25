@@ -78,7 +78,7 @@ function ENT:Initialize()
 	end
 
 	if self:IsEffectActive(EF_ITEM_BLINK) then
-		self.FadeTime = RealTime()+0.6
+		self.FadeTime = RealTime()+0.8
 	end
 
 	self._initialized = true

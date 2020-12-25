@@ -130,7 +130,7 @@ function PANEL:Init()
 		local center = width*0.5
 
 		local titlefont = tag.."Title"
-		local multiplier = ms.Ores.GetPlayerMultiplier(pl)
+		local multiplier = math.Round(ms.Ores.GetPlayerMultiplier(pl),3)
 
 		surface.SetFont(titlefont)
 		local txt = "Your Ores"

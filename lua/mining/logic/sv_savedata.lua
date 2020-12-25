@@ -14,11 +14,7 @@ function Ores.GetSavedPlayerDataAsync(pl,callback)
 	checkLibraries()
 
 	db.Query(("SELECT * FROM %s WHERE accountId = %d LIMIT 1"):format(sqlTableName,pl:AccountID()),function(data)
-		if not data then
-			pl._noMiningData = true
-		end
-
-		data = data[1]
+		data = data and data[1]
 
 		if not data then
 			pl._noMiningData = true

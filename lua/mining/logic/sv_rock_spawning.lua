@@ -209,7 +209,7 @@ resource.AddSingleFile("sound/mining/xen_spawn.mp3")
 
 function Ores.GenerateXenCrystal(startPos)
     local normal = VectorRand()
-	normal.z = -0.1
+	normal.z = -0.05
 
 	local traceTbl = {
 		start = startPos,
@@ -238,20 +238,22 @@ function Ores.GenerateXenCrystal(startPos)
 
 	ent:Spawn()
 
-    ent:EmitSound("mining/xen_spawn.mp3",80,math.random(98,102))
+    ent:EmitSound("mining/xen_spawn.mp3",90,math.random(98,102))
 
     local timeLimit = 300
     timer.Simple(timeLimit-3,function()
         if not ent:IsValid() or ent:GetUnlodged() then return end
-        ent:EmitSound("mining/xen_despawning.mp3",80)
+        ent:EmitSound("mining/xen_despawning.mp3",90)
     end)
     timer.Simple(timeLimit,function()
         if not ent:IsValid() or ent:GetUnlodged() then return end
 
-        ent:EmitSound("mining/xen_despawn.mp3",80)
+        ent:EmitSound("mining/xen_despawn.mp3",90)
 
         ent:SetDeparting(true)
         ent:SetSolid(SOLID_NONE)
+
+        ent.PhysObject = nil
         ent:PhysicsDestroy()
 
         SafeRemoveEntityDelayed(ent,1.25)
