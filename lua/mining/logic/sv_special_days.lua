@@ -42,7 +42,7 @@ BuildSpecialDay("Halloween",{10,31,0},{11,1,0},1.5)
 BuildSpecialDay("GMod's Birthday",{11,29,0},{11,30,0},1.5)
 BuildSpecialDay("Christmas",{12,24,0},{12,27,0},2)	-- Christmas Period, 24-26
 
-local function NotifySpecialDay(pl)
+function Ores.NotifySpecialDay(pl)
 	if pl == nil or (istable(pl) and #pl == 0) then return end
 	if not Ores.SpecialDays.ActiveId then return end
 
@@ -86,7 +86,7 @@ function Ores.CheckForSpecialDay()
 
 				Ores.Print(str("Activating special day \"%s\" with x%s payout mutliplier, until %s-%s-%s %s:00...",v.Name,v.Multiplier,year,v.Date.To.Month,v.Date.To.Day,v.Date.To.Hour))
 				Ores.SendSpecialDayInfo(pls)
-				NotifySpecialDay(pls)
+				Ores.NotifySpecialDay(pls)
 			end
 			return
 		end
