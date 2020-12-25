@@ -47,7 +47,7 @@ function Ores.SetSavedPlayerData(pl,field,value)
 			pl._noMiningData = nil
 		end
 
-		db.Query(("UPDATE %s SET %s = %d WHERE accountId = %d"):format(sqlTableName,field,value,pl:AccountID()))
+		db.Query(("UPDATE %s SET %s = %s WHERE accountId = %d"):format(sqlTableName,field,value,pl:AccountID()))
 	end)
 end
 
