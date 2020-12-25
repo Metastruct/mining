@@ -230,8 +230,9 @@ function Ores.GenerateXenCrystal(startPos)
 	end
 
 	local ent = ents.Create("mining_xen_crystal")
-	ent:SetPos(t.HitPos+(t.HitNormal*8))
+	ent:SetPos(t.HitPos+(t.HitNormal*6))
 	ent:SetAngles(AngleRand())
+	ent.WallNormal = t.HitNormal
 
 	ent:AddEffects(EF_ITEM_BLINK)
     timer.Simple(0.5,function() if ent:IsValid() then ent:RemoveEffects(EF_ITEM_BLINK) end end)
