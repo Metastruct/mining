@@ -1,5 +1,8 @@
 module("ms",package.seeall)
 
+local str = string.format
+local next = next
+
 Ores = Ores or {}
 
 util.AddNetworkString("ms.Ores_UpdateSpecialDay")
