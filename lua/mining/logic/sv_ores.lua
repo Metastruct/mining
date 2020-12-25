@@ -181,6 +181,6 @@ hook.Add("PlayerReceivedOre","ms.Ores_FirstReceive",function(pl)
 	-- _receivedOre will be nil the first time this hook is called for this player
 	if pl._receivedOre then return end
 
-	Ores.SendChatMessage(pl,"You've picked up some ore! Hand it in to the miner at the mine outpost!\nBe aware - disconnecting while holding ore will turn it into coins for you, but without any bonuses!")
+	Ores.SendChatMessage(pl,"You've picked up some ore! Hand it in to the miner at the mine outpost! Be aware - disconnecting while holding ore will turn it into coins for you, but without any bonuses!")
 	NotifySpecialDay(pl)
 end)

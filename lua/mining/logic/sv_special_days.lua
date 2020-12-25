@@ -54,7 +54,7 @@ local function NotifySpecialDay(pl)
 	toTime.min = 0
 	toTime.sec = 1
 
-	Ores.SendChatMessage(pl,str("In celebration of %s, get x%s payout when turning in your ores! Celebration ends in %s!",day.Name,day.Multiplier,string.NiceTime(os.time(toTime)-os.time())))
+	Ores.SendChatMessage(pl,str("In celebration of %s, get +%d%% payout when turning in your ores! Celebration ends in %s!",day.Name,(day.Multiplier-1)*100,string.NiceTime(os.time(toTime)-os.time())))
 end
 
 function Ores.CheckForSpecialDay()

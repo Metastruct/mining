@@ -68,7 +68,7 @@ function ENT:OnTakeDamage(dmg)
 	self:AllowGracePeriod(attacker,30)
 
 	self:EmitSound(")physics/concrete/concrete_break"..math.random(2,3)..".wav",70,math.random(130,145),0.75)
-	self:EmitSound(")ambient/atmosphere/cave_hit2.wav",80,86) --hole_hit4.wav (pitch 105)
+	self:EmitSound(")ambient/atmosphere/cave_hit2.wav",80,86)
 
 	if self.PhysObject then
 		self.PhysObject:EnableMotion(true)
