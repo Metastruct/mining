@@ -124,9 +124,21 @@ function Ores.GenerateMiningRock(startPos,rarity)
 	return ent
 end
 
--- Fair mining rock spawning functions
-local attemptTime = 30
-local nextAttempt = attemptTime
+-- Utility function for getting the cave trigger
+local mineTrigger
+function Ores.GetMineTrigger()
+	if not GetTrigger then return NULL end
+
+	if not (mineTrigger and mineTrigger:IsValid()) then
+		mineTrigger = GetTrigger("cave1")
+	end
+
+	return mineTrigger or NULL
+end
+
+-- Fair mining rock spawning logic
+local attemptTimeBase = 30
+local nextAttempt = attemptTimeBase
 local function AdjustTimer(time)
 	nextAttempt = time
 	timer.Adjust("ms.Ores_Spawn",nextAttempt,0)
@@ -143,7 +155,7 @@ local function SpawnRock(rarity)
 			if mapdata.minespots and next(mapdata.minespots) then
 				Ores.Print("Detected data in ms.mapdata.minespots - mining rock spawning resumed...")
 
-				timer.Create("ms.Ores_Spawn",attemptTime,0,SpawnRock)
+				timer.Create("ms.Ores_Spawn",attemptTimeBase,0,SpawnRock)
 				hook.Add("PlayerDestroyedMiningRock","ms.Ores_Spawn",QuickCheckRocks)
 				return
 			end
@@ -168,14 +180,28 @@ local function SpawnRock(rarity)
 		end
 
 		if Ores.GenerateMiningRock(mapdata.minespots[id],rarity) then
-			AdjustTimer(attemptTime)
+			local now = CurTime()
+
+			-- Get players in the mine who are actually mining
+			local trigger = Ores.GetMineTrigger()
+			local numPlayers = 0
+			if trigger:IsValid() and trigger.GetPlayers then
+				for k,v in next,trigger:GetPlayers() do
+					if k:IsValid() and not (k.IsAFK and k:IsAFK()) and (k._miningCooldown or 0)+30 > now then
+						numPlayers = numPlayers+1
+					end
+				end
+			end
+
+			-- Scale spawning time by number of players mining
+			AdjustTimer(attemptTimeBase/math.Clamp(numPlayers,1,5))
 			return true
 		end
 	end
 
 	Ores.Print("Failed to spawn mining rock after 4 retries.")
 
-	AdjustTimer(nextAttempt+attemptTime)
+	AdjustTimer(nextAttempt+attemptTimeBase)
 end
 
 local function InitRocks()
@@ -194,7 +220,7 @@ local function QuickCheckRocks(pl,rock)
 end
 
 -- Hook up the rock spawning logic
-timer.Create("ms.Ores_Spawn",attemptTime,0,SpawnRock)
+timer.Create("ms.Ores_Spawn",attemptTimeBase,0,SpawnRock)
 hook.Add("PlayerDestroyedMiningRock","ms.Ores_Spawn",QuickCheckRocks)
 hook.Add("InitPostEntity","ms.Ores_Init",InitRocks)
 hook.Add("PostCleanupMap","ms.Ores_Init",InitRocks)
@@ -239,17 +265,18 @@ function Ores.GenerateXenCrystal(startPos)
 
 	ent:Spawn()
 
-    ent:EmitSound("mining/xen_spawn.mp3",90,math.random(98,102))
+	local soundLevel = 98
+    ent:EmitSound(")mining/xen_spawn.mp3",soundLevel,math.random(97,103))
 
     local timeLimit = 300
     timer.Simple(timeLimit-3,function()
         if not ent:IsValid() or ent:GetUnlodged() then return end
-        ent:EmitSound("mining/xen_despawning.mp3",90)
+        ent:EmitSound(")mining/xen_despawning.mp3",soundLevel)
     end)
     timer.Simple(timeLimit,function()
         if not ent:IsValid() or ent:GetUnlodged() then return end
 
-        ent:EmitSound("mining/xen_despawn.mp3",90)
+        ent:EmitSound(")mining/xen_despawn.mp3",soundLevel)
 
         ent:SetDeparting(true)
         ent:SetSolid(SOLID_NONE)
@@ -267,8 +294,8 @@ end
 local function TrySpawnCrystal()
     if not (mapdata.minespots and next(mapdata.minespots)) then return end
 
-    -- 2% chance to actually spawn in
-    if math.random() > 0.02 then return end
+    -- 25% chance to spawn in every minute
+    if math.random() <= 0.25 then return end
 
 	-- 4 attempts
 	for i=1,4 do

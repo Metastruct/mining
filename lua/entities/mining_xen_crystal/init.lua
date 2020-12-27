@@ -64,6 +64,9 @@ function ENT:OnTakeDamage(dmg)
 	local inflictor = dmg:GetInflictor()	-- Inflictor is either yourself (because inflictor w/ crowbar = yourself??) or the crowbar
 	if inflictor != attacker and inflictor != wep then return end
 
+	-- Update _miningCooldown to allow checking when they last mined
+	attacker._miningCooldown = now
+
 	self:SetUnlodged(true)
 	self:AllowGracePeriod(attacker,30)
 
@@ -105,7 +108,7 @@ function ENT:Use(pl)
 		pl:SetNWFloat(ms.Ores._nwMult,newMult)
 		ms.Ores.SetSavedPlayerData(pl,"mult",newMult)
 
-		ms.Ores.SendChatMessage(pl,("The Xen Crystal's energy was taken - your multiplier is now x%.3f!"):format(1+newMult))
+		ms.Ores.SendChatMessage(pl,("The Xen Crystal's energy was taken - your multiplier is now x%s!"):format(1+newMult))
 	else
 		self:EmitSound("ambient/atmosphere/hole_hit4.wav",70,105)
 	end

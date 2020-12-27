@@ -155,7 +155,7 @@ function ENT:OnTakeDamage(dmg)
 			local spotOffset = Vector(v.Pos)
 			spotOffset:Rotate(self:GetAngles())
 
-			if dmgPos:DistToSqr(pos+spotOffset) <= 9 then
+			if dmgPos:DistToSqr(pos+spotOffset) <= 10 then
 				v.Hit = true
 				self:SetBonusSpotHit(bit.bor(2^k,self:GetBonusSpotHit()))
 
@@ -167,6 +167,9 @@ function ENT:OnTakeDamage(dmg)
 	end
 
 	if hp > 0 then return end
+
+	-- Update _miningCooldown to allow checking when they last mined
+	attacker._miningCooldown = now
 
 	local size = math.Clamp(self:GetSize(),0,2)
 

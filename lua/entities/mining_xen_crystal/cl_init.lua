@@ -70,7 +70,7 @@ function ENT:Initialize()
 		self.AmbientSettings = {
 			Path = "hl1/ambience/labdrone2.wav",
 			Pitch = 55,
-			Volume = 0.3
+			Volume = 0.75
 		}
 
 		self.AmbientSound = CreateSound(self,self.AmbientSettings.Path)

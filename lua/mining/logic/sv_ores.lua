@@ -50,7 +50,7 @@ hook.Add("PlayerInitialSpawn","ms.Ores",function(pl)
 
 		timer.Simple(60,function()
 			if pl:IsValid() then
-				NotifySpecialDay(pl)
+				Ores.NotifySpecialDay(pl)
 			end
 		end)
 	end
