@@ -265,26 +265,12 @@ function Ores.GenerateXenCrystal(startPos)
 
 	ent:Spawn()
 
-	local soundLevel = 98
-    ent:EmitSound(")mining/xen_spawn.mp3",soundLevel,math.random(97,103))
+    ent:EmitSound(")mining/xen_spawn.mp3",98,math.random(97,103))
 
-    local timeLimit = 300
-    timer.Simple(timeLimit-3,function()
-        if not ent:IsValid() or ent:GetUnlodged() then return end
-        ent:EmitSound(")mining/xen_despawning.mp3",soundLevel)
-    end)
+    local timeLimit = 300-3
     timer.Simple(timeLimit,function()
         if not ent:IsValid() or ent:GetUnlodged() then return end
-
-        ent:EmitSound(")mining/xen_despawn.mp3",soundLevel)
-
-        ent:SetDeparting(true)
-        ent:SetSolid(SOLID_NONE)
-
-        ent.PhysObject = nil
-        ent:PhysicsDestroy()
-
-        SafeRemoveEntityDelayed(ent,1.25)
+        ent:Depart()
     end)
 
 	return ent

@@ -119,6 +119,27 @@ function ENT:AllowGracePeriod(pl,dur)
 	self.GraceOwnerExpiry = CurTime()+(dur or 10)
 end
 
+function ENT:Depart(force)
+	if not force and self:GetUnlodged() then return end
+
+	local soundLevel = 98
+	self:EmitSound(")mining/xen_despawning.mp3",soundLevel)
+
+    timer.Simple(3,function()
+        if not self:IsValid() or (not force and self:GetUnlodged()) then return end
+
+        self:EmitSound(")mining/xen_despawn.mp3",soundLevel)
+
+        self:SetDeparting(true)
+        self:SetSolid(SOLID_NONE)
+
+        self.PhysObject = nil
+        self:PhysicsDestroy()
+
+        SafeRemoveEntityDelayed(self,1.25)
+    end)
+end
+
 function ENT:Think()
 	if self.PhysObject and self.PhysObject:IsMotionEnabled() and self.PhysObject:IsAsleep() then
 		self.PhysObject:EnableMotion(false)
