@@ -280,8 +280,8 @@ end
 local function TrySpawnCrystal()
     if not (mapdata.minespots and next(mapdata.minespots)) then return end
 
-    -- 10% chance to spawn in every minute
-    if math.random() <= 0.1 then return end
+    -- 5% chance to spawn in every minute
+    if math.random() <= 0.05 then return end
 
 	-- 4 attempts
 	for i=1,4 do
