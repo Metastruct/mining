@@ -176,36 +176,38 @@ if _G.AOWL_SUCCESS then
 	hook.Add("CanPlyGoto","ms.Ores_MiningCooldown",applyMiningCooldown)
 end
 
-if istable(_G.SF) then
-	local processorClass = "starfall_processor"
+util.OnInitialize(function()
+	if istable(_G.SF) then
+		local processorClass = "starfall_processor"
 
-	hook.Add("PlayerLoadedStarfall","ms.Ores_SFChecks",function(pl,ent,mainFile,allFiles)
-		ent._miningContainsSetPos = nil
+		hook.Add("PlayerLoadedStarfall","ms.Ores_SFChecks",function(pl,ent,mainFile,allFiles)
+			ent._miningContainsSetPos = nil
 
-		for k,v in next,allFiles do
-			if v:lower():match(":setpos[ \t]*[(]") then
-				ent._miningContainsSetPos = true
-				pl._miningBlocked = true
+			for k,v in next,allFiles do
+				if v:lower():match(":setpos[ \t]*[(]") then
+					ent._miningContainsSetPos = true
+					pl._miningBlocked = true
 
-				return
+					return
+				end
 			end
-		end
-	end)
+		end)
 
-	hook.Add("EntityRemoved","ms.Ores_SFChecks",function(ent)
-		if ent:GetClass() != processorClass then return end
+		hook.Add("EntityRemoved","ms.Ores_SFChecks",function(ent)
+			if ent:GetClass() != processorClass then return end
 
-		local pl = ent.owner or (ent.CPPIGetOwner and ent:CPPIGetOwner())
-		if pl and pl:IsValid() and pl._miningBlocked then
-			-- Check the player's other Starfall processors, only remove the _miningBlocked flag if they're all clear
-			for k,v in next,ents.FindByClass(processorClass) do
-				if (v.owner or (v.CPPIGetOwner and v:CPPIGetOwner())) == pl and v._miningContainsSetPos then return end
+			local pl = ent.owner or (ent.CPPIGetOwner and ent:CPPIGetOwner())
+			if pl and pl:IsValid() and pl._miningBlocked then
+				-- Check the player's other Starfall processors, only remove the _miningBlocked flag if they're all clear
+				for k,v in next,ents.FindByClass(processorClass) do
+					if (v.owner or (v.CPPIGetOwner and v:CPPIGetOwner())) == pl and v._miningContainsSetPos then return end
+				end
+
+				pl._miningBlocked = nil
 			end
-
-			pl._miningBlocked = nil
-		end
-	end)
-end
+		end)
+	end
+end)
 
 -- Tutorials
 hook.Add("PlayerReceivedOre","ms.Ores_FirstReceive",function(pl)
