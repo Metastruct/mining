@@ -184,7 +184,7 @@ util.OnInitialize(function()
 			ent._miningContainsSetPos = nil
 
 			for k,v in next,allFiles do
-				if v:lower():match(":setpos[ \t]*[(]") then
+				if v:lower():match("[.:]setpos[ \t]*[^a-z]") then
 					ent._miningContainsSetPos = true
 					pl._miningBlocked = true
 
