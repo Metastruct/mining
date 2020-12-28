@@ -235,7 +235,7 @@ resource.AddSingleFile("sound/mining/xen_spawn.mp3")
 
 function Ores.GenerateXenCrystal(startPos)
     local normal = VectorRand()
-	normal.z = -0.05
+	normal.z = -0.025
 
 	local traceTbl = {
 		start = startPos,
@@ -267,7 +267,7 @@ function Ores.GenerateXenCrystal(startPos)
 
     ent:EmitSound(")mining/xen_spawn.mp3",98,math.random(97,103))
 
-    local timeLimit = 300-3
+    local timeLimit = 180-3
     timer.Simple(timeLimit,function()
         if not ent:IsValid() or ent:GetUnlodged() then return end
         ent:Depart()
@@ -280,8 +280,8 @@ end
 local function TrySpawnCrystal()
     if not (mapdata.minespots and next(mapdata.minespots)) then return end
 
-    -- 5% chance to spawn in every minute
-    if math.random() > 0.05 then return end
+    -- 4% chance to spawn in every minute
+    if math.random() > 0.04 then return end
 
 	-- 4 attempts
 	for i=1,4 do
