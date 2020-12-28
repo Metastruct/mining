@@ -107,13 +107,9 @@ function ENT:OnTakeDamage(dmg)
 
 	local attacker = dmg:GetAttacker()
 	if not (attacker:IsValid() and attacker:IsPlayer()) then return end
-	if attacker:GetMoveType() == MOVETYPE_NOCLIP then
-		self:EmitSound("player/suit_denydevice.wav",70)
-		return
-	end
-	if attacker._miningCooldown and attacker._miningCooldown > now then return end
-	if attacker:GetShootPos():DistToSqr(dmg:GetDamagePosition()) > 16384 then return end
+	if attacker._miningBlocked or (attacker._miningCooldown and attacker._miningCooldown > now) then return end
 	if attacker.IsAFK and attacker:IsAFK() then return end
+	if attacker:GetShootPos():DistToSqr(dmg:GetDamagePosition()) > 16384 then return end
 
 	local isPickaxe = false
 
@@ -136,6 +132,10 @@ function ENT:OnTakeDamage(dmg)
 
 	local inflictor = dmg:GetInflictor()	-- Inflictor is either yourself (because inflictor w/ crowbar = yourself??) or the crowbar
 	if inflictor != attacker and inflictor != wep then return end
+	if attacker:GetMoveType() == MOVETYPE_NOCLIP then
+		self:EmitSound("player/suit_denydevice.wav",70)
+		return
+	end
 
 	local hp = self:GetHealthEx()-dmg:GetDamage()
 	self:SetHealthEx(hp)

@@ -62,6 +62,7 @@ function ENT:Touch(ent)
 	and not self:IsPlayerHolding()
 	and ent:IsPlayer()
 	and ent:GetMoveType() != MOVETYPE_NOCLIP
+	and not ent._miningBlocked
 	and now >= (ent._miningCooldown or 0)
 	and not (ent.IsAFK and ent:IsAFK())
 	and (self.GraceOwner == NULL or (self.GraceOwner == ent or now >= (self.GraceOwnerExpiry or 0))) then

@@ -45,13 +45,9 @@ function ENT:OnTakeDamage(dmg)
 
 	local attacker = dmg:GetAttacker()
 	if not (attacker:IsValid() and attacker:IsPlayer()) then return end
-	if attacker:GetMoveType() == MOVETYPE_NOCLIP then
-		self:EmitSound("player/suit_denydevice.wav",70)
-		return
-	end
-	if attacker._miningCooldown and attacker._miningCooldown > now then return end
-	if attacker:GetShootPos():DistToSqr(dmg:GetDamagePosition()) > 16384 then return end
+	if attacker._miningBlocked or (attacker._miningCooldown and attacker._miningCooldown > now) then return end
 	if attacker.IsAFK and attacker:IsAFK() then return end
+	if attacker:GetShootPos():DistToSqr(dmg:GetDamagePosition()) > 16384 then return end
 
 	local isPickaxe = false
 
@@ -63,6 +59,11 @@ function ENT:OnTakeDamage(dmg)
 
 	local inflictor = dmg:GetInflictor()	-- Inflictor is either yourself (because inflictor w/ crowbar = yourself??) or the crowbar
 	if inflictor != attacker and inflictor != wep then return end
+
+	if attacker:GetMoveType() == MOVETYPE_NOCLIP then
+		self:EmitSound("player/suit_denydevice.wav",70)
+		return
+	end
 
 	-- Update _miningCooldown to allow checking when they last mined
 	attacker._miningCooldown = now
@@ -92,7 +93,7 @@ function ENT:Use(pl)
 	end
 
 	local now = CurTime()
-	if pl._miningCooldown and pl._miningCooldown > now then return end
+	if pl._miningBlocked or (pl._miningCooldown and pl._miningCooldown > now) then return end
 	if pl.IsAFK and pl:IsAFK() then return end
 
 	if self.GraceOwner == NULL or (self.GraceOwner == pl or now >= (self.GraceOwnerExpiry or 0)) then
