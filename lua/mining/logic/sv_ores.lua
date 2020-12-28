@@ -176,7 +176,7 @@ if _G.AOWL_SUCCESS then
 	hook.Add("CanPlyGoto","ms.Ores_MiningCooldown",applyMiningCooldown)
 end
 
-if _G.SF and scripted_ents.Get("starfall_processor") then
+if istable(_G.SF) then
 	local processorClass = "starfall_processor"
 
 	hook.Add("PlayerLoadedStarfall","ms.Ores_SFChecks",function(pl,ent,mainFile,allFiles)
