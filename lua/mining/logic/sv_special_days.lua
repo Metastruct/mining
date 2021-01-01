@@ -37,10 +37,11 @@ end
 Ores.WorthMultiplier = Ores.WorthMultiplier or 1
 Ores.SpecialDays = {Days = {}}
 
-BuildSpecialDay("Meta Construct's Birthday",{1,23,0},{1,24,0},3)
-BuildSpecialDay("Anniversary of Mining 2.0",{1,25,0},{1,26,0},1.5)
+BuildSpecialDay("Meta Construct's Birthday",{1,23,0},{1,24,0},2.5)
+BuildSpecialDay("Anniversary of Mining 2.0",{1,25,0},{1,26,0},2)
 BuildSpecialDay("Valentine's Day",{2,14,0},{2,15,0},2)
 BuildSpecialDay("April Fools",{4,1,0},{4,2,0},1.5)
+BuildSpecialDay("Independence Day",{7,4,0},{7,5,0},2)
 BuildSpecialDay("Halloween",{10,31,0},{11,1,0},1.5)
 BuildSpecialDay("GMod's Birthday",{11,29,0},{11,30,0},1.5)
 BuildSpecialDay("Christmas",{12,24,0},{12,27,0},2)	-- Christmas Period, 24-26
