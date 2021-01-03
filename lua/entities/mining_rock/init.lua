@@ -109,7 +109,7 @@ function ENT:OnTakeDamage(dmg)
 	if not (attacker:IsValid() and attacker:IsPlayer()) then return end
 	if attacker._miningBlocked or (attacker._miningCooldown and attacker._miningCooldown > now) then return end
 	if attacker.IsAFK and attacker:IsAFK() then return end
-	if attacker:GetShootPos():DistToSqr(dmg:GetDamagePosition()) > 16384 then return end
+	if attacker:GetShootPos():DistToSqr(dmg:GetDamagePosition()) > 40000 then return end
 
 	local isPickaxe = false
 
