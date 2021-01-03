@@ -225,15 +225,19 @@ function SWEP:PrimaryAttack()
 				local allRocks = ents.FindByClass("mining_rock")
 
 				for k,v in next,allRocks do
+					local rockPos = v.GetCorrectedPos and v:GetCorrectedPos() or v:GetPos()
 					local rockTr = util.TraceLine({
 						start = tr.HitPos,
-						endpos = tr.HitPos+(((v.GetCorrectedPos and v:GetCorrectedPos() or v:GetPos())-tr.HitPos):GetNormalized()*self.Stats.ShockwaveRange),
+						endpos = tr.HitPos+((rockPos-tr.HitPos):GetNormalized()*self.Stats.ShockwaveRange),
 						filter = function(e) return e == v end,
 						ignoreworld = true
 					})
 
 					if rockTr.Hit then
-						self:DoHitEffect(rockTr,rockTr.Entity)
+						-- Edit the HitPos to prevent ores from spawning in the ground
+						rockTr.HitPos = v.GetCorrectedPos and rockPos or rockTr.HitPos+(vector_up*4)
+
+						self:DoHitEffect(rockTr,v)
 
 						if SERVER then
 							self:DoDamage(rockTr,math.min(1-rockTr.Fraction,0.5))
