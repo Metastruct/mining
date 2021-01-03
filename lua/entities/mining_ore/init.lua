@@ -150,7 +150,7 @@ function ENT:CheckExistence()
 		local pos = self:GetPos()
 
 		if not util.IsInWorld(pos) or util.TraceLine({
-			start = pos,
+			start = pos+(vector_up*2),
 			endpos = pos-(vector_up*128),
 			mask = MASK_SOLID_BRUSHONLY
 		}).HitNoDraw then
