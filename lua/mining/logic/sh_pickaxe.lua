@@ -47,6 +47,15 @@ Ores.__PStats = {
 		VarStep = 0.005,
 		VarFormat = "%p%%",
 		CostStep = 1275
+	},
+	{
+		Name = "Shockwave", -- 1.9 * 50 (max: 95)
+		Help = "The size of the shockwave created when you hit the ground.",
+		VarName = "ShockwaveRange",
+		VarBase = 0,
+		VarStep = 1.9,
+		VarFormat = "%s hu",
+		CostStep = 1100
 	}
 }
 
