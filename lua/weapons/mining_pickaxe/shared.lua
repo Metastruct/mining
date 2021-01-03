@@ -101,6 +101,7 @@ end
 
 if CLIENT then
 	local spriteFleck = Material("effects/fleck_cement2")
+	local spriteWave = Material("particle/particle_noisesphere")
 	local gravityFleck = vector_up*-500
 
 	function SWEP:CreateFleckEffect(pos,amount)
@@ -126,6 +127,37 @@ if CLIENT then
 				p:SetCollide(true)
 				p:SetGravity(gravityFleck)
 				p:SetVelocity(VectorRand()*128)
+			end
+		end
+	end
+
+	function SWEP:CreateShockwaveEffect(pos,amount,range,normalRight,normalUp,effectStrength)
+		if self.ParticleEmitter and self.ParticleEmitter:IsValid() then
+			self.ParticleEmitter:SetPos(self:GetPos())
+		else
+			self.ParticleEmitter = ParticleEmitter(self:GetPos())
+		end
+
+		local circleStep = 360/amount
+		for i=1,amount do
+			local p = self.ParticleEmitter:Add(spriteWave,pos)
+			if p then
+				p:SetDieTime(1)
+
+				p:SetLighting(true)
+				p:SetStartAlpha(150)
+				p:SetEndAlpha(0)
+
+				p:SetStartSize(32*effectStrength)
+				p:SetEndSize(12*effectStrength)
+				p:SetRoll(math.random(-5,5))
+
+				p:SetCollide(false)
+				p:SetGravity(vector_origin)
+
+				local circleDir = ((i*circleStep)/360)*math.pi*2
+				p:SetVelocity(((normalRight*math.sin(circleDir))+(normalUp*math.cos(circleDir)))*(range*6))
+				p:SetAirResistance(256)
 			end
 		end
 	end
@@ -208,19 +240,23 @@ function SWEP:PrimaryAttack()
 			end
 		elseif self.Stats.ShockwaveRange and self.Stats.ShockwaveRange > 0 then
 			if IsFirstTimePredicted() then
+				local waveStrength = self.Stats.ShockwaveRange/95
+
 				if CLIENT then
 					local norAng = tr.HitNormal:Angle()
 					local norRight,norUp = norAng:Right(),norAng:Up()
 
-					for i=1,math.ceil(self.Stats.ShockwaveRange*0.5) do
+					for i=1,math.ceil(self.Stats.ShockwaveRange*0.4) do
 						local norRotRand = math.Rand(-1,1)*math.pi
 						local norRand = math.random()
 
 						self:CreateFleckEffect(tr.HitPos+(tr.HitNormal*4)+((norRight*math.sin(norRotRand)*norRand)+(norUp*math.cos(norRotRand)*norRand))*self.Stats.ShockwaveRange,3)
 					end
+
+					self:CreateShockwaveEffect(tr.HitPos,18,self.Stats.ShockwaveRange,norRight,norUp,math.Clamp(waveStrength*1.5,0.25,1))
 				end
 
-				self:EmitSound(self.Primary.SoundShockwave,70,math.random(150,160),math.max(self.Stats.ShockwaveRange/95,0.25)*0.4,CHAN_VOICE2)
+				self:EmitSound(self.Primary.SoundShockwave,70,math.random(150,165),math.max(waveStrength,0.25)*0.5,CHAN_VOICE2)
 
 				local allRocks = ents.FindByClass("mining_rock")
 
@@ -240,7 +276,7 @@ function SWEP:PrimaryAttack()
 						self:DoHitEffect(rockTr,v)
 
 						if SERVER then
-							self:DoDamage(rockTr,math.min(1-rockTr.Fraction,0.5))
+							self:DoDamage(rockTr,math.min((1-rockTr.Fraction)*1.5,1)*0.5)
 						end
 					end
 				end
