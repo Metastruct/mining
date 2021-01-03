@@ -2,11 +2,12 @@ include("shared.lua")
 AddCSLuaFile("shared.lua")
 AddCSLuaFile("cl_init.lua")
 
+ENT.ExpiryCheckPlayers = true
+ENT.Unlodged = false
+
 ENT.ms_nogoto = "No cheating!"
 ENT._initialized = false
 ENT._nextDamaged = 0
-
-ENT.Unlodged = false
 
 function ENT:Initialize()
 	self._initialized = true
@@ -70,6 +71,8 @@ function ENT:OnTakeDamage(dmg)
 
 	self:SetUnlodged(true)
 	self:AllowGracePeriod(attacker,60)
+
+	self.Expiry = now+180
 
 	self:EmitSound(")physics/concrete/concrete_break"..math.random(2,3)..".wav",70,math.random(130,145),0.75)
 	self:EmitSound(")ambient/atmosphere/cave_hit2.wav",80,86)
@@ -146,7 +149,31 @@ function ENT:Think()
 		self.PhysObject:EnableMotion(false)
 	end
 
-	self:NextThink(CurTime()+1)
+	local now = CurTime()
+
+	if self.Expiry and self.Expiry <= now then
+		local remove = true
+
+		if self.ExpiryCheckPlayers then
+			local pos = self:GetPos()
+			local dist = 90000
+
+			for k,v in next,player.GetHumans() do
+				if pos:DistToSqr(v:GetPos()) <= dist then
+					self.Expiry = now+30
+
+					remove = false
+					break
+				end
+			end
+		end
+
+		if remove then
+			self:Remove()
+		end
+	end
+
+	self:NextThink(now+1)
 	return true
 end
 
