@@ -53,6 +53,10 @@ function ENT:Initialize()
 
 	self:DrawShadow(false)
 	self:SetMaterial("models/shiny")
+
+	timer.Simple(1.25,function()
+		if self:IsValid() then self:CheckExistence() end
+	end)
 end
 
 function ENT:Touch(ent)
@@ -136,4 +140,26 @@ function ENT:Think()
 
 	self:NextThink(now+1)
 	return true
+end
+
+function ENT:CheckExistence()
+	if not self._initialized then
+		-- Hasn't initialized properly
+		SafeRemoveEntity(self)
+	else
+		local pos = self:GetPos()
+
+		if not util.IsInWorld(pos) or util.TraceLine({
+			start = pos,
+			endpos = pos-(vector_up*128),
+			mask = MASK_SOLID_BRUSHONLY
+		}).HitNoDraw then
+			-- Outside the world or believed to be if there is nodraw underneath it
+			if self.GraceOwner and self.GraceOwner:IsValid() then
+				self:SetPos(self.GraceOwner:GetPos()+(vector_up*4))
+			else
+				SafeRemoveEntity(self)
+			end
+		end
+	end
 end
