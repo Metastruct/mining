@@ -69,7 +69,7 @@ function ENT:OnTakeDamage(dmg)
 	attacker._miningCooldown = now
 
 	self:SetUnlodged(true)
-	self:AllowGracePeriod(attacker,30)
+	self:AllowGracePeriod(attacker,60)
 
 	self:EmitSound(")physics/concrete/concrete_break"..math.random(2,3)..".wav",70,math.random(130,145),0.75)
 	self:EmitSound(")ambient/atmosphere/cave_hit2.wav",80,86)
@@ -104,7 +104,7 @@ function ENT:Use(pl)
 		self:EmitSound("physics/glass/glass_cup_break1.wav",70,math.random(75,90),0.5)
 		SafeRemoveEntity(self)
 
-		local newMult = math.Round(pl:GetNWFloat(ms.Ores._nwMult,0)+0.05,3)
+		local newMult = math.Round(pl:GetNWFloat(ms.Ores._nwMult,0)+0.04,3)
 
 		pl:SetNWFloat(ms.Ores._nwMult,newMult)
 		ms.Ores.SetSavedPlayerData(pl,"mult",newMult)
