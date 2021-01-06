@@ -187,7 +187,7 @@ local function SpawnRock(rarity)
 			local numPlayers = 0
 			if trigger:IsValid() and trigger.GetPlayers then
 				for k,v in next,trigger:GetPlayers() do
-					if k:IsValid() and not (k.IsAFK and k:IsAFK()) and (k._miningCooldown or 0)+45 > now then
+					if k:IsValid() and not (k.IsAFK and k:IsAFK()) and not k:IsBot() and (k._miningCooldown or 0)+45 > now then
 						numPlayers = numPlayers+1
 					end
 				end
