@@ -528,7 +528,7 @@ function PANEL:Think()
 		end
 
 		if total > 0 then
-			total = ms.Ores.SpecialDay and total*math.Clamp(ms.Ores.SpecialDay.WorthMultiplier,1,5) or total
+			total = math.ceil(total*math.Round(ms.Ores.GetPlayerMultiplier(pl),3))
 
 			self.OresPanel.TurnInCoinsBtn:SetEnabled(true)
 			self.OresPanel.TurnInPointsBtn:SetEnabled(true)
