@@ -210,18 +210,8 @@ local function InitRocks()
 	end
 end
 
-local function QuickCheckRocks(pl,rock)
-	-- When the last rock is destroyed, spawn another rock in the next second
-	if not next(Ores.SpawnedRocks) then
-		timer.Simple(1,function()
-			if not next(Ores.SpawnedRocks) then SpawnRock() end
-		end)
-	end
-end
-
 -- Hook up the rock spawning logic
 timer.Create("ms.Ores_Spawn",attemptTimeBase,0,SpawnRock)
-hook.Add("PlayerDestroyedMiningRock","ms.Ores_Spawn",QuickCheckRocks)
 hook.Add("InitPostEntity","ms.Ores_Init",InitRocks)
 hook.Add("PostCleanupMap","ms.Ores_Init",InitRocks)
 
