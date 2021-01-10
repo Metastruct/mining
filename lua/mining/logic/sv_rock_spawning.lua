@@ -156,14 +156,12 @@ local function SpawnRock(rarity)
 				Ores.Print("Detected data in ms.mapdata.minespots - mining rock spawning resumed...")
 
 				timer.Create("ms.Ores_Spawn",attemptTimeBase,0,SpawnRock)
-				hook.Add("PlayerDestroyedMiningRock","ms.Ores_Spawn",QuickCheckRocks)
 				return
 			end
 
 			Ores.Print(noSetupText)
 		end)
 
-		hook.Remove("PlayerDestroyedMiningRock","ms.Ores_Spawn")
 		return
 	end
 
