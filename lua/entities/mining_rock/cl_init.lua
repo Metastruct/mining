@@ -1,6 +1,6 @@
 include("shared.lua")
 
-local enableLight = CreateConVar("mining_rock_lights",1,0,"Enables the light emitted from mining rocks.")
+local enableLight
 
 local spriteGlow = Material("particle/fire")
 local spriteRock = Material("effects/fleck_cement2")
@@ -261,6 +261,7 @@ function ENT:Draw()
 	self:SetRenderBounds(-renderBounds,renderBounds)
 
 	-- Lights
+	enableLight = enableLight or ms.Ores.Settings.RockLights
 	if rSettings and enableLight:GetBool() then
 		local l = DynamicLight(self:EntIndex())
 		if l then

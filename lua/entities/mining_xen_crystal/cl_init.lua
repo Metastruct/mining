@@ -1,5 +1,7 @@
 include("shared.lua")
 
+local enableLight
+
 local spriteGlow = Material("particle/fire")
 local spriteFleck = Material("effects/fleck_glass2")
 local spriteXen1 = Material("particle/particle_glow_02")
@@ -60,6 +62,24 @@ function ENT:CreateBeamPoints(pos,forced)
 			filter = self,
 			mask = MASK_SOLID
 		}).HitPos
+	end
+end
+
+function ENT:CreateLight(col,brightness,size)
+	enableLight = enableLight or ms.Ores.Settings.RockLights
+	if enableLight:GetBool() then
+		local l = DynamicLight(self:EntIndex())
+		if l then
+			local r,g,b = col:Unpack()
+			l.pos = self:GetPos()
+			l.r = r
+			l.g = g
+			l.b = b
+			l.brightness = brightness
+			l.Size = size
+			l.Decay = 500
+			l.DieTime = CurTime()+0.5
+		end
 	end
 end
 
@@ -125,6 +145,8 @@ function ENT:Draw()
 			p:SetGravity(vector_origin)
 			p:SetVelocity((pos-p:GetPos()):GetNormalized()*-math.random(32,128))
 		end
+
+		self:CreateLight(self.GlowColor,2,2500,5000)
 	else
 		if self:GetDeparting() then return end
 
@@ -135,6 +157,10 @@ function ENT:Draw()
 
 			render.SetMaterial(spriteGlow)
 			render.DrawSprite(self:GetPos(),sizesin,sizesin,self.GlowColor)
+
+			self:CreateLight(self.GlowColor,-2,500)
+		else
+			self:CreateLight(self.CrystalColor,-3,500)
 		end
 
 		self:DrawModel()

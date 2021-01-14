@@ -21,6 +21,8 @@ function ENT:Initialize()
 
 	self.PhysObject = self:GetPhysicsObject()
 	if self.PhysObject:IsValid() then
+		self.PhysObject:SetMass(3)
+		self.PhysObject:SetBuoyancyRatio(0.245)
 		self.PhysObject:EnableMotion(false)
 	else
 		self.PhysObject = nil
