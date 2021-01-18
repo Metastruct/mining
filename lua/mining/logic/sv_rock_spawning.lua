@@ -2,8 +2,6 @@ module("ms",package.seeall)
 
 local next = next
 
-local enableBonusSpots = CreateConVar("mining_rock_bonusspots",1,0,"Enables bonus spot generation on mining rocks.")
-
 local traceMatWhitelist = {
 	[MAT_CONCRETE] = true,
 	[MAT_DIRT] = true,
@@ -106,7 +104,7 @@ function Ores.GenerateMiningRock(startPos,rarity)
 	ent:AddEffects(EF_ITEM_BLINK)	-- Shh, I'm setting this so clients know to fade it in without using net
 	timer.Simple(0.5,function() if ent:IsValid() then ent:RemoveEffects(EF_ITEM_BLINK) end end)
 
-	if enableBonusSpots:GetBool() then
+	if Ores.Settings.BonusSpots:GetBool() then
 		ent:SetBonusSpotCount(math.random(0,2))
 	end
 
@@ -155,7 +153,7 @@ local function SpawnRock(rarity)
 			if mapdata.minespots and next(mapdata.minespots) then
 				Ores.Print("Detected data in ms.mapdata.minespots - mining rock spawning resumed...")
 
-				timer.Create("ms.Ores_Spawn",attemptTimeBase,0,SpawnRock)
+				timer.Create("ms.Ores_Spawn",5,0,SpawnRock)
 				return
 			end
 
@@ -178,10 +176,13 @@ local function SpawnRock(rarity)
 		end
 
 		if Ores.GenerateMiningRock(mapdata.minespots[id],rarity) then
-			local spawnRateModifier = 6-math.Clamp(table.Count(Ores.SpawnedRocks)-3,0,5)
+			local spawnedRocks = table.Count(Ores.SpawnedRocks)
+			local spawnRate = attemptTimeBase/(6-math.Clamp(spawnedRocks-3,0,5))
 
 			-- Scale spawning time by number of rocks left in the mine
-			AdjustTimer(attemptTimeBase/spawnRateModifier)
+			AdjustTimer(spawnRate)
+
+			Ores.PrintVerbose(string.format("%s mining rocks now in the mine - next rock spawning in %s seconds...",spawnedRocks,spawnRate))
 			return true
 		end
 	end
@@ -270,7 +271,9 @@ local function TrySpawnCrystal()
 			continue
 		end
 
-		if Ores.GenerateXenCrystal(mapdata.minespots[id]) then
+		local ent = Ores.GenerateXenCrystal(mapdata.minespots[id])
+		if ent then
+			Ores.PrintVerbose(string.format("Generated Xen crystal at [%s]",ent:GetPos()))
 			return true
 		end
 	end

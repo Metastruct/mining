@@ -36,6 +36,11 @@ function Ores.Print(...)
 	MsgC(Color(230,130,65),"[Ores] ")
 	print(...)
 end
+function Ores.PrintVerbose(...)
+	if not Ores.Settings.VerbosePrint:GetBool() then return end
+
+	Ores.Print("[Verbose] ",...)
+end
 
 util.AddNetworkString("ms.Ores_ChatMSG")
 function Ores.SendChatMessage(pl,txt)
