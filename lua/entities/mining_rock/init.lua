@@ -76,6 +76,7 @@ function ENT:Initialize()
 
 	self.PhysObject = self:GetPhysicsObject()
 	if self.PhysObject:IsValid() then
+		self.PhysObject:SetMass(255)
 		self.PhysObject:EnableMotion(false)
 	else
 		self.PhysObject = nil
@@ -215,7 +216,6 @@ function ENT:OnTakeDamage(dmg)
 
 			local phys = r:GetPhysicsObject()
 			if phys:IsValid() then
-				phys:SetMass(255)
 				phys:EnableMotion(true)
 				phys:Wake()
 				phys:AddVelocity((force*48*math.cos(i/(numRocks-1)*math.pi))+(vector_up*16)+(VectorRand()*64))

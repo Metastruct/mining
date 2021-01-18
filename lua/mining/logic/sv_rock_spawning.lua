@@ -178,21 +178,10 @@ local function SpawnRock(rarity)
 		end
 
 		if Ores.GenerateMiningRock(mapdata.minespots[id],rarity) then
-			local now = CurTime()
+			local spawnRateModifier = 6-math.Clamp(table.Count(Ores.SpawnedRocks)-3,0,5)
 
-			-- Get players in the mine who are actually mining
-			local trigger = Ores.GetMineTrigger()
-			local numPlayers = 0
-			if trigger:IsValid() and trigger.GetPlayers then
-				for k,v in next,trigger:GetPlayers() do
-					if k:IsValid() and not (k.IsAFK and k:IsAFK()) and not k:IsBot() and (k._miningCooldown or 0)+45 > now then
-						numPlayers = numPlayers+1
-					end
-				end
-			end
-
-			-- Scale spawning time by number of players mining
-			AdjustTimer(attemptTimeBase/math.Clamp(numPlayers,1,5))
+			-- Scale spawning time by number of rocks left in the mine
+			AdjustTimer(attemptTimeBase/spawnRateModifier)
 			return true
 		end
 	end
