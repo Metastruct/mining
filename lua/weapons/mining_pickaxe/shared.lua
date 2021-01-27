@@ -169,12 +169,14 @@ if CLIENT then
 		end
 	end
 else
-	function SWEP:DoDamage(tr,dmgScale)
+	function SWEP:DoDamage(tr,dmgScale,isShockwave)
+		local dmgType = isShockwave and bit.bor(DMG_CLUB,DMG_NEVERGIB) or DMG_CLUB
+
 		local dmg = DamageInfo()
 		dmg:SetAttacker(self:GetOwner())
 		dmg:SetInflictor(self)
 		dmg:SetDamage(math.ceil(20*(dmgScale or 1)))
-		dmg:SetDamageType(DMG_CLUB)
+		dmg:SetDamageType(dmgType)
 		dmg:SetDamagePosition(tr.HitPos)
 		dmg:SetDamageForce(tr.Normal*32)
 
@@ -276,7 +278,7 @@ function SWEP:PrimaryAttack()
 						self:DoHitEffect(rockTr,v)
 
 						if SERVER then
-							self:DoDamage(rockTr,math.min((1-rockTr.Fraction)*1.5,1)*0.5)
+							self:DoDamage(rockTr,math.min((1-rockTr.Fraction)*1.5,1)*0.5,true)
 						end
 					end
 				end

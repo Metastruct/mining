@@ -60,6 +60,7 @@ local function SendBonusSpots(self)
 	net.WriteEntity(self)
 	for k,v in next,self.BonusSpots do
 		net.WriteVector(v.Pos)
+		net.WriteVector(v.Normal)
 	end
 	net.SendToServer()
 end

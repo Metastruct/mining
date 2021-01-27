@@ -149,20 +149,34 @@ function ENT:OnTakeDamage(dmg)
 	local dmgPos = dmg:GetDamagePosition()
 	if self:GetBonusSpotCount() > 0 then
 		local pos = self:GetPos()
+		local ang = self:GetAngles()
+		local isDirectDmg = not dmg:IsDamageType(DMG_NEVERGIB) -- DMG_NEVERGIB means it came from Shockwave ability
 
-		for k,v in next,self.BonusSpots.Confirmed do
-			if v.Hit then continue end
+		if isDirectDmg then
+			for k,v in next,self.BonusSpots.Confirmed do
+				if v.Hit then continue end
 
-			local spotOffset = Vector(v.Pos)
-			spotOffset:Rotate(self:GetAngles())
+				local spotOffset = Vector(v.Pos)
+				spotOffset:Rotate(ang)
 
-			if dmgPos:DistToSqr(pos+spotOffset) <= 10 then
-				v.Hit = true
-				self:SetBonusSpotHit(bit.bor(2^k,self:GetBonusSpotHit()))
+				local spotPos = pos+spotOffset
 
-				self:EmitSound("physics/metal/metal_grenade_impact_hard2.wav",70,math.random(20,30))
+				local hit = dmgPos:DistToSqr(spotPos) <= 10
+				if not hit then
+					local spotNormal = Vector(v.Normal)
+					spotNormal:Rotate(ang)
 
-				createOre(dmgPos,attacker,rarity,magicFindChance,foolsDay)
+					hit = (dmgPos-spotPos):GetNormalized():Dot(spotNormal) >= 0.9
+				end
+
+				if hit then
+					v.Hit = true
+					self:SetBonusSpotHit(bit.bor(2^k,self:GetBonusSpotHit()))
+
+					self:EmitSound("physics/metal/metal_grenade_impact_hard2.wav",70,math.random(20,30))
+
+					createOre(dmgPos,attacker,rarity,magicFindChance,foolsDay)
+				end
 			end
 		end
 	end
@@ -286,6 +300,7 @@ net.Receive("mining_rock.BonusSpot",function(_,pl)
 
 	local ent = net.ReadEntity()
 	if not (ent and ent:IsValid() and ent:GetClass() == "mining_rock") then return end
+	if not ent.BonusSpots then return end
 
 	local maxSpots = ent.GetBonusSpotCount and ent:GetBonusSpotCount()
 	if not maxSpots or maxSpots <= (ent.BonusSpots.Raw[pl] and #ent.BonusSpots.Raw[pl] or 0) then return end
@@ -294,27 +309,36 @@ net.Receive("mining_rock.BonusSpot",function(_,pl)
 
 	for i=1,maxSpots do
 		local pos = net.ReadVector()
+		local normal = net.ReadVector()
 		local id = #ent.BonusSpots.Raw[pl]+1
 
-		ent.BonusSpots.Raw[pl][id] = pos
+		ent.BonusSpots.Raw[pl][id] = {
+			Pos = pos,
+			Normal = normal
+		}
 
 		if ent.BonusSpots.Confirmed[id] and ent.BonusSpots.Confirmed[id].Hit then continue end
 
-		local best,bestK,bestV = {},nil,0
+		local best,bestPos,bestNor,bestV = {},nil,nil,0
 		for k,v in next,ent.BonusSpots.Raw do
-			local rawPos = v[id]
-			local strPos = tostring(rawPos)
+			local rawData = v[id]
+			local strPos = tostring(rawData.Pos)
 			best[strPos] = (best[strPos] or 0)+1
 
 			if best[strPos] >= bestV then
-				bestK,bestV = rawPos,best[strPos]
+				bestPos,bestNor,bestV = rawData.Pos,rawData.Normal,best[strPos]
 			end
 		end
 
 		if ent.BonusSpots.Confirmed[id] then
-			ent.BonusSpots.Confirmed[id].Pos = bestK
+			ent.BonusSpots.Confirmed[id].Pos = bestPos
+			ent.BonusSpots.Confirmed[id].Normal = bestNor
 		else
-			ent.BonusSpots.Confirmed[id] = {Pos = bestK,Hit = false}
+			ent.BonusSpots.Confirmed[id] = {
+				Pos = bestPos,
+				Normal = bestNor,
+				Hit = false
+			}
 		end
 	end
 end)
