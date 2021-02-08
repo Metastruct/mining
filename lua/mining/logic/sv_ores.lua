@@ -167,7 +167,7 @@ end
 -- Anti-cheat Hooks
 -- Hinder mining bots by setting a cooldown where rocks and ores can't be interacted with, normal players shouldn't notice this
 local function applyMiningCooldown(pl)
-	pl._miningCooldown = CurTime()+1
+	pl._miningCooldown = CurTime()+1.5
 end
 
 hook.Add("PlayerNoClip","ms.Ores_MiningCooldown",function(pl,enable)
@@ -186,16 +186,7 @@ util.OnInitialize(function()
 		local processorClass = "starfall_processor"
 
 		hook.Add("PlayerLoadedStarfall","ms.Ores_SFChecks",function(pl,ent,mainFile,allFiles)
-			ent._miningContainsSetPos = nil
-
-			for k,v in next,allFiles do
-				if v:lower():match("[.:]setpos[ \t]*[^a-z]") then
-					ent._miningContainsSetPos = true
-					pl._miningBlocked = true
-
-					return
-				end
-			end
+			pl._miningBlocked = true
 		end)
 
 		hook.Add("EntityRemoved","ms.Ores_SFChecks",function(ent)
@@ -205,7 +196,7 @@ util.OnInitialize(function()
 			if pl and pl:IsValid() and pl._miningBlocked then
 				-- Check the player's other Starfall processors, only remove the _miningBlocked flag if they're all clear
 				for k,v in next,ents.FindByClass(processorClass) do
-					if (v.owner or (v.CPPIGetOwner and v:CPPIGetOwner())) == pl and v._miningContainsSetPos then return end
+					if (v.owner or (v.CPPIGetOwner and v:CPPIGetOwner())) == pl then return end
 				end
 
 				pl._miningBlocked = nil
