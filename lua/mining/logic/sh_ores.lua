@@ -36,6 +36,7 @@ local function AddOre(
 		ambSoundPath,
 		ambSoundPitch,
 		ambSoundVolume,
+		ambSoundLevel,
 		hidden)
 	Ores.__R[id] = {
 		Name = name,
@@ -48,6 +49,7 @@ local function AddOre(
 		AmbientSound = ambSoundPath,
 		AmbientPitch = ambSoundPitch,
 		AmbientVolume = ambSoundVolume and ambSoundVolume/3,
+		AmbientLevel = ambSoundLevel,
 		Hidden = hidden or false
 	}
 end
@@ -85,7 +87,7 @@ AddOre(2,
 	Color(225,225,0),
 	0.3,
 	3,
-	"ambient/levels/labs/machine_ring_resonance_loop1.wav",30,0.6
+	"ambient/levels/labs/machine_ring_resonance_loop1.wav",30,0.6,75
 )
 
 AddOre(3,
@@ -96,7 +98,7 @@ AddOre(3,
 	Color(140,255,235),
 	0.3,
 	nil,
-	"ambient/levels/citadel/field_loop3.wav",65,0.9,
+	"ambient/levels/citadel/field_loop3.wav",65,0.9,78,
 	true
 )
 -- -- --

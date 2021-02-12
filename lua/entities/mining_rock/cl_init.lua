@@ -116,6 +116,7 @@ function ENT:Initialize()
 
 		self.AmbientSound = CreateSound(self,self.AmbientSettings.Path)
 		self.AmbientSound:PlayEx(self.AmbientSettings.Volume,self.AmbientSettings.Pitch)
+		self.AmbientSound:SetSoundLevel(self.AmbientSettings.Level)
 	end
 
 	if self:IsEffectActive(EF_ITEM_BLINK) then
@@ -346,6 +347,7 @@ function ENT:Think()
 		self.AmbientSound:Play()
 		self.AmbientSound:ChangeVolume(self.AmbientSettings.Volume)
 		self.AmbientSound:ChangePitch(self.AmbientSettings.Pitch)
+		self.AmbientSound:SetSoundLevel(self.AmbientSettings.Level)
 	end
 
 	if self.ParticleEmitter and self.ParticleEmitter:IsValid() then
