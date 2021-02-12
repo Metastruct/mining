@@ -131,12 +131,18 @@ function ENT:OnTakeDamage(dmg)
 		return
 	end
 
-	local inflictor = dmg:GetInflictor()	-- Inflictor is either yourself (because inflictor w/ crowbar = yourself??) or the crowbar
+	-- Inflictor is either yourself (inflictor w/ crowbar = yourself) or the weapon
+	local inflictor = dmg:GetInflictor()
 	if inflictor != attacker and inflictor != wep then return end
 	if attacker:GetMoveType() == MOVETYPE_NOCLIP then
 		self:EmitSound("player/suit_denydevice.wav",70)
 		return
 	end
+
+	-- Check for and apply 1 second "last attacker" grace to prevent "rock stealing"
+	if self._lastAttacker != attacker and (self._lastAttackerGrace and self._lastAttackerGrace > now) then return end
+	self._lastAttacker = attacker
+	self._lastAttackerGrace = now+1
 
 	local hp = self:GetHealthEx()-dmg:GetDamage()
 	self:SetHealthEx(hp)
