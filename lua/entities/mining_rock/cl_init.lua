@@ -111,7 +111,8 @@ function ENT:Initialize()
 		self.AmbientSettings = {
 			Path = rSettings.AmbientSound,
 			Pitch = rSettings.AmbientPitch or 100,
-			Volume = (rSettings.AmbientVolume or 0.2)*math.Clamp(self:GetSize()+1,1,3)
+			Volume = (rSettings.AmbientVolume or 0.2)*math.Clamp(self:GetSize()+1,1,3),
+			Level = rSettings.AmbientLevel or 75
 		}
 
 		self.AmbientSound = CreateSound(self,self.AmbientSettings.Path)
