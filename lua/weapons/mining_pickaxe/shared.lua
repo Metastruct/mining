@@ -44,6 +44,11 @@ SWEP.StatsLoaded = false
 
 SWEP.NextVMIdle = nil
 
+-- List of entity classnames that trigger shockwave on hit rather than apply damage
+SWEP.IgnoredEnts = {
+	mining_ore = true
+}
+
 function SWEP:RefreshStats()
 	if not _G.ms then return end
 
@@ -236,7 +241,7 @@ function SWEP:PrimaryAttack()
 		self:SendWeaponAnim(ACT_VM_HITCENTER)
 		self.NextVMIdle = CurTime()+0.6
 
-		if tr.Entity:IsValid() then
+		if tr.Entity:IsValid() and !self.IgnoredEnts[tr.Entity:GetClass()] then
 			if SERVER then
 				self:DoDamage(tr)
 			end
