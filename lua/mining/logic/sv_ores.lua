@@ -19,7 +19,7 @@ Available mining hooks:
 		Arguments:
 		- Player "player"
 		- Number "amountGained"
-		- Number "rarityId" (0-2)
+		- Number "rarityId"
 
 	PlayerLostOre
 		Description:
@@ -27,7 +27,7 @@ Available mining hooks:
 		Arguments:
 		- Player "player"
 		- Number "amountLost"
-		- Number "rarityId" (0-2)
+		- Number "rarityId"
 ]]
 
 Ores = Ores or {}
@@ -60,7 +60,7 @@ hook.Add("PlayerInitialSpawn","ms.Ores",function(pl)
 		end)
 	end
 
-	-- Loading pickaxe values on the same frame as PlayerInitialSpawn doesn't work, so...
+	-- Loading pickaxe values on the same frame as PlayerInitialSpawn doesn't work, do it a second later
 	timer.Simple(1,function()
 		if pl:IsValid() then
 			Ores.RefreshPlayerData(pl)
@@ -200,6 +200,7 @@ util.OnInitialize(function()
 				end
 
 				pl._miningBlocked = nil
+				pl._miningCooldown = CurTime()+10
 			end
 		end)
 	end
