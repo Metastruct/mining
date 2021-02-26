@@ -200,7 +200,7 @@ util.OnInitialize(function()
 				end
 
 				pl._miningBlocked = nil
-				pl._miningCooldown = CurTime()+10
+				pl._miningCooldown = CurTime()+30
 			end
 		end)
 	end
