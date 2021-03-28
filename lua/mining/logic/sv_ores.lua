@@ -171,47 +171,7 @@ function Ores.TakePlayerOre(pl,rarity,amount)
 	hook.Run("PlayerLostOre",pl,math.min(amount,current),rarity)
 end
 
--- Anti-cheat Hooks
--- Hinder mining bots by setting a cooldown where rocks and ores can't be interacted with, normal players shouldn't notice this
-local function applyMiningCooldown(pl)
-	pl._miningCooldown = CurTime()+1.5
-end
 
-hook.Add("PlayerNoClip","ms.Ores_MiningCooldown",function(pl,enable)
-	if not enable then
-		applyMiningCooldown(pl)
-	end
-end)
-
-if _G.AOWL_SUCCESS then
-	hook.Add("CanPlyTeleport","ms.Ores_MiningCooldown",applyMiningCooldown)
-	hook.Add("CanPlyGoto","ms.Ores_MiningCooldown",applyMiningCooldown)
-end
-
-util.OnInitialize(function()
-	if istable(_G.SF) then
-		local processorClass = "starfall_processor"
-
-		hook.Add("PlayerLoadedStarfall","ms.Ores_SFChecks",function(pl,ent,mainFile,allFiles)
-			pl._miningBlocked = true
-		end)
-
-		hook.Add("EntityRemoved","ms.Ores_SFChecks",function(ent)
-			if ent:GetClass() != processorClass then return end
-
-			local pl = ent.owner or (ent.CPPIGetOwner and ent:CPPIGetOwner())
-			if pl and pl:IsValid() and pl._miningBlocked then
-				-- Check the player's other Starfall processors, only remove the _miningBlocked flag if they're all clear
-				for k,v in next,ents.FindByClass(processorClass) do
-					if (v.owner or (v.CPPIGetOwner and v:CPPIGetOwner())) == pl then return end
-				end
-
-				pl._miningBlocked = nil
-				pl._miningCooldown = CurTime()+30
-			end
-		end)
-	end
-end)
 
 -- Tutorials
 hook.Add("PlayerReceivedOre","ms.Ores_FirstReceive",function(pl)
