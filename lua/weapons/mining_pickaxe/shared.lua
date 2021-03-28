@@ -307,3 +307,16 @@ end
 function SWEP:SecondaryAttack() end
 function SWEP:CanSecondaryAttack() return false end
 function SWEP:Reload() end
+
+
+
+function SWEP:DrawWeaponSelection(x, y, wide, tall, alpha)
+	surface.SetDrawColor(color_transparent)
+	surface.SetTextColor(0, 220, 255, alpha)
+	surface.SetFont("creditslogo")
+	local w, h = surface.GetTextSize("c")
+	surface.SetTextPos(x + (wide / 2) - (w / 2), y + (tall / 2) - (h / 2))
+	surface.DrawText("c")
+end
+
+
