@@ -136,6 +136,13 @@ hook.Add("PlayerDisconnected","ms.Ores_AutoHandIn",function(pl)
 	Ores.TradeOresForCoins(pl,true)
 end)
 
+
+hook.Add("ShutDown","ms.Ores_AutoHandIn",function()
+	for _,pl in pairs(player.GetHumans()) do
+		Ores.TradeOresForCoins(pl,true)
+	end
+end)
+
 -- function Ores.GetPlayerOre is in sh_ores.lua
 function Ores.GivePlayerOre(pl,rarity,amount)
 	assert(pl and pl:IsPlayer(),"[Ores] First argument is not a player")
