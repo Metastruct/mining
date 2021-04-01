@@ -3,6 +3,8 @@ include("shared.lua")
 ENT.WeaponPath = "models/weapons/w_pistol.mdl"
 ENT.WeaponDropped = false
 
+language.Add(ENT.ClassName,"???")
+
 util.PrecacheModel(ENT.WeaponPath)
 
 function ENT:Initialize()

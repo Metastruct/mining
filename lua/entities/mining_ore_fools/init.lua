@@ -19,7 +19,7 @@ ENT._shootTable = {
 		util.Effect("MuzzleEffect",eff,true,true)
 
 		if tr.Entity == target then
-			target._hitByOre = true
+			target._hitByOre = self
 		end
 	end,
 	Force = 1,
@@ -108,15 +108,15 @@ function ENT:Think()
 
 	if now < self._shootEnd and target:IsValid() and target:Alive() and target:GetPos():DistToSqr(pos) < 1440000 then	--1200HU
 		if now > self._shootNext then
-			local eyePos = target:EyePos()
+			local targetPos = target:WorldSpaceCenter()
 
 			self._shootTraceTable.start = pos
-			self._shootTraceTable.endpos = eyePos
+			self._shootTraceTable.endpos = targetPos
 			self._shootTraceTable.filter = {self,target}
 
 			if not util.TraceLine(self._shootTraceTable).Hit then
 				self._shootTable.Damage = self:GetRarity()+1
-				self._shootTable.Dir = (eyePos-pos):GetNormalized()
+				self._shootTable.Dir = (targetPos-pos):GetNormalized()
 				self._shootTable.Src = pos
 				self._shootTable.IgnoreEntity = self
 
@@ -132,8 +132,10 @@ function ENT:Think()
 end
 
 hook.Add("PlayerShouldTakeDamage",ENT.ClassName,function(pl,attacker)
-	if pl._hitByOre and pl == attacker then
+	if pl._hitByOre then
+		local ent = pl._hitByOre
 		pl._hitByOre = nil
-		return true
+
+		if pl == attacker or attacker == ent then return true end
 	end
 end)

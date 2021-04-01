@@ -19,6 +19,8 @@ ENT._nextRefresh = 0
 ENT._initialized = false
 ENT._drawn = false
 
+language.Add(ENT.ClassName,"Mining Rock")
+
 local function RandomModelMeshPos(self)
 	local modelMesh = util.GetModelMeshes(self:GetModel())[1]
 	if not modelMesh then
