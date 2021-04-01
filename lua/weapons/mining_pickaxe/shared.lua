@@ -109,6 +109,17 @@ if CLIENT then
 	local spriteWave = Material("particle/particle_noisesphere")
 	local gravityFleck = vector_up*-500
 
+	function SWEP:DrawWeaponSelection(x,y,w,h,alpha)
+		surface.SetDrawColor(color_transparent)
+		surface.SetTextColor(0,220,255,alpha)
+
+		surface.SetFont("creditslogo")
+		local logoW,logoH = surface.GetTextSize("c")
+
+		surface.SetTextPos(x+(w*0.5)-(logoW*0.5),y+(h*0.5)-(logoH*0.5))
+		surface.DrawText("c")
+	end
+
 	function SWEP:CreateFleckEffect(pos,amount)
 		if self.ParticleEmitter and self.ParticleEmitter:IsValid() then
 			self.ParticleEmitter:SetPos(self:GetPos())
@@ -307,16 +318,3 @@ end
 function SWEP:SecondaryAttack() end
 function SWEP:CanSecondaryAttack() return false end
 function SWEP:Reload() end
-
-
-
-function SWEP:DrawWeaponSelection(x, y, wide, tall, alpha)
-	surface.SetDrawColor(color_transparent)
-	surface.SetTextColor(0, 220, 255, alpha)
-	surface.SetFont("creditslogo")
-	local w, h = surface.GetTextSize("c")
-	surface.SetTextPos(x + (wide / 2) - (w / 2), y + (tall / 2) - (h / 2))
-	surface.DrawText("c")
-end
-
-

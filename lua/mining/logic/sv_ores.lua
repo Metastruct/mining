@@ -136,9 +136,8 @@ hook.Add("PlayerDisconnected","ms.Ores_AutoHandIn",function(pl)
 	Ores.TradeOresForCoins(pl,true)
 end)
 
-
 hook.Add("ShutDown","ms.Ores_AutoHandIn",function()
-	for _,pl in pairs(player.GetHumans()) do
+	for _,pl in next,player.GetHumans() do
 		Ores.TradeOresForCoins(pl,true)
 	end
 end)
@@ -170,8 +169,6 @@ function Ores.TakePlayerOre(pl,rarity,amount)
 
 	hook.Run("PlayerLostOre",pl,math.min(amount,current),rarity)
 end
-
-
 
 -- Tutorials
 hook.Add("PlayerReceivedOre","ms.Ores_FirstReceive",function(pl)

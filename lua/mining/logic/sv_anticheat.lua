@@ -1,32 +1,34 @@
-local Tag = 'mineanticheat'
 module("ms", package.seeall)
+local Tag = "mineanticheat"
 local Ores = assert(Ores)
+
+local maxMinerRange = 340*340
 
 local function playerNearMiningNPC(pl)
 	local pos = pl:GetPos()
 
-	for k, npc in ents"lua_npc" do
-		if npc.role == "miner" and npc:GetPos():DistToSqr(pos) < 340 * 340 then return npc end
+	for k,npc in next,ents.FindByClass("lua_npc") do
+		if npc.role == "miner" and npc:GetPos():DistToSqr(pos) < maxMinerRange then return npc end
 	end
 end
 
 local function takeAllOres(pl)
-	for k, v in next, Ores.__R do
-		local n = Ores.GetPlayerOre(pl, k)
+	for k,v in next,Ores.__R do
+		local n = Ores.GetPlayerOre(pl,k)
 		if n <= 0 then continue end
-		Ores.TakePlayerOre(pl, k, n)
+
+		Ores.TakePlayerOre(pl,k,n)
 	end
 end
 
 local function playerHasOres(pl)
-	for k, v in next, Ores.__R do
-		local n = Ores.GetPlayerOre(pl, k)
+	for k,v in next,Ores.__R do
+		local n = Ores.GetPlayerOre(pl,k)
 		if n > 0 then return true end
 	end
 end
 
-FindMetaTable"Player".HasOres = playerHasOres
-
+FindMetaTable("Player").HasOres = playerHasOres
 
 -- Anti-cheat Hooks
 -- Hinder mining bots by setting a cooldown where rocks and ores can't be interacted with, normal players shouldn't notice this
@@ -35,27 +37,33 @@ FindMetaTable"Player".HasOres = playerHasOres
 
 local function applyMiningCooldown(pl)
 	if not pl._receivedOre then return end
-    
+
     -- This forgives if you haven't mined yet
     local secondsSinceLastMineAction = CurTime()-(pl._lastMiningAction or -999999)
     -- if not playerHasOres(pl) then return end -- TODO: Check if exploitable?
 
-    if secondsSinceLastMineAction>60*5 then return end
+    if secondsSinceLastMineAction > 60*5 then return end
 
     -- This forgives once every 8 minutes and warns on the first try
     local secondsSinceLastForgiveCooldown = CurTime()-(pl._miningNoclipForgiveTimer or -999999)
-	if secondsSinceLastForgiveCooldown>60*8 then
+	if secondsSinceLastForgiveCooldown > 60*8 then
 		pl._miningNoclipForgiveTimer = CurTime()
+
 		if not pl._miningNoclipForgiveMsgd then
-			pl._miningNoclipForgiveMsgd=true
-			Ores.SendChatMessage(pl, "WARNING: Noclipping/teleporting prevents mining for a minute!!!")
-			pl:EmitSound'vo/npc/female01/thehacks02.wav'
+			pl._miningNoclipForgiveMsgd = true
+
+			Ores.SendChatMessage(pl,"WARNING: Noclipping/teleporting prevents mining for a minute!")
+			pl:EmitSound("vo/npc/female01/thehacks02.wav")
 		end
-		
+
 		return
 	end
-	
+
 	pl._miningCooldown = CurTime()+45
+end
+
+local function setLastMiningAction(pl)
+	pl._lastMiningAction = CurTime()
 end
 
 hook.Add("PlayerNoClip",Tag,function(pl,enable)
@@ -64,26 +72,16 @@ hook.Add("PlayerNoClip",Tag,function(pl,enable)
 	end
 end)
 
-hook.Add("PlayerDestroyedMiningRock",Tag,function(pl)
-    pl._lastMiningAction=CurTime()
-end)
-hook.Add("PlayerReceivedOre",Tag,function(pl)
-    pl._lastMiningAction=CurTime()
-end)
+hook.Add("PlayerDestroyedMiningRock",Tag,setLastMiningAction)
+hook.Add("PlayerReceivedOre",Tag,setLastMiningAction)
 
 --TODO
-hook.Add("PlayerSoldOre",Tag,function(pl)
-    pl._lastMiningAction=CurTime()
-end)
+hook.Add("PlayerSoldOre",Tag,setLastMiningAction)
 
-
-
-hook.Add("CanPlyGoto", Tag, function(pl)
-	
-
+hook.Add("CanPlyGoto",Tag,function(pl)
     if not pl:IsPlayer() then return end
 	if not pl._receivedOre then return end
-    
+
     applyMiningCooldown(pl)
 
 	if not playerHasOres(pl) then return end
@@ -91,27 +89,25 @@ hook.Add("CanPlyGoto", Tag, function(pl)
 	-- must block trading here before timer, otherwise race condition
 	pl._receivedOre = false
 
-	timer.Create("checkMinigNPC" .. pl:EntIndex(), 0.1, 1, function()
+	timer.Create("ms.Ores_CheckMiningNPC"..pl:EntIndex(),0.1,1,function()
 		pl._receivedOre = true
 		local npc = playerNearMiningNPC(pl)
 
 		if npc then
-			timer.Simple(math.Rand(0.01, 0.1), function()
-				npc:EmitSound')vo/npc/female01/startle01.wav'
+			timer.Simple(math.Rand(0.01,0.1),function()
+				npc:EmitSound("vo/npc/female01/startle01.wav")
 
-				timer.Simple(math.Rand(0.2, 0.5), function()
-					npc:EmitSound")vo/npc/male01/thehacks02.wav"
+				timer.Simple(math.Rand(0.2,0.5),function()
+					npc:EmitSound(")vo/npc/male01/thehacks02.wav")
 				end)
 			end)
 
-			Ores.SendChatMessage(pl, "The merchant was startled by your sudden appearance and refuses to accept your ores at this time")
+			Ores.SendChatMessage(pl,"The merchant was startled by your sudden appearance and refuses to accept your ores at this time...")
 			-- takeAllOres(pl) -- too harsh
 			pl._receivedOre = false
 		end
 	end)
 end)
-
-
 
 hook.Add("CanPlyTeleport",Tag,applyMiningCooldown)
 
