@@ -4,6 +4,11 @@ if CLIENT then
 	-- No need for a cl_mine file yet
 	net.Receive("ms.Ores_ChatMSG",function()
 		local txt = net.ReadString()
+		local importanceLvl = net.ReadUInt(3)
+
+		-- Check if the client wants to see the message
+		if (importanceLvl or 0) < Ores.Settings.ReduceMessages:GetInt() then return end
+
 		chat.AddText(Color(230,130,65)," ♦ [Ores] ",color_white,txt)
 	end)
 

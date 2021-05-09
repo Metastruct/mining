@@ -43,9 +43,23 @@ function Ores.PrintVerbose(...)
 end
 
 util.AddNetworkString("ms.Ores_ChatMSG")
-function Ores.SendChatMessage(pl,txt)
+function Ores.SendChatMessage(pl,importanceLvl,txt)
+	-- Importance Level lets clients determine if they should see the message
+	-- 0 = info (eg. tutorials)
+	-- 1 = warnings (eg. warnings about noclipping)
+	-- 2 = alerts (eg. messages about events)
+
+	if txt then
+		importanceLvl = math.Clamp(importanceLvl,0,7)
+	else
+		-- If txt is missing, assume importanceLvl is txt
+		txt = importanceLvl
+		importanceLvl = 0
+	end
+
 	net.Start("ms.Ores_ChatMSG")
 	net.WriteString(txt)
+	net.WriteUInt(importanceLvl,3)
 	net.Send(pl)
 end
 
@@ -175,6 +189,6 @@ hook.Add("PlayerReceivedOre","ms.Ores_FirstReceive",function(pl)
 	-- _receivedOre will be nil the first time this hook is called for this player
 	if pl._receivedOre then return end
 
-	Ores.SendChatMessage(pl,"You've picked up some ore! Hand it in to the miner at the mine outpost! Be aware - disconnecting while holding ore will turn it into coins for you, but without any bonuses!")
+	Ores.SendChatMessage(pl,0,"You've picked up some ore! Hand it in to the miner at the mine outpost! Be aware - disconnecting while holding ore will turn it into coins for you, but without any bonuses!")
 	Ores.NotifySpecialDay(pl)
 end)

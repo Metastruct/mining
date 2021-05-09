@@ -12,15 +12,6 @@ local function playerNearMiningNPC(pl)
 	end
 end
 
-local function takeAllOres(pl)
-	for k,v in next,Ores.__R do
-		local n = Ores.GetPlayerOre(pl,k)
-		if n <= 0 then continue end
-
-		Ores.TakePlayerOre(pl,k,n)
-	end
-end
-
 local function playerHasOres(pl)
 	for k,v in next,Ores.__R do
 		local n = Ores.GetPlayerOre(pl,k)
@@ -52,7 +43,7 @@ local function applyMiningCooldown(pl)
 		if not pl._miningNoclipForgiveMsgd then
 			pl._miningNoclipForgiveMsgd = true
 
-			Ores.SendChatMessage(pl,"WARNING: Noclipping/teleporting prevents mining for a minute!")
+			Ores.SendChatMessage(pl,1,"WARNING: Noclipping/teleporting prevents mining for a minute!")
 			pl:EmitSound("vo/npc/female01/thehacks02.wav")
 		end
 
@@ -102,8 +93,7 @@ hook.Add("CanPlyGoto",Tag,function(pl)
 				end)
 			end)
 
-			Ores.SendChatMessage(pl,"The merchant was startled by your sudden appearance and refuses to accept your ores at this time...")
-			-- takeAllOres(pl) -- too harsh
+			Ores.SendChatMessage(pl,1,"The merchant was startled by your sudden appearance and refuses to accept your ores at this time...")
 			pl._receivedOre = false
 		end
 	end)
