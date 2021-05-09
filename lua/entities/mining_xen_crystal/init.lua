@@ -114,7 +114,7 @@ function ENT:Use(pl)
 		pl:SetNWFloat(ms.Ores._nwMult,newMult)
 		ms.Ores.SetSavedPlayerData(pl,"mult",newMult)
 
-		ms.Ores.SendChatMessage(pl,("The Xen Crystal's energy was taken - your multiplier is now x%s!"):format(1+newMult))
+		ms.Ores.SendChatMessage(pl,2,("The Xen Crystal's energy was taken - your multiplier is now x%s!"):format(1+newMult))
 	else
 		self:EmitSound("ambient/atmosphere/hole_hit4.wav",70,105)
 	end

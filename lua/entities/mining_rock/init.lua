@@ -121,7 +121,7 @@ function ENT:OnTakeDamage(dmg)
 		dmg:SetDamage(math.floor(dmg:GetDamage()*0.6))
 
 		if ms.Ores.SendChatMessage and (not attacker._miningCrowbarMsgNext or now > attacker._miningCrowbarMsgNext) then
-			ms.Ores.SendChatMessage(attacker,"Psst! You should use the Mining Pickaxe to get the most out of mining! Look in the Weapons tab!")
+			ms.Ores.SendChatMessage(attacker,0,"Psst! You should use the Mining Pickaxe to get the most out of mining! Look in the Weapons tab!")
 			attacker._miningCrowbarMsgNext = now+120
 		end
 	elseif wep:GetClass() == "mining_pickaxe" then
