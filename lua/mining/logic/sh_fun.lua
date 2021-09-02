@@ -116,7 +116,7 @@ local function spawnHim(pos,ang)
 			if activate then
 				self._t = time
 
-				EmitSound("mining/cave.mp3",gPos,-1,CHAN_AUTO,0.5,75,0,100)
+				EmitSound("mining/cave.mp3",gPos,-1,CHAN_AUTO,0.4,75,0,100)
 			end
 		end
 
@@ -150,7 +150,7 @@ hook.Add("PlayerEnteredZone",tag,function(pl,zone)
 	if zone != "cave" then return end
 
 	timer.Create(timerId,15,0,function()
-		if math.random() <= 0.005 or Ores._himm then
+		if math.random() <= 0.01 or Ores._himm then
 			me = me or LocalPlayer()
 			spawnHim(getBehindPlayer())
 
