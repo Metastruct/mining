@@ -102,26 +102,56 @@ end)
 hook.Add("CanPlyTeleport",Tag,applyMiningCooldown)
 
 util.OnInitialize(function()
-	if istable(_G.SF) then
-		local processorClass = "starfall_processor"
+	local function addToChipsOwned(pl,ent)
+		pl._miningChipsOwned = pl._miningChipsOwned or {}
+		pl._miningChipsOwned[ent] = true
 
-		hook.Add("PlayerLoadedStarfall","ms.Ores_SFChecks",function(pl,ent,mainFile,allFiles)
-			pl._miningBlocked = true
+		pl._miningBlocked = true
+	end
+
+	local chipClasses = {}
+
+	if istable(_G.E2Lib) then
+		local registerCallback = _G.E2Lib.registerCallback or registerCallback
+
+		if registerCallback then
+			registerCallback("construct",function(data)
+				if data.player and data.player:IsValid() then
+					addToChipsOwned(data.player,data.entity)
+				end
+			end)
+
+			chipClasses.gmod_wire_expression2 = true
+		end
+	end
+
+	if istable(_G.SF) then
+		hook.Add("PlayerLoadedStarfall","ms.Ores_ChipChecks",function(pl,ent,mainFile,allFiles)
+			addToChipsOwned(pl,ent)
 		end)
 
-		hook.Add("EntityRemoved","ms.Ores_SFChecks",function(ent)
-			if ent:GetClass() != processorClass then return end
+		chipClasses.starfall_processor = true
+	end
 
-			local pl = ent.owner or (ent.CPPIGetOwner and ent:CPPIGetOwner())
-			if pl and pl:IsValid() and pl._miningBlocked then
-				-- Check the player's other Starfall processors, only remove the _miningBlocked flag if they're all clear
-				for k,v in next,ents.FindByClass(processorClass) do
-					if (v.owner or (v.CPPIGetOwner and v:CPPIGetOwner())) == pl then return end
-				end
+	if next(chipClasses) then
+		hook.Add("EntityRemoved","ms.Ores_ChipChecks",function(ent)
+			if not chipClasses[ent:GetClass()] then return end
 
+			local pl = ent.owner or ent.player or (ent.CPPIGetOwner and ent:CPPIGetOwner())
+
+			if pl and pl:IsValid() and pl._miningChipsOwned then
+				pl._miningChipsOwned[ent] = nil
+
+				-- If the player still has chips spawned, don't remove the _miningBlocked flag yet
+				if next(pl._miningChipsOwned) then return end
+
+				pl._miningChipsOwned = nil
 				pl._miningBlocked = nil
 				pl._miningCooldown = CurTime()+30
 			end
 		end)
+	else
+		addToChipsOwned = nil
+		chipClasses = nil
 	end
 end)
