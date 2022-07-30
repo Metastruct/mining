@@ -10,16 +10,16 @@ Ores.__PStats = {
 		VarBase = 0.6,
 		VarStep = -0.0096,
 		VarFormat = "%s secs",
-		CostStep = 750
+		CostStep = 500
 	},
 	{
-		Name = "Range", -- 1.4 * 50 (max: 135)
+		Name = "Range", -- 1.5 * 50 (max: 140)
 		Help = "How far the pickaxe can reach when swung.",
 		VarName = "Range",
 		VarBase = 65,
-		VarStep = 1.4,
+		VarStep = 1.5,
 		VarFormat = "%s hu",
-		CostStep = 500
+		CostStep = 350
 	},
 	{
 		Name = "Bonus Ore Chance", -- 0.045 * 50 (max: 2.25)
@@ -28,7 +28,7 @@ Ores.__PStats = {
 		VarBase = 0,
 		VarStep = 0.045,
 		VarFormat = "%p%%",
-		CostStep = 1400
+		CostStep = 950
 	},
 	{
 		Name = "Precise Cut", -- 0.015 * 50 (max: 0.75)
@@ -37,7 +37,7 @@ Ores.__PStats = {
 		VarBase = 0,
 		VarStep = 0.015,
 		VarFormat = "%p%%",
-		CostStep = 1200
+		CostStep = 800
 	},
 	{
 		Name = "Magic Find", -- 0.005 * 50 (max: 0.25)
@@ -46,7 +46,7 @@ Ores.__PStats = {
 		VarBase = 0,
 		VarStep = 0.005,
 		VarFormat = "%p%%",
-		CostStep = 1275
+		CostStep = 850
 	},
 	{
 		Name = "Shockwave", -- 1.9 * 50 (max: 95)
@@ -55,7 +55,7 @@ Ores.__PStats = {
 		VarBase = 0,
 		VarStep = 1.9,
 		VarFormat = "%s hu",
-		CostStep = 1100
+		CostStep = 750
 	}
 }
 

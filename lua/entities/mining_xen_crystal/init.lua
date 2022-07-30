@@ -109,7 +109,7 @@ function ENT:Use(pl)
 		self:EmitSound("physics/glass/glass_cup_break1.wav",70,math.random(75,90),0.5)
 		SafeRemoveEntity(self)
 
-		local newMult = math.Round(pl:GetNWFloat(ms.Ores._nwMult,0)+0.025,3)
+		local newMult = math.Round(pl:GetNWFloat(ms.Ores._nwMult,0)+0.02,3)
 
 		pl:SetNWFloat(ms.Ores._nwMult,newMult)
 		ms.Ores.SetSavedPlayerData(pl,"mult",newMult)
