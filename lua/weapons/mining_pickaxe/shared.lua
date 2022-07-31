@@ -300,7 +300,9 @@ function SWEP:PrimaryAttack()
 				end
 
 				-- Coal spawn
-				if SERVER and math.random() <= 0.00075 then
+				if SERVER
+				and tr.MatType == MAT_CONCRETE
+				and math.random() <= 0.00075 then
 					local ore = ents.Create("mining_ore")
 					ore:SetRarity(0)
 					ore:AllowGracePeriod(owner,5)
