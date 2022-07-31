@@ -149,7 +149,7 @@ local timerId = tag.."_Him"
 hook.Add("PlayerEnteredZone",tag,function(pl,zone)
 	if zone != "cave" then return end
 
-	timer.Create(timerId,15,0,function()
+	timer.Create(timerId,30,0,function()
 		if math.random() <= 0.01 or Ores._himm then
 			me = me or LocalPlayer()
 			spawnHim(getBehindPlayer())
