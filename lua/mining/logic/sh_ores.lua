@@ -32,6 +32,7 @@ end
 local function AddOre(
 		id,
 		name,
+		suffix,
 		health,
 		worth,
 		physicalCol,
@@ -45,6 +46,7 @@ local function AddOre(
 		hidden)
 	Ores.__R[id] = {
 		Name = name,
+		Suffix = suffix, -- Placed after the ore's name on the HUD
 		Health = health,
 		Worth = worth,
 		PhysicalColor = physicalCol,
@@ -65,7 +67,21 @@ Ores.__R = {}
 
 -- Ore Definition
 AddOre(0,
+	"Coal",
+	"",
+	10,
+	5,
+	Color(25,25,25),
+	Color(75,75,75),
+	2,
+	nil,
+	nil,nil,nil,nil,
+	true
+)
+
+AddOre(1,
 	"Copper",
+	nil,
 	40,
 	25,
 	Color(255,77,0),
@@ -74,8 +90,9 @@ AddOre(0,
 	1
 )
 
-AddOre(1,
+AddOre(2,
 	"Silver",
+	nil,
 	65,
 	75,
 	Color(255,255,255),
@@ -84,8 +101,9 @@ AddOre(1,
 	2
 )
 
-AddOre(2,
+AddOre(3,
 	"Gold",
+	nil,
 	90,
 	300,
 	Color(255,255,0),
@@ -95,8 +113,9 @@ AddOre(2,
 	"ambient/levels/labs/machine_ring_resonance_loop1.wav",30,0.6,75
 )
 
-AddOre(3,
+AddOre(4,
 	"Platinum",
+	nil,
 	115,
 	500,
 	Color(153,255,237),

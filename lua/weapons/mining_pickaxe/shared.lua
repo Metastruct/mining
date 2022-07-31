@@ -298,6 +298,27 @@ function SWEP:PrimaryAttack()
 						end
 					end
 				end
+
+				-- Coal spawn
+				if SERVER and math.random() <= 0.00075 then
+					local ore = ents.Create("mining_ore")
+					ore:SetRarity(0)
+					ore:AllowGracePeriod(owner,5)
+					ore:SetPos(tr.HitPos+(tr.HitNormal*4))
+					ore:SetAngles(AngleRand())
+
+					ore:Spawn()
+
+					local ophys = ore:GetPhysicsObject()
+					if ophys:IsValid() then
+						local vec = VectorRand()*math.random(64,128)
+						vec.z = math.abs(vec.z)
+
+						ophys:AddVelocity(vec)
+					end
+
+					ore:EmitSound(")physics/surfaces/sand_impact_bullet"..math.random(1,4)..".wav",70,math.random(58,66))
+				end
 			end
 		end
 	else
