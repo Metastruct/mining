@@ -29,28 +29,29 @@ FindMetaTable("Player").HasOres = playerHasOres
 local function applyMiningCooldown(pl)
 	if not pl._receivedOre then return end
 
+	local now = CurTime()
+
     -- This forgives if you haven't mined yet
-    local secondsSinceLastMineAction = CurTime()-(pl._lastMiningAction or -999999)
-    -- if not playerHasOres(pl) then return end -- TODO: Check if exploitable?
+    local secondsSinceLastMineAction = now-(pl._lastMiningAction or -999999)
 
     if secondsSinceLastMineAction > 60*5 then return end
 
     -- This forgives once every 8 minutes and warns on the first try
-    local secondsSinceLastForgiveCooldown = CurTime()-(pl._miningNoclipForgiveTimer or -999999)
+    local secondsSinceLastForgiveCooldown = now-(pl._miningNoclipForgiveTimer or -999999)
 	if secondsSinceLastForgiveCooldown > 60*8 then
-		pl._miningNoclipForgiveTimer = CurTime()
+		pl._miningNoclipForgiveTimer = now
 
 		if not pl._miningNoclipForgiveMsgd then
 			pl._miningNoclipForgiveMsgd = true
 
-			Ores.SendChatMessage(pl,1,"WARNING: Noclipping/teleporting prevents mining for a minute!")
+			Ores.SendChatMessage(pl,1,"WARNING: Noclipping/teleporting prevents mining for a while!")
 			pl:EmitSound("vo/npc/female01/thehacks02.wav")
 		end
 
 		return
 	end
 
-	pl._miningCooldown = CurTime()+45
+	pl._miningCooldown = now+20
 end
 
 local function setLastMiningAction(pl)
