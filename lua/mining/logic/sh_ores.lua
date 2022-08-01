@@ -87,7 +87,7 @@ AddOre(1,
 	Color(255,77,0),
 	Color(225,100,40),
 	0.7,
-	1
+	2
 )
 
 AddOre(2,
@@ -98,7 +98,7 @@ AddOre(2,
 	Color(255,255,255),
 	Color(200,235,235),
 	0.5,
-	2
+	3
 )
 
 AddOre(3,
@@ -109,7 +109,7 @@ AddOre(3,
 	Color(255,255,0),
 	Color(225,225,0),
 	0.3,
-	3,
+	4,
 	"ambient/levels/labs/machine_ring_resonance_loop1.wav",30,0.6,75
 )
 
