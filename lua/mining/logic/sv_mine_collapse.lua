@@ -199,11 +199,15 @@ local COLLAPSE_CHANCE = 10
 local OK_CLASSES = { mining_rock = true, mining_xen_crystal = true }
 hook.Add("OnEntityCreated", "mining_collapse", function(ent)
 	if not OK_CLASSES[ent:GetClass()] then return end
-	if ent:GetClass() == "mining_rock" and not ent.OriginalRock then return end
 
-	if math.random(0, 100) <= COLLAPSE_CHANCE then
-		ent.MiningIncident = true
-	end
+	-- have to wait until the next frame
+	timer.Simple(0, function()
+		if ent:GetClass() == "mining_rock" and not ent.OriginalRock then return end
+
+		if math.random(0, 100) <= COLLAPSE_CHANCE then
+			ent.MiningIncident = true
+		end
+	end)
 end)
 
 hook.Add("EntityTakeDamage", "mining_collapse", function(ent)
