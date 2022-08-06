@@ -2,20 +2,35 @@
 -- remove if you don't like, this is mostly a test
 
 local ROCK_MDLS = {
-	"models/props_canal/rock_riverbed01a.mdl",
-	"models/props_canal/rock_riverbed01b.mdl",
-	"models/props_canal/rock_riverbed01c.mdl",
-	"models/props_canal/rock_riverbed01d.mdl",
+	"models/props_wasteland/rockcliff01b.mdl",
+	"models/props_wasteland/rockcliff01c.mdl",
+	"models/props_wasteland/rockcliff01e.mdl",
+	"models/props_wasteland/rockcliff01f.mdl",
+	"models/props_wasteland/rockcliff01g.mdl",
+	"models/props_wasteland/rockcliff01j.mdl",
+	"models/props_wasteland/rockcliff01k.mdl",
+	"models/props_wasteland/rockcliff05a.mdl",
+}
+
+local FALLING_ROCKS_MDLS = {
+	"models/props_debris/concrete_chunk04a.mdl",
+	"models/props_debris/concrete_chunk05g.mdl",
+	"models/props_debris/concrete_chunk03a.mdl",
+	"models/props_debris/concrete_spawnchunk001b.mdl",
+	"models/props_debris/concrete_spawnchunk001a.mdl",
 }
 
 local ROCK_MAT = "models/props_wasteland/rockcliff02c"
 local function spawnRockDebris(rocks, pos, ang)
 	local rock = ents.Create("prop_physics")
-	rock:SetPos(pos)
+	rock:SetPos(pos + VectorRand(-50, 50))
 	rock:SetModel(table.Random(ROCK_MDLS))
+	rock:SetModelScale(math.random(0.5, 1))
 	rock:SetMaterial(ROCK_MAT)
 	rock:SetAngles(ang)
 	rock:Spawn()
+	rock:Activate()
+
 	rock.ms_notouch = true
 
 	local phys = rock:GetPhysicsObject()
@@ -27,7 +42,7 @@ local function spawnRockDebris(rocks, pos, ang)
 end
 
 local triggerNames = { "cave1", "cave2", "caveshaft", "cavebunker", "cavesafespot", "epicminecoolthing" }
-local function CaveRecipientFilter()
+local function caveRecipientFilter()
 	if not ms or not ms.GetTrigger then return {} end
 
 	local filter = RecipientFilter()
@@ -44,7 +59,7 @@ local function CaveRecipientFilter()
 end
 
 local function playSoundForDuration(sound_path, delay)
-	local snd = CreateSound(game.GetWorld(), sound_path, CaveRecipientFilter())
+	local snd = CreateSound(game.GetWorld(), sound_path, caveRecipientFilter())
 	snd:Stop()
 	snd:SetDSP(1)
 	snd:ChangeVolume(2, 0.1)
@@ -56,14 +71,65 @@ local function playSoundForDuration(sound_path, delay)
 	end)
 end
 
+local MAX_DIST = 1000
 local RUMBLE_DURATION = 5
-local function mineCollapse(pos, delay)
+local TUNNEL_RADIUS = 150
+local function mineCollapse(ply, delay)
+	local rocks = {}
+	local pos = ply:GetPos()
+
 	playSoundForDuration("ambient/atmosphere/terrain_rumble1.wav", RUMBLE_DURATION)
 	playSoundForDuration("ambience/rocketrumble1.wav", RUMBLE_DURATION)
 
 	util.ScreenShake(pos, 20, 240, RUMBLE_DURATION * 2, 2000)
 
+	local ceiling_pos = util.TraceLine({ start = pos, endpos = pos + Vector(0, 0, MAX_DIST), filter = function() return false end }).HitPos
+	timer.Create("mining_collapse_rumble", 0.25, 0, function()
+		for _ = 1, math.random(2, 6) do
+			local fallingRockPos = pos + VectorRand(-TUNNEL_RADIUS, TUNNEL_RADIUS)
+			fallingRockPos.z = ceiling_pos.z - 10 -- extra offset to spawn the rocks freely
+
+			if not util.IsInWorld(fallingRockPos) then continue end
+
+			local fallingRock = ents.Create("prop_physics")
+			fallingRock:SetPos(fallingRockPos)
+			fallingRock:SetModel(table.Random(FALLING_ROCKS_MDLS))
+			fallingRock:SetModelScale(1, 4)
+			fallingRock:SetMaterial(ROCK_MAT)
+			fallingRock:Spawn()
+
+			local phys = fallingRock:GetPhysicsObject()
+			if IsValid(phys) then
+				phys:SetVelocity(VectorRand(-1, 1) * 50)
+			end
+
+			if math.random(0, 100) <= 10 then
+				fallingRock:SetNoDraw(true)
+
+				local miningRock = ents.Create("mining_rock")
+				miningRock:SetPos(fallingRock:GetPos())
+				miningRock:SetAngles(fallingRock:GetAngles())
+				miningRock:SetRarity(math.random(0, 100) <= 70 and 0 or 1)
+				miningRock:SetSize(math.random() < 0.33 and 1 or 2)
+				miningRock:Spawn()
+				miningRock:SetParent(fallingRock)
+
+				timer.Simple(2, function()
+					if not IsValid(miningRock) then return end
+
+					miningRock:SetParent(NULL)
+					miningRock:DropToFloor()
+					SafeRemoveEntity(fallingRock)
+				end)
+			else
+				SafeRemoveEntityDelayed(fallingRock, 2)
+			end
+		end
+	end)
+
 	timer.Simple(RUMBLE_DURATION, function()
+		timer.Remove("mining_collapse_rumble")
+
 		playSoundForDuration("ambient/materials/cartrap_explode_impact1.wav", 5)
 		playSoundForDuration("physics/concrete/boulder_impact_hard" .. math.random(1, 4) .. ".wav", 5)
 
@@ -71,25 +137,13 @@ local function mineCollapse(pos, delay)
 		effectData:SetOrigin(pos)
 		util.Effect("litesmoke", effectData, true, true)
 
-		local rocks = {}
 		for _ = 1, math.random(5, 10) do
 			local debrisAng = AngleRand(-45, 45)
 			spawnRockDebris(rocks, pos, debrisAng)
-			spawnRockDebris(rocks, pos, -debrisAng)
+			--spawnRockDebris(rocks, pos, -debrisAng)
 		end
 
-		for _ = 1, math.random(0, 4) do
-			local rockPos = pos + VectorRand(-50, 50)
-			local miningRock = ents.Create("mining_rock")
-			miningRock:SetPos(rockPos)
-			miningRock:SetAngles(AngleRand())
-			miningRock:SetRarity(math.random(0, 100) <= 70 and 0 or 1)
-			miningRock:Spawn()
-
-			table.insert(rocks, miningRock)
-		end
-
-		for _, ent in ipairs(ents.FindInSphere(pos, 200)) do
+		for _, ent in ipairs(ents.FindInSphere(pos, 300)) do
 			if ent:IsPlayer() and ent:Alive() then
 				local dmg = DamageInfo()
 				dmg:SetInflictor(game.GetWorld())
@@ -118,38 +172,6 @@ local function mineCollapse(pos, delay)
 	end)
 end
 
-local MAX_DIST = 1000
-local TUNNEL_HEIGHT = 150
-local function getCenterOfTunnel(ply, ent)
-	local pos = ent:GetPos()
-	if not IsValid(ply) then return pos end
-
-	local dir = (ply:GetPos() - pos):GetNormalized()
-	dir.z = 0
-
-	local horizontalTrace = util.TraceLine({
-		start = pos,
-		endpos = pos +  dir * MAX_DIST,
-		filter = function() return false end
-	})
-
-	if not horizontalTrace.Hit then return ent:GetPos() end
-
-	local horizontalCenter = pos + dir * (horizontalTrace.HitPos:Distance(pos) / 2)
-	local verticalTrace = util.TraceLine({
-		start = horizontalCenter,
-		endpos = horizontalCenter + Vector(0, 0, MAX_DIST),
-		filter = function() return false end
-	})
-
-	if not verticalTrace.Hit then return horizontalCenter end
-
-	local verticalDist = (verticalTrace.HitPos:Distance(horizontalCenter) / 2)
-	if verticalDist > TUNNEL_HEIGHT then return horizontalCenter end
-
-	return horizontalCenter + (Vector(0, 0, 1) * verticalDist)
-end
-
 local OK_CLASSES = { mining_rock = true, mining_xen_crystal = true }
 hook.Add("OnEntityCreated", "mining_collapse", function(ent)
 	if not OK_CLASSES[ent:GetClass()] then return end
@@ -160,11 +182,18 @@ hook.Add("OnEntityCreated", "mining_collapse", function(ent)
 	end
 end)
 
+hook.Add("EntityTakeDamage", "mining_collapse", function(ent)
+	if not ent.MiningIncident then return end
+	if not ent.OriginalRock then return end
+
+	playSoundForDuration("ambient/atmosphere/terrain_rumble1.wav", 2)
+	playSoundForDuration("ambience/rocketrumble1.wav", 2)
+end)
+
 local COLLAPSE_DURATION = 5 * 60
 hook.Add("PlayerDestroyedMiningRock", "mining_collapse", function(ply, rock)
 	if not rock.MiningIncident then return end
 	if not rock.OriginalRock then return end
 
-	local center = getCenterOfTunnel(ply, rock)
-	mineCollapse(center, COLLAPSE_DURATION)
+	mineCollapse(ply, COLLAPSE_DURATION)
 end)
