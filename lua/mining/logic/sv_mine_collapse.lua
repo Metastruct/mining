@@ -25,7 +25,7 @@ local function spawnRockDebris(rocks, pos, ang)
 	local rock = ents.Create("prop_physics")
 	rock:SetPos(pos + VectorRand(-50, 50))
 	rock:SetModel(table.Random(ROCK_MDLS))
-	rock:SetModelScale(math.random(0.5, 1))
+	rock:SetModelScale(math.random(0.5, 2))
 	rock:SetMaterial(ROCK_MAT)
 	rock:SetAngles(ang)
 	rock:Spawn()
@@ -62,7 +62,7 @@ local function playSoundForDuration(sound_path, delay)
 	local snd = CreateSound(game.GetWorld(), sound_path, caveRecipientFilter())
 	snd:Stop()
 	snd:SetDSP(1)
-	snd:ChangeVolume(2, 0.1)
+	snd:ChangeVolume(2)
 	snd:SetSoundLevel(0) -- play everywhere
 	snd:Play()
 
@@ -74,6 +74,7 @@ end
 local MAX_DIST = 1000
 local RUMBLE_DURATION = 5
 local TUNNEL_RADIUS = 150
+local COAL_CHANCE = 70
 local function mineCollapse(ply, delay)
 	local rocks = {}
 	local pos = ply:GetPos()
@@ -83,12 +84,12 @@ local function mineCollapse(ply, delay)
 
 	util.ScreenShake(pos, 20, 240, RUMBLE_DURATION * 2, 2000)
 
-	local ceiling_pos = util.TraceLine({ start = pos, endpos = pos + Vector(0, 0, MAX_DIST), filter = function() return false end }).HitPos
+	local ceilingPos = util.TraceLine({ start = pos, endpos = pos + Vector(0, 0, MAX_DIST), filter = function() return false end }).HitPos
 	timer.Create("mining_collapse_rumble", 0.25, 0, function()
 		local trigger = ms and ms.GetTrigger and ms.GetTrigger("cave1")
 		for _ = 1, math.random(2, 6) do
 			local fallingRockPos = pos + VectorRand(-TUNNEL_RADIUS, TUNNEL_RADIUS)
-			fallingRockPos.z = ceiling_pos.z - 10 -- extra offset to spawn the rocks freely
+			fallingRockPos.z = ceilingPos.z - 10 -- extra offset to spawn the rocks freely
 
 			if not util.IsInWorld(fallingRockPos) then continue end
 
@@ -110,7 +111,7 @@ local function mineCollapse(ply, delay)
 				local miningRock = ents.Create("mining_rock")
 				miningRock:SetPos(fallingRock:GetPos())
 				miningRock:SetAngles(fallingRock:GetAngles())
-				miningRock:SetRarity(math.random(0, 100) <= 70 and 0 or 1)
+				miningRock:SetRarity(math.random(0, 100) <= COAL_CHANCE and 0 or 1)
 				miningRock:SetSize(math.random() < 0.33 and 1 or 2)
 				miningRock:Spawn()
 				miningRock:SetParent(fallingRock)
@@ -120,13 +121,22 @@ local function mineCollapse(ply, delay)
 
 					miningRock:SetParent(NULL)
 					miningRock:DropToFloor()
+
+					local physMiningRock = miningRock:GetPhysicsObject()
+					if IsValid(physMiningRock) then
+						physMiningRock:EnableMotion(true)
+						physMiningRock:Wake()
+					end
+
 					SafeRemoveEntity(fallingRock)
 
-					local tr = util.TraceLine({ start = miningRock:GetPos(), endpos = miningRock:GetPos() - Vector(0,0,100), filter = miningRock })
+					-- check if we're not under the mines
+					local tr = util.TraceLine({ start = miningRock:GetPos(), endpos = miningRock:GetPos() - Vector(0, 0, 128), filter = miningRock })
 					if tr.HitWorld and tr.HitTexture:match("^TOOLS%/") then
 						SafeRemoveEntity(miningRock)
 					end
 
+					-- check if we're not stuck in the ceiling
 					if IsValid(trigger) then
 						local max_z = trigger:GetPos().z + trigger:OBBMaxs().z
 						if miningRock:GetPos().z > max_z then
@@ -185,12 +195,13 @@ local function mineCollapse(ply, delay)
 	end)
 end
 
+local COLLAPSE_CHANCE = 10
 local OK_CLASSES = { mining_rock = true, mining_xen_crystal = true }
 hook.Add("OnEntityCreated", "mining_collapse", function(ent)
 	if not OK_CLASSES[ent:GetClass()] then return end
 	if ent:GetClass() == "mining_rock" and not ent.OriginalRock then return end
 
-	if math.random(0, 100) <= 5 then
+	if math.random(0, 100) <= COLLAPSE_CHANCE then
 		ent.MiningIncident = true
 	end
 end)
@@ -199,14 +210,23 @@ hook.Add("EntityTakeDamage", "mining_collapse", function(ent)
 	if not ent.MiningIncident then return end
 	if not ent.OriginalRock then return end
 
-	playSoundForDuration("ambient/atmosphere/terrain_rumble1.wav", 2)
-	playSoundForDuration("ambience/rocketrumble1.wav", 2)
+	playSoundForDuration("ambient/atmosphere/terrain_rumble1.wav", 4)
+	playSoundForDuration("ambience/rocketrumble1.wav", 4)
 end)
 
-local COLLAPSE_DURATION = 5 * 60
+local COLLAPSE_DURATION = 3 * 60
 hook.Add("PlayerDestroyedMiningRock", "mining_collapse", function(ply, rock)
 	if not rock.MiningIncident then return end
 	if not rock.OriginalRock then return end
 
 	mineCollapse(ply, COLLAPSE_DURATION)
+end)
+
+-- after the core goes off it weakens the cave structures
+hook.Add("MGNCoreExploded", "mining_collapse", function()
+	for _, rock in ipairs(ents.FindByClass("mining_rock")) do
+		if not rock.OriginalRock then continue end
+
+		rock.MiningIncident = true
+	end
 end)
