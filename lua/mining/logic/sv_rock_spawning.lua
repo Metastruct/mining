@@ -91,6 +91,7 @@ function Ores.GenerateMiningRock(startPos,rarity)
 	local ent = ents.Create("mining_rock")
 	ent:SetPos(t.HitPos+(t.HitNormal*10))
 	ent:SetAngles(AngleRand())
+	ent.OriginalRock = true
 
 	local rand = math.random()
 	ent:SetSize(rand < 0.33 and 1 or 2)
