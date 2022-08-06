@@ -85,6 +85,7 @@ local function mineCollapse(ply, delay)
 
 	local ceiling_pos = util.TraceLine({ start = pos, endpos = pos + Vector(0, 0, MAX_DIST), filter = function() return false end }).HitPos
 	timer.Create("mining_collapse_rumble", 0.25, 0, function()
+		local trigger = ms and ms.GetTrigger and ms.GetTrigger("cave1")
 		for _ = 1, math.random(2, 6) do
 			local fallingRockPos = pos + VectorRand(-TUNNEL_RADIUS, TUNNEL_RADIUS)
 			fallingRockPos.z = ceiling_pos.z - 10 -- extra offset to spawn the rocks freely
@@ -120,6 +121,18 @@ local function mineCollapse(ply, delay)
 					miningRock:SetParent(NULL)
 					miningRock:DropToFloor()
 					SafeRemoveEntity(fallingRock)
+
+					local tr = util.TraceLine({ start = miningRock:GetPos(), endpos = miningRock:GetPos() - Vector(0,0,100), filter = miningRock })
+					if tr.HitWorld and tr.HitTexture:match("^TOOLS%/") then
+						SafeRemoveEntity(miningRock)
+					end
+
+					if IsValid(trigger) then
+						local max_z = trigger:GetPos().z + trigger:OBBMaxs().z
+						if miningRock:GetPos().z > max_z then
+							SafeRemoveEntity(miningRock)
+						end
+					end
 				end)
 			else
 				SafeRemoveEntityDelayed(fallingRock, 2)
