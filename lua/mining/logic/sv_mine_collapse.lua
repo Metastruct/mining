@@ -195,7 +195,7 @@ local function mineCollapse(ply, delay)
 	end)
 end
 
-local COLLAPSE_CHANCE = 10
+local COLLAPSE_CHANCE = 5
 local OK_CLASSES = { mining_rock = true, mining_xen_crystal = true }
 hook.Add("OnEntityCreated", "mining_collapse", function(ent)
 	if not OK_CLASSES[ent:GetClass()] then return end
