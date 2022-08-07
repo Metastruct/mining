@@ -57,7 +57,9 @@ local function spawnFallingRockDebris(pos)
 
 	local phys = fallingRock:GetPhysicsObject()
 	if IsValid(phys) then
-		phys:SetVelocity(VectorRand(-1, 1) * 50)
+		local vel = VectorRand(-1, 1) * 100
+		phys:SetVelocity(vel)
+		phys:SetAngleVelocity(vel)
 	end
 
 	if math.random(0, 100) <= 10 then
@@ -189,6 +191,8 @@ local function mineCollapse(ply, delay)
 						ent:KillSilent()
 					end
 				end)
+
+				ent.KilledInMiningIncident = true
 			end
 		end
 
@@ -212,6 +216,19 @@ hook.Add("OnEntityCreated", "mining_collapse", function(ent)
 			ent.MiningIncident = true
 		end
 	end)
+end)
+
+hook.Add("PlayerSpawn", "mining_collapse", function(ply)
+	if not ply.KilledInMiningIncident then return end
+
+	if landmark and landmark.get then
+		local cave_pos = landmark.get("land_caves")
+		if cave_pos then
+			ply:SetPos(cave_pos)
+		end
+	end
+	
+	ply.KilledInMiningIncident = nil
 end)
 
 hook.Add("EntityTakeDamage", "mining_collapse", function(ent)
