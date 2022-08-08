@@ -228,6 +228,7 @@ hook.Add("OnEntityCreated", "mining_collapse", function(ent)
 
 		if math.random(0, 100) <= COLLAPSE_CHANCE then
 			ent.MiningIncident = true
+			ent.PreventSplit = true
 		end
 	end)
 end)
