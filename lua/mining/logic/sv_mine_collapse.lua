@@ -26,6 +26,7 @@ local TUNNEL_RADIUS = 150
 local COLLAPSE_CHANCE = 5
 local OK_CLASSES = { mining_rock = true, mining_xen_crystal = true }
 local COLLAPSE_DURATION = 3 * 60
+local COLLAPSE_DMG_RADIUS = 400
 
 local function spawnRockDebris(rocks, pos, ang)
 	local rock = ents.Create("prop_physics")
@@ -36,6 +37,7 @@ local function spawnRockDebris(rocks, pos, ang)
 	rock:SetAngles(ang)
 	rock:Spawn()
 	rock:Activate()
+	rock:PhysWake()
 
 	rock.ms_notouch = true
 
@@ -45,6 +47,44 @@ local function spawnRockDebris(rocks, pos, ang)
 	end
 
 	table.insert(rocks, rock)
+end
+
+local function checkExistence(fallingRock, miningRock, originalPos, checkOffset)
+	if not IsValid(miningRock) then return end
+
+	if IsValid(fallingRock) then
+		miningRock:SetParent(NULL)
+		miningRock:DropToFloor()
+
+		local physMiningRock = miningRock:GetPhysicsObject()
+		if IsValid(physMiningRock) then
+			physMiningRock:EnableMotion(true)
+			physMiningRock:Wake()
+		end
+
+		SafeRemoveEntity(fallingRock)
+	end
+
+	-- check if we're not under/above the mines
+	local trDown = util.TraceLine({ start = miningRock:GetPos(), endpos = miningRock:GetPos() - Vector(0, 0, MAX_DIST), filter = miningRock })
+	local trUp = util.TraceLine({ start = miningRock:GetPos(), endpos = miningRock:GetPos() + Vector(0, 0, MAX_DIST), filter = miningRock })
+	if (trDown.HitWorld and trDown.HitTexture:match("^TOOLS%/")) or (trUp.HitWorld and trUp.HitTexture:match("^TOOLS%/")) then
+		SafeRemoveEntity(miningRock)
+		return
+	end
+
+	-- check if we're not stuck in the ceiling
+	local trigger = ms and ms.GetTrigger and ms.GetTrigger("cave1")
+	if IsValid(trigger) then
+		local max_z = trigger:GetPos().z + trigger:OBBMaxs().z
+		if miningRock:GetPos().z > max_z then
+			SafeRemoveEntity(miningRock)
+			return
+		end
+	end
+
+	-- remove after a while
+	SafeRemoveEntityDelayed(miningRock, COLLAPSE_DURATION * 2)
 end
 
 local function spawnFallingRockDebris(pos, originalPos, checkOffset)
@@ -60,11 +100,10 @@ local function spawnFallingRockDebris(pos, originalPos, checkOffset)
 		local vel = VectorRand(-1, 1) * 100
 		phys:SetVelocity(vel)
 		phys:SetAngleVelocity(vel)
+		phys:Wake()
 	end
 
 	if math.random(0, 100) <= 10 then
-		fallingRock:SetNoDraw(true)
-
 		local miningRock = ents.Create("mining_rock")
 		miningRock:SetPos(fallingRock:GetPos())
 		miningRock:SetAngles(fallingRock:GetAngles())
@@ -73,47 +112,8 @@ local function spawnFallingRockDebris(pos, originalPos, checkOffset)
 		miningRock:Spawn()
 		miningRock:SetParent(fallingRock)
 
-		timer.Simple(2, function()
-			if not IsValid(miningRock) then return end
-
-			miningRock:SetParent(NULL)
-			miningRock:DropToFloor()
-
-			local physMiningRock = miningRock:GetPhysicsObject()
-			if IsValid(physMiningRock) then
-				physMiningRock:EnableMotion(true)
-				physMiningRock:Wake()
-			end
-
-			SafeRemoveEntity(fallingRock)
-
-			-- check if we're not under/above the mines
-			local trDown = util.TraceLine({ start = miningRock:GetPos(), endpos = miningRock:GetPos() - Vector(0, 0, MAX_DIST), filter = miningRock })
-			local trUp = util.TraceLine({ start = miningRock:GetPos(), endpos = miningRock:GetPos() + Vector(0, 0, MAX_DIST), filter = miningRock })
-			if (trDown.HitWorld and trDown.HitTexture:match("^TOOLS%/")) or (trUp.HitWorld and trUp.HitTexture:match("^TOOLS%/")) then
-				SafeRemoveEntity(miningRock)
-				return
-			end
-
-			-- check if we're not stuck in the ceiling
-			local trigger = ms and ms.GetTrigger and ms.GetTrigger("cave1")
-			if IsValid(trigger) then
-				local max_z = trigger:GetPos().z + trigger:OBBMaxs().z
-				if miningRock:GetPos().z > max_z then
-					SafeRemoveEntity(miningRock)
-					return
-				end
-			end
-
-			-- check if the rock is accessible
-			local trToOriginalPos = util.TraceLine({ start = miningRock:GetPos() + checkOffset, endpos = originalPos + checkOffset, filter = function() return false end, mask = MASK_SOLID_BRUSHONLY })
-			if trToOriginalPos.Fraction <= 0.9 then
-				SafeRemoveEntity(miningRock)
-				return
-			end
-
-			-- remove after a while
-			SafeRemoveEntityDelayed(miningRock, COLLAPSE_DURATION * 2)
+		timer.Create(("mining_collapse_check_[%d]"):format(miningRock:EntIndex()), 2, COLLAPSE_DURATION / 2, function()
+			checkExistence(fallingRock, miningRock, originalPos, checkOffset)
 		end)
 	else
 		SafeRemoveEntityDelayed(fallingRock, 2)
@@ -181,22 +181,18 @@ local function mineCollapse(ply, delay)
 		effectData:SetOrigin(pos)
 		util.Effect("litesmoke", effectData, true, true)
 
-		for _ = 1, math.random(5, 10) do
-			local debrisAng = AngleRand(-45, 45)
-			spawnRockDebris(rocks, pos, debrisAng)
-			--spawnRockDebris(rocks, pos, -debrisAng)
-		end
+		for _, ent in ipairs(ents.FindInSphere(pos, COLLAPSE_DMG_RADIUS)) do
+			local force = Vector(math.random() > 0.5 and 100 or -100, math.random() > 0.5 and 100 or -100, math.random() > 0.5 and 100 or -100) * math.random(4, 8)
+			local dmg = DamageInfo()
+			dmg:SetInflictor(game.GetWorld())
+			dmg:SetAttacker(game.GetWorld())
+			dmg:SetDamageForce(force)
+			dmg:SetDamage(1000)
+			dmg:SetDamageType(DMG_CRUSH)
+			ent:TakeDamageInfo(dmg)
 
-		for _, ent in ipairs(ents.FindInSphere(pos, 300)) do
-			if ent:IsPlayer() and ent:Alive() then
-				local dmg = DamageInfo()
-				dmg:SetInflictor(game.GetWorld())
-				dmg:SetAttacker(game.GetWorld())
-				dmg:SetDamage(1000)
-				dmg:SetDamageType(DMG_CRUSH)
-				ent:TakeDamageInfo(dmg)
-
-				-- fallback
+			-- fallback
+			if ent:IsPlayer() then
 				timer.Simple(0, function()
 					if IsValid(ent) and ent:Alive() then
 						hook.Run("PlayerDeath", ent, game.GetWorld(), game.GetWorld())
@@ -207,6 +203,13 @@ local function mineCollapse(ply, delay)
 				ent.KilledInMiningIncident = true
 			end
 		end
+
+		timer.Simple(0.25, function()
+			for _ = 1, math.random(5, 10) do
+				local debrisAng = AngleRand(-45, 45)
+				spawnRockDebris(rocks, pos, debrisAng)
+			end
+		end)
 
 		timer.Simple(delay, function()
 			for _, rock in pairs(rocks) do
@@ -228,7 +231,6 @@ hook.Add("OnEntityCreated", "mining_collapse", function(ent)
 
 		if math.random(0, 100) <= COLLAPSE_CHANCE then
 			ent.MiningIncident = true
-			ent.PreventSplit = true
 		end
 	end)
 end)
@@ -242,7 +244,7 @@ hook.Add("PlayerSpawn", "mining_collapse", function(ply)
 			ply:SetPos(cave_pos)
 		end
 	end
-	
+
 	ply.KilledInMiningIncident = nil
 end)
 
@@ -267,6 +269,5 @@ hook.Add("MGNCoreExploded", "mining_collapse", function()
 		if not rock.OriginalRock then continue end
 
 		rock.MiningIncident = true
-		rock.PreventSplit = true
 	end
 end)
