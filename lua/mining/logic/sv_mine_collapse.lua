@@ -47,7 +47,7 @@ local function spawnRockDebris(rocks, pos, ang)
 	table.insert(rocks, rock)
 end
 
-local function spawnFallingRockDebris(pos)
+local function spawnFallingRockDebris(pos, originalPos, checkOffset)
 	local fallingRock = ents.Create("prop_physics")
 	fallingRock:SetPos(pos)
 	fallingRock:SetModel(table.Random(FALLING_ROCKS_MDLS))
@@ -101,8 +101,19 @@ local function spawnFallingRockDebris(pos)
 				local max_z = trigger:GetPos().z + trigger:OBBMaxs().z
 				if miningRock:GetPos().z > max_z then
 					SafeRemoveEntity(miningRock)
+					return
 				end
 			end
+
+			-- check if the rock is accessible
+			local trToOriginalPos = util.TraceLine({ start = miningRock:GetPos() + checkOffset, endpos = originalPos + checkOffset, filter = function() return false end, mask = MASK_SOLID_BRUSHONLY })
+			if trToOriginalPos.Fraction <= 0.9 then
+				SafeRemoveEntity(miningRock)
+				return
+			end
+
+			-- remove after a while
+			SafeRemoveEntityDelayed(miningRock, COLLAPSE_DURATION * 2)
 		end)
 	else
 		SafeRemoveEntityDelayed(fallingRock, 2)
@@ -141,6 +152,7 @@ end
 local function mineCollapse(ply, delay)
 	local rocks = {}
 	local pos = ply:GetPos()
+	local plyHeight = ply:OBBMaxs().z
 
 	playSoundForDuration("ambient/atmosphere/terrain_rumble1.wav", RUMBLE_DURATION)
 	playSoundForDuration("ambience/rocketrumble1.wav", RUMBLE_DURATION)
@@ -155,7 +167,7 @@ local function mineCollapse(ply, delay)
 
 			if not util.IsInWorld(fallingRockPos) then continue end
 
-			spawnFallingRockDebris(fallingRockPos)
+			spawnFallingRockDebris(fallingRockPos, pos, Vector(0, 0, plyHeight))
 		end
 	end)
 
@@ -207,9 +219,11 @@ local function mineCollapse(ply, delay)
 end
 
 hook.Add("OnEntityCreated", "mining_collapse", function(ent)
+	if not IsValid(ent) then return end
 	if not OK_CLASSES[ent:GetClass()] then return end
 
 	timer.Simple(0, function()
+		if not IsValid(ent) then return end
 		if ent:GetClass() == "mining_rock" and not ent.OriginalRock then return end
 
 		if math.random(0, 100) <= COLLAPSE_CHANCE then
@@ -252,5 +266,6 @@ hook.Add("MGNCoreExploded", "mining_collapse", function()
 		if not rock.OriginalRock then continue end
 
 		rock.MiningIncident = true
+		rock.PreventSplit = true
 	end
 end)

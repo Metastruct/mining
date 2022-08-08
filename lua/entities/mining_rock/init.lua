@@ -214,7 +214,7 @@ function ENT:OnTakeDamage(dmg)
 		end
 	end
 
-	if size > 0 then
+	if size > 0 and not self.PreventSplit then
 		local pos = self:GetCorrectedPos()
 		local force = dmg:GetDamageForce():Angle():Right()
 
