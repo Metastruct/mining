@@ -1,3 +1,6 @@
+module("ms", package.seeall)
+Ores = Ores or {}
+
 local ROCK_MDLS = {
 	"models/props_wasteland/rockcliff01b.mdl",
 	"models/props_wasteland/rockcliff01c.mdl",
@@ -149,7 +152,7 @@ local function playSoundForDuration(sound_path, delay)
 	end)
 end
 
-local function mineCollapse(ply, delay)
+function Ores.MineCollapse(ply, delay)
 	local rocks = {}
 	local pos = ply:GetPos()
 	local plyHeight = ply:OBBMaxs().z
@@ -260,7 +263,7 @@ hook.Add("PlayerDestroyedMiningRock", "mining_collapse", function(ply, rock)
 	if not rock.MiningIncident then return end
 	if not rock.OriginalRock then return end
 
-	mineCollapse(ply, COLLAPSE_DURATION)
+	Ores.MineCollapse(ply, COLLAPSE_DURATION)
 end)
 
 -- after the core goes off it weakens the cave structures
