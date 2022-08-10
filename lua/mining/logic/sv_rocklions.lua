@@ -20,6 +20,7 @@ function Ores.SpawnRockyAntlion(pos, rarity)
 	
 	npc.MiningRarity = rarity
 	npc.NextOreDrop = 0
+	npc.OreDropCount = 0
 
 	npc:Input("Unburrow")
 	
@@ -88,12 +89,13 @@ hook.Add("EntityTakeDamage", "mining_antlions", function(ent, dmg)
 		
 		SafeRemoveEntity(ent)
 	elseif ent:IsNPC() and ent:GetClass() == "npc_antlion" and ent.MiningRarity then
-		if CurTime() >= ent.NextOreDrop then
+		if CurTime() >= ent.NextOreDrop and ent.OreDropCount <= 5 then
 			local atck = dmg:GetAttacker()
 			local oreAmount = math.random(1, 3)
 			
 			createOreDrops(ent.MiningRarity, ent:GetPos(), atck, oreAmount)
 			ent.NextOreDrop = CurTime() + 1
+			ent.OreDropCount = ent.OreDropCount + 1
 		end
 		
 		ent:EmitSound("physics/metal/metal_grenade_impact_hard2.wav")
