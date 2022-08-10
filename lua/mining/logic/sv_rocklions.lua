@@ -47,7 +47,8 @@ function Ores.SpawnRockyAntlion(pos, rarity)
 	end
 	
 	-- remove that
-	rock.OnTakeDamage = function(dmg) 
+	rock.OnTakeDamage = function(_, dmg) 
+		if type(dmg) ~= "CTakeDamageInfo" then return end
 		npc:TakeDamageInfo(dmg)
 	end
 	
