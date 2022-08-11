@@ -91,7 +91,7 @@ hook.Add("EntityTakeDamage", "mining_antlions", function(ent, dmg)
 	elseif ent:IsNPC() and ent:GetClass() == "npc_antlion" and ent.MiningRarity then
 		if CurTime() >= ent.NextOreDrop and ent.OreDropCount <= 5 then
 			local atck = dmg:GetAttacker()
-			local oreAmount = math.random(1, 3)
+			local oreAmount = math.random(1, 2)
 			
 			createOreDrops(ent.MiningRarity, ent:GetPos(), atck, oreAmount)
 			ent.NextOreDrop = CurTime() + 1
@@ -127,7 +127,7 @@ end)
 
 hook.Add("OnNPCKilled", "mining_antlions", function(npc, atck)
 	if npc:GetClass() == "npc_antlion" and npc.MiningRarity then
-		createOreDrops(npc.MiningRarity, npc:GetPos(), atck, math.random(2, 4))
+		createOreDrops(npc.MiningRarity, npc:GetPos(), atck, math.random(1, 4))
 		
 		atck:EmitSound("physics/concrete/boulder_impact_hard" .. math.random(1, 2) .. ".wav", 100)
 		atck:EmitSound("physics/concrete/boulder_impact_hard" .. math.random(3, 4) .. ".wav", 100)
