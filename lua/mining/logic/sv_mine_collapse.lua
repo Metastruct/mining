@@ -56,9 +56,11 @@ local function spawnRockDebris(rocks, pos, ang)
 end
 
 local function checkExistence(fallingRock, miningRock, originalPos, checkOffset)
-	if not IsValid(miningRock) then return end
-
 	if IsValid(fallingRock) then
+		SafeRemoveEntity(fallingRock)
+
+		if not IsValid(miningRock) then return end
+
 		miningRock:SetParent(NULL)
 		miningRock:DropToFloor()
 
@@ -70,6 +72,8 @@ local function checkExistence(fallingRock, miningRock, originalPos, checkOffset)
 
 		SafeRemoveEntity(fallingRock)
 	end
+
+	if not IsValid(miningRock) then return end
 
 	-- check if we're not under/above the mines
 	local trDown = util.TraceLine({ start = miningRock:GetPos(), endpos = miningRock:GetPos() - Vector(0, 0, MAX_DIST), filter = miningRock })
