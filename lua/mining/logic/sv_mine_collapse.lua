@@ -41,6 +41,7 @@ local function spawnRockDebris(rocks, pos, ang)
 	rock:Spawn()
 	rock:Activate()
 	rock:PhysWake()
+	rock:SetKeyValue("classname", "Rock")
 
 	rock.ms_notouch = true
 
@@ -50,6 +51,8 @@ local function spawnRockDebris(rocks, pos, ang)
 	end
 
 	table.insert(rocks, rock)
+
+	return rock
 end
 
 local function checkExistence(fallingRock, miningRock, originalPos, checkOffset)
@@ -97,6 +100,7 @@ local function spawnFallingRockDebris(pos, originalPos, checkOffset)
 	fallingRock:SetModelScale(1, 4)
 	fallingRock:SetMaterial(ROCK_MAT)
 	fallingRock:Spawn()
+	fallingRock:SetKeyValue("classname", "Rock")
 
 	local phys = fallingRock:GetPhysicsObject()
 	if IsValid(phys) then
@@ -152,6 +156,14 @@ local function playSoundForDuration(sound_path, delay)
 	end)
 end
 
+local function findValidRock(rocks)
+	for _, rock in pairs(rocks) do
+		if IsValid(rock) then return rock end
+	end
+
+	return NULL
+end
+
 function Ores.MineCollapse(ply, delay)
 	local rocks = {}
 	local pos = ply:GetPos()
@@ -185,10 +197,11 @@ function Ores.MineCollapse(ply, delay)
 		util.Effect("litesmoke", effectData, true, true)
 
 		for _, ent in ipairs(ents.FindInSphere(pos, COLLAPSE_DMG_RADIUS)) do
+			local rock = spawnRockDebris(rocks, Vector(0, 0, 0), Angle(0, 0, 0))
 			local force = Vector(math.random() > 0.5 and 100 or -100, math.random() > 0.5 and 100 or -100, math.random() > 0.5 and 100 or -100) * math.random(4, 8)
 			local dmg = DamageInfo()
-			dmg:SetInflictor(game.GetWorld())
-			dmg:SetAttacker(game.GetWorld())
+			dmg:SetInflictor(rock)
+			dmg:SetAttacker(rock)
 			dmg:SetDamageForce(force)
 			dmg:SetDamage(1000)
 			dmg:SetDamageType(DMG_CRUSH)
@@ -198,13 +211,15 @@ function Ores.MineCollapse(ply, delay)
 			if ent:IsPlayer() then
 				timer.Simple(0, function()
 					if IsValid(ent) and ent:Alive() then
-						hook.Run("PlayerDeath", ent, game.GetWorld(), game.GetWorld())
+						hook.Run("PlayerDeath", ent, rock, rock)
 						ent:KillSilent()
 					end
 				end)
 
 				ent.KilledInMiningIncident = true
 			end
+
+			rock:Remove()
 		end
 
 		timer.Simple(0.25, function()

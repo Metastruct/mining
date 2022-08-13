@@ -17,6 +17,7 @@ function Ores.SpawnRockyAntlion(pos, rarity)
 	npc:DropToFloor()
 	npc:AddRelationship("player D_HT 99")
 	npc:SetHealth(100)
+	npc:SetKeyValue("classname", "Rocklion")
 	
 	npc.MiningRarity = rarity
 	npc.NextOreDrop = 0
