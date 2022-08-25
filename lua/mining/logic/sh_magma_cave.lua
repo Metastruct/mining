@@ -208,7 +208,10 @@ if SERVER then
 	hook.Add("PlayerUse", "magma_cave_valve", function(ply, ent)
 		if not ent.VolcanoValve then return end
 		if on_going then return end
-		if activated_valves[ent] then return end
+		if activated_valves[ent] then 
+			Ores.SendChatMessage(ply, 1, ("This old valve seems stuck. %s]..."):format(VALVE_SENTENCES[math.random(#VALVE_SENTENCES)]))
+			return 
+		end
 
 		local trigger = ms and ms.GetTrigger and ms.GetTrigger("volcano")
 		if not IsValid(trigger) then return end
