@@ -208,8 +208,12 @@ if SERVER then
 	hook.Add("PlayerUse", "magma_cave_valve", function(ply, ent)
 		if not ent.VolcanoValve then return end
 		if on_going then return end
+		if ent.NextUse and CurTime() < ent.NextUse then return end
+
+		ent.NextUse = CurTime() + 1
+
 		if activated_valves[ent] then 
-			Ores.SendChatMessage(ply, 1, ("This old valve seems stuck. %s]..."):format(VALVE_SENTENCES[math.random(#VALVE_SENTENCES)]))
+			Ores.SendChatMessage(ply, 1, ("This old valve seems stuck. %s..."):format(VALVE_SENTENCES[math.random(#VALVE_SENTENCES)]))
 			return 
 		end
 
