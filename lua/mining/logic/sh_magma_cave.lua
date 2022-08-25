@@ -101,6 +101,8 @@ if SERVER then
 						ply:Spawn()
 					end
 				end)
+
+				trigger:LockCave()
 			end
 
 			timer.Simple(is_debug and 0 or LOCK_DURATION, function()
