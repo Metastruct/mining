@@ -274,7 +274,10 @@ if SERVER then
 		end
 	end
 
-	hook.Add("InitPostEntity", "magma_cave_valves", spawn_valves)
+	hook.Add("InitPostEntity", "magma_cave_valves", function()
+		timer.Simple(5, spawn_valves) -- too early otherwise
+	end)
+	
 	hook.Add("PostCleanupMap", "magma_cave_valves", spawn_valves)
 end
 
