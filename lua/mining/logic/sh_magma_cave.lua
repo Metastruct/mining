@@ -233,12 +233,18 @@ if SERVER then
 
 		if activated_valve_count >= total_valve_count then
 			Ores.MagmaOverheat(EVENT_DURATION, false)
-		end
 
-		timer.Simple(EVENT_COOLDOWN, function()
-			if not IsValid(ent) then return end
-			activated_valves[ent] = nil
-		end)
+			if LuaScreen then
+				local screen = LuaScreen.GetScreenEntities("magma_cave")[1]
+				if IsValid(screen) then
+					screen:SetMagmaCooldowns(LOCK_DURATION, EVENT_COOLDOWN)
+				end
+			end
+
+			timer.Simple(EVENT_COOLDOWN, function()
+				activated_valves = {}
+			end)
+		end
 	end)
 
 	local VALVE_DATA = {
@@ -271,6 +277,17 @@ if SERVER then
 			valve:SetPos(pos)
 			valve:SetAngles(data.Angles)
 			valve:Spawn()
+		end
+
+		if LuaScreen and #LuaScreen.GetScreenEntities("magma_cave") == 0 then
+			local gates = ents.FindByName("*magma_gate*")
+			local diff = gates[1]:GetPos() - gates[2]:GetPos()
+			local gate_center_pos = (gates[1]:GetPos() - diff / 2) + gates[1]:GetForward() * 25 + gates[1]:GetUp() * 125
+
+			local succ, _ = pcall(LuaScreen.LoadScreen, "magma_cave")
+            if succ then
+				LuaScreen.Create("magma_cave", gate_center_pos, Angle(0, 0, 0))
+			end
 		end
 	end
 
