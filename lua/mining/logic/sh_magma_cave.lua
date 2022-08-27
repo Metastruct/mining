@@ -13,6 +13,15 @@ if SERVER then
 
 	util.AddNetworkString(NET_TAG)
 
+	local function update_lua_screen(lock_duration, event_cooldown)
+		if LuaScreen then
+			local screen = LuaScreen.GetScreenEntities("magma_cave")[1]
+			if IsValid(screen) then
+				screen:SetMagmaCooldowns(lock_duration, lock_duration)
+			end
+		end
+	end
+
 	local on_going = false
 	local end_time = -1
 	local cur_duration = -1
@@ -65,6 +74,8 @@ if SERVER then
 			end
 		end
 
+		update_lua_screen(0, EVENT_DURATION)
+
 		cur_duration = duration
 		on_going = true
 		end_time = CurTime() + duration
@@ -111,6 +122,8 @@ if SERVER then
 				trigger:ChangeLavaLevel(0)
 				trigger:UnlockCave()
 			end)
+
+			update_lua_screen(LOCK_DURATION, EVENT_COOLDOWN)
 		end)
 
 		-- raise lava slighty before end of event
@@ -233,13 +246,6 @@ if SERVER then
 
 		if activated_valve_count >= total_valve_count then
 			Ores.MagmaOverheat(EVENT_DURATION, false)
-
-			if LuaScreen then
-				local screen = LuaScreen.GetScreenEntities("magma_cave")[1]
-				if IsValid(screen) then
-					screen:SetMagmaCooldowns(LOCK_DURATION, EVENT_COOLDOWN)
-				end
-			end
 
 			timer.Simple(EVENT_COOLDOWN, function()
 				activated_valves = {}
