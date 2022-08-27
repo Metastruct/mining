@@ -297,6 +297,9 @@ if SERVER then
 		end
 	end
 
+	-- this needs to be cached because we are spawning it ourselves
+	hook.Add("PopulateLuaScreens", "magma_cave_luascreen", function() LuaScreen.Precache("magma_cave") end)
+
 	hook.Add("InitPostEntity", "magma_cave_valves", function()
 		timer.Simple(5, spawn_valves) -- too early otherwise
 	end)
