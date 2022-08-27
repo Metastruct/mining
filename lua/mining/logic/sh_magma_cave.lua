@@ -13,26 +13,26 @@ if SERVER then
 
 	util.AddNetworkString(NET_TAG)
 
-	local function update_lua_screen(lock_duration, event_cooldown)
+	local function updateLuaScreen(lock_duration, event_cooldown)
 		if LuaScreen then
 			local screen = LuaScreen.GetScreenEntities("magma_cave")[1]
 			if IsValid(screen) then
-				screen:SetMagmaCooldowns(lock_duration, lock_duration)
+				screen:SetMagmaCooldowns(lock_duration, event_cooldown)
 			end
 		end
 	end
 
-	local on_going = false
-	local end_time = -1
-	local cur_duration = -1
-	function Ores.MagmaOverheat(duration, is_debug)
-		if on_going then return end
+	local isOnGoing = false
+	local endTime = -1
+	local currentDuration = -1
+	function Ores.MagmaOverheat(duration, isDebug)
+		if isOnGoing then return end
 		if not ms.GetTrigger then return end
 
 		local trigger = ms.GetTrigger("volcano")
 		if not IsValid(trigger) then return end
 
-		if not is_debug then
+		if not isDebug then
 			Ores.SendChatMessage(player.GetAll(), 2, "Rare ores are now accessible in the magma caves! Be quick as the temperature is rising fast...")
 		end
 
@@ -52,37 +52,37 @@ if SERVER then
 			end)
 		end
 
-		local lava_pools = ents.FindByName("*magma_lavapool*")
-		for _, lava_pool in ipairs(lava_pools) do
-			local original_pos = lava_pool:GetSaveTable().m_vecPosition1
+		local lavaPools = ents.FindByName("*magma_lavapool*")
+		for _, lavaPool in ipairs(lavaPools) do
+			local originalPos = lavaPool:GetSaveTable().m_vecPosition1
 			for _ = 1, math.random(8, 10) do
-				local rock_pos = original_pos + Vector(math.random(-MAX_DIST, MAX_DIST), math.random(-MAX_DIST, MAX_DIST), 0)
+				local rockPos = originalPos + Vector(math.random(-MAX_DIST, MAX_DIST), math.random(-MAX_DIST, MAX_DIST), 0)
 				local retries = 0
-				while retries < MAX_RETRIES and not util.IsInWorld(rock_pos) do
-					rock_pos = original_pos + Vector(math.random(-MAX_DIST, MAX_DIST), math.random(-MAX_DIST, MAX_DIST), 0)
+				while retries < MAX_RETRIES and not util.IsInWorld(rockPos) do
+					rockPos = originalPos + Vector(math.random(-MAX_DIST, MAX_DIST), math.random(-MAX_DIST, MAX_DIST), 0)
 				end
 
 				local rock = ents.Create("mining_rock")
 				rock:SetRarity(4) -- platinum
 				rock:SetSize(2)
-				rock:SetPos(rock_pos)
+				rock:SetPos(rockPos)
 				rock:Spawn()
 				rock:DropToFloor()
 
-				if is_debug then rock.OnTakeDamage = function() end end
+				if isDebug then rock.OnTakeDamage = function() end end
 				SafeRemoveEntityDelayed(rock, duration)
 			end
 		end
 
-		update_lua_screen(0, EVENT_DURATION)
+		updateLuaScreen(0, EVENT_DURATION)
 
-		cur_duration = duration
-		on_going = true
-		end_time = CurTime() + duration
+		currentDuration = duration
+		isOnGoing = true
+		endTime = CurTime() + duration
 		timer.Simple(duration, function()
-			on_going = false
-			end_time = -1
-			cur_duration = -1
+			isOnGoing = false
+			endTime = -1
+			currentDuration = -1
 
 			if not IsValid(trigger) then return end
 
@@ -92,7 +92,7 @@ if SERVER then
 				end
 			end
 
-			if not is_debug then
+			if not isDebug then
 				for ply, _ in pairs(trigger:GetPlayers()) do
 					for rarity, _ in pairs(Ores.__R) do
 						local count = Ores.GetPlayerOre(ply, rarity)
@@ -116,14 +116,14 @@ if SERVER then
 				trigger:LockCave()
 			end
 
-			timer.Simple(is_debug and 0 or LOCK_DURATION, function()
+			timer.Simple(isDebug and 0 or LOCK_DURATION, function()
 				if not IsValid(trigger) then return end
 
 				trigger:ChangeLavaLevel(0)
 				trigger:UnlockCave()
 			end)
 
-			update_lua_screen(LOCK_DURATION, EVENT_COOLDOWN)
+			updateLuaScreen(LOCK_DURATION, EVENT_COOLDOWN)
 		end)
 
 		-- raise lava slighty before end of event
@@ -147,45 +147,45 @@ if SERVER then
 	end
 
 	hook.Add("PlayerFullyConnected", "magma_cave", function(ply)
-		if on_going and end_time > -1 then
+		if isOnGoing and endTime > -1 then
 			net.Start(NET_TAG)
-			net.WriteInt(end_time - CurTime(), 32)
+			net.WriteInt(endTime - CurTime(), 32)
 			net.Send(ply)
 		end
 	end)
 
-	local fire_ent
-	local function get_fire_ent()
-		if IsValid(fire_ent) then return fire_ent end
+	local fireEnt
+	local function getFireEntity()
+		if IsValid(fireEnt) then return fireEnt end
 
-		fire_ent = ents.Create("env_fire")
-		fire_ent:Spawn()
+		fireEnt = ents.Create("env_fire")
+		fireEnt:Spawn()
 
-		return fire_ent
+		return fireEnt
 	end
 
-	local next_think = 0
+	local nextThink = 0
 	hook.Add("Think", "magma_cave", function()
-		if not on_going then return end
+		if not isOnGoing then return end
 
 		local trigger = ms.GetTrigger("volcano")
 		if not IsValid(trigger) then return end
 
-		if CurTime() <= next_think then return end
+		if CurTime() <= nextThink then return end
 
-		next_think = CurTime() + 5
+		nextThink = CurTime() + 5
 
-		local perc = 1 - ((end_time - CurTime()) / cur_duration)
-		local lava_pools = ents.FindByName("*magma_lavapool*")
-		for _, lava_pool in ipairs(lava_pools) do
-			local original_pos = lava_pool:GetSaveTable().m_vecPosition1
-			util.ScreenShake(original_pos, 5 + 20 * perc, 20, 5 * 3, 2000)
+		local perc = 1 - ((endTime - CurTime()) / currentDuration)
+		local lavaPools = ents.FindByName("*magma_lavapool*")
+		for _, lavaPool in ipairs(lavaPools) do
+			local originalPos = lavaPool:GetSaveTable().m_vecPosition1
+			util.ScreenShake(originalPos, 5 + 20 * perc, 20, 5 * 3, 2000)
 		end
 
-		local fire_atck = get_fire_ent()
+		local fireAttacker = getFireEntity()
 		for ply, _ in pairs(trigger:GetPlayers()) do
 			if math.random() < 0.05 and ms.Ores.MineCollapse then
-				ms.Ores.MineCollapse(ply, end_time - CurTime())
+				ms.Ores.MineCollapse(ply, endTime - CurTime())
 			end
 
 			if perc >= 0.65 then
@@ -193,13 +193,13 @@ if SERVER then
 			end
 
 			if perc >= 0.9 then
-				local dmg_info = DamageInfo()
-				dmg_info:SetDamage(5)
-				dmg_info:SetDamageType(DMG_BURN)
-				dmg_info:SetAttacker(fire_atck)
-				dmg_info:SetInflictor(fire_atck)
+				local dmgInfo = DamageInfo()
+				dmgInfo:SetDamage(5)
+				dmgInfo:SetDamageType(DMG_BURN)
+				dmgInfo:SetAttacker(fireAttacker)
+				dmgInfo:SetInflictor(fireAttacker)
 
-				ply:TakeDamageInfo(dmg_info)
+				ply:TakeDamageInfo(dmgInfo)
 			end
 		end
 	end)
@@ -219,36 +219,36 @@ if SERVER then
 		"It looks dangerous",
 	}
 
-	local activated_valves = {}
+	local activatedValves = {}
 	hook.Add("PlayerUse", "magma_cave_valve", function(ply, ent)
 		if not ent.VolcanoValve then return end
-		if on_going then return end
+		if isOnGoing then return end
 		if ent.NextUse and CurTime() < ent.NextUse then return end
 
 		ent.NextUse = CurTime() + 1
 
-		if activated_valves[ent] then 
+		if activatedValves[ent] then
 			Ores.SendChatMessage(ply, 1, ("This old valve seems stuck. %s..."):format(VALVE_SENTENCES[math.random(#VALVE_SENTENCES)]))
-			return 
+			return
 		end
 
 		local trigger = ms and ms.GetTrigger and ms.GetTrigger("volcano")
 		if not IsValid(trigger) then return end
 		if trigger.CaveLocked then return end
 
-		activated_valves[ent] = true
+		activatedValves[ent] = true
 
 		ent:EmitSound(METAL_STRESS_SOUNDS[math.random(#METAL_STRESS_SOUNDS)], 100)
 		ent:EmitSound("ambient/atmosphere/terrain_rumble1.wav")
 
-		local activated_valve_count, total_valve_count = table.Count(activated_valves), #ents.FindByClass("magma_cave_valve")
-		Ores.SendChatMessage(ply, 1, ("You've activated an old valve. %s [%d/%d]..."):format(VALVE_SENTENCES[math.random(#VALVE_SENTENCES)], activated_valve_count, total_valve_count))
+		local activatedValveCount, totalValveCount = table.Count(activatedValves), #ents.FindByClass("magma_cave_valve")
+		Ores.SendChatMessage(ply, 1, ("You've activated an old valve. %s [%d/%d]..."):format(VALVE_SENTENCES[math.random(#VALVE_SENTENCES)], activatedValveCount, totalValveCount))
 
-		if activated_valve_count >= total_valve_count then
+		if activatedValveCount >= totalValveCount then
 			Ores.MagmaOverheat(EVENT_DURATION, false)
 
 			timer.Simple(EVENT_COOLDOWN, function()
-				activated_valves = {}
+				activatedValves = {}
 			end)
 		end
 	end)
@@ -268,17 +268,17 @@ if SERVER then
 		}
 	}
 
-	local function spawn_valves()
-		for _, existing_vale in ipairs(ents.FindByClass("magma_cave_valve")) do
-			SafeRemoveEntity(existing_vale)
+	local function spawnMagmaCaveEnts()
+		for _, existingValve in ipairs(ents.FindByClass("magma_cave_valve")) do
+			SafeRemoveEntity(existingValve)
 		end
 
 		local trigger = ms and ms.GetTrigger and ms.GetTrigger("volcano")
 		if not IsValid(trigger) then return end
 
-		local base_pos = trigger:GetPos()
+		local basePos = trigger:GetPos()
 		for _, data in ipairs(VALVE_DATA) do
-			local pos = base_pos - data.Position
+			local pos = basePos - data.Position
 			local valve = ents.Create("magma_cave_valve")
 			valve:SetPos(pos)
 			valve:SetAngles(data.Angles)
@@ -287,12 +287,14 @@ if SERVER then
 
 		if LuaScreen and #LuaScreen.GetScreenEntities("magma_cave") == 0 then
 			local gates = ents.FindByName("*magma_gate*")
+			if #gates < 2 then return end
+
 			local diff = gates[1]:GetPos() - gates[2]:GetPos()
-			local gate_center_pos = (gates[1]:GetPos() - diff / 2) + gates[1]:GetForward() * 25 + gates[1]:GetUp() * 125
+			local gateCenterPos = (gates[1]:GetPos() - diff / 2) + gates[1]:GetForward() * 25 + gates[1]:GetUp() * 125
 
 			local succ, _ = pcall(LuaScreen.LoadScreen, "magma_cave")
-            if succ then
-				LuaScreen.Create("magma_cave", gate_center_pos, Angle(0, 0, 0))
+			if succ then
+				LuaScreen.Create("magma_cave", gateCenterPos, Angle(0, 0, 0))
 			end
 		end
 	end
@@ -301,10 +303,10 @@ if SERVER then
 	hook.Add("PopulateLuaScreens", "magma_cave_luascreen", function() LuaScreen.Precache("magma_cave") end)
 
 	hook.Add("InitPostEntity", "magma_cave_valves", function()
-		timer.Simple(5, spawn_valves) -- too early otherwise
+		timer.Simple(5, spawnMagmaCaveEnts) -- too early otherwise
 	end)
-	
-	hook.Add("PostCleanupMap", "magma_cave_valves", spawn_valves)
+
+	hook.Add("PostCleanupMap", "magma_cave_valves", spawnMagmaCaveEnts)
 end
 
 if CLIENT then
@@ -318,7 +320,7 @@ if CLIENT then
 	--local FIRE_ICON = Material("icon16/fire.png")
 	local WARNING_ICON = Material("icon16/error.png")
 
-	local function get_volcano_music(callback)
+	local function playVolcanoMusic(callback)
 		if not file.Exists("meta_volcano_countdown.ogg", "DATA") then
 			http.Fetch(COUNTDOWN_URL, function(data)
 				if not data or #data == 0 then
@@ -337,19 +339,19 @@ if CLIENT then
 	end
 
 	local duration = 1
-	local in_volcano = false
-	local start_time = -1
+	local isInVolcano = false
+	local startTime = -1
 	local function draw_hud()
-		if not in_volcano then return end
+		if not isInVolcano then return end
 
 		surface.SetDrawColor(0, 0, 0, 200)
 		surface.DrawRect(BASE_POS_X - 10, BASE_POS_Y - 10, WIDTH + 20, HEIGHT + 20, 5)
 
-		local perc = (CurTime() - start_time) / duration
-		local y_pos = math.max(BASE_POS_Y, BASE_POS_Y + (HEIGHT - CURSOR_SIZE) - (HEIGHT * perc))
+		local perc = (CurTime() - startTime) / duration
+		local yPos = math.max(BASE_POS_Y, BASE_POS_Y + (HEIGHT - CURSOR_SIZE) - (HEIGHT * perc))
 		local temperature = math.ceil(25 + 75 * perc)
 
-		render.SetScissorRect(BASE_POS_X, y_pos + CURSOR_SIZE, WIDTH + BASE_POS_X, HEIGHT + BASE_POS_Y, true)
+		render.SetScissorRect(BASE_POS_X, yPos + CURSOR_SIZE, WIDTH + BASE_POS_X, HEIGHT + BASE_POS_Y, true)
 			surface.SetMaterial(LAVA_MAT)
 			surface.SetDrawColor(255, 255, 255, 255)
 			surface.DrawTexturedRect(BASE_POS_X, BASE_POS_Y, HEIGHT * 1.5, HEIGHT * 1.5)
@@ -359,33 +361,33 @@ if CLIENT then
 		surface.DrawOutlinedRect(BASE_POS_X, BASE_POS_Y, WIDTH, HEIGHT, 4)
 
 		surface.SetDrawColor(255, 0, 0,  math.max(0, -50 + 200 * perc))
-		surface.DrawRect(BASE_POS_X, BASE_POS_Y + y_pos, WIDTH, HEIGHT - y_pos)
+		surface.DrawRect(BASE_POS_X, BASE_POS_Y + yPos, WIDTH, HEIGHT - yPos)
 
 		surface.SetDrawColor(255, math.max(0, 155 * (1 - perc)), 0, 255)
-		surface.DrawOutlinedRect(BASE_POS_X + math.random(-5, 5) * perc, y_pos + math.random(-5, 5) * perc, WIDTH, 50, 2)
+		surface.DrawOutlinedRect(BASE_POS_X + math.random(-5, 5) * perc, yPos + math.random(-5, 5) * perc, WIDTH, 50, 2)
 
 		surface.SetTextColor(255, math.max(0, 155 * (1 - perc)), 0, 255)
 		surface.SetFont("DermaLarge")
-		surface.SetTextPos(BASE_POS_X + 5, y_pos + 10)
+		surface.SetTextPos(BASE_POS_X + 5, yPos + 10)
 		surface.DrawText(temperature .. "°")
 
 		if perc >= 0.75 then
 			surface.SetMaterial(WARNING_ICON)
 			surface.SetDrawColor(255, 255, 255, 255)
-			surface.DrawTexturedRect(BASE_POS_X - WIDTH + math.random(-5, 5) * perc, y_pos + 10 + math.random(-5, 5) * perc, 32, 32)
+			surface.DrawTexturedRect(BASE_POS_X - WIDTH + math.random(-5, 5) * perc, yPos + 10 + math.random(-5, 5) * perc, 32, 32)
 		end
 	end
 
 	local audio
 	net.Receive(NET_TAG, function()
 		duration = net.ReadInt(32)
-		start_time = CurTime()
+		startTime = CurTime()
 
-		if in_volcano then
-			get_volcano_music(function(station)
+		if isInVolcano then
+			playVolcanoMusic(function(station)
 				if not IsValid(station) then return end
 
-				station:SetTime(CurTime() - start_time)
+				station:SetTime(CurTime() - startTime)
 				station:Play()
 
 				audio = station
@@ -394,30 +396,30 @@ if CLIENT then
 
 		timer.Simple(duration, function()
 			hook.Remove("HUDPaint", "magma_cave")
-			start_time = -1
+			startTime = -1
 		end)
 
 		hook.Add("HUDPaint", "magma_cave", draw_hud)
 	end)
 
-	hook.Add("lua_trigger", "magma_cave", function(trigger_name, is_entering)
+	hook.Add("lua_trigger", "magma_cave", function(trigger_name, isEntering)
 		if trigger_name ~= "volcano" then return end
-		in_volcano = is_entering
+		isInVolcano = isEntering
 
 		-- put the music back
-		if start_time > -1 then
-			if is_entering then
+		if startTime > -1 then
+			if isEntering then
 				if not IsValid(audio) then
-					get_volcano_music(function(station)
+					playVolcanoMusic(function(station)
 						if not IsValid(station) then return end
 
-						station:SetTime(CurTime() - start_time)
+						station:SetTime(CurTime() - startTime)
 						station:Play()
 
 						audio = station
 					end)
 				else
-					audio:SetTime(CurTime() - start_time)
+					audio:SetTime(CurTime() - startTime)
 					audio:Play()
 				end
 			else
