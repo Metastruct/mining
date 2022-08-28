@@ -87,13 +87,15 @@ if SERVER then
 			if not IsValid(trigger) then return end
 
 			for ent, _ in pairs(trigger:GetEntities()) do
-				if ent:GetClass():match("^mining") then
+				if IsValid(ent) and ent:GetClass():match("^mining") then
 					SafeRemoveEntity(ent)
 				end
 			end
 
 			if not isDebug then
 				for ply, _ in pairs(trigger:GetPlayers()) do
+					if not IsValid(ply) then continue end
+
 					for rarity, _ in pairs(Ores.__R) do
 						local count = Ores.GetPlayerOre(ply, rarity)
 						if count <= 0 then continue end
