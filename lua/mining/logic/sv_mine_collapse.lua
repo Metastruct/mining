@@ -97,7 +97,7 @@ local function checkExistence(fallingRock, miningRock, originalPos, checkOffset)
 	SafeRemoveEntityDelayed(miningRock, COLLAPSE_DURATION * 2)
 end
 
-local function spawnFallingRockDebris(pos, originalPos, checkOffset)
+local function spawnFallingRockDebris(pos, originalPos, checkOffset, inVolcano)
 	local fallingRock = ents.Create("prop_physics")
 	fallingRock:SetPos(pos)
 	fallingRock:SetModel(table.Random(FALLING_ROCKS_MDLS))
@@ -119,7 +119,7 @@ local function spawnFallingRockDebris(pos, originalPos, checkOffset)
 		miningRock:SetPos(fallingRock:GetPos())
 		miningRock:SetAngles(fallingRock:GetAngles())
 		miningRock:SetRarity(math.random(0, 100) <= COAL_CHANCE and 0 or 1)
-		miningRock:SetSize(math.random() < 0.33 and 1 or 2)
+		miningRock:SetSize(inVolcano and (math.random() < 0.33 and 1 or 2) or (math.random() < 0.33 and 4 or 3)) -- if in volcano give plat and gold otherwise coal and copper
 		miningRock:Spawn()
 		miningRock:SetParent(fallingRock)
 
@@ -160,18 +160,11 @@ local function playSoundForDuration(sound_path, delay)
 	end)
 end
 
-local function findValidRock(rocks)
-	for _, rock in pairs(rocks) do
-		if IsValid(rock) then return rock end
-	end
-
-	return NULL
-end
-
 function Ores.MineCollapse(ply, delay)
 	local rocks = {}
 	local pos = ply:GetPos()
 	local plyHeight = ply:OBBMaxs().z
+	local inVolcano = ply.IsInZone and ply:IsInZone("volcano") or false
 
 	playSoundForDuration("ambient/atmosphere/terrain_rumble1.wav", RUMBLE_DURATION)
 	playSoundForDuration("ambience/rocketrumble1.wav", RUMBLE_DURATION)
@@ -186,7 +179,7 @@ function Ores.MineCollapse(ply, delay)
 
 			if not util.IsInWorld(fallingRockPos) then continue end
 
-			spawnFallingRockDebris(fallingRockPos, pos, Vector(0, 0, plyHeight))
+			spawnFallingRockDebris(fallingRockPos, pos, Vector(0, 0, plyHeight), inVolcano)
 		end
 	end)
 
