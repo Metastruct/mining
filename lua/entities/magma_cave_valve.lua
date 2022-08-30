@@ -28,7 +28,7 @@ if SERVER then
 
 	function ENT:Initialize()
 		self:SetModel("models/props_pipes/pipeset32d_128_001a.mdl")
-		self:SetModelScale(4)
+		self:SetModelScale(4, 0.0001)
 		self:PhysicsInit(SOLID_VPHYSICS)
 		self:SetSolid(SOLID_VPHYSICS)
 		self:Activate()
