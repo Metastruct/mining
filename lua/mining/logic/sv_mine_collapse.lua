@@ -118,8 +118,15 @@ local function spawnFallingRockDebris(pos, originalPos, checkOffset, inVolcano)
 		local miningRock = ents.Create("mining_rock")
 		miningRock:SetPos(fallingRock:GetPos())
 		miningRock:SetAngles(fallingRock:GetAngles())
-		miningRock:SetRarity(math.random(0, 100) <= COAL_CHANCE and 0 or 1)
-		miningRock:SetSize(inVolcano and (math.random() < 0.33 and 1 or 2) or (math.random() < 0.33 and 4 or 3)) -- if in volcano give plat and gold otherwise coal and copper
+
+		if inVolcano then
+			-- if in volcano give plat and gold otherwise coal and copper
+			miningRock:SetRarity(math.random(0, 100) <= COAL_CHANCE and 4 or 3)
+		else
+			miningRock:SetRarity(math.random(0, 100) <= COAL_CHANCE and 0 or 1)
+		end
+
+		miningRock:SetSize(math.random() < 0.33 and 1 or 2)
 		miningRock:Spawn()
 		miningRock:SetParent(fallingRock)
 
