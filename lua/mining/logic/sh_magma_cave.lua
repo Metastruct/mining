@@ -60,6 +60,7 @@ if SERVER then
 				local retries = 0
 				while retries < MAX_RETRIES and not util.IsInWorld(rockPos) do
 					rockPos = originalPos + Vector(math.random(-MAX_DIST, MAX_DIST), math.random(-MAX_DIST, MAX_DIST), 0)
+					retries = retries + 1
 				end
 
 				local rock = ents.Create("mining_rock")
