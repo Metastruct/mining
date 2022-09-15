@@ -50,7 +50,7 @@ function Ores.SelectRarityFromSpawntable()
 	end
 end
 
-function Ores.GenerateMiningRock(startPos,rarity)
+function Ores.GenerateMiningRock(startPos, rarity)
 	if rarity then
 		assert(isnumber(rarity) and Ores.__R and Ores.__R[rarity],"[Ores] Rarity argument is invalid")
 	end
