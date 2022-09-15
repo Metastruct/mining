@@ -97,7 +97,14 @@ local function checkExistence(fallingRock, miningRock, originalPos, checkOffset)
 	SafeRemoveEntityDelayed(miningRock, COLLAPSE_DURATION * 2)
 end
 
-local function spawnFallingRockDebris(pos, originalPos, checkOffset, inVolcano)
+local function spawnFallingRockDebris(pos, originalPos, checkOffset, rarityData)
+	rarityData = rarityData or {
+		{ Rarity = 0, Chance = COAL_CHANCE },
+		{ Rarity = 1, Chance = 100 - COAL_CHANCE }
+	}
+
+	table.sort(rarityData, function(a, b) return a.Chance < b.Chance end)
+
 	local fallingRock = ents.Create("prop_physics")
 	fallingRock:SetPos(pos)
 	fallingRock:SetModel(table.Random(FALLING_ROCKS_MDLS))
@@ -119,13 +126,15 @@ local function spawnFallingRockDebris(pos, originalPos, checkOffset, inVolcano)
 		miningRock:SetPos(fallingRock:GetPos())
 		miningRock:SetAngles(fallingRock:GetAngles())
 
-		if inVolcano then
-			-- if in volcano give plat and gold otherwise coal and copper
-			miningRock:SetRarity(math.random(0, 100) <= COAL_CHANCE and 4 or 3)
-		else
-			miningRock:SetRarity(math.random(0, 100) <= COAL_CHANCE and 0 or 1)
+		local chance = math.random(0, 100)
+		local rarity = 0
+		for _, rarityDataChunk in ipairs(rarityData) do
+			if rarityDataChunk.Chance > chance then
+				rarity = rarityDataChunk.Rarity
+			end
 		end
 
+		miningRock:SetRarity(rarity)
 		miningRock:SetSize(math.random() < 0.33 and 1 or 2)
 		miningRock:Spawn()
 		miningRock:SetParent(fallingRock)
@@ -167,11 +176,10 @@ local function playSoundForDuration(sound_path, delay)
 	end)
 end
 
-function Ores.MineCollapse(ply, delay)
+function Ores.MineCollapse(ply, delay, rarityData)
 	local rocks = {}
 	local pos = ply:GetPos()
 	local plyHeight = ply:OBBMaxs().z
-	local inVolcano = ply.IsInZone and ply:IsInZone("volcano") or false
 
 	playSoundForDuration("ambient/atmosphere/terrain_rumble1.wav", RUMBLE_DURATION)
 	playSoundForDuration("ambience/rocketrumble1.wav", RUMBLE_DURATION)
@@ -186,7 +194,7 @@ function Ores.MineCollapse(ply, delay)
 
 			if not util.IsInWorld(fallingRockPos) then continue end
 
-			spawnFallingRockDebris(fallingRockPos, pos, Vector(0, 0, plyHeight), inVolcano)
+			spawnFallingRockDebris(fallingRockPos, pos, Vector(0, 0, plyHeight), rarityData)
 		end
 	end)
 

@@ -188,7 +188,10 @@ if SERVER then
 		local fireAttacker = getFireEntity()
 		for ply, _ in pairs(trigger:GetPlayers()) do
 			if math.random() < 0.05 and ms.Ores.MineCollapse then
-				ms.Ores.MineCollapse(ply, endTime - CurTime())
+				ms.Ores.MineCollapse(ply, endTime - CurTime(), {
+					{ Rarity = 4, Chance = 30 },
+					{ Rarity = 3, Chance = 70 },
+				})
 			end
 
 			if perc >= 0.65 then
