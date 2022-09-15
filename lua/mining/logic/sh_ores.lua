@@ -126,18 +126,6 @@ AddOre(4,
 	true
 )
 
-AddOre(5,
-	"Uranium",
-	nil,
-	115,
-	500,
-	Color(0, 255, 68),
-	Color(0, 255, 68),
-	0.3,
-	nil,
-	"ambient/levels/citadel/field_loop3.wav",65,0.9,78,
-	true
-)
 -- -- --
 
 for k,v in next,Ores.__R do
