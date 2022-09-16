@@ -1,38 +1,44 @@
 -- Small helpers similar to those found in "metastruct/preinit.lua" of the metastruct repo
 local function includeShared(f)
-	if SERVER then AddCSLuaFile(f..".lua") end
-	include(f..".lua")
+    if SERVER then
+        AddCSLuaFile(f .. ".lua")
+    end
+
+    include(f .. ".lua")
 end
 
 local function includeClient(f)
-	if SERVER then
-		AddCSLuaFile(f..".lua")
-	else
-		include(f..".lua")
-	end
+    if SERVER then
+        AddCSLuaFile(f .. ".lua")
+    else
+        include(f .. ".lua")
+    end
 end
 
 local function includeServer(f)
-	if SERVER then include(f..".lua") end
+    if SERVER then
+        include(f .. ".lua")
+    end
 end
 
 local guiFiles = {}
 
 local function includeGuiFile(f)
-	if SERVER then
-		AddCSLuaFile(f..".lua")
-	else
-		guiFiles[#guiFiles+1] = f..".lua"
-	end
+    if SERVER then
+        AddCSLuaFile(f .. ".lua")
+    else
+        guiFiles[#guiFiles + 1] = f .. ".lua"
+    end
 end
 
 local tag = "ms.Ores.IncludeGui"
-hook.Add("InitPostEntity",tag,function()
-	for k,v in next,guiFiles do
-		include(v)
-	end
 
-	hook.Remove("InitPostEntity",tag)
+hook.Add("InitPostEntity", tag, function()
+    for k, v in next, guiFiles do
+        include(v)
+    end
+
+    hook.Remove("InitPostEntity", tag)
 end)
 
 -- File initialisation starts here...
@@ -54,3 +60,4 @@ includeServer("mining/logic/sv_anticheat")
 includeServer("mining/logic/sv_mine_collapse")
 includeServer("mining/logic/sv_rocklions")
 includeShared("mining/logic/sh_magma_cave")
+includeShared("mining/logic/sh_argonite_extraction")
