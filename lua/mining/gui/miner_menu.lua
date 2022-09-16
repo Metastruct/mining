@@ -318,9 +318,6 @@ function PANEL:Init()
 
 		surface.SetFont(tag.."Title")
 		local txt = LocalPlayer():GetNick()
-		if chat and chat.UndecorateNick then
-			txt = chat.UndecorateNick(txt)
-		end
 		local txtW = surface.GetTextSize(txt)
 		DrawTitleText(txt,self.TopPanel:GetWide()-self.TopPanel:GetTall()-txtW-4-2,4+2,tag.."ItemName",Color(0,0,0,127),Color(225,192,64),1)
 
