@@ -456,7 +456,7 @@ if SERVER then
 					ply:SetDrunkFactor(dmg * 10)
 				end
 
-				if ply:Alive() and preHealth == ply:Health() then
+				if ply:Health() > 0 and preHealth == ply:Health() then
 					ply:SetHealth(preHealth - count)
 
 					if ply:Health() <= 0 then
