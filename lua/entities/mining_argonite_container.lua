@@ -53,7 +53,7 @@ if SERVER then
 		if self:GetNWBool("ArgoniteOverload") then return end
 
 		local cur_amount = self:GetNWInt("ArgoniteCount", 0)
-		local new_amount = math.min(CONTAINER_CAPACITY, cur_amount + amount)
+		local new_amount = math.min(CONTAINER_CAPACITY, cur_amount + amount * 10)
 		self:SetNWInt("ArgoniteCount", new_amount)
 
 		if new_amount >= CONTAINER_CAPACITY then
