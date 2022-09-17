@@ -88,7 +88,7 @@ if SERVER then
 			if not IsValid(trigger) then return end
 
 			for ent, _ in pairs(trigger:GetEntities()) do
-				if IsValid(ent) and ent:GetClass():match("^mining") then
+				if IsValid(ent) and (ent:GetClass() == "mining_ore" or ent:GetClass() == "mining_rock") then
 					SafeRemoveEntity(ent)
 				end
 			end

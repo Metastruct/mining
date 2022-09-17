@@ -573,6 +573,19 @@ if SERVER then
 		npc:Spawn()
 		npc.ms_notouch = true
 
+		local onKilled = npc.OnNPCKilled
+		function npc:OnNPCKilled(...)
+			onKilled(...)
+			timer.Simple(5, function()
+				npc = ents.Create("lua_npc")
+				npc:SetPos(basePos + NPC_OFFSET)
+				npc:SetAngles(NPC_ANGLE)
+				npc.role = "extractor"
+				npc:Spawn()
+				npc.ms_notouch = true
+			end)
+		end
+
 		local container = ents.Create("mining_argonite_container")
 		container:SetPos(basePos + CONTAINER_OFFSET)
 		container:SetAngles(CONTAINER_ANGLE)
