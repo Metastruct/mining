@@ -517,6 +517,11 @@ if SERVER then
 			ms.Ores.TakePlayerOre(ply, ARGONITE_RARITY, amount)
 			ms.Ores.PlayerArgonExtractionCounts[steamid] = (ms.Ores.PlayerArgonExtractionCounts[steamid] or 0) + 1
 
+			local container = ents.FindByClass("mining_argonite_container")[1]
+			if IsValid(container) then
+				container:AddArgonite(amount)
+			end
+
 			-- reset after a day or when server restarts/crashes
 			timer.Simple(60 * 60 * 24, function()
 				ms.Ores.PlayerArgonExtractionCounts[steamid] = nil
@@ -553,20 +558,30 @@ if SERVER then
 
 	local NPC_OFFSET = Vector (1476, -348, -103)
 	local NPC_ANGLE = Angle(0, 90, 0)
-	local function spawn_extractor_npc()
+	local CONTAINER_OFFSET = Vector(1477, -108, -103)
+	local CONTAINER_ANGLE = Angle(0, 90, 0)
+	local function spawn_extractor_ents()
 		local trigger = ms and ms.GetTrigger and ms.GetTrigger("volcano")
 		if not IsValid(trigger) then return end
 
 		local basePos = trigger:GetPos()
+
 		local npc = ents.Create("lua_npc")
 		npc:SetPos(basePos + NPC_OFFSET)
 		npc:SetAngles(NPC_ANGLE)
 		npc.role = "extractor"
 		npc:Spawn()
+		npc.ms_notouch = true
+
+		local container = ents.Create("mining_argonite_container")
+		container:SetPos(basePos + CONTAINER_OFFSET)
+		container:SetAngles(CONTAINER_ANGLE)
+		container:Spawn()
+		container.ms_notouch = true
 	end
 
-	hook.Add("InitPostEntity", "mining_argonite_extractor_npc", spawn_extractor_npc)
-	hook.Add("PostCleanupMap", "mining_argonite_extractor_npc", spawn_extractor_npc)
+	hook.Add("InitPostEntity", "mining_argonite_extractor_npc", spawn_extractor_ents)
+	hook.Add("PostCleanupMap", "mining_argonite_extractor_npc", spawn_extractor_ents)
 
 	net.Receive(NET_TAG, function(_, ply)
 		local isInRange = false
