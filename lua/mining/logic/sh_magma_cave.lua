@@ -70,6 +70,12 @@ if SERVER then
 				rock:Spawn()
 				rock:DropToFloor()
 
+				timer.Simple(0.1, function()
+					if not IsValid(rock) then return end
+
+					rock:DropToFloor()
+				end)
+
 				if isDebug then rock.OnTakeDamage = function() end end
 				SafeRemoveEntityDelayed(rock, duration)
 			end
