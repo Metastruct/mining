@@ -423,16 +423,24 @@ if SERVER then
 		for _, ply in ipairs(player.GetAll()) do
 			local count = ms.Ores.GetPlayerOre(ply, ARGONITE_RARITY)
 			local drunkFactor = ply.GetDrunkFactor and ply:GetDrunkFactor() or 0
-			if count == 0 and drunkFactor > 0 and ply.IsInZone and ply:IsInZone("volcano") then
-				ply:SetDrunkFactor(0)
+			if count == 0 then
+				ply.LastToxicHealth = nil
+
+				if drunkFactor > 0 and ply.IsInZone and ply:IsInZone("volcano") then
+					ply:SetDrunkFactor(0)
+				end
 			end
 
 			if count > 0 then
+				if ply.LastToxicHealth then
+					ply:SetHealth(ply.LastToxicHealth)
+				end
+
 				if ply:Health() > ply:GetMaxHealth() then
 					ply:SetHealth(ply:GetMaxHealth())
 				end
 
-				local dmg = math.min(40, math.ceil(count / 2))
+				local dmg = math.min(25, math.ceil(count / 2))
 				dmg = dmg - ((dmg / 100) * ply:GetNWInt("ms.Ores.ToxicResistance", 0)) -- diminishes damage received with toxic resistance
 
 				local preHealth = ply:Health()
@@ -459,6 +467,17 @@ if SERVER then
 						skipDeathHook = false
 					end
 				end
+
+				-- we can't use :Alive here because it won't be accurate just yet
+				if ply:Health() > 0 then
+					ply.LastToxicHealth = ply:Health()
+
+					local timer_name = ("mining_argonite_toxic_timeout_player_[%s]"):format(ply:SteamID())
+					timer.Remove(timer_name)
+					timer.Create(timer_name, 20, 1, function()
+						ply.LastToxicHealth = nil
+					end)
+				end
 			end
 		end
 	end)
@@ -472,6 +491,8 @@ if SERVER then
 		if count > 0 then
 			ms.Ores.TakePlayerOre(ply, ARGONITE_RARITY, math.ceil(count / 2))
 		end
+
+		ply.LastToxicHealth = nil
 	end
 
 	hook.Add("PlayerDeath", "mining_argonite_ore", reducePlayerArgoniteOreCount)
