@@ -432,7 +432,7 @@ if SERVER then
 					ply:SetHealth(ply:GetMaxHealth())
 				end
 
-				local dmg = math.min(25, math.ceil(count / 2))
+				local dmg = math.min(40, math.ceil(count / 2))
 				dmg = dmg - ((dmg / 100) * ply:GetNWInt("ms.Ores.ToxicResistance", 0)) -- diminishes damage received with toxic resistance
 
 				local preHealth = ply:Health()
