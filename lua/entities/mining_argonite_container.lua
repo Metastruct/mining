@@ -100,6 +100,9 @@ end
 
 if CLIENT then
 	local MAT = Material("models/props_combine/coredx70")
+	if MAT:IsError() then
+		MAT = Material("models/props_lab/cornerunit_cloud") -- fallback for people who dont have ep1
+	end
 
 	function ENT:Initialize()
 		self.LiquidEnt = ClientsideModel("models/hunter/tubes/tube1x1x4.mdl", RENDERGROUP_OPAQUE)
