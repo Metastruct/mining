@@ -432,7 +432,7 @@ if SERVER then
 			end
 
 			if count > 0 then
-				if ply.LastToxicHealth then
+				if isnumber(ply.LastToxicHealth) and ply.LastToxicHealth < ply:Health() then
 					ply:SetHealth(ply.LastToxicHealth)
 				end
 
