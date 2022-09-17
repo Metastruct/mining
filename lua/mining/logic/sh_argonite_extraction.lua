@@ -471,12 +471,6 @@ if SERVER then
 				-- we can't use :Alive here because it won't be accurate just yet
 				if ply:Health() > 0 then
 					ply.LastToxicHealth = ply:Health()
-
-					local timer_name = ("mining_argonite_toxic_timeout_player_[%s]"):format(ply:SteamID())
-					timer.Remove(timer_name)
-					timer.Create(timer_name, 20, 1, function()
-						ply.LastToxicHealth = nil
-					end)
 				end
 			end
 		end
