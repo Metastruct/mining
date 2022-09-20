@@ -29,13 +29,13 @@ local TUNNEL_RADIUS = 150
 local COLLAPSE_CHANCE = 5
 local OK_CLASSES = { mining_rock = true, mining_xen_crystal = true }
 local COLLAPSE_DURATION = 3 * 60
-local COLLAPSE_DMG_RADIUS = 400
+local COLLAPSE_DMG_RADIUS = 300
 
 local function spawnRockDebris(rocks, pos, ang)
 	local rock = ents.Create("prop_physics")
 	rock:SetPos(pos + VectorRand(-50, 50))
 	rock:SetModel(table.Random(ROCK_MDLS))
-	rock:SetModelScale(math.random(0.5, 2), 0.0001)
+	rock:SetModelScale(math.random(0.5, 1.25), 0.0001)
 	rock:SetMaterial(ROCK_MAT)
 	rock:SetAngles(ang)
 	rock:Spawn()
@@ -186,11 +186,18 @@ function Ores.MineCollapse(ply, delay, rarityData)
 
 	util.ScreenShake(pos, 20, 240, RUMBLE_DURATION * 2, 2000)
 
-	local ceiling_pos = util.TraceLine({ start = pos, endpos = pos + Vector(0, 0, MAX_DIST), filter = function() return false end }).HitPos
+	local ceiling_tr = util.TraceLine({
+		start = pos,
+		endpos = pos + Vector(0, 0, MAX_DIST),
+		filter = function() return false end,
+		mask = MASK_SOLID_BRUSHONLY,
+	})
+
+	local ceiling_pos = ceiling_tr.HitPos
 	timer.Create("mining_collapse_rumble", 0.25, 0, function()
 		for _ = 1, math.random(2, 6) do
-			local fallingRockPos = pos + VectorRand(-TUNNEL_RADIUS, TUNNEL_RADIUS)
-			fallingRockPos.z = ceiling_pos.z - 10 -- extra offset to spawn the rocks freely
+			local fallingRockPos = ceiling_pos + VectorRand(-TUNNEL_RADIUS, TUNNEL_RADIUS)
+			fallingRockPos.z = ceiling_pos.z + (ceiling_tr.HitNormal * 10).z -- set the z axes to an appropriate point
 
 			if not util.IsInWorld(fallingRockPos) then continue end
 
@@ -294,10 +301,10 @@ hook.Add("PlayerDestroyedMiningRock", "mining_collapse", function(ply, rock)
 end)
 
 -- after the core goes off it weakens the cave structures
-hook.Add("MGNCoreExploded", "mining_collapse", function()
+--[[hook.Add("MGNCoreExploded", "mining_collapse", function()
 	for _, rock in ipairs(ents.FindByClass("mining_rock")) do
 		if not rock.OriginalRock then continue end
 
 		rock.MiningIncident = true
 	end
-end)
+end)]]
