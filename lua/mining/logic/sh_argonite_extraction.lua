@@ -602,6 +602,14 @@ if SERVER then
 	hook.Add("InitPostEntity", "mining_argonite_extractor_npc", function() spawn_extractor_ents() end)
 	hook.Add("PostCleanupMap", "mining_argonite_extractor_npc", function() spawn_extractor_ents(true) end)
 
+	hook.Add("PlayerTriggeredMineCollapse", "mining_argonite_ore", function(ply, _, _, isDefaultRarityData)
+		if isDefaultRarityData and ply.IsInZone and ply:IsInZone("volcano") then
+			return {
+				{ Rarity = 0, Chance = 100 },
+			}
+		end
+	end)
+
 	net.Receive(NET_TAG, function(_, ply)
 		local isInRange = false
 		for _, npc in ipairs(ents.FindByClass("lua_npc")) do
