@@ -31,6 +31,11 @@ local OK_CLASSES = { mining_rock = true, mining_xen_crystal = true }
 local COLLAPSE_DURATION = 3 * 60
 local COLLAPSE_DMG_RADIUS = 300
 
+local DEFAULT_RARITY_DATA = {
+	{ Rarity = 0, Chance = COAL_CHANCE },
+	{ Rarity = 1, Chance = 100 - COAL_CHANCE }
+}
+
 local function spawnRockDebris(rocks, pos, ang)
 	local rock = ents.Create("prop_physics")
 	rock:SetPos(pos + VectorRand(-50, 50))
@@ -98,11 +103,6 @@ local function checkExistence(fallingRock, miningRock, originalPos, checkOffset)
 end
 
 local function spawnFallingRockDebris(pos, originalPos, checkOffset, rarityData)
-	rarityData = rarityData or {
-		{ Rarity = 0, Chance = COAL_CHANCE },
-		{ Rarity = 1, Chance = 100 - COAL_CHANCE }
-	}
-
 	table.sort(rarityData, function(a, b) return a.Chance < b.Chance end)
 
 	local fallingRock = ents.Create("prop_physics")
@@ -180,6 +180,13 @@ function Ores.MineCollapse(ply, delay, rarityData)
 	local rocks = {}
 	local pos = ply:GetPos()
 	local plyHeight = ply:OBBMaxs().z
+
+	rarityData = rarityData or DEFAULT_RARITY_DATA
+
+	local newRarityData = hook.Run("PlayerTriggeredMineCollapse", ply, delay, rarityData, rarityData == DEFAULT_RARITY_DATA)
+	if istable(newRarityData) then
+		rarityData = newRarityData
+	end
 
 	playSoundForDuration("ambient/atmosphere/terrain_rumble1.wav", RUMBLE_DURATION)
 	playSoundForDuration("ambience/rocketrumble1.wav", RUMBLE_DURATION)
