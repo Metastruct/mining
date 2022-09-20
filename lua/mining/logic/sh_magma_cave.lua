@@ -7,7 +7,7 @@ if SERVER then
 	local MAX_DIST = 800
 	local MAX_RETRIES = 5
 	local LOCK_DURATION = 10 * 60
-	local MIN_LAVA_LEVEL = -220
+	local MIN_LAVA_LEVEL = -250
 	local EVENT_COOLDOWN = 60 * 60 * 2 -- 2 hours
 	local EVENT_DURATION = 180 -- 3 mins
 
@@ -144,7 +144,7 @@ if SERVER then
 				level = math.min(500, level + 4)
 				trigger:ChangeLavaLevel(level)
 
-				if level == MIN_LAVA_LEVEL then
+				if level == 500 then
 					timer.Remove("magma_cave_lava_overheat_preparation")
 				end
 			end)
@@ -319,6 +319,13 @@ if SERVER then
 	end)
 
 	hook.Add("PostCleanupMap", "magma_cave_valves", spawnMagmaCaveEnts)
+
+	-- delete rocks that are not reachable
+	hook.Add("OnEntityWaterLevelChanged", "magma_cave_ore_lava_check", function(ent, oldLevel, newLevel)
+		if (ent:GetClass() == "mining_rock" or ent:GetClass() == "mining_ore") and newLevel > 0 then
+			SafeRemoveEntity(ent)
+		end
+	end)
 end
 
 if CLIENT then
