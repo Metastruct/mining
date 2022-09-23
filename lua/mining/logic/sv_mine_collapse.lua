@@ -26,7 +26,7 @@ local COAL_CHANCE = 70
 local CAVE_TRIGGER_NAMES = { "cave1", "volcano" }
 local RUMBLE_DURATION = 5
 local TUNNEL_RADIUS = 150
-local COLLAPSE_CHANCE = 5
+local COLLAPSE_CHANCE = 2.5
 local OK_CLASSES = { mining_rock = true, mining_xen_crystal = true }
 local COLLAPSE_DURATION = 3 * 60
 local COLLAPSE_DMG_RADIUS = 300
