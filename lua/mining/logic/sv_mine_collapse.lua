@@ -30,6 +30,7 @@ local COLLAPSE_CHANCE = 2.5
 local OK_CLASSES = { mining_rock = true, mining_xen_crystal = true }
 local COLLAPSE_DURATION = 3 * 60
 local COLLAPSE_DMG_RADIUS = 300
+local COLLAPSE_MIN_INTERVAL = 5 * 60
 
 local DEFAULT_RARITY_DATA = {
 	{ Rarity = 0, Chance = COAL_CHANCE },
@@ -265,6 +266,7 @@ function Ores.MineCollapse(ply, delay, rarityData)
 	end)
 end
 
+local nextIncidentRock = 0
 hook.Add("OnEntityCreated", "mining_collapse", function(ent)
 	if not IsValid(ent) then return end
 	if not OK_CLASSES[ent:GetClass()] then return end
@@ -273,8 +275,9 @@ hook.Add("OnEntityCreated", "mining_collapse", function(ent)
 		if not IsValid(ent) then return end
 		if ent:GetClass() == "mining_rock" and not ent.OriginalRock then return end
 
-		if math.random(0, 100) <= COLLAPSE_CHANCE then
+		if math.random(0, 100) <= COLLAPSE_CHANCE and nextIncidentRock <= CurTime() then
 			ent.MiningIncident = true
+			nextIncidentRock = CurTime() + COLLAPSE_MIN_INTERVAL
 		end
 	end)
 end)
