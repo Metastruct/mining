@@ -150,13 +150,13 @@ if CLIENT then
 		function oresPanel:Paint(w, h)
 			drawPanelList(self, w, h)
 
+			local y = 0
 			for rarity, rarity_mult in pairs(RARITY_DATA) do
 				local oreData = ms.Ores.__R[rarity]
 				local amount = ms.Ores.GetPlayerOre(LocalPlayer(), rarity)
 				local txt = amount .. " " .. oreData.Name .. " Ore(s)"
 				surface.SetFont("msOresExtractorTitle")
 				local txtW, txtH = surface.GetTextSize(txt)
-				local y = 0
 				surface.SetDrawColor(BACKGROUND_COLOR)
 				surface.DrawRect(0, y, w, h)
 				surface.SetTextPos(4, y + 4)
@@ -171,6 +171,8 @@ if CLIENT then
 					surface.SetTextColor(GREEN_COLOR)
 					surface.DrawText(txt)
 				end
+
+				y = y + draw.GetFontHeight("msOresExtractorTitle")
 			end
 		end
 
