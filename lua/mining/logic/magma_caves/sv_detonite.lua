@@ -54,8 +54,15 @@ hook.Add("CanPlyTeleport", "miningDetonite", function(ply)
 	end
 end)
 
+hook.Add("CanPlayerTimescale", "miningDetonite", function(ply)
+	local detoniteAmount = ms.Ores.GetPlayerOre(ply, DETONITE_RARITY)
+	if detoniteAmount > 0 then return false end
+end)
+
 hook.Add("PlayerReceivedOre", "miningDetonite", function(ply, amount, rarity)
 	if rarity ~= DETONITE_RARITY then return end
+
+	ply:SetLaggedMovementValue(1)
 
 	if ms.Ores.GetPlayerOre(ply, DETONITE_RARITY) >= 5 then return end -- above 5 block re-creating the timer so you can't wait endlessly for detonite
 
