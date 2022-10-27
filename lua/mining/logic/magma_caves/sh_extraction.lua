@@ -151,14 +151,16 @@ if CLIENT then
 			drawPanelList(self, w, h)
 
 			local y = 0
+			surface.SetDrawColor(BACKGROUND_COLOR)
+			surface.DrawRect(0, y, w, h)
+
 			for rarity, rarity_mult in pairs(RARITY_DATA) do
 				local oreData = ms.Ores.__R[rarity]
 				local amount = ms.Ores.GetPlayerOre(LocalPlayer(), rarity)
 				local txt = amount .. " " .. oreData.Name .. " Ore(s)"
 				surface.SetFont("msOresExtractorTitle")
 				local txtW, txtH = surface.GetTextSize(txt)
-				--surface.SetDrawColor(BACKGROUND_COLOR)
-				--surface.DrawRect(0, y, w, h)
+
 				surface.SetTextPos(4, y + 4)
 				surface.SetTextColor(amount > 0 and oreData.HudColor or DEFAULT_COLOR)
 				surface.DrawText(txt)
@@ -172,7 +174,7 @@ if CLIENT then
 					surface.DrawText(txt)
 				end
 
-				y = y + draw.GetFontHeight("msOresExtractorTitle")
+				y = y + draw.GetFontHeight("msOresExtractorTitle") + 5
 			end
 		end
 
@@ -366,7 +368,9 @@ if SERVER then
 
 			for rarity, _ in pairs(RARITY_DATA) do
 				local amount = ms.Ores.GetPlayerOre(ply, rarity)
-				ms.Ores.TakePlayerOre(ply, rarity, amount)
+				if amount > 0 then
+					ms.Ores.TakePlayerOre(ply, rarity, amount)
+				end
 			end
 
 			ms.Ores.PlayerExtractionCounts[steamid] = (ms.Ores.PlayerExtractionCounts[steamid] or 0) + 1
