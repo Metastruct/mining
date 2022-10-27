@@ -9,7 +9,7 @@ if CLIENT then
 		-- Check if the client wants to see the message
 		if (importanceLvl or 0) < Ores.Settings.ReduceMessages:GetInt() then return end
 
-		chat.AddText(Color(230,130,65)," ♦ [Ores] ",color_white,txt)
+		chat.AddText(Color(230, 130, 65)," ♦ [Ores] ", color_white, txt)
 	end)
 
 	net.Receive("ms.Ores_UpdateSpecialDay",function()
@@ -44,6 +44,7 @@ local function AddOre(
 		ambSoundVolume,
 		ambSoundLevel,
 		hidden)
+
 	Ores.__R[id] = {
 		Name = name,
 		Suffix = suffix, -- Placed after the ore's name on the HUD
@@ -55,7 +56,7 @@ local function AddOre(
 		NextRarityId = nextRarity,
 		AmbientSound = ambSoundPath,
 		AmbientPitch = ambSoundPitch,
-		AmbientVolume = ambSoundVolume and ambSoundVolume/3,
+		AmbientVolume = ambSoundVolume and ambSoundVolume / 3,
 		AmbientLevel = ambSoundLevel,
 		Hidden = hidden or false
 	}
@@ -71,8 +72,8 @@ AddOre(0,
 	"",
 	10,
 	5,
-	Color(25,25,25),
-	Color(75,75,75),
+	Color(25, 25, 25),
+	Color(75, 75, 75),
 	2,
 	nil,
 	nil,nil,nil,nil,
@@ -84,8 +85,8 @@ AddOre(1,
 	nil,
 	40,
 	25,
-	Color(255,77,0),
-	Color(225,100,40),
+	Color(255, 77, 0),
+	Color(225, 100, 40),
 	0.7,
 	2
 )
@@ -95,8 +96,8 @@ AddOre(2,
 	nil,
 	65,
 	75,
-	Color(255,255,255),
-	Color(200,235,235),
+	Color(255, 255, 255),
+	Color(200, 235, 235),
 	0.5,
 	3
 )
@@ -106,11 +107,11 @@ AddOre(3,
 	nil,
 	90,
 	300,
-	Color(255,255,0),
-	Color(225,225,0),
+	Color(255, 255, 0),
+	Color(225, 225, 0),
 	0.3,
 	4,
-	"ambient/levels/labs/machine_ring_resonance_loop1.wav",30,0.6,75
+	"ambient/levels/labs/machine_ring_resonance_loop1.wav", 30, 0.6, 75
 )
 
 AddOre(4,
@@ -118,11 +119,38 @@ AddOre(4,
 	nil,
 	115,
 	500,
-	Color(153,255,237),
-	Color(140,255,235),
+	Color(153, 255, 237),
+	Color(140, 255, 235),
 	0.3,
 	nil,
-	"ambient/levels/citadel/field_loop3.wav",65,0.9,78,
+	"ambient/levels/citadel/field_loop3.wav", 65, 0.9, 78,
+	true
+)
+
+-- magma cave ores
+AddOre(18,
+	"Argonite",
+	nil,
+	40,
+	1,
+	Color(255, 20, 50),
+	Color(255, 20, 50),
+	0.3,
+	nil,
+	nil, nil, nil, nil,
+	true
+)
+
+AddOre(19,
+	"Detonite",
+	nil,
+	1,
+	1,
+	Color(255, 0, 0),
+	Color(255, 0, 0),
+	0.3,
+	nil,
+	"hl1/ambience/labdrone2.wav", 25, 0.3, 78,
 	true
 )
 
@@ -132,15 +160,15 @@ for k,v in next,Ores.__R do
 	Ores.__E[v.Name:upper()] = k
 end
 
-function Ores.GetPlayerOre(self,rarity)
-	assert(self and self:IsPlayer(),"[Ores] First argument is not a player")
-	assert(isnumber(rarity) and Ores.__R and Ores.__R[rarity],"[Ores] Rarity argument is invalid")
+function Ores.GetPlayerOre(self, rarity)
+	assert(self and self:IsPlayer(), "[Ores] First argument is not a player")
+	assert(isnumber(rarity) and Ores.__R and Ores.__R[rarity], "[Ores] Rarity argument is invalid")
 
-	return self:GetNWInt(Ores._nwPrefix..Ores.__R[rarity].Name,0)
+	return self:GetNWInt(Ores._nwPrefix .. Ores.__R[rarity].Name, 0)
 end
 
 function Ores.GetPlayerMultiplier(self)
-	assert(self and self:IsPlayer(),"[Ores] First argument is not a player")
+	assert(self and self:IsPlayer(), "[Ores] First argument is not a player")
 
-	return math.Clamp((SERVER and Ores.WorthMultiplier or (Ores.SpecialDay and Ores.SpecialDay.WorthMultiplier or 1)),1,5)+self:GetNWFloat(Ores._nwMult,0)
+	return math.Clamp(SERVER and Ores.WorthMultiplier or (Ores.SpecialDay and Ores.SpecialDay.WorthMultiplier or 1), 1, 5) + self:GetNWFloat(Ores._nwMult, 0)
 end
