@@ -1,7 +1,7 @@
 local ARGONITE_RARITY = 18
 local RARITY_DATA = {
 	[18] = 1000, -- argonite
-	[19] = 1500, -- detonite
+	[19] = 1750, -- detonite
 }
 
 local EXTRACTION_COUNT_PER_DAY = 8
@@ -150,7 +150,7 @@ if CLIENT then
 		function oresPanel:Paint(w, h)
 			drawPanelList(self, w, h)
 
-			local y = 0
+			local y = 25
 			for rarity, rarity_mult in pairs(RARITY_DATA) do
 				local oreData = ms.Ores.__R[rarity]
 				local amount = ms.Ores.GetPlayerOre(LocalPlayer(), rarity)
@@ -167,7 +167,7 @@ if CLIENT then
 					surface.SetFont("DermaDefault")
 					txt = "+ " .. string.Comma(math.ceil((oreData.Worth * amount) * rarity_mult))
 					txtW, txtH = surface.GetTextSize(txt)
-					surface.SetTextPos(w - 4 - txtW, txtH)
+					surface.SetTextPos(w - 4 - txtW, y + txtH)
 					surface.SetTextColor(GREEN_COLOR)
 					surface.DrawText(txt)
 				end
