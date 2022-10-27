@@ -332,6 +332,14 @@ if SERVER then
 			SafeRemoveEntity(ent)
 		end
 	end)
+
+	hook.Add("PlayerTriggeredMineCollapse", "magma_cave", function(ply, _, _, isDefaultRarityData)
+		if isDefaultRarityData and ply.IsInZone and ply:IsInZone("volcano") then
+			return {
+				{ Rarity = 0, Chance = 100 },
+			}
+		end
+	end)
 end
 
 if CLIENT then
