@@ -1,4 +1,4 @@
-local DETONITE_RARITY = 20
+local DETONITE_RARITY = 19
 
 local function explode(ent)
 	local effectData = EffectData()
