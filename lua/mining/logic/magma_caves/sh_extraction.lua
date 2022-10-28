@@ -322,10 +322,6 @@ if SERVER then
 	hook.Add("KeyPress", "mining_extraction_npc", function(ply, key)
 		if key ~= IN_USE then return end
 
-		-- based on sv_anticheat.lua things, deny if chips, teleport, etc...
-		if isnumber(ply._miningCooldown) and ply._miningCooldown > CurTime() then return end
-		if ply._miningBlocked then return end
-
 		local npc = ply:GetEyeTrace().Entity
 		if not npc:IsValid() then return end
 
@@ -453,6 +449,10 @@ if SERVER then
 		end
 
 		if not isInRange then return end
+
+		-- based on sv_anticheat.lua things, deny if chips, teleport, etc...
+		if isnumber(ply._miningCooldown) and ply._miningCooldown > CurTime() then return end
+		if ply._miningBlocked then return end
 
 		local op = net.ReadString()
 		if op == "GiveOres" then
