@@ -1,5 +1,6 @@
 local DETONITE_RARITY = 19
 local TIME_TO_NPC = 30 -- timed just right normally... 30s from a lava lake to the npc
+local MIN_DIST_TO_ROCK = 200
 
 local function explode(ent)
 	local effectData = EffectData()
@@ -90,7 +91,7 @@ local function spawnDetonite(tr)
 	local target_pos = tr.HitPos + tr.HitNormal * 10
 
 	-- dont spawn all of them together
-	for _, nearby_ent in ipairs(ents.FindInSphere(target_pos, 300)) do
+	for _, nearby_ent in ipairs(ents.FindInSphere(target_pos, MIN_DIST_TO_ROCK)) do
 		if nearby_ent:GetClass() == "mining_rock" and nearby_ent:GetRarity() == DETONITE_RARITY then
 			return
 		end
@@ -111,8 +112,6 @@ local function spawnDetonite(tr)
 	rock:Spawn()
 	rock.OriginalRock = true
 	rock.OnTakeDamage = function() SafeRemoveEntity(rock) end
-
-
 
 	rock:AddEffects(EF_ITEM_BLINK)
 
