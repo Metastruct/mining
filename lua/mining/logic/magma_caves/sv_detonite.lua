@@ -94,8 +94,8 @@ local function spawnDetonite(tr)
 	rock.OnTakeDamage = function() SafeRemoveEntity(rock) end
 
 	local stuck_tr = util.TraceLine({
-		start = this:GetPos(),
-		endpos = this:GetPos() + Vector(0, 0, 1000),
+		start = rock:GetPos(),
+		endpos = rock:GetPos() + Vector(0, 0, 1000),
 		mask = MASK_SOLID_BRUSHONLY
 	})
 
