@@ -67,13 +67,15 @@ hook.Add("PlayerReceivedOre", "miningDetonite", function(ply, amount, rarity)
 	if ms.Ores.GetPlayerOre(ply, DETONITE_RARITY) >= 5 then return end -- above 5 block re-creating the timer so you can't wait endlessly for detonite
 
 	local timerName = ("mining_detonite_[%d]"):format(ply:EntIndex())
+	local ticks = 0
 	timer.Create(timerName, 30, 1, function() -- timed just right normally... 30s from a lava lake to the npc
 		timer.Create(timerName, 2, 0, function()
 			local detoniteAmount = ms.Ores.GetPlayerOre(ply, DETONITE_RARITY)
 			if detoniteAmount > 0 then
-				ply:EmitSound("common/wpn_denyselect.wav", 100)
 				ply:EmitSound("common/warning.wav", 100)
-				ms.Ores.TakePlayerOre(ply, DETONITE_RARITY, 1)
+
+				ticks = ticks + 1
+				ms.Ores.TakePlayerOre(ply, DETONITE_RARITY, ticks * 2)
 				return
 			end
 
@@ -90,6 +92,17 @@ local function spawnDetonite(tr)
 	rock:Spawn()
 	rock.OriginalRock = true
 	rock.OnTakeDamage = function() SafeRemoveEntity(rock) end
+
+	local stuck_tr = util.TraceLine({
+		start = this:GetPos(),
+		endpos = this:GetPos() + Vector(0, 0, 1000),
+		mask = MASK_SOLID_BRUSHONLY
+	})
+
+	if isstring(stuck_tr.HitTexture) and stuck_tr.HitTexture:match("^TOOLS%/") then
+		SafeRemoveEntity(rock)
+		return
+	end
 
 	rock:AddEffects(EF_ITEM_BLINK)
 
