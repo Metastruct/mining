@@ -87,24 +87,32 @@ hook.Add("PlayerReceivedOre", "miningDetonite", function(ply, amount, rarity)
 end)
 
 local function spawnDetonite(tr)
+	local target_pos = tr.HitPos + tr.HitNormal * 10
+
+	-- dont spawn all of them together
+	for _, nearby_ent in ipairs(ents.FindInSphere(target_pos, 300)) do
+		if nearby_ent:GetClass() == "mining_rock" and nearby_ent:GetRarity() == DETONITE_RARITY then
+			return
+		end
+	end
+
+	local stuck_tr = util.TraceLine({
+		start = target_pos,
+		endpos = target_pos + Vector(0, 0, 1000),
+		mask = MASK_SOLID_BRUSHONLY
+	})
+
+	if isstring(stuck_tr.HitTexture) and stuck_tr.HitTexture:match("^TOOLS%/") then return end
+
 	local rock = ents.Create("mining_rock")
-	rock:SetPos(tr.HitPos + tr.HitNormal * 10)
+	rock:SetPos(target_pos)
 	rock:SetSize(math.random() < 0.33 and 2 or 1)
 	rock:SetRarity(DETONITE_RARITY)
 	rock:Spawn()
 	rock.OriginalRock = true
 	rock.OnTakeDamage = function() SafeRemoveEntity(rock) end
 
-	local stuck_tr = util.TraceLine({
-		start = rock:GetPos(),
-		endpos = rock:GetPos() + Vector(0, 0, 1000),
-		mask = MASK_SOLID_BRUSHONLY
-	})
 
-	if isstring(stuck_tr.HitTexture) and stuck_tr.HitTexture:match("^TOOLS%/") then
-		SafeRemoveEntity(rock)
-		return
-	end
 
 	rock:AddEffects(EF_ITEM_BLINK)
 

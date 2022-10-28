@@ -31,14 +31,14 @@ local function applyMiningCooldown(pl)
 
 	local now = CurTime()
 
-    -- This forgives if you haven't mined yet
-    local secondsSinceLastMineAction = now-(pl._lastMiningAction or -999999)
+	-- This forgives if you haven't mined yet
+	local secondsSinceLastMineAction = now - (pl._lastMiningAction or -999999)
 
-    if secondsSinceLastMineAction > 60*5 then return end
+	if secondsSinceLastMineAction > 60 * 5 then return end
 
-    -- This forgives once every 8 minutes and warns on the first try
-    local secondsSinceLastForgiveCooldown = now-(pl._miningNoclipForgiveTimer or -999999)
-	if secondsSinceLastForgiveCooldown > 60*8 then
+	-- This forgives once every 8 minutes and warns on the first try
+	local secondsSinceLastForgiveCooldown = now - (pl._miningNoclipForgiveTimer or -999999)
+	if secondsSinceLastForgiveCooldown > 60 * 8 then
 		pl._miningNoclipForgiveTimer = now
 
 		if not pl._miningNoclipForgiveMsgd then
@@ -51,7 +51,7 @@ local function applyMiningCooldown(pl)
 		return
 	end
 
-	pl._miningCooldown = now+20
+	pl._miningCooldown = now + 20
 end
 
 local function setLastMiningAction(pl)
@@ -71,10 +71,10 @@ hook.Add("PlayerReceivedOre",Tag,setLastMiningAction)
 hook.Add("PlayerSoldOre",Tag,setLastMiningAction)
 
 hook.Add("CanPlyGoto",Tag,function(pl)
-    if not pl:IsPlayer() then return end
+	if not pl:IsPlayer() then return end
 	if not pl._receivedOre then return end
 
-    applyMiningCooldown(pl)
+	applyMiningCooldown(pl)
 
 	if not playerHasOres(pl) then return end
 	if playerNearMiningNPC(pl) then return end
