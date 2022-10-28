@@ -169,7 +169,7 @@ end)
 
 timer.Create("mining_argonite_ore_spawning", 5, 0, generateArgoniteRocks)
 
-local function reducePlayerArgoniteOreCount(ply)
+local function reducePlayerArgoniteOreCount(ply, no_toxicity_reset)
 	if skipDeathHook then return end
 
 	local count = ms.Ores.GetPlayerOre(ply, ARGONITE_RARITY)
@@ -177,8 +177,19 @@ local function reducePlayerArgoniteOreCount(ply)
 		ms.Ores.TakePlayerOre(ply, ARGONITE_RARITY, math.ceil(count / 2))
 	end
 
-	ply.LastToxicHealth = nil
+	if not no_toxicity_reset then
+		ply.LastToxicHealth = nil
+	end
 end
 
 hook.Add("PlayerDeath", "mining_argonite_ore", reducePlayerArgoniteOreCount)
 hook.Add("PlayerSilentDeath", "mining_argonite_ore", reducePlayerArgoniteOreCount)
+
+hook.Add("CanPlyTeleport", "mining_argonite_ore", function(ply) reducePlayerArgoniteOreCount(ply, true) end)
+hook.Add("PlayerNoClip", "mining_argonite_ore", function(ply, wants_noclip)
+	if wants_noclip and ms.Ores.GetPlayerOre(ply, ARGONITE_RARITY) > 0 then
+		reducePlayerArgoniteOreCount(ply, true)
+		
+		return false
+	end
+end)
