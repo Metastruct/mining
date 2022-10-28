@@ -67,7 +67,7 @@ hook.Add("PlayerReceivedOre", "miningDetonite", function(ply, amount, rarity)
 	if ms.Ores.GetPlayerOre(ply, DETONITE_RARITY) >= 5 then return end -- above 5 block re-creating the timer so you can't wait endlessly for detonite
 
 	local timerName = ("mining_detonite_[%d]"):format(ply:EntIndex())
-	timer.Create(timerName, 15, 1, function() -- timed just right normally... 15s from a lava lake to the npc
+	timer.Create(timerName, 30, 1, function() -- timed just right normally... 30s from a lava lake to the npc
 		timer.Create(timerName, 2, 0, function()
 			local detoniteAmount = ms.Ores.GetPlayerOre(ply, DETONITE_RARITY)
 			if detoniteAmount > 0 then
