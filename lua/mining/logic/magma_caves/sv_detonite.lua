@@ -1,4 +1,5 @@
 local DETONITE_RARITY = 19
+local TIME_TO_NPC = 30 -- timed just right normally... 30s from a lava lake to the npc
 
 local function explode(ent)
 	local effectData = EffectData()
@@ -68,7 +69,8 @@ hook.Add("PlayerReceivedOre", "miningDetonite", function(ply, amount, rarity)
 
 	local timerName = ("mining_detonite_[%d]"):format(ply:EntIndex())
 	local ticks = 0
-	timer.Create(timerName, 30, 1, function() -- timed just right normally... 30s from a lava lake to the npc
+	local time_needed = TIME_TO_NPC + math.ceil(ply:GetNWInt("ms.Ores.ToxicResistance", 0) / 2)
+	timer.Create(timerName, time_needed, 1, function() --
 		timer.Create(timerName, 2, 0, function()
 			local detoniteAmount = ms.Ores.GetPlayerOre(ply, DETONITE_RARITY)
 			if detoniteAmount > 0 then
