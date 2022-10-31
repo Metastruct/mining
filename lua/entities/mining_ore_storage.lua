@@ -1,9 +1,9 @@
 AddCSLuaFile()
 
 local TEXT_DIST = 150
-local ORE_CAPACITIES = {
-	[18] = 20, -- argonite
-	[19] = 20, -- detonite
+local BAD_ORES = {
+	[18] = true, -- argonite
+	[19] = true, -- detonite
 }
 
 ENT.Type = "anim"
@@ -39,58 +39,18 @@ if SERVER then
 		self:SetNWString("OreData", table.concat(t, ";"))
 	end
 
-	function ENT:CheckOreExpiration()
-		local timerName = ("mining_storage_[%d]"):format(self:EntIndex())
-		if timer.Exists(timerName) then return end
-
-		local ticks = 0
-		local time_needed = 100
-		timer.Create(timerName, time_needed, 1, function() --
-			timer.Create(timerName, 2, 0, function()
-				local has_ores = false
-				for rarity, amount in pairs(self.Ores) do
-					if not ORE_CAPACITIES[rarity] then continue end
-
-					if amount > 0 then
-						has_ores = true
-
-						local remaining = amount - ticks * 2
-						self.Ores[rarity] = remaining
-
-						if remaining <= 0 then
-							self.Ores[rarity] = nil
-						end
-					end
-				end
-
-				self:UpdateNetworkOreData()
-				self:EmitSound("common/warning.wav", 100)
-				ticks = ticks + 1
-
-				if not has_ores then
-					timer.Remove(timerName)
-				end
-			end)
-		end)
-	end
-
 	function ENT:Touch(ent)
 		if ent:GetClass() ~= "mining_ore" then return end
 		if ent.MiningContainerCollected then return end
 
-		self.Ores[ent:GetRarity()] = (self.Ores[ent:GetRarity()] or 0) + 1
-		if ORE_CAPACITIES[ent:GetRarity()]then
-			self.Ores[ent:GetRarity()] = math.min(ORE_CAPACITIES[ent:GetRarity()], self.Ores[ent:GetRarity()])
-			self:CheckOreExpiration()
+		if not BAD_ORES[ent:GetRarity()] then
+			self.Ores[ent:GetRarity()] = (self.Ores[ent:GetRarity()] or 0) + 1
+			self:UpdateNetworkOreData()
 		end
 
 		ent.MiningContainerCollected = true
-
-		self:UpdateNetworkOreData()
 		SafeRemoveEntity(ent)
 	end
-
-	function ENT:StartTouch() end
 
 	function ENT:Use(activator)
 		if not activator:IsPlayer() then return end
