@@ -27,7 +27,7 @@ if SERVER then
 
 		self.Frame:SetAngles(ang)
 		self.Frame:SetModel("models/props_phx/construct/wood/wood_wire1x1x2.mdl")
-		self.Frame:SetMaterial("models/vgui/ibeam001_vgui")
+		self.Frame:SetMaterial("phoenix_storms/future_vents")
 		self.Frame:SetSaveValue("m_takedamage", 0)
 		self.Frame:Spawn()
 		self.Frame:SetParent(self)
