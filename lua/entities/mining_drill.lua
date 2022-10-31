@@ -50,11 +50,9 @@ if SERVER then
 		self.Frame:Spawn()
 		self.Frame:SetParent(self)
 
-		self.Saws = {
-			add_saw(self, self:GetForward() * -40 + self:GetRight() * 10),
-			add_saw(self, self:GetForward() * -40),
-			add_saw(self, self:GetForward() * -40 + self:GetRight() * -10),
-		}
+		add_saw(self, self:GetForward() * -40 + self:GetRight() * 10)
+		add_saw(self, self:GetForward() * -40)
+		add_saw(self, self:GetForward() * -40 + self:GetRight() * -10)
 
 		timer.Simple(0, function()
 			if not IsValid(self) then return end
@@ -132,8 +130,8 @@ if SERVER then
 			ang:RotateAroundAxis(self:GetRight(), CurTime() * 400 % 360)
 		end
 
-		for _, saw in ipairs(self.Saws) do
-			if IsValid(saw) then
+		for _, saw in ipairs(self:GetChildren()) do
+			if IsValid(saw) and saw:GetModel() == "models/props_junk/sawblade001a.mdl" then
 				saw:SetAngles(ang)
 			end
 		end
