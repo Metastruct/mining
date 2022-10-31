@@ -1,6 +1,8 @@
 AddCSLuaFile()
 
 local TEXT_DIST = 150
+local DETONITE_RARITY = 19
+local MAX_DETONITE = 20
 
 ENT.Type = "anim"
 ENT.Base = "base_anim"
@@ -40,6 +42,10 @@ if SERVER then
 		if ent.MiningContainerCollected then return end
 
 		self.Ores[ent:GetRarity()] = (self.Ores[ent:GetRarity()] or 0) + 1
+		if ent:GetRarity() == DETONITE_RARITY then
+			self.Ores[DETONITE_RARITY] = math.min(MAX_DETONITE, self.Ores[DETONITE_RARITY])
+		end
+
 		ent.MiningContainerCollected = true
 
 		self:UpdateNetworkOreData()
