@@ -30,12 +30,27 @@ if SERVER then
 		self.Frame:SetAngles(self:GetAngles())
 		self.Frame:Spawn()
 		self.Frame:SetParent(self)
+
+		timer.Simple(0, function()
+			if not IsValid(self) then return end
+
+			for _, child in pairs(self:GetChildren()) do
+				child:SetOwner(self:GetOwner())
+				child:SetCreator(self:GetCreator())
+
+				if child.CPPISetOwner then
+					child:CPPISetOwner(self:CPPIGetOwner())
+				end
+			end
+		end)
 	end
 
 	function ENT:Use(activator, caller)
 		if not activator:IsPlayer() then return end
 
 		local amount = ms.Ores.GetPlayerOre(activator, ARGONITE_RARITY)
+		if amount < 1 then return end
+
 		local curAmount = self:GetNWInt("ArgoniteCount", 0)
 		local newAmount = math.min(CONTAINER_CAPACITY, curAmount + amount)
 		self:SetNWInt("ArgoniteCount", newAmount)
@@ -48,6 +63,13 @@ if CLIENT then
 	local MAT = Material("models/props_combine/coredx70")
 	if MAT:IsError() then
 		MAT = Material("models/props_lab/cornerunit_cloud") -- fallback for people who dont have ep1
+	end
+
+	function ENT:ShouldDrawText()
+		if LocalPlayer():EyePos():DistToSqr(self:WorldSpaceCenter()) <= TEXT_DIST * TEXT_DIST then return true end
+		if LocalPlayer():GetEyeTrace().Entity == self then return true end
+
+		return false
 	end
 
 	function ENT:Draw()
@@ -65,7 +87,7 @@ if CLIENT then
 
 		self:DrawModel()
 
-		if LocalPlayer():EyePos():DistToSqr(self:WorldSpaceCenter()) <= TEXT_DIST * TEXT_DIST then
+		if self:ShouldDrawText() then
 			cam.IgnoreZ(true)
 			cam.Start2D()
 				local pos = self:WorldSpaceCenter():ToScreen()

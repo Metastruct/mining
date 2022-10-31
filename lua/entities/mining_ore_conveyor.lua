@@ -26,9 +26,8 @@ if SERVER then
 		ang:RotateAroundAxis(self:GetUp(), 90)
 
 		self.Frame:SetAngles(ang)
-		self.Frame:SetModel("models/props_phx/construct/wood/wood_wire1x1x2.mdl")
+		self.Frame:SetModel("models/props_phx/construct/metal_wire1x1x2.mdl")
 		self.Frame:SetMaterial("phoenix_storms/future_vents")
-		self.Frame:SetSaveValue("m_takedamage", 0)
 		self.Frame:Spawn()
 		self.Frame:SetParent(self)
 
@@ -44,6 +43,19 @@ if SERVER then
 		self.Trigger.Touch = function(_, ent)
 			self:Touch(ent)
 		end
+
+		timer.Simple(0, function()
+			if not IsValid(self) then return end
+
+			for _, child in pairs(self:GetChildren()) do
+				child:SetOwner(self:GetOwner())
+				child:SetCreator(self:GetCreator())
+
+				if child.CPPISetOwner then
+					child:CPPISetOwner(self:CPPIGetOwner())
+				end
+			end
+		end)
 	end
 
 	function ENT:Think()
