@@ -160,6 +160,12 @@ if SERVER then
 		ore:Spawn()
 		ore:PhysWake()
 
+		if self.CPPIGetOwner then
+			ore.GraceOwner = self:CPPIGetOwner()
+			ore.GraceOwnerExpiry = CurTime() + (60 * 60)
+			SafeRemoveEntityDelayed(ore, 2 * 60)
+		end
+
 		constraint.NoCollide(ore, self, 0, 0)
 
 		self.NextDrilledOre = CurTime() + (in_volcano and ARGONITE_ORE_PRODUCTION_RATE or NORMAL_ORE_PRODUCTION_RATE)
