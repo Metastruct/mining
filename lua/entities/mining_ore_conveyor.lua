@@ -73,14 +73,14 @@ if SERVER then
 		if not IsValid(phys) then return end
 
 		local coef = -200---0.1 * phys:GetMass() * 200
-		local forward_force = coef * self:GetRight()
+		local forwardForce = coef * self:GetRight()
 
-		local local_pos = -self:WorldToLocal(ent:GetPos())
-		local_pos.z = 0
-		local_pos.y = 0
+		local localPos = -self:WorldToLocal(ent:GetPos())
+		localPos.z = 0
+		localPos.y = 0
 
-		local pull_force = 10 * self:GetPhysicsObject():LocalToWorldVector(local_pos)
-		local force = forward_force + pull_force
+		local pullForce = 10 * self:GetPhysicsObject():LocalToWorldVector(localPos)
+		local force = forwardForce + pullForce
 		force.z = 0
 
 		if ent:IsPlayer() or ent:IsNPC() then
