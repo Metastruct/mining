@@ -44,13 +44,20 @@ if SERVER then
 		self.Trigger.Touch = function(_, ent)
 			self:Touch(ent)
 		end
+	end
 
-		timer.Simple(0, function()
-			if not IsValid(self) then return end
-
+	function ENT:Think()
+		if not self.SndLoop then
 			self.SndLoop = CreateSound(self, "ambient/machines/refinery_loop_1.wav")
 			self.SndLoop:PlayEx(0.25, 100)
-		end)
+
+			return
+		end
+
+		if not self.SndLoop:IsPlaying() then
+			self.SndLoop:Stop()
+			self.SndLoop:PlayEx(0.25, 100)
+		end
 	end
 
 	function ENT:OnRemove()
