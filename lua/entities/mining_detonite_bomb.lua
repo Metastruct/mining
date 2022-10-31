@@ -40,6 +40,7 @@ if SERVER then
 	function ENT:Use(activator)
 		if not activator:IsPlayer() then return end
 		if self.CPPIGetOwner and self:CPPIGetOwner() ~= activator then return end
+		if not activator:IsInZone("cave") then return end -- lets not annoy people in build
 
 		local cur_amount = self:GetNWInt("DetoniteAmount", 0)
 		if cur_amount < BOMB_CAPACITY then
@@ -71,6 +72,8 @@ if SERVER then
 				net.SendPVS(ent:GetPos())
 
 				ent:Kill()
+			elseif ent:GetClass() == "mining_detonite_bomb" then
+				SafeRemoveEntity(ent)
 			end
 		end
 
@@ -130,7 +133,7 @@ if CLIENT then
 				surface.SetTextPos(pos.x - tw / 2, pos.y + th * 2)
 				surface.DrawText(text)
 			else
-				text = ("[ %s ] Explode"):format(key)
+				text = bomb.CPPIGetOwner and bomb:CPPIGetOwner() == LocalPlayer() and ("[ %s ] Explode"):format(key) or "Ready to explode"
 				tw, th = surface.GetTextSize(text)
 
 				surface.SetTextPos(pos.x - tw / 2, pos.y + th / 2)
