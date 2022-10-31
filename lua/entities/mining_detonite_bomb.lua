@@ -25,13 +25,14 @@ if SERVER then
 	end
 
 	function ENT:Touch(ent)
+		local cur_amount = self:GetNWInt("DetoniteAmount", 0)
+		if cur_amount >= BOMB_CAPACITY then return end
+
 		if ent:GetClass() == "mining_ore" and ent:GetRarity() == DETONITE_RARITY then
 			if ent.MiningBombRemoved then return end
 
 			ent:Remove()
 			ent.MiningBombRemoved = true
-
-			local cur_amount = self:GetNWInt("DetoniteAmount", 0)
 			self:SetNWInt("DetoniteAmount", math.min(BOMB_CAPACITY, cur_amount + 1))
 		end
 	end
