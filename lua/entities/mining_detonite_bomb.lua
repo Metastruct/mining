@@ -10,7 +10,7 @@ ENT.PrintName = "Detonite Bomb"
 ENT.Author = "Earu"
 ENT.Category = "Mining"
 ENT.RenderGroup = RENDERGROUP_OPAQUE
-ENT.Spawnable = false
+ENT.Spawnable = true
 ENT.ClassName = "mining_detonite_bomb"
 
 if SERVER then
