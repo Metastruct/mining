@@ -1,7 +1,7 @@
 local ARGONITE_RARITY = 18
 local RARITY_DATA = {
 	[18] = 1000, -- argonite
-	[19] = 10, -- detonite
+	[19] = 2000, -- detonite
 }
 
 local EXTRACTION_COUNT_PER_DAY = 8
