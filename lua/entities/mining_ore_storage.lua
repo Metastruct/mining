@@ -42,6 +42,7 @@ if SERVER then
 	function ENT:Touch(ent)
 		if ent:GetClass() ~= "mining_ore" then return end
 		if ent.MiningContainerCollected then return end
+		if self.CPPIGetOwner and ent.GraceOwner ~= self:CPPIGetOwner() then return end -- lets not have people highjack each others
 
 		if not BAD_ORES[ent:GetRarity()] then
 			self.Ores[ent:GetRarity()] = (self.Ores[ent:GetRarity()] or 0) + 1
