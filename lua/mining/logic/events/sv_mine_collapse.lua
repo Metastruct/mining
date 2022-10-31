@@ -61,7 +61,7 @@ local function spawnRockDebris(rocks, pos, ang)
 	return rock
 end
 
-local function checkExistence(fallingRock, miningRock, originalPos, checkOffset)
+local function checkExistence(fallingRock, miningRock, originalPos)
 	if IsValid(fallingRock) then
 		SafeRemoveEntity(fallingRock)
 
@@ -103,7 +103,7 @@ local function checkExistence(fallingRock, miningRock, originalPos, checkOffset)
 	SafeRemoveEntityDelayed(miningRock, COLLAPSE_DURATION * 2)
 end
 
-local function spawnFallingRockDebris(pos, originalPos, checkOffset, rarityData)
+local function spawnFallingRockDebris(pos, originalPos, rarityData)
 	table.sort(rarityData, function(a, b) return a.Chance < b.Chance end)
 
 	local fallingRock = ents.Create("prop_physics")
@@ -141,7 +141,7 @@ local function spawnFallingRockDebris(pos, originalPos, checkOffset, rarityData)
 		miningRock:SetParent(fallingRock)
 
 		timer.Create(("mining_collapse_check_[%d]"):format(miningRock:EntIndex()), 2, COLLAPSE_DURATION / 2, function()
-			checkExistence(fallingRock, miningRock, originalPos, checkOffset)
+			checkExistence(fallingRock, miningRock, originalPos)
 		end)
 	else
 		SafeRemoveEntityDelayed(fallingRock, 2)
@@ -177,16 +177,17 @@ local function playSoundForDuration(sound_path, delay)
 	end)
 end
 
-function Ores.MineCollapse(ply, delay, rarityData)
+function Ores.MineCollapse(ply_or_pos, delay, rarityData)
 	local rocks = {}
-	local pos = ply:GetPos()
-	local plyHeight = ply:OBBMaxs().z
+	local pos = type(ply_or_pos) == "player" and ply_or_pos:GetPos() or ply_or_pos
 
 	rarityData = rarityData or DEFAULT_RARITY_DATA
 
-	local newRarityData = hook.Run("PlayerTriggeredMineCollapse", ply, delay, rarityData, rarityData == DEFAULT_RARITY_DATA)
-	if istable(newRarityData) then
-		rarityData = newRarityData
+	if type(ply_or_pos) == "player" then
+		local newRarityData = hook.Run("PlayerTriggeredMineCollapse", ply_or_pos, delay, rarityData, rarityData == DEFAULT_RARITY_DATA)
+		if istable(newRarityData) then
+			rarityData = newRarityData
+		end
 	end
 
 	playSoundForDuration("ambient/atmosphere/terrain_rumble1.wav", RUMBLE_DURATION)
@@ -209,7 +210,7 @@ function Ores.MineCollapse(ply, delay, rarityData)
 
 			if not util.IsInWorld(fallingRockPos) then continue end
 
-			spawnFallingRockDebris(fallingRockPos, pos, Vector(0, 0, plyHeight), rarityData)
+			spawnFallingRockDebris(fallingRockPos, pos, rarityData)
 		end
 	end)
 
