@@ -52,11 +52,11 @@ if SERVER then
 	function ENT:AddArgonite(amount)
 		if self:GetNWBool("ArgoniteOverload") then return end
 
-		local cur_amount = self:GetNWInt("ArgoniteCount", 0)
-		local new_amount = math.min(CONTAINER_CAPACITY, cur_amount + amount * 10)
-		self:SetNWInt("ArgoniteCount", new_amount)
+		local curAmount = self:GetNWInt("ArgoniteCount", 0)
+		local newAmount = math.min(CONTAINER_CAPACITY, curAmount + amount * 10)
+		self:SetNWInt("ArgoniteCount", newAmount)
 
-		if new_amount >= CONTAINER_CAPACITY then
+		if newAmount >= CONTAINER_CAPACITY then
 			-- proper timing for the meltdown
 			self:SetNWBool("ArgoniteOverload", true)
 			self.LeakingSound = CreateSound(self, "ambient/gas/steam_loop1.wav")
@@ -67,10 +67,10 @@ if SERVER then
 					return
 				end
 
-				new_amount = math.max(0, new_amount - 2.15)
-				self:SetNWInt("ArgoniteCount", new_amount)
+				newAmount = math.max(0, newAmount - 2.15)
+				self:SetNWInt("ArgoniteCount", newAmount)
 
-				if new_amount <= 0 then
+				if newAmount <= 0 then
 					self:SetNWBool("ArgoniteOverload", false)
 					timer.Remove("ArgoniteContainerEmptying")
 					self.LeakingSound:FadeOut(1)
