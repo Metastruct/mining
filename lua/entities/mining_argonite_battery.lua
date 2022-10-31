@@ -87,6 +87,7 @@ if CLIENT then
 	end
 
 	hook.Add("HUDPaint", "mining_argonite_battery", function()
+		local color = ms.Ores.__R[ARGONITE_RARITY].PhysicalColor
 		for _, battery in ipairs(ents.FindByClass("mining_argonite_battery")) do
 			if battery:ShouldDrawText() then
 				local pos = battery:WorldSpaceCenter():ToScreen()
