@@ -84,14 +84,13 @@ if CLIENT then
 
 		render.MaterialOverride()
 		render.SetColorModulation(1, 1, 1)
+	end
 
-		self:DrawModel()
-
-		if self:ShouldDrawText() then
-			cam.IgnoreZ(true)
-			cam.Start2D()
-				local pos = self:WorldSpaceCenter():ToScreen()
-				local text = ("%d%%"):format((self:GetNWInt("ArgoniteCount", 0) / CONTAINER_CAPACITY) * 100)
+	hook.Add("HUDPaint", "mining_argonite_battery", function()
+		for _, battery in ipairs(ents.FindByClass("mining_argonite_battery")) do
+			if battery:ShouldDrawText() then
+				local pos = battery:WorldSpaceCenter():ToScreen()
+				local text = ("%d%%"):format((battery:GetNWInt("ArgoniteCount", 0) / CONTAINER_CAPACITY) * 100)
 				surface.SetFont("DermaLarge")
 				local tw, th = surface.GetTextSize(text)
 				surface.SetTextColor(color)
@@ -108,8 +107,7 @@ if CLIENT then
 				tw, th = surface.GetTextSize(text)
 				surface.SetTextPos(pos.x - tw / 2, pos.y + th)
 				surface.DrawText(text)
-			cam.End2D()
-			cam.IgnoreZ(false)
+			end
 		end
-	end
+	end)
 end
