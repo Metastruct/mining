@@ -215,12 +215,13 @@ if CLIENT then
 	local WHITE_COLOR = Color(255, 255, 255)
 	function ENT:Draw()
 		self:DrawModel()
+	end
 
-		if self:ShouldDrawText() then
-			cam.IgnoreZ(true)
-			cam.Start2D()
-				local pos = self:WorldSpaceCenter():ToScreen()
-				local text = ("%d%%"):format((self:GetNWInt("Energy", 0) / MAX_ENERGY) * 100)
+	hook.Add("HUDPaint", "mining_drill", function()
+		for _, drill in ipairs(ents.FindByClass("mining_drill")) do
+			if drill:ShouldDrawText() then
+				local pos = drill:WorldSpaceCenter():ToScreen()
+				local text = ("%d%%"):format((drill:GetNWInt("Energy", 0) / MAX_ENERGY) * 100)
 				surface.SetFont("DermaLarge")
 				local tw, th = surface.GetTextSize(text)
 				surface.SetTextColor(WHITE_COLOR)
@@ -231,8 +232,7 @@ if CLIENT then
 				tw, th = surface.GetTextSize(text)
 				surface.SetTextPos(pos.x - tw / 2, pos.y - th * 2)
 				surface.DrawText(text)
-			cam.End2D()
-			cam.IgnoreZ(false)
+			end
 		end
-	end
+	end)
 end
