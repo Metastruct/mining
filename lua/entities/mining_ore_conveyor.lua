@@ -80,8 +80,10 @@ if SERVER then
 
 	local VECTOR_ZERO = Vector(0, 0, 0)
 	local BAD_CLASSES = {
-		--player = true,
-		ore_conveyor = true,
+		player = true,
+		mining_ore_conveyor = true,
+		mining_ore_storage = true,
+		mining_drill = true,
 	}
 	function ENT:Touch(ent)
 		if self.Frame == ent then return end
