@@ -3,6 +3,7 @@ AddCSLuaFile()
 local TEXT_DIST = 150
 local DETONITE_RARITY = 19
 local BOMB_CAPACITY = 5
+local TIME_TO_DETONATION = 4
 
 ENT.Type = "anim"
 ENT.Base = "base_anim"
@@ -37,23 +38,7 @@ if SERVER then
 		end
 	end
 
-	function ENT:Use(activator)
-		if not activator:IsPlayer() then return end
-		if self.CPPIGetOwner and self:CPPIGetOwner() ~= activator then return end
-		if not activator:IsInZone("cave") then return end -- lets not annoy people in build
-
-		local cur_amount = self:GetNWInt("DetoniteAmount", 0)
-		if cur_amount < BOMB_CAPACITY then
-			local ply_amount = ms.Ores.GetPlayerOre(activator, DETONITE_RARITY)
-			if ply_amount > 0 then
-				local amount_to_add = math.min(BOMB_CAPACITY - cur_amount, ply_amount)
-				ms.Ores.TakePlayerOre(activator, DETONITE_RARITY, amount_to_add)
-				self:SetNWInt("DetoniteAmount", cur_amount + amount_to_add)
-			end
-
-			return
-		end
-
+	function ENT:Detonate()
 		for _ = 1, math.random(8, 16) do
 			local pos = self:WorldSpaceCenter() + VectorRand() * 300
 			local expl = ents.Create("env_explosion")
@@ -77,11 +62,43 @@ if SERVER then
 			end
 		end
 
-		ms.Ores.MineCollapse(activator, 60, {
-			[0] = 100,
-		})
-
 		SafeRemoveEntity(self)
+	end
+
+	function ENT:Use(activator)
+		if not activator:IsPlayer() then return end
+		if self.CPPIGetOwner and self:CPPIGetOwner() ~= activator then return end
+		if not activator:IsInZone("cave") then return end -- lets not annoy people in build
+
+		local cur_amount = self:GetNWInt("DetoniteAmount", 0)
+		if cur_amount < BOMB_CAPACITY then
+			local ply_amount = ms.Ores.GetPlayerOre(activator, DETONITE_RARITY)
+			if ply_amount > 0 then
+				local amount_to_add = math.min(BOMB_CAPACITY - cur_amount, ply_amount)
+				ms.Ores.TakePlayerOre(activator, DETONITE_RARITY, amount_to_add)
+				self:SetNWInt("DetoniteAmount", cur_amount + amount_to_add)
+			end
+
+			return
+		end
+
+		self:SetNWBool("Detonating", true)
+		local original_pos = activator:GetPos()
+		local i = 0
+		timer.Create(("mining_detonite_bomb_[%d]"):format(self:EntIndex()), 1, TIME_TO_DETONATION, function()
+			if not IsValid(self) then return end
+
+			i = i + 1
+			self:EmitSound(")buttons/button17.wav", 100, 80 + 20 * i)
+
+			if i >= TIME_TO_DETONATION then
+				self:Detonate()
+
+				ms.Ores.MineCollapse(original_pos, 60, {
+					[0] = 100,
+				})
+			end
+		end)
 	end
 end
 
@@ -131,6 +148,12 @@ if CLIENT then
 				tw, th = surface.GetTextSize(text)
 
 				surface.SetTextPos(pos.x - tw / 2, pos.y + th * 2)
+				surface.DrawText(text)
+			elseif bomb:GetNWBool("Detonating", false) then
+				text = "DETONATING!!!"
+				tw, th = surface.GetTextSize(text)
+
+				surface.SetTextPos(pos.x - tw / 2, pos.y + th / 2)
 				surface.DrawText(text)
 			else
 				text = bomb.CPPIGetOwner and bomb:CPPIGetOwner() == LocalPlayer() and ("[ %s ] Explode"):format(key) or "Ready to explode"
