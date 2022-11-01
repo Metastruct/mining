@@ -107,7 +107,7 @@ if CLIENT then
 
 							surface.SetTextColor(COLOR_WHITE)
 							surface.SetTextPos(pos.x, pos.y + (i * th))
-							surface.DrawText(("[ %s ] Claim Ores"):format(key))
+							surface.DrawText(("[ %s ] Claim ore(s)"):format(key))
 						end
 					end
 				end
