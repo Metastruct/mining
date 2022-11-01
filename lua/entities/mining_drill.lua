@@ -17,8 +17,14 @@ ENT.ClassName = "mining_drill"
 
 if SERVER then
 	local ACCEPTED_ENERGY_ENTS = {
-		mining_argonite_battery = function(ent) return ent:GetNWInt("ArgoniteCount", 0) end,
-		mining_coal_burner = function(ent) return math.ceil(ent:GetNWInt("CoalCount", 0) / 2) end,
+		mining_argonite_battery = {
+			get = function(ent) return ent:GetNWInt("ArgoniteCount", 0) end,
+			set = function(ent, value) ent:SetNWInt("ArgoniteCount", value) end,
+		},
+		mining_coal_burner = {
+			get = function(ent) return math.ceil(ent:GetNWInt("CoalCount", 0) / 2) end,
+			set = function(ent, value) ent:SetNWInt("CoalCount", value) end,
+		}
 	}
 
 	local function add_saw(self, offset)
@@ -74,12 +80,20 @@ if SERVER then
 	end
 
 	function ENT:StartTouch(ent)
-		if ACCEPTED_ENERGY_ENTS[ent:GetClass()] then
-			local energy_amount = ACCEPTED_ENERGY_ENTS[ent:GetClass()](ent)
-			local cur_energy = self:GetNWInt("Energy", 0)
-			self:SetNWInt("Energy", math.min(MAX_ENERGY, cur_energy + energy_amount))
+		if ent.MiningInvalidPower then return end
 
-			SafeRemoveEntity(ent)
+		if ACCEPTED_ENERGY_ENTS[ent:GetClass()] then
+			local energy_amount = ACCEPTED_ENERGY_ENTS[ent:GetClass()].get(ent)
+			local cur_energy = self:GetNWInt("Energy", 0)
+			local energy_to_add = math.min(MAX_ENERGY - cur_energy, energy_amount)
+
+			self:SetNWInt("Energy", math.min(MAX_ENERGY, cur_energy + energy_to_add))
+			ACCEPTED_ENERGY_ENTS[ent:GetClass()].set(ent, math.max(0, energy_amount - energy_to_add))
+
+			if energy_amount - energy_to_add < 1 then
+				SafeRemoveEntity(ent)
+				ent.MiningInvalidPower = true
+			end
 
 			self:EmitSound(")physics/surfaces/underwater_impact_bullet3.wav", 75, 70)
 		end
