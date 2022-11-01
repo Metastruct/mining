@@ -1,27 +1,96 @@
---[[
-	UNFINISHED, DIDNT FEEL RIGHT, AUTOMATING BATTERIES RUINS PLAYER INVOLVMENT, AND ALLOWS INFINITE AFK
-	KEEPING IT AS ADMIN ONLY FOR FUN ETC
-]]
-
-
 AddCSLuaFile()
 
-local CONTAINER_CAPACITY = 150
-local TEXT_DIST = 150
 local ARGONITE_RARITY = 18
-local ARGONITE_EXTRACTION_RATE = 5 -- 1 every 5s
+local BATTERY_CAPACITY = 150
+local TEXT_DIST = 150
 
 ENT.Type = "anim"
 ENT.Base = "base_anim"
-ENT.PrintName = "Argonite Transformer"
+ENT.PrintName = "Argonite Transformer MK1"
 ENT.Author = "Earu"
 ENT.Category = "Mining"
 ENT.RenderGroup = RENDERGROUP_OPAQUE
 ENT.Spawnable = true
-ENT.AdminOnly = true
-ENT.ClassName = "mining_argonite_transformer"
+ENT.ClassName = "mining_argonite_transformer_mk1"
 
 if SERVER then
+	local teslas = {}
+	local function do_zap_effect(pos, ent)
+		if #teslas > 4 then
+			for k, v in pairs(teslas) do
+				if not IsValid(v) then table.remove(teslas, k) continue end
+
+				v:Remove()
+				table.remove(teslas, k)
+				break
+			end
+		end
+
+		local tesla = ents.Create("point_tesla")
+		tesla:SetPos(pos)
+		tesla:SetKeyValue("texture", "trails/electric.vmt")
+		tesla:SetKeyValue("m_iszSpriteName", "sprites/physbeam.vmt")
+		--tesla:SetKeyValue("m_SourceEntityName", "secret_tesla")
+		tesla:SetKeyValue("m_Color", "255 20 50")
+		tesla:SetKeyValue("m_flRadius",  "10")
+		tesla:SetKeyValue("interval_min", "0.1")
+		tesla:SetKeyValue("interval_max", "0.1")
+		tesla:SetKeyValue("beamcount_min", "3")
+		tesla:SetKeyValue("beamcount_max", "3")
+		tesla:SetKeyValue("thick_min", "5")
+		tesla:SetKeyValue("thick_max", "6")
+		tesla:SetKeyValue("lifetime_min", "0.2")
+		tesla:SetKeyValue("lifetime_max", "0.2")
+		--tesla:SetKeyValue("m_SoundName", "ambient/levels/labs/electric_explosion"..math.random(1,5)..".wav")
+		--tesla:EmitSound("ambient/levels/labs/electric_explosion"..math.random(1,5)..".wav", 75, 100, 0.5)
+		tesla:Spawn()
+		tesla:Activate()
+
+		--tesla:SetParent(ent)
+
+		timer.Simple(0.3, function()
+			if not IsValid(tesla) then return end
+
+			tesla:SetKeyValue("thick_min", "5")
+			tesla:SetKeyValue("thick_max", "6")
+			tesla:SetKeyValue("m_flRadius",  "20")
+			tesla:SetKeyValue("beamcount_min", "3")
+			tesla:SetKeyValue("beamcount_max", "3")
+		end)
+
+		tesla:Fire("TurnOn", "", 0)
+		tesla:Fire("DoSpark", "", 0)
+
+		timer.Simple(0.8, function()
+			if not IsValid(tesla) then return end
+
+			tesla:SetKeyValue("thick_min", "5")
+			tesla:SetKeyValue("thick_max", "6")
+			tesla:SetKeyValue("beamcount_min", "3")
+			tesla:SetKeyValue("beamcount_max", "3")
+			tesla:SetKeyValue("m_flRadius",  "20")
+		end)
+
+		timer.Simple(1.5, function()
+			if not IsValid(tesla) then return end
+
+			tesla:SetKeyValue("thick_min", "2")
+			tesla:SetKeyValue("thick_max", "3")
+			tesla:SetKeyValue("beamcount_min", "3")
+			tesla:SetKeyValue("beamcount_max", "3")
+			tesla:SetKeyValue("m_flRadius",  "20")
+		end)
+
+		local idx = table.insert(teslas, tesla)
+		timer.Simple(2, function()
+			if IsValid(tesla) then
+				tesla:Remove()
+			end
+
+			table.remove(teslas, idx)
+		end)
+	end
+
 	local function apply_ownership(ent, parent)
 		if ent ~= parent then
 			ent:SetCreator(parent:GetCreator())
@@ -43,156 +112,133 @@ if SERVER then
 	end
 
 	function ENT:Initialize()
-		self:SetModel("models/props_wasteland/kitchen_stove002a.mdl")
-		self:SetMaterial("Models/Weapons/W_stunbaton/stunbaton")
+		local color = ms.Ores.__R[ARGONITE_RARITY].PhysicalColor
+
+		self:SetModel("models/props_phx/construct/metal_tube.mdl")
+		self:SetMaterial("effects/tvscreen_noise002a")
 		self:SetMoveType(MOVETYPE_VPHYSICS)
 		self:PhysicsInit(SOLID_VPHYSICS)
 		self:SetSolid(SOLID_VPHYSICS)
 		self:PhysWake()
-		self:SetUseType(SIMPLE_USE)
-		self.NextArgoniteExtraction = 0
+		self:SetColor(color)
+		self.BatteriesToProduce = 0
 
 		self.Frame = ents.Create("prop_physics")
-		self.Frame:SetModel("models/props_phx/construct/metal_wire1x1x2.mdl")
+		self.Frame:SetModel("models/props_phx/construct/metal_wire1x1x1.mdl")
 		self.Frame:SetMaterial("phoenix_storms/future_vents")
-		self.Frame:SetPos(self:GetPos() + self:GetForward() * 24 + self:GetUp() * 24)
+		self.Frame:SetPos(self:WorldSpaceCenter() + self:GetForward() * 24)
+		self.Frame:SetAngles(self:GetAngles())
+		self.Frame:Spawn()
+		self.Frame:SetParent(self)
+
+		self.Out = ents.Create("prop_physics")
+		self.Out:SetModel("models/props_phx/construct/metal_wire1x1.mdl")
+		self.Out:SetMaterial("phoenix_storms/stripes")
+		self.Out:SetPos(self:WorldSpaceCenter() + self:GetForward() * 30)
 
 		local ang = self:GetAngles()
 		ang:RotateAroundAxis(self:GetRight(), 90)
 
-		self.Frame:SetAngles(ang)
-		self.Frame:Spawn()
-		self.Frame:SetParent(self)
+		self.Out:SetAngles(ang)
+		self.Out:Spawn()
+		self.Out:SetParent(self)
 
-		self.Saw = ents.Create("prop_physics")
-		self.Saw:SetModel("models/props_junk/sawblade001a.mdl")
-		self.Saw:SetModelScale(3)
-		self.Saw:SetPos(self:WorldSpaceCenter() + self:GetUp() * 25)
-		self.Saw:Spawn()
-		self.Saw:SetParent(self)
-		self.Saw:SetKeyValue("classname", "mining_drill_saw")
+		self.Core = ents.Create("prop_physics")
+		self.Core:SetModel("models/hunter/misc/sphere025x025.mdl")
+		self.Core:SetModelScale(0.25)
+		self.Core:SetMaterial("models/debug/white")
+		self.Core:SetPos(self:WorldSpaceCenter())
+		self.Core:Spawn()
+		self.Core:SetParent(self)
+		self.Core:SetColor(Color(0, 0, 0, 255))
+		self.Core:Activate()
+
+		local timer_name = ("mining_argonite_transformer_mk1_[%d]"):format(self:EntIndex())
+		timer.Create(timer_name, 1, 0, function()
+			if not IsValid(self) then
+				timer.Remove(timer_name)
+				return
+			end
+
+			do_zap_effect(self:WorldSpaceCenter(), IsValid(self.Core) and self.Core or self)
+
+			if self.BatteriesToProduce > 0 then
+				self:CreateBattery()
+				self.BatteriesToProduce = math.max(0, self.BatteriesToProduce - 1)
+			end
+		end)
 
 		timer.Simple(0, function()
 			if not IsValid(self) then return end
+
 			apply_ownership(self, self)
 		end)
 	end
 
-	function ENT:RotateSaw()
-		local ang = self:GetAngles()
-		ang:RotateAroundAxis(self:GetForward(), 90)
+	function ENT:AddArgonite(amount)
+		if amount < 1 then return end
 
-		if self:CanWork() then
-			ang:RotateAroundAxis(self:GetRight(), CurTime() * 400 % 360)
-		end
+		local cur_amount = self:GetNWInt("ArgoniteCount", 0)
+		local new_amount = cur_amount + amount
+		if new_amount >= BATTERY_CAPACITY then
+			local batteries_to_produce = math.floor(new_amount / BATTERY_CAPACITY)
+			local remaining = new_amount % BATTERY_CAPACITY
 
-		for _, saw in pairs(self:GetChildren()) do
-			if saw:GetModel() == "models/props_junk/sawblade001a.mdl" then
-				saw:SetAngles(ang)
-			end
-		end
-	end
-
-	function ENT:CanWork()
-		local tr = util.TraceLine({
-			start = self:WorldSpaceCenter(),
-			endpos = self:WorldSpaceCenter() + self:GetUp() * 75,
-			mask = MASK_SOLID_BRUSHONLY,
-		})
-
-		if not tr.Hit then return false end
-
-		return true
-	end
-
-	function ENT:CheckSoundLoop()
-		if not self:CanWork() then
-			if self.SndLoop then
-				self.SndLoop:Stop()
-			end
-
-			return
-		end
-
-		if not self.SndLoop then
-			self.SndLoop = CreateSound(self, "ambient/spacebase/spacebase_drill.wav")
-			self.SndLoop:PlayEx(0.75, 100)
-		elseif self.SndLoop and not self.SndLoop:IsPlaying() then
-			self.SndLoop:Stop()
-			self.SndLoop:PlayEx(0.75, 100)
+			self:SetNWInt("ArgoniteCount", remaining)
+			self.BatteriesToProduce = self.BatteriesToProduce + batteries_to_produce
 		end
 	end
 
-	function ENT:ExtractArgonite()
-		if CurTime() < self.NextArgoniteExtraction then return end
-		if not self:CanWork() then return end
+	local transformer_idx = 1
+	local function check_transformer_to_use(ply, base_transformer)
+		local transformers = {}
+		for _, t in ipairs(ents.FindByClass("mining_argonite_transformer_mk1")) do
+			if t:CPPIGetOwner() ~= ply then continue end
 
-		local new_count = self:GetNWInt("ArgoniteCount", 0) + 1
-		if new_count >= CONTAINER_CAPACITY then
-			local target_pos = self:WorldSpaceCenter() + self:GetUp() * -75
-			if util.IsInWorld(target_pos) then
-				local battery = ents.Create("mining_argonite_battery")
-				battery:SetPos(target_pos)
-				battery:Spawn()
-				battery:SetNWInt("ArgoniteCount", CONTAINER_CAPACITY)
-
-				timer.Simple(0, function()
-					if not IsValid(battery) then return end
-					if not IsValid(self) then return end
-
-					apply_ownership(battery, self)
-				end)
-
-				SafeRemoveEntityDelayed(battery, 2 * 60)
-			end
-
-			self:SetNWInt("ArgoniteCount", 0)
-			return
+			table.insert(transformers, t)
 		end
 
-		self:SetNWInt("ArgoniteCount", new_count)
-		self.NextArgoniteExtraction = CurTime() + ARGONITE_EXTRACTION_RATE
+		table.sort(transformers, function(a, b) return a:GetCreationTime() > b:GetCreationTime() end)
+
+		local transformer = transformers[transformer_idx % (#transformers + 1)]
+		if not transformer then
+			transformer_idx = 1
+			return transformers[transformer_idx] == base_transformer
+		end
+
+		return base_transformer == transformer
 	end
 
 	function ENT:Think()
-		self:CheckSoundLoop()
-		self:RotateSaw()
-		self:ExtractArgonite()
+		if not self.CPPIGetOwner then return end
 
-		self:NextThink(CurTime())
-		return true
+		local owner = self:CPPIGetOwner()
+		if not IsValid(owner) then return end
+
+		local amount = math.min(BATTERY_CAPACITY, ms.Ores.GetPlayerOre(owner, ARGONITE_RARITY))
+		if amount > 0 and check_transformer_to_use(owner, self) then
+			self:AddArgonite(amount)
+			ms.Ores.TakePlayerOre(owner, ARGONITE_RARITY, amount)
+
+			transformer_idx = transformer_idx + 1
+		end
 	end
 
-	function ENT:OnRemove()
-		if self.SndLoop then
-			self.SndLoop:Stop()
-		end
+	function ENT:CreateBattery()
+		local battery = ents.Create("mining_argonite_battery")
+		battery:SetPos(self:WorldSpaceCenter() + self:GetForward() * 50)
+		battery:SetNWInt("ArgoniteCount", BATTERY_CAPACITY)
+		battery:Spawn()
+
+		timer.Simple(0, function()
+			if IsValid(self) and IsValid(battery) then
+				apply_ownership(battery, self)
+			end
+		end)
 	end
 end
 
 if CLIENT then
-	local MAT = Material("models/props_combine/coredx70")
-	if MAT:IsError() then
-		MAT = Material("models/props_lab/cornerunit_cloud") -- fallback for people who dont have ep1
-	end
-
-	hook.Add("OnEntityCreated", "mining_transformer_drill_saw_mat", function(ent)
-		if ent:GetModel() ~= "models/props_junk/sawblade001a.mdl" then return end
-		if isfunction(ent.RenderOverride) then return end
-
-		local parent = ent:GetParent()
-		if IsValid(parent) and parent:GetClass() == "mining_argonite_transformer" then
-			ent.RenderOverride = function(self)
-				local color = ms.Ores.__R[ARGONITE_RARITY].PhysicalColor
-				render.SetColorModulation(color.r / 100, color.g / 100, color.b / 100)
-				render.MaterialOverride(MAT)
-				self:DrawModel()
-				render.MaterialOverride()
-				render.SetColorModulation(1, 1, 1)
-			end
-		end
-	end)
-
 	function ENT:ShouldDrawText()
 		if LocalPlayer():EyePos():DistToSqr(self:WorldSpaceCenter()) <= TEXT_DIST * TEXT_DIST then return true end
 		if LocalPlayer():GetEyeTrace().Entity == self then return true end
@@ -203,21 +249,4 @@ if CLIENT then
 	function ENT:Draw()
 		self:DrawModel()
 	end
-
-	hook.Add("HUDPaint", "mining_argonite_transformer", function()
-		for _, transformer in ipairs(ents.FindByClass("mining_argonite_transformer")) do
-			if not transformer:ShouldDrawText() then continue end
-
-			surface.SetFont("DermaLarge")
-
-			local pos = transformer:WorldSpaceCenter():ToScreen()
-			local text = ("Creating Battery: %d%%"):format((transformer:GetNWInt("ArgoniteCount", 0) / CONTAINER_CAPACITY) * 100)
-			local color = ms.Ores.__R[ARGONITE_RARITY].HudColor
-			local tw, th = surface.GetTextSize(text)
-
-			surface.SetTextColor(color)
-			surface.SetTextPos(pos.x - tw / 2, pos.y - th / 2)
-			surface.DrawText(text)
-		end
-	end)
 end
