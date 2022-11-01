@@ -6,12 +6,12 @@ local TEXT_DIST = 150
 
 ENT.Type = "anim"
 ENT.Base = "base_anim"
-ENT.PrintName = "Argonite Transformer MK1"
+ENT.PrintName = "Argonite Transformer"
 ENT.Author = "Earu"
 ENT.Category = "Mining"
 ENT.RenderGroup = RENDERGROUP_OPAQUE
 ENT.Spawnable = true
-ENT.ClassName = "mining_argonite_transformer_mk1"
+ENT.ClassName = "mining_argonite_transformer"
 
 if SERVER then
 	local teslas = {}
@@ -153,7 +153,7 @@ if SERVER then
 		self.Core:SetColor(Color(0, 0, 0, 255))
 		self.Core:Activate()
 
-		local timer_name = ("mining_argonite_transformer_mk1_[%d]"):format(self:EntIndex())
+		local timer_name = ("mining_argonite_transformer_[%d]"):format(self:EntIndex())
 		timer.Create(timer_name, 1, 0, function()
 			if not IsValid(self) then
 				timer.Remove(timer_name)
@@ -186,13 +186,15 @@ if SERVER then
 
 			self:SetNWInt("ArgoniteCount", remaining)
 			self.BatteriesToProduce = self.BatteriesToProduce + batteries_to_produce
+		else
+			self:SetNWInt("ArgoniteCount", new_amount)
 		end
 	end
 
 	local transformer_idx = 1
 	local function check_transformer_to_use(ply, base_transformer)
 		local transformers = {}
-		for _, t in ipairs(ents.FindByClass("mining_argonite_transformer_mk1")) do
+		for _, t in ipairs(ents.FindByClass("mining_argonite_transformer")) do
 			if t:CPPIGetOwner() ~= ply then continue end
 
 			table.insert(transformers, t)
@@ -235,6 +237,8 @@ if SERVER then
 				apply_ownership(battery, self)
 			end
 		end)
+
+		self:EmitSound(")npc/scanner/scanner_siren1.wav", 100)
 	end
 end
 
@@ -249,4 +253,24 @@ if CLIENT then
 	function ENT:Draw()
 		self:DrawModel()
 	end
+
+	hook.Add("HUDPaint", "mining_argonite_transformer", function()
+		local color = ms.Ores.__R[ARGONITE_RARITY].PhysicalColor
+		for _, battery in ipairs(ents.FindByClass("mining_argonite_transformer")) do
+			if battery:ShouldDrawText() then
+				local pos = battery:WorldSpaceCenter():ToScreen()
+				local text = ("%d%%"):format((battery:GetNWInt("ArgoniteCount", 0) / BATTERY_CAPACITY) * 100)
+				surface.SetFont("DermaLarge")
+				local tw, th = surface.GetTextSize(text)
+				surface.SetTextColor(color)
+				surface.SetTextPos(pos.x - tw / 2, pos.y - th / 2)
+				surface.DrawText(text)
+
+				text = "Next Battery"
+				tw, th = surface.GetTextSize(text)
+				surface.SetTextPos(pos.x - tw / 2, pos.y - th * 2)
+				surface.DrawText(text)
+			end
+		end
+	end)
 end
