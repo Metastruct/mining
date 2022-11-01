@@ -6,7 +6,7 @@ local TEXT_DIST = 150
 
 ENT.Type = "anim"
 ENT.Base = "base_anim"
-ENT.PrintName = "Argonite Battery"
+ENT.PrintName = "Coal Burner"
 ENT.Author = "Earu"
 ENT.Category = "Mining"
 ENT.RenderGroup = RENDERGROUP_OPAQUE
