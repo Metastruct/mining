@@ -82,12 +82,14 @@ if CLIENT then
 		self:DrawModel()
 	end
 
+	local COLOR_WHITE = Color(255, 255, 255)
 	hook.Add("HUDPaint", "mining_ore_storage", function()
 		for _, storage in ipairs(ents.FindByClass("mining_ore_storage")) do
 			if storage:ShouldDrawText() then
 				local pos = storage:WorldSpaceCenter():ToScreen()
 				surface.SetFont("DermaLarge")
 
+				local th = draw.GetFontHeight("DermaLarge")
 				local global_ore_data = storage:GetNWString("OreData", ""):Trim()
 				if #global_ore_data > 0 then
 					local data = global_ore_data:Split(";")
@@ -97,8 +99,16 @@ if CLIENT then
 						local text = ("x%s %s"):format(rarity_data[2], ore_data.Name)
 
 						surface.SetTextColor(ore_data.HudColor)
-						surface.SetTextPos(pos.x, pos.y + ((i - 1) * draw.GetFontHeight("DermaLarge")))
+						surface.SetTextPos(pos.x, pos.y + ((i - 1) * th))
 						surface.DrawText(text)
+
+						if i >= #data and storage.CPPIGetOwner and storage:CPPIGetOwner() == LocalPlayer() then
+							local key = (input.LookupBinding("+use", true) or "?"):upper()
+
+							surface.SetTextColor(COLOR_WHITE)
+							surface.SetTextPos(pos.x, pos.y + (i * th))
+							surface.DrawText(("[ %s ] Claim Ores"):format(key))
+						end
 					end
 				end
 			end
