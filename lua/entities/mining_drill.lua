@@ -16,6 +16,11 @@ ENT.Spawnable = true
 ENT.ClassName = "mining_drill"
 
 if SERVER then
+	local ACCEPTED_ENERGY_ENTS = {
+		mining_argonite_battery = function(ent) return ent:GetNWInt("ArgoniteCount", 0) end,
+		mining_coal_burner = function(ent) return ent:GetNWInt("CoalCount", 0) end,
+	}
+
 	local function add_saw(self, offset)
 		local saw = ents.Create("prop_physics")
 		saw:SetModel("models/props_junk/sawblade001a.mdl")
@@ -69,8 +74,8 @@ if SERVER then
 	end
 
 	function ENT:StartTouch(ent)
-		if ent:GetClass() == "mining_argonite_battery" then
-			local energy_amount = ent:GetNWInt("ArgoniteCount", 0)
+		if ACCEPTED_ENERGY_ENTS[ent:GetClass()] then
+			local energy_amount = ACCEPTED_ENERGY_ENTS[ent:GetClass()](ent)
 			local cur_energy = self:GetNWInt("Energy", 0)
 			self:SetNWInt("Energy", math.min(MAX_ENERGY, cur_energy + energy_amount))
 
