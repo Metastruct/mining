@@ -75,6 +75,18 @@ local function generateArgoniteRocks()
 			rock:Spawn()
 			rock:PhysWake()
 			rock:DropToFloor()
+
+			local stuck_tr = util.TraceLine({
+				start = target_pos,
+				endpos = target_pos + Vector(0, 0, 1000),
+				mask = MASK_SOLID_BRUSHONLY
+			})
+
+			if isstring(stuck_tr.HitTexture) and stuck_tr.HitTexture:match("^TOOLS%/") then
+				SafeRemoveEntity(rock)
+				continue
+			end
+
 			rock.OriginalRock = true
 
 			count = count + 1
@@ -189,7 +201,7 @@ hook.Add("CanPlyTeleport", "mining_argonite_ore", function(ply) reducePlayerArgo
 hook.Add("PlayerNoClip", "mining_argonite_ore", function(ply, wants_noclip)
 	if wants_noclip and ms.Ores.GetPlayerOre(ply, ARGONITE_RARITY) > 0 then
 		reducePlayerArgoniteOreCount(ply, true)
-		
+
 		return false
 	end
 end)
