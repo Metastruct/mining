@@ -77,8 +77,8 @@ local function generateArgoniteRocks()
 			rock:DropToFloor()
 
 			local stuck_tr = util.TraceLine({
-				start = target_pos,
-				endpos = target_pos + Vector(0, 0, 1000),
+				start = rock:GetPos(),
+				endpos = rock:GetPos() + Vector(0, 0, 1000),
 				mask = MASK_SOLID_BRUSHONLY
 			})
 
