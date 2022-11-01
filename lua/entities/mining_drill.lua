@@ -18,7 +18,7 @@ ENT.ClassName = "mining_drill"
 if SERVER then
 	local ACCEPTED_ENERGY_ENTS = {
 		mining_argonite_battery = function(ent) return ent:GetNWInt("ArgoniteCount", 0) end,
-		mining_coal_burner = function(ent) return ent:GetNWInt("CoalCount", 0) end,
+		mining_coal_burner = function(ent) return math.ceil(ent:GetNWInt("CoalCount", 0) / 2) end,
 	}
 
 	local function add_saw(self, offset)
