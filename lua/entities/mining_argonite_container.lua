@@ -9,7 +9,7 @@ ENT.PrintName = "Argonite Container"
 ENT.Author = "Earu"
 ENT.RenderGroup = RENDERGROUP_OPAQUE
 ENT.Spawnable = false
-ENT.AdminOnly = truee
+ENT.AdminOnly = true
 ENT.CanConstruct = function() return false end
 ENT.CanTool = function() return false end
 ENT.ms_notouch = true
@@ -38,6 +38,10 @@ if SERVER then
 		bottom:Spawn()
 		bottom:SetNotSolid(true)
 		bottom:SetModelScale(0.95)
+		bottom:SetParent(self)
+		bottom.ms_notouch = true
+		bottom.CanConstruct = function() return false end
+		bottom.CanTool = function() return false end
 
 		local top = ents.Create("prop_physics")
 		top:SetModel("models/props_wasteland/laundry_basket001.mdl")
@@ -47,6 +51,10 @@ if SERVER then
 		top:Spawn()
 		top:SetNotSolid(true)
 		top:SetModelScale(0.95)
+		top:SetParent(self)
+		top.ms_notouch = true
+		top.CanConstruct = function() return false end
+		top.CanTool = function() return false end
 	end
 
 	function ENT:AddArgonite(amount)
