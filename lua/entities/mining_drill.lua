@@ -16,6 +16,10 @@ ENT.Spawnable = true
 ENT.ClassName = "mining_drill"
 
 if SERVER then
+	ENT.NextEnergyEnt = 0
+	ENT.NextDrilledOre = 0
+	ENT.NextEnergyConsumption = 0
+
 	local ACCEPTED_ENERGY_ENTS = {
 		mining_argonite_battery = {
 			get = function(ent) return ent:GetNWInt("ArgoniteCount", 0) end,
@@ -45,9 +49,21 @@ if SERVER then
 		self:PhysicsInit(SOLID_VPHYSICS)
 		self:SetSolid(SOLID_VPHYSICS)
 		self:PhysWake()
-		self:SetTrigger(true)
 		self.NextEnergyConsumption = 0
 		self.NextDrilledOre = 0
+		self.NextEnergyEnt = 0
+
+		-- we use this so that its easy for drills to accept power entities
+		self.Trigger = ents.Create("base_brush")
+		self.Trigger:SetPos(self:WorldSpaceCenter())
+		self.Trigger:SetParent(self)
+		self.Trigger:SetTrigger(true)
+		self.Trigger:SetSolid(SOLID_BBOX)
+		self.Trigger:SetNotSolid(true)
+		self.Trigger:SetCollisionBounds(Vector(-100, -100, -100), Vector(100, 100, 100))
+		self.Trigger.Touch = function(_, ent)
+			self:Touch(ent)
+		end
 
 		self.Frame = ents.Create("prop_physics")
 		self.Frame:SetModel("models/props_phx/construct/metal_wire1x1x2.mdl")
@@ -79,8 +95,9 @@ if SERVER then
 		end)
 	end
 
-	function ENT:StartTouch(ent)
+	function ENT:Touch(ent)
 		if ent.MiningInvalidPower then return end
+		if CurTime() < self.NextEnergyEnt then return end
 
 		if ACCEPTED_ENERGY_ENTS[ent:GetClass()] then
 			local energy_amount = ACCEPTED_ENERGY_ENTS[ent:GetClass()].get(ent)
@@ -95,7 +112,8 @@ if SERVER then
 				ent.MiningInvalidPower = true
 			end
 
-			self:EmitSound(")physics/surfaces/underwater_impact_bullet3.wav", 75, 70)
+			self:EmitSound(")ambient/machines/thumper_top.wav", 75, 70)
+			self.NextEnergyEnt = CurTime() + 2
 		end
 	end
 
