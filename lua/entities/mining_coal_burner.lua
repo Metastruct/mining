@@ -52,6 +52,8 @@ if SERVER then
 
 		local curAmount = self:GetNWInt("CoalCount", 0)
 		local amountToAdd = math.min(CONTAINER_CAPACITY - curAmount, amount)
+		if amountToAdd == 0 then return end
+
 		local newAmount = math.min(CONTAINER_CAPACITY, curAmount + amountToAdd)
 		self:SetNWInt("CoalCount", newAmount)
 
