@@ -83,7 +83,7 @@ if SERVER then
 		end
 
 		self:SetNWBool("Detonating", true)
-		local original_pos = activator:GetPos()
+
 		local i = 0
 		timer.Create(("mining_detonite_bomb_[%d]"):format(self:EntIndex()), 1, TIME_TO_DETONATION, function()
 			if not IsValid(self) then return end
@@ -94,7 +94,7 @@ if SERVER then
 			if i >= TIME_TO_DETONATION then
 				self:Detonate()
 
-				ms.Ores.MineCollapse(original_pos, 60, {
+				ms.Ores.MineCollapse(self:WorldSpaceCenter(), 60, {
 					[0] = 100,
 				})
 			end
