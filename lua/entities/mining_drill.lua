@@ -101,22 +101,24 @@ if SERVER then
 		if ent.MiningInvalidPower then return end
 		if CurTime() < self.NextEnergyEnt then return end
 
-		if ACCEPTED_ENERGY_ENTS[ent:GetClass()] then
-			local energy_amount = ACCEPTED_ENERGY_ENTS[ent:GetClass()].get(ent)
-			local cur_energy = self:GetNWInt("Energy", 0)
-			local energy_to_add = math.min(MAX_ENERGY - cur_energy, energy_amount)
+		local className = ent:GetClass()
+		if not ACCEPTED_ENERGY_ENTS[className] then return end
 
-			self:SetNWInt("Energy", math.min(MAX_ENERGY, cur_energy + energy_to_add))
-			ACCEPTED_ENERGY_ENTS[ent:GetClass()].set(ent, math.max(0, energy_amount - energy_to_add))
+		local fns = ACCEPTED_ENERGY_ENTS[className]
+		local energy_amount = fns.get(ent)
+		local cur_energy = self:GetNWInt("Energy", 0)
+		local energy_to_add = math.min(MAX_ENERGY - cur_energy, energy_amount)
 
-			if energy_amount - energy_to_add < 1 then
-				SafeRemoveEntity(ent)
-				ent.MiningInvalidPower = true
-			end
+		self:SetNWInt("Energy", math.min(MAX_ENERGY, cur_energy + energy_to_add))
+		fns.set(ent, math.max(0, energy_amount - energy_to_add))
 
-			self:EmitSound(")ambient/machines/thumper_top.wav", 75, 70)
-			self.NextEnergyEnt = CurTime() + 2
+		if energy_amount - energy_to_add < 1 then
+			SafeRemoveEntity(ent)
+			ent.MiningInvalidPower = true
 		end
+
+		self:EmitSound(")ambient/machines/thumper_top.wav", 75, 70)
+		self.NextEnergyEnt = CurTime() + 2
 	end
 
 	function ENT:CanWork()
@@ -129,6 +131,7 @@ if SERVER then
 				mask = MASK_SOLID_BRUSHONLY,
 			})
 
+			self.NextTraceCheck = CurTime() + 1.5
 			self.TraceCheckResult = tr.Hit
 			return tr.Hit
 		end
@@ -180,8 +183,8 @@ if SERVER then
 	end
 
 	function ENT:DrillOres()
-		if not self:CanWork() then return end
 		if CurTime() < self.NextDrilledOre then return end
+		if not self:CanWork() then return end
 
 		local in_volcano = false
 		local ore_rarity = ms.Ores.SelectRarityFromSpawntable()
@@ -216,9 +219,6 @@ if SERVER then
 		self:ProcessEnergy()
 		self:RotateSaws()
 		self:DrillOres()
-
-		self:NextThink(CurTime())
-		return true
 	end
 
 	function ENT:OnRemove()

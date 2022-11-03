@@ -218,7 +218,9 @@ if SERVER then
 		if not IsValid(owner) then return end
 
 		local amount = math.min(BATTERY_CAPACITY, ms.Ores.GetPlayerOre(owner, ARGONITE_RARITY))
-		if amount > 0 and check_transformer_to_use(owner, self) then
+		if amount < 1 then return end
+
+		if check_transformer_to_use(owner, self) then
 			self:AddArgonite(amount)
 			ms.Ores.TakePlayerOre(owner, ARGONITE_RARITY, amount)
 
