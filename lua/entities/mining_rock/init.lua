@@ -100,6 +100,37 @@ function ENT:Initialize()
 	end)
 end
 
+-- I really can't think of anything else better to check if something is in the caves or not...
+function ENT:IsStuckEx()
+	if not util.IsInWorld(self:GetPos()) or not util.IsInWorld(self:WorldSpaceCenter()) then return true end
+
+	local rock_pos = self:WorldSpaceCenter()
+	local dirs = { self:GetForward(), -self:GetForward(), self:GetRight(), -self:GetRight(), self:GetUp(), -self:GetUp() }
+	for _, dir in ipairs(dirs) do
+		local tr = util.TraceLine({
+			start = rock_pos,
+			endpos = rock_pos + dir * 1000,
+			filter = self,
+			mask = MASK_SOLID_BRUSHONLY,
+		})
+
+		if tr.HitNoDraw then return true end
+
+		for _, other_dir in ipairs(dirs) do
+			tr = util.TraceLine({
+				start = rock_pos,
+				endpos = rock_pos + (dir + other_dir) * 1000,
+				filter = self,
+				mask = MASK_SOLID_BRUSHONLY,
+			})
+
+			if tr.HitNoDraw then return true end
+		end
+	end
+
+	return false
+end
+
 function ENT:OnTakeDamage(dmg)
 	local now = CurTime()
 
