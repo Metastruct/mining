@@ -94,6 +94,13 @@ if SERVER then
 					child:CPPISetOwner(self:CPPIGetOwner())
 				end
 			end
+
+			if self.CPPIGetOwner then
+				local owner = self:CPPIGetOnwer()
+				if IsValid(owner) and owner:GetInfoNum("mining_automation_entity_frames", 1) < 1 then
+					SafeRemoveEntity(self.Frame)
+				end
+			end
 		end)
 	end
 
