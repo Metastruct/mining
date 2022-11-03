@@ -176,13 +176,12 @@ if SERVER then
 	local nextThink = 0
 	hook.Add("Think", "magma_cave", function()
 		if not isOnGoing then return end
-
-		local trigger = ms.GetTrigger("volcano")
-		if not IsValid(trigger) then return end
-
 		if CurTime() <= nextThink then return end
 
 		nextThink = CurTime() + 5
+
+		local trigger = ms.GetTrigger("volcano")
+		if not IsValid(trigger) then return end
 
 		local perc = 1 - ((endTime - CurTime()) / currentDuration)
 		local lavaPools = ents.FindByName("*magma_lavapool*")
