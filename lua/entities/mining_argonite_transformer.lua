@@ -97,7 +97,15 @@ if SERVER then
 			ent:SetOwner(parent:GetOwner())
 
 			if ent.CPPISetOwner then
-				ent:CPPISetOwner(parent:CPPIGetOwner())
+				local owner = parent:CPPIGetOwner()
+				if IsValid(owner) then
+					ent:CPPISetOwner(owner)
+
+					undo.Create(ent:GetClass())
+						undo.SetPlayer(owner)
+						undo.AddEntity(ent)
+					undo.Finish()
+				end
 			end
 		end
 
