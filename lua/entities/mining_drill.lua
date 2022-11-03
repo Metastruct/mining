@@ -19,6 +19,7 @@ if SERVER then
 	ENT.NextEnergyEnt = 0
 	ENT.NextDrilledOre = 0
 	ENT.NextEnergyConsumption = 0
+	ENT.NextTraceCheck = 0
 
 	local ACCEPTED_ENERGY_ENTS = {
 		mining_argonite_battery = {
@@ -52,6 +53,7 @@ if SERVER then
 		self.NextEnergyConsumption = 0
 		self.NextDrilledOre = 0
 		self.NextEnergyEnt = 0
+		self.NextTraceCheck = 0
 
 		-- we use this so that its easy for drills to accept power entities
 		self.Trigger = ents.Create("base_brush")
@@ -125,9 +127,10 @@ if SERVER then
 				mask = MASK_SOLID_BRUSHONLY,
 			})
 
-			if not tr.Hit then return false end
+			self.TraceCheckResult = tr.Hit
+			self.NextTraceCheck = CurTime() + 1
 
-			return true
+			return tr.Hit
 		end
 
 		return false
@@ -180,14 +183,14 @@ if SERVER then
 
 		local in_volcano = false
 		local ore_rarity = ms.Ores.SelectRarityFromSpawntable()
-		local trigger = ms and ms.GetTrigger and ms.GetTrigger("volcano")
+		--[[local trigger = ms and ms.GetTrigger and ms.GetTrigger("volcano")
 		if IsValid(trigger) then
 			local mins, maxs = trigger:GetCollisionBounds()
 			if self:GetPos():WithinAABox(trigger:GetPos() + mins, trigger:GetPos() + maxs) then
 				-- disable that for now
 				--in_volcano = true
 			end
-		end
+		end]]
 
 		local ore = ents.Create("mining_ore")
 		ore:SetPos(self:GetPos() + self:GetForward() * 75)
