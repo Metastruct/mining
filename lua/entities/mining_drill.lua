@@ -120,6 +120,8 @@ if SERVER then
 	end
 
 	function ENT:CanWork()
+		if CurTime() < self.NextTraceCheck then return self.TraceCheckResult end
+
 		if self:GetNWInt("Energy", 0) > 0 then
 			local tr = util.TraceLine({
 				start = self:GetPos() + self:GetForward() * -20,
@@ -128,11 +130,11 @@ if SERVER then
 			})
 
 			self.TraceCheckResult = tr.Hit
-			self.NextTraceCheck = CurTime() + 1
-
 			return tr.Hit
 		end
 
+		self.NextTraceCheck = CurTime() + 1.5
+		self.TraceCheckResult = false
 		return false
 	end
 
