@@ -21,13 +21,16 @@ hook.Add("EntityRemoved", "miningDetonite", function(ent)
 	end
 end)
 
+local MAX_ORE_SPEED = 299 * 299
 hook.Add("Move", "miningDetonite", function(ply, data)
-	local speed = data:GetVelocity():Length()
+	local speed = data:GetVelocity():LengthSqr()
+	if speed <= MAX_ORE_SPEED then return end
+
 	local detoniteAmount = ms.Ores.GetPlayerOre(ply, DETONITE_RARITY)
-	if speed > 299 and detoniteAmount > 0 then
-		explode(ply)
-		ms.Ores.TakePlayerOre(ply, DETONITE_RARITY, detoniteAmount)
-	end
+	if detoniteAmount < 1 then return end
+
+	explode(ply)
+	ms.Ores.TakePlayerOre(ply, DETONITE_RARITY, detoniteAmount)
 end)
 
 hook.Add("EntityTakeDamage", "miningDetonite", function(ent)
