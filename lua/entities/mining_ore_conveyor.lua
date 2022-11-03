@@ -10,6 +10,8 @@ ENT.PrintName = "Mining Conveyor"
 ENT.ClassName = "ore_conveyor"
 
 if SERVER then
+	ENT.NextTouch = 0
+
 	function ENT:Initialize()
 		self:SetModel("models/props_phx/construct/wood/wood_panel1x2.mdl")
 		self:SetMaterial("models/weapons/v_stunbaton/w_shaft01a")
@@ -18,6 +20,7 @@ if SERVER then
 		self:SetSolid(SOLID_VPHYSICS)
 		self:SetSaveValue("m_takedamage", 0)
 		self:PhysWake()
+		self.NextTouch = 0
 
 		self.Frame = ents.Create("prop_physics")
 		self.Frame:SetPos(self:GetPos() - Vector(0, 0, 10))
@@ -87,6 +90,7 @@ if SERVER then
 	}
 	function ENT:Touch(ent)
 		if self.Frame == ent then return end
+		if CurTime() < self.NextTouch then return end
 		if BAD_CLASSES[ent:GetClass()] then return end
 		--if ent:GetClass() ~= "mining_rock" then return end
 
@@ -112,6 +116,8 @@ if SERVER then
 
 		phys:SetVelocity(force + self:GetUp() * -phys:GetMass())
 		phys:SetAngleVelocity(VECTOR_ZERO)
+
+		self.NextTouch = CurTime() + 0.1
 	end
 end
 
