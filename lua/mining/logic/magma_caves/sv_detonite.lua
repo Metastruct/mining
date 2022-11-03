@@ -97,14 +97,6 @@ local function spawnDetonite(tr)
 		end
 	end
 
-	local stuck_tr = util.TraceLine({
-		start = target_pos,
-		endpos = target_pos + Vector(0, 0, 1000),
-		mask = MASK_SOLID_BRUSHONLY
-	})
-
-	if isstring(stuck_tr.HitTexture) and stuck_tr.HitTexture:match("^TOOLS%/") then return end
-
 	local rock = ents.Create("mining_rock")
 	rock:SetPos(target_pos)
 	rock:SetSize(math.random() < 0.33 and 2 or 1)
@@ -112,6 +104,11 @@ local function spawnDetonite(tr)
 	rock:Spawn()
 	rock.OriginalRock = true
 	rock.OnTakeDamage = function() SafeRemoveEntity(rock) end
+
+	if rock:IsStuckEx() then
+		SafeRemoveEntity(rock)
+		return
+	end
 
 	rock:AddEffects(EF_ITEM_BLINK)
 

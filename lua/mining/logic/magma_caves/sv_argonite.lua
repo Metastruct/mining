@@ -32,6 +32,7 @@ local function getArgoniteRockCount()
 	return curArgoniteCount
 end
 
+
 local function generateArgoniteRocks()
 	local count = getArgoniteRockCount()
 	if count >= MAX_ARGON then return end
@@ -76,13 +77,7 @@ local function generateArgoniteRocks()
 			rock:PhysWake()
 			rock:DropToFloor()
 
-			local stuck_tr = util.TraceLine({
-				start = rock:GetPos(),
-				endpos = rock:GetPos() + Vector(0, 0, 1000),
-				mask = MASK_SOLID_BRUSHONLY
-			})
-
-			if isstring(stuck_tr.HitTexture) and stuck_tr.HitTexture:match("^TOOLS%/") then
+			if rock:IsStuckEx() then
 				SafeRemoveEntity(rock)
 				continue
 			end
