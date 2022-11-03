@@ -324,11 +324,11 @@ if SERVER then
 	hook.Add("OnEntityWaterLevelChanged", "magma_cave_ore_lava_check", function(ent, oldLevel, newLevel)
 		if not ms.GetTrigger then return end
 
-		local trigger = ms.GetTrigger("volcano")
-		if not IsValid(trigger) then return end
-		if not trigger:GetEntities()[ent] then return end
-
 		if (ent:GetClass() == "mining_rock" or ent:GetClass() == "mining_ore") and newLevel > 0 then
+			local trigger = ms.GetTrigger("volcano")
+			if not IsValid(trigger) then return end
+			if not trigger:GetEntities()[ent] then return end
+
 			SafeRemoveEntity(ent)
 		end
 	end)
