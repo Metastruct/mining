@@ -6,8 +6,8 @@ ENT.RenderGroup = RENDERGROUP_OPAQUE
 ENT.Author = "Earu"
 ENT.Spawnable = true
 ENT.Category = "Mining"
-ENT.PrintName = "Mining Conveyor"
-ENT.ClassName = "ore_conveyor"
+ENT.PrintName = "Conveyor"
+ENT.ClassName = "mining_ore_conveyor"
 
 if SERVER then
 	function ENT:Initialize()
@@ -91,6 +91,7 @@ if SERVER then
 		mining_ore_conveyor = true,
 		mining_ore_storage = true,
 		mining_drill = true,
+		mining_conveyor_splitter = true,
 	}
 	function ENT:Touch(ent)
 		if self.Frame == ent then return end
