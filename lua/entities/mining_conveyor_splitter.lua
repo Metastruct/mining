@@ -132,7 +132,7 @@ if SERVER then
 	function ENT:OnTouch(ent, directionFrom)
 		if ent == self then return end
 		if self.ProcessedEnts[ent] then return end
-		if Ores.IgnoredClasses[ent:GetClass()] then return end
+		if Ores.Automation.IgnoredClasses[ent:GetClass()] then return end
 
 		local parent = ent:GetParent()
 		if IsValid(parent) then return end
