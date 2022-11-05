@@ -50,7 +50,9 @@ if SERVER then
 	end
 
 	function ENT:OnRemove()
-		self:StopLoopingSound(self.SndLoop)
+		if self.SndLoop and self.SndLoop ~= -1 then
+			self:StopLoopingSound(self.SndLoop)
+		end
 	end
 
 	local VECTOR_ZERO = Vector(0, 0, 0)
