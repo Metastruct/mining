@@ -73,6 +73,7 @@ if SERVER then
 		timer.Simple(0, function()
 			if not IsValid(self) then return end
 			Ores.Automation.ReplicateOwnership(self, self)
+			self.SndLoop = self:StartLoopingSound("ambient/spacebase/spacebase_drill.wav")
 		end)
 	end
 
@@ -122,19 +123,13 @@ if SERVER then
 
 	function ENT:CheckSoundLoop()
 		if not self:CanWork() then
-			if self.SndLoop then
-				self.SndLoop:Stop()
-			end
-
+			self:StopLoopingSound(self.SndLoop)
+			self.SndLoop = nil
 			return
 		end
 
 		if not self.SndLoop then
-			self.SndLoop = CreateSound(self, "ambient/spacebase/spacebase_drill.wav")
-			self.SndLoop:PlayEx(0.75, 75)
-		elseif self.SndLoop and not self.SndLoop:IsPlaying() then
-			self.SndLoop:Stop()
-			self.SndLoop:PlayEx(0.75, 75)
+			self.SndLoop = self:StartLoopingSound("ambient/spacebase/spacebase_drill.wav")
 		end
 	end
 
