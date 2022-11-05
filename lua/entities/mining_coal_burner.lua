@@ -1,8 +1,7 @@
 AddCSLuaFile()
 
-local CONTAINER_CAPACITY = 150
-local COAL_RARITY = 0
-local TEXT_DIST = 150
+module("ms", package.seeall)
+Ores = Ores or {}
 
 ENT.Type = "anim"
 ENT.Base = "base_anim"
@@ -32,32 +31,25 @@ if SERVER then
 
 		timer.Simple(0, function()
 			if not IsValid(self) then return end
-
-			for _, child in pairs(self:GetChildren()) do
-				child:SetOwner(self:GetOwner())
-				child:SetCreator(self:GetCreator())
-
-				if child.CPPISetOwner then
-					child:CPPISetOwner(self:CPPIGetOwner())
-				end
-			end
+			Ores.Automation.ReplicateOwnership(self, self)
 		end)
 	end
 
 	function ENT:Use(activator, caller)
 		if not activator:IsPlayer() then return end
 
-		local amount = ms.Ores.GetPlayerOre(activator, COAL_RARITY)
+		local coalRarity = Ores.Automation.GetOreRarityByName("Coal")
+		local amount = ms.Ores.GetPlayerOre(activator, coalRarity)
 		if amount < 1 then return end
 
 		local curAmount = self:GetNWInt("CoalCount", 0)
-		local amountToAdd = math.min(CONTAINER_CAPACITY - curAmount, amount)
+		local amountToAdd = math.min(Ores.Automation.BatteryCapacity - curAmount, amount)
 		if amountToAdd == 0 then return end
 
-		local newAmount = math.min(CONTAINER_CAPACITY, curAmount + amountToAdd)
+		local newAmount = math.min(Ores.Automation.BatteryCapacity, curAmount + amountToAdd)
 		self:SetNWInt("CoalCount", newAmount)
 
-		ms.Ores.TakePlayerOre(activator, COAL_RARITY, amountToAdd)
+		ms.Ores.TakePlayerOre(activator, coalRarity, amountToAdd)
 		self:Fire("ignite")
 	end
 
@@ -68,24 +60,17 @@ if SERVER then
 end
 
 if CLIENT then
-	function ENT:ShouldDrawText()
-		if LocalPlayer():EyePos():DistToSqr(self:WorldSpaceCenter()) <= TEXT_DIST * TEXT_DIST then return true end
-		if LocalPlayer():GetEyeTrace().Entity == self then return true end
-
-		return false
-	end
-
 	function ENT:Draw()
 		self:DrawModel()
 	end
 
 	local COLOR_WHITE = Color(255, 255, 255)
 	hook.Add("HUDPaint", "mining_coal_burner", function()
-		local color = COLOR_WHITE--ms.Ores.__R[COAL_RARITY].PhysicalColor
-		for _, battery in ipairs(ents.FindByClass("mining_coal_burner")) do
-			if battery:ShouldDrawText() then
-				local pos = battery:WorldSpaceCenter():ToScreen()
-				local text = ("%d%%"):format((battery:GetNWInt("CoalCount", 0) / CONTAINER_CAPACITY) * 100)
+		local color = COLOR_WHITE
+		for _, burner in ipairs(ents.FindByClass("mining_coal_burner")) do
+			if Ores.Automation.ShouldDrawText(burner) then
+				local pos = burner:WorldSpaceCenter():ToScreen()
+				local text = ("%d%%"):format((burner:GetNWInt("CoalCount", 0) / Ores.Automation.BatteryCapacity) * 100)
 				surface.SetFont("DermaLarge")
 				local tw, th = surface.GetTextSize(text)
 				surface.SetTextColor(color)

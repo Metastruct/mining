@@ -1,10 +1,7 @@
 AddCSLuaFile()
 
-local TEXT_DIST = 150
-local BATTERY_CAPACITY = 150
-local MAX_ENERGY = BATTERY_CAPACITY * 3
-local ARGONITE_RARITY = 18
-local NORMAL_ORE_PRODUCTION_RATE = 10 -- 1 every 10s
+module("ms", package.seeall)
+Ores = Ores or {}
 
 ENT.Type = "anim"
 ENT.Base = "base_anim"
@@ -21,18 +18,7 @@ if SERVER then
 	ENT.NextEnergyConsumption = 0
 	ENT.NextTraceCheck = 0
 
-	local ACCEPTED_ENERGY_ENTS = {
-		mining_argonite_battery = {
-			get = function(ent) return ent:GetNWInt("ArgoniteCount", 0) end,
-			set = function(ent, value) ent:SetNWInt("ArgoniteCount", value) end,
-		},
-		mining_coal_burner = {
-			get = function(ent) return math.ceil(ent:GetNWInt("CoalCount", 0) / 2) end,
-			set = function(ent, value) ent:SetNWInt("CoalCount", value) end,
-		}
-	}
-
-	local function add_saw(self, offset)
+	local function addSawEntity(self, offset)
 		local saw = ents.Create("prop_physics")
 		saw:SetModel("models/props_junk/sawblade001a.mdl")
 		saw:SetModelScale(2)
@@ -54,6 +40,7 @@ if SERVER then
 		self.NextDrilledOre = 0
 		self.NextEnergyEnt = 0
 		self.NextTraceCheck = 0
+		self.MaxEnergy = Ores.Automation.BatteryCapacity * 3
 
 		-- we use this so that its easy for drills to accept power entities
 		self.Trigger = ents.Create("base_brush")
@@ -79,28 +66,13 @@ if SERVER then
 		self.Frame:Spawn()
 		self.Frame:SetParent(self)
 
-		add_saw(self, self:GetForward() * -40 + self:GetRight() * 10)
-		add_saw(self, self:GetForward() * -40)
-		add_saw(self, self:GetForward() * -40 + self:GetRight() * -10)
+		addSawEntity(self, self:GetForward() * -40 + self:GetRight() * 10)
+		addSawEntity(self, self:GetForward() * -40)
+		addSawEntity(self, self:GetForward() * -40 + self:GetRight() * -10)
 
 		timer.Simple(0, function()
 			if not IsValid(self) then return end
-
-			for _, child in pairs(self:GetChildren()) do
-				child:SetOwner(self:GetOwner())
-				child:SetCreator(self:GetCreator())
-
-				if child.CPPISetOwner then
-					child:CPPISetOwner(self:CPPIGetOwner())
-				end
-			end
-
-			if self.CPPIGetOwner then
-				local owner = self:CPPIGetOwner()
-				if IsValid(owner) and owner:GetInfoNum("mining_automation_entity_frames", 1) < 1 then
-					SafeRemoveEntity(self.Frame)
-				end
-			end
+			Ores.Automation.ReplicateOwnership(self, self)
 		end)
 	end
 
@@ -109,17 +81,17 @@ if SERVER then
 		if CurTime() < self.NextEnergyEnt then return end
 
 		local className = ent:GetClass()
-		if not ACCEPTED_ENERGY_ENTS[className] then return end
+		if not Ores.Automation.EnergyEntities[className] then return end
 
-		local fns = ACCEPTED_ENERGY_ENTS[className]
-		local energy_amount = fns.get(ent)
-		local cur_energy = self:GetNWInt("Energy", 0)
-		local energy_to_add = math.min(MAX_ENERGY - cur_energy, energy_amount)
+		local fns = Ores.Automation.EnergyEntities[className]
+		local energyAmount = fns.get(ent)
+		local curEnergy = self:GetNWInt("Energy", 0)
+		local energyToAdd = math.min(self.MaxEnergy - curEnergy, energyAmount)
 
-		self:SetNWInt("Energy", math.min(MAX_ENERGY, cur_energy + energy_to_add))
-		fns.set(ent, math.max(0, energy_amount - energy_to_add))
+		self:SetNWInt("Energy", math.min(self.MaxEnergy, curEnergy + energyToAdd))
+		fns.set(ent, math.max(0, energyAmount - energyToAdd))
 
-		if energy_amount - energy_to_add < 1 then
+		if energyAmount - energyToAdd < 1 then
 			SafeRemoveEntity(ent)
 			ent.MiningInvalidPower = true
 		end
@@ -168,9 +140,9 @@ if SERVER then
 
 	function ENT:ProcessEnergy()
 		if CurTime() >= self.NextEnergyConsumption then
-			local cur_energy = self:GetNWInt("Energy", 0)
-			self:SetNWInt("Energy", math.max(0, cur_energy - 1))
-			self.NextEnergyConsumption = CurTime() + NORMAL_ORE_PRODUCTION_RATE
+			local curEnergy = self:GetNWInt("Energy", 0)
+			self:SetNWInt("Energy", math.max(0, curEnergy - 1))
+			self.NextEnergyConsumption = CurTime() + Ores.Automation.BaseOreProductionRate
 		end
 	end
 
@@ -193,10 +165,10 @@ if SERVER then
 		if CurTime() < self.NextDrilledOre then return end
 		if not self:CanWork() then return end
 
-		local ore_rarity = ms.Ores.SelectRarityFromSpawntable()
+		local oreRarity = Ores.SelectRarityFromSpawntable()
 		local ore = ents.Create("mining_ore")
 		ore:SetPos(self:GetPos() + self:GetForward() * 75)
-		ore:SetRarity(ore_rarity)
+		ore:SetRarity(oreRarity)
 		ore:Spawn()
 		ore:PhysWake()
 
@@ -212,8 +184,8 @@ if SERVER then
 		-- at less than 33% -> 10s,
 		-- less than 66% -> 8s
 		-- less than 100% -> 6s
-		local efficiency_rate_increase = (math.ceil(self:GetNWInt("Energy", 0) / BATTERY_CAPACITY) - 1) * 2
-		self.NextDrilledOre = CurTime() + (NORMAL_ORE_PRODUCTION_RATE - efficiency_rate_increase)
+		local effiencyRateIncrease = (math.ceil(self:GetNWInt("Energy", 0) / Ores.Automation.BatteryCapacity) - 1) * 2
+		self.NextDrilledOre = CurTime() + (Ores.Automation.BaseOreProductionRate - effiencyRateIncrease)
 	end
 
 	function ENT:Think()
@@ -231,9 +203,8 @@ if SERVER then
 end
 
 if CLIENT then
-	local MAT = Material("models/props_combine/coredx70")
-	if MAT:IsError() then
-		MAT = Material("models/props_lab/cornerunit_cloud") -- fallback for people who dont have ep1
+	function ENT:Initialize()
+		self.MaxEnergy = Ores.Automation.BatteryCapacity * 3
 	end
 
 	hook.Add("OnEntityCreated", "mining_drill_saw_mat", function(ent)
@@ -242,10 +213,11 @@ if CLIENT then
 
 		local parent = ent:GetParent()
 		if IsValid(parent) and parent:GetClass() == "mining_drill" then
+			local argoniteRarity = Ores.Automation.GetOreRarityByName("Argonite")
 			ent.RenderOverride = function(self)
-				local color = ms.Ores.__R[ARGONITE_RARITY].PhysicalColor
+				local color = Ores.__R[argoniteRarity].PhysicalColor
 				render.SetColorModulation(color.r / 100, color.g / 100, color.b / 100)
-				render.MaterialOverride(MAT)
+				render.MaterialOverride(Ores.Automation.EnergyMaterial)
 				self:DrawModel()
 				render.MaterialOverride()
 				render.SetColorModulation(1, 1, 1)
@@ -253,23 +225,16 @@ if CLIENT then
 		end
 	end)
 
-	function ENT:ShouldDrawText()
-		if LocalPlayer():EyePos():DistToSqr(self:WorldSpaceCenter()) <= TEXT_DIST * TEXT_DIST then return true end
-		if LocalPlayer():GetEyeTrace().Entity == self then return true end
-
-		return false
-	end
-
-	local WHITE_COLOR = Color(255, 255, 255)
 	function ENT:Draw()
 		self:DrawModel()
 	end
 
+	local WHITE_COLOR = Color(255, 255, 255)
 	hook.Add("HUDPaint", "mining_drill", function()
 		for _, drill in ipairs(ents.FindByClass("mining_drill")) do
-			if drill:ShouldDrawText() then
+			if Ores.Automation.ShouldDrawText(drill) then
 				local pos = drill:WorldSpaceCenter():ToScreen()
-				local text = ("%d%%"):format((drill:GetNWInt("Energy", 0) / MAX_ENERGY) * 100)
+				local text = ("%d%%"):format((drill:GetNWInt("Energy", 0) / drill.MaxEnergy) * 100)
 				surface.SetFont("DermaLarge")
 				local tw, th = surface.GetTextSize(text)
 				surface.SetTextColor(WHITE_COLOR)

@@ -1,10 +1,7 @@
 AddCSLuaFile()
 
-local TEXT_DIST = 150
-local BAD_ORES = {
-	[18] = true, -- argonite
-	[19] = true, -- detonite
-}
+module("ms", package.seeall)
+Ores = Ores or {}
 
 ENT.Type = "anim"
 ENT.Base = "base_anim"
@@ -27,7 +24,15 @@ if SERVER then
 		--self:SetCollisionGroup(COLLISION_GROUP_DEBRIS)
 		--self:PhysWake()
 
+		self.BadOreRarities = {}
 		self.Ores = {}
+
+		for _, oreName in pairs(Ores.Automation.NonStorableOres) do
+			local rarity = Ores.Automation.GetOreRarityByName(oreName)
+			if rarity == -1 then continue end
+
+			self.BadOreRarities[rarity] = true
+		end
 	end
 
 	function ENT:UpdateNetworkOreData()
@@ -45,7 +50,7 @@ if SERVER then
 		if self.CPPIGetOwner and ent.GraceOwner ~= self:CPPIGetOwner() then return end -- lets not have people highjack each others
 
 		local rarity = ent:GetRarity()
-		if not BAD_ORES[rarity] then
+		if not self.BadOreRarities[rarity] then
 			self.Ores[rarity] = (self.Ores[rarity] or 0) + 1
 			self:UpdateNetworkOreData()
 		end
@@ -60,7 +65,7 @@ if SERVER then
 
 		for rarity, amount in pairs(self.Ores) do
 			if amount > 0 then
-				ms.Ores.GivePlayerOre(activator, rarity, amount)
+				Ores.GivePlayerOre(activator, rarity, amount)
 			end
 
 			self.Ores[rarity] = nil
@@ -72,45 +77,37 @@ if SERVER then
 end
 
 if CLIENT then
-	function ENT:ShouldDrawText()
-		if LocalPlayer():EyePos():DistToSqr(self:WorldSpaceCenter()) <= TEXT_DIST * TEXT_DIST then return true end
-		if LocalPlayer():GetEyeTrace().Entity == self then return true end
-
-		return false
-	end
-
 	function ENT:Draw()
 		self:DrawModel()
 	end
 
 	local COLOR_WHITE = Color(255, 255, 255)
 	hook.Add("HUDPaint", "mining_ore_storage", function()
+		local key = (input.LookupBinding("+use", true) or "?"):upper()
 		for _, storage in ipairs(ents.FindByClass("mining_ore_storage")) do
-			if storage:ShouldDrawText() then
-				local pos = storage:WorldSpaceCenter():ToScreen()
-				surface.SetFont("DermaLarge")
+			if not Ores.Automation.ShouldDrawText(storage) then continue end
 
-				local th = draw.GetFontHeight("DermaLarge")
-				local global_ore_data = storage:GetNWString("OreData", ""):Trim()
-				if #global_ore_data > 0 then
-					local data = global_ore_data:Split(";")
-					for i, data_chunk in ipairs(data) do
-						local rarity_data = data_chunk:Split("=")
-						local ore_data = ms.Ores.__R[tonumber(rarity_data[1])]
-						local text = ("x%s %s"):format(rarity_data[2], ore_data.Name)
+			local pos = storage:WorldSpaceCenter():ToScreen()
+			surface.SetFont("DermaLarge")
 
-						surface.SetTextColor(ore_data.HudColor)
-						surface.SetTextPos(pos.x, pos.y + ((i - 1) * th))
-						surface.DrawText(text)
+			local th = draw.GetFontHeight("DermaLarge")
+			local globalOreData = storage:GetNWString("OreData", ""):Trim()
+			if #globalOreData < 1 then continue end
 
-						if i >= #data and storage.CPPIGetOwner and storage:CPPIGetOwner() == LocalPlayer() then
-							local key = (input.LookupBinding("+use", true) or "?"):upper()
+			local data = globalOreData:Split(";")
+			for i, dataChunk in ipairs(data) do
+				local rarityData = dataChunk:Split("=")
+				local oreData = Ores.__R[tonumber(rarityData[1])]
+				local text = ("x%s %s"):format(rarityData[2], oreData.Name)
 
-							surface.SetTextColor(COLOR_WHITE)
-							surface.SetTextPos(pos.x, pos.y + (i * th))
-							surface.DrawText(("[ %s ] Claim ore(s)"):format(key))
-						end
-					end
+				surface.SetTextColor(oreData.HudColor)
+				surface.SetTextPos(pos.x, pos.y + ((i - 1) * th))
+				surface.DrawText(text)
+
+				if i >= #data and storage.CPPIGetOwner and storage:CPPIGetOwner() == LocalPlayer() then
+					surface.SetTextColor(COLOR_WHITE)
+					surface.SetTextPos(pos.x, pos.y + (i * th))
+					surface.DrawText(("[ %s ] Claim ore(s)"):format(key))
 				end
 			end
 		end

@@ -44,6 +44,7 @@ end)
 -- File initialisation starts here...
 includeShared("mining/logic/sh_ores")
 includeServer("mining/logic/sv_ores")
+includeShared("mining/logic/sh_mining_automation")
 includeShared("mining/logic/caves/sh_miner")
 includeServer("mining/logic/caves/sv_miner")
 includeClient("mining/logic/caves/cl_miner")

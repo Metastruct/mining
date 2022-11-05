@@ -1,9 +1,7 @@
 AddCSLuaFile()
 
-local TEXT_DIST = 150
-local DETONITE_RARITY = 19
-local BOMB_CAPACITY = 5
-local TIME_TO_DETONATION = 4
+module("ms", package.seeall)
+Ores = Ores or {}
 
 ENT.Type = "anim"
 ENT.Base = "base_anim"
@@ -26,15 +24,15 @@ if SERVER then
 	end
 
 	function ENT:Touch(ent)
-		local cur_amount = self:GetNWInt("DetoniteAmount", 0)
-		if cur_amount >= BOMB_CAPACITY then return end
+		local curAmount = self:GetNWInt("DetoniteAmount", 0)
+		if curAmount >= Ores.Automation.BombCapacity then return end
 
-		if ent:GetClass() == "mining_ore" and ent:GetRarity() == DETONITE_RARITY then
+		if ent:GetClass() == "mining_ore" and ent:GetRarity() == Ores.Automation.GetOreRarityByName("Detonite") then
 			if ent.MiningBombRemoved then return end
 
 			ent:Remove()
 			ent.MiningBombRemoved = true
-			self:SetNWInt("DetoniteAmount", math.min(BOMB_CAPACITY, cur_amount + 1))
+			self:SetNWInt("DetoniteAmount", math.min(Ores.Automation.BombCapacity, curAmount + 1))
 		end
 	end
 
@@ -70,13 +68,14 @@ if SERVER then
 		if self.CPPIGetOwner and self:CPPIGetOwner() ~= activator then return end
 		if not activator:IsInZone("cave") then return end -- lets not annoy people in build
 
-		local cur_amount = self:GetNWInt("DetoniteAmount", 0)
-		if cur_amount < BOMB_CAPACITY then
-			local ply_amount = ms.Ores.GetPlayerOre(activator, DETONITE_RARITY)
-			if ply_amount > 0 then
-				local amount_to_add = math.min(BOMB_CAPACITY - cur_amount, ply_amount)
-				ms.Ores.TakePlayerOre(activator, DETONITE_RARITY, amount_to_add)
-				self:SetNWInt("DetoniteAmount", cur_amount + amount_to_add)
+		local curAmount = self:GetNWInt("DetoniteAmount", 0)
+		if curAmount < Ores.Automation.BombCapacity then
+			local detoniteRarity = Ores.Automation.GetOreRarityByName("Detonite")
+			local plyAmount = Ores.GetPlayerOre(activator, detoniteRarity)
+			if plyAmount > 0 then
+				local amountToAdd = math.min(Ores.Automation.BombCapacity - curAmount, plyAmount)
+				Ores.TakePlayerOre(activator, detoniteRarity, amountToAdd)
+				self:SetNWInt("DetoniteAmount", curAmount + amountToAdd)
 			end
 
 			return
@@ -85,16 +84,16 @@ if SERVER then
 		self:SetNWBool("Detonating", true)
 
 		local i = 0
-		timer.Create(("mining_detonite_bomb_[%d]"):format(self:EntIndex()), 1, TIME_TO_DETONATION, function()
+		timer.Create(("mining_detonite_bomb_[%d]"):format(self:EntIndex()), 1, Ores.Automation.BombDetonationTime, function()
 			if not IsValid(self) then return end
 
 			i = i + 1
 			self:EmitSound(")buttons/button17.wav", 100, 80 + 20 * i)
 
-			if i >= TIME_TO_DETONATION then
+			if i >= Ores.Automation.BombDetonationTime then
 				self:Detonate()
 
-				ms.Ores.MineCollapse(self:WorldSpaceCenter(), 60, {
+				Ores.MineCollapse(self:WorldSpaceCenter(), 60, {
 					[0] = 100,
 				}, activator)
 			end
@@ -108,30 +107,19 @@ if SERVER then
 end
 
 if CLIENT then
-	local MAT = Material("models/props_combine/coredx70")
-	if MAT:IsError() then
-		MAT = Material("models/props_lab/cornerunit_cloud") -- fallback for people who dont have ep1
-	end
-
-	function ENT:ShouldDrawText()
-		if LocalPlayer():EyePos():DistToSqr(self:WorldSpaceCenter()) <= TEXT_DIST * TEXT_DIST then return true end
-		if LocalPlayer():GetEyeTrace().Entity == self then return true end
-
-		return false
-	end
-
 	function ENT:Draw()
 		self:DrawModel()
 	end
 
 	hook.Add("HUDPaint", "mining_detonite_bomb", function()
+		local color = Ores.__R[Ores.Automation.GetOreRarityByName("Detonite")].HudColor
+		local key = (input.LookupBinding("+use", true) or "?"):upper()
+
 		for _, bomb in ipairs(ents.FindByClass("mining_detonite_bomb")) do
-			if not bomb:ShouldDrawText() then continue end
+			if not Ores.Automation.ShouldDrawText(bomb) then continue end
 
 			local pos = bomb:WorldSpaceCenter():ToScreen()
-			local ready = bomb:GetNWInt("DetoniteAmount", 0) == BOMB_CAPACITY
-			local color = ms.Ores.__R[DETONITE_RARITY].HudColor
-			local key = (input.LookupBinding("+use", true) or "?"):upper()
+			local ready = bomb:GetNWInt("DetoniteAmount", 0) == Ores.Automation.BombCapacity
 
 			surface.SetFont("DermaLarge")
 			surface.SetTextColor(color)
@@ -143,7 +131,7 @@ if CLIENT then
 			surface.DrawText(text)
 
 			if not ready then
-				text = ("%d out of %d detonite ore(s)"):format(bomb:GetNWInt("DetoniteAmount", 0), BOMB_CAPACITY)
+				text = ("%d out of %d detonite ore(s)"):format(bomb:GetNWInt("DetoniteAmount", 0), Ores.Automation.BombCapacity)
 				tw, th = surface.GetTextSize(text)
 
 				surface.SetTextPos(pos.x - tw / 2, pos.y + th / 2)

@@ -1,7 +1,9 @@
 AddCSLuaFile()
 
+module("ms", package.seeall)
+Ores = Ores or {}
+
 local CONTAINER_CAPACITY = 5000
-local ARGONITE_RARITY = 18
 
 ENT.Type = "anim"
 ENT.Base = "base_anim"
@@ -107,11 +109,6 @@ if SERVER then
 end
 
 if CLIENT then
-	local MAT = Material("models/props_combine/coredx70")
-	if MAT:IsError() then
-		MAT = Material("models/props_lab/cornerunit_cloud") -- fallback for people who dont have ep1
-	end
-
 	function ENT:Initialize()
 		self.LiquidEnt = ClientsideModel("models/hunter/tubes/tube1x1x4.mdl", RENDERGROUP_OPAQUE)
 		self.LiquidEnt:SetModelScale(0.95)
@@ -131,10 +128,10 @@ if CLIENT then
 			self.LiquidEntTop:SetModelScale(0.8)
 		end
 
-		local color = ms.Ores.__R[ARGONITE_RARITY].PhysicalColor
+		local color = Ores.__R[Ores.Automation.GetOreRarityByName("Argonite")].PhysicalColor
 
 		render.SetColorModulation(color.r / 100, color.g / 100, color.b / 100)
-		render.MaterialOverride(MAT)
+		render.MaterialOverride(Ores.Automation.EnergyMaterial)
 
 		local perc = math.max(0, 1 - (self:GetNWInt("ArgoniteCount", 0) / CONTAINER_CAPACITY))
 
@@ -155,7 +152,7 @@ if CLIENT then
 
 		self:DrawModel()
 
-		if LocalPlayer():EyePos():DistToSqr(self:WorldSpaceCenter()) <= 255 * 255 then
+		if Ores.Automation.ShouldDrawText(self) then
 			cam.IgnoreZ(true)
 			cam.Start2D()
 				local pos = self:WorldSpaceCenter():ToScreen()
