@@ -38,6 +38,7 @@ if SERVER then
 			if not IsValid(self) then return end
 
 			Ores.Automation.ReplicateOwnership(self, self)
+			self.SndLoop = self:StartLoopingSound("ambient/machines/refinery_loop_1.wav")
 
 			if self.CPPIGetOwner then
 				local owner = self:CPPIGetOwner()
@@ -48,24 +49,8 @@ if SERVER then
 		end)
 	end
 
-	function ENT:Think()
-		if not self.SndLoop then
-			self.SndLoop = CreateSound(self, "ambient/machines/refinery_loop_1.wav")
-			self.SndLoop:PlayEx(0.25, 100)
-
-			return
-		end
-
-		if not self.SndLoop:IsPlaying() then
-			self.SndLoop:Stop()
-			self.SndLoop:PlayEx(0.25, 100)
-		end
-	end
-
 	function ENT:OnRemove()
-		if self.SndLoop then
-			self.SndLoop:Stop()
-		end
+		self:StopLoopingSound(self.SndLoop)
 	end
 
 	local VECTOR_ZERO = Vector(0, 0, 0)
