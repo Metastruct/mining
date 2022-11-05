@@ -17,6 +17,14 @@ if SERVER then
 	ENT.CurrentOutput = 0
 	ENT.ProcessedEnts = {}
 
+	local function shouldCallOnTouch(trigger, ent)
+		local pos = ent:GetPos()
+		local nearest = ent:WorldToLocal(trigger:NearestPoint(pos))
+		if not nearest:WithinAABox(ent:OBBMins(), ent:OBBMaxs()) then return false end
+
+		return true
+	end
+
 	function ENT:SetupInsOuts()
 		self.In = ents.Create("prop_physics")
 		self.In:SetModel("models/props_phx/construct/metal_wire1x1.mdl")
@@ -34,15 +42,17 @@ if SERVER then
 		self.InTrigger:SetModel("models/hunter/blocks/cube075x075x025.mdl")
 		self.InTrigger:SetMaterial("models/debug/debugwhite")
 		self.InTrigger:SetColor(COLOR_BLACK)
-		self.InTrigger:SetSolid(SOLID_BBOX)
+		self.InTrigger:PhysicsInit(SOLID_OBB)
 		self.InTrigger:SetNotSolid(true)
 		self.InTrigger:SetTrigger(true)
 		self.InTrigger:SetPos(self:WorldSpaceCenter() + self:GetForward() * 22)
 		self.InTrigger:SetAngles(self.In:GetAngles())
 		self.InTrigger:SetParent(self)
 		self.InTrigger:Spawn()
-		self.InTrigger.Touch = function(_, ent) self:OnTouch(ent, "Forward") end
-		self.InTrigger:SetSolidFlags(FSOLID_NOT_STANDABLE)
+		self.InTrigger.Touch = function(trigger, ent)
+			if not shouldCallOnTouch(trigger, ent) then return end
+			self:OnTouch(ent, "FORWARD")
+		end
 
 		self.Right = ents.Create("prop_physics")
 		self.Right:SetModel("models/props_phx/construct/metal_wire1x1.mdl")
@@ -59,17 +69,18 @@ if SERVER then
 		self.RightTrigger = ents.Create("base_anim")
 		self.RightTrigger:SetModel("models/hunter/blocks/cube075x075x025.mdl")
 		self.RightTrigger:SetMaterial("models/debug/debugwhite")
-		self.RightTrigger:SetSolid(SOLID_BBOX)
-		self.RightTrigger:SetNotSolid(true)
 		self.RightTrigger:SetColor(COLOR_BLACK)
+		self.RightTrigger:PhysicsInit(SOLID_OBB)
+		self.RightTrigger:SetNotSolid(true)
+		self.RightTrigger:SetTrigger(true)
 		self.RightTrigger:SetPos(self:WorldSpaceCenter() + self:GetRight() * -22)
 		self.RightTrigger:SetAngles(self.Right:GetAngles())
-		self.RightTrigger:Spawn()
 		self.RightTrigger:SetParent(self)
-		self.RightTrigger:SetTrigger(true)
-		self.RightTrigger:PhysWake()
-		self.RightTrigger.Touch = function(_, ent) self:OnTouch(ent, "Right") end
-		self.RightTrigger:SetSolidFlags(FSOLID_NOT_STANDABLE)
+		self.RightTrigger:Spawn()
+		self.RightTrigger.Touch = function(trigger, ent)
+			if not shouldCallOnTouch(trigger, ent) then return end
+			self:OnTouch(ent, "FORWARD")
+		end
 
 		self.Left = ents.Create("prop_physics")
 		self.Left:SetModel("models/props_phx/construct/metal_wire1x1.mdl")
@@ -86,17 +97,18 @@ if SERVER then
 		self.LeftTrigger = ents.Create("base_anim")
 		self.LeftTrigger:SetModel("models/hunter/blocks/cube075x075x025.mdl")
 		self.LeftTrigger:SetMaterial("models/debug/debugwhite")
-		self.LeftTrigger:SetSolid(SOLID_BBOX)
-		self.LeftTrigger:SetNotSolid(true)
 		self.LeftTrigger:SetColor(COLOR_BLACK)
+		self.LeftTrigger:PhysicsInit(SOLID_OBB)
+		self.LeftTrigger:SetNotSolid(true)
+		self.LeftTrigger:SetTrigger(true)
 		self.LeftTrigger:SetPos(self:WorldSpaceCenter() + self:GetRight() * 22)
 		self.LeftTrigger:SetAngles(self.Left:GetAngles())
-		self.LeftTrigger:Spawn()
 		self.LeftTrigger:SetParent(self)
-		self.LeftTrigger:SetTrigger(true)
-		self.LeftTrigger:PhysWake()
-		self.LeftTrigger.Touch = function(_, ent) self:OnTouch(ent, "Left") end
-		self.LeftTrigger:SetSolidFlags(FSOLID_NOT_STANDABLE)
+		self.LeftTrigger:Spawn()
+		self.LeftTrigger.Touch = function(trigger, ent)
+			if not shouldCallOnTouch(trigger, ent) then return end
+			self:OnTouch(ent, "FORWARD")
+		end
 	end
 
 	function ENT:Initialize()
@@ -111,9 +123,9 @@ if SERVER then
 		self:SetupInsOuts()
 		self.ProcessedEnts = {}
 		self.Directions = {
-			{ Name = "Forward", Function = function() return self.InTrigger:GetUp() end },
-			{ Name = "Right", Function = function() return self.RightTrigger:GetUp() end },
-			{ Name = "Left", Function = function() return self.LeftTrigger:GetUp() end },
+			{ Name = "FORWARD", Function = function() return self.InTrigger:GetUp() end },
+			{ Name = "RIGHT", Function = function() return self.RightTrigger:GetUp() end },
+			{ Name = "LEFT", Function = function() return self.LeftTrigger:GetUp() end },
 		}
 
 		timer.Simple(0, function()
