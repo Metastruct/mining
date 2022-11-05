@@ -77,7 +77,7 @@ local function generateArgoniteRocks()
 			rock:PhysWake()
 			rock:DropToFloor()
 
-			if rock:IsStuckEx() then
+			if rock:IsStuckEx() or rock:WaterLevel() > 0 then
 				SafeRemoveEntity(rock)
 				continue
 			end
