@@ -193,7 +193,7 @@ if SERVER then
 		local fireAttacker = getFireEntity()
 		for ply, _ in pairs(trigger:GetPlayers()) do
 			if math.random() < 0.05 and ms.Ores.MineCollapse then
-				ms.Ores.MineCollapse(ply, endTime - CurTime(), {
+				ms.Ores.MineCollapse(ply:EyePos(), endTime - CurTime(), {
 					{ Rarity = 4, Chance = 30 },
 					{ Rarity = 3, Chance = 70 },
 				})
@@ -334,7 +334,7 @@ if SERVER then
 		SafeRemoveEntity(ent)
 	end)
 
-	hook.Add("PlayerTriggeredMineCollapse", "magma_cave", function(ply, _, _, isDefaultRarityData)
+	hook.Add("PlayerTriggeredMineCollapse", "magma_cave", function(ply, pos, _, _, isDefaultRarityData)
 		if isDefaultRarityData and ply.IsInZone and ply:IsInZone("volcano") then
 			return {
 				{ Rarity = 0, Chance = 100 },
