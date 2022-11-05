@@ -14,7 +14,7 @@ ENT.ClassName = "mining_argonite_transformer"
 
 if SERVER then
 	local teslas = {}
-	local function do_zap_effect(pos, ent)
+	local function doZapEffect(pos, ent)
 		if #teslas > 4 then
 			for k, v in pairs(teslas) do
 				if not IsValid(v) then table.remove(teslas, k) continue end
@@ -82,10 +82,7 @@ if SERVER then
 
 		local idx = table.insert(teslas, tesla)
 		timer.Simple(2, function()
-			if IsValid(tesla) then
-				tesla:Remove()
-			end
-
+			SafeRemoveEntity(tesla)
 			table.remove(teslas, idx)
 		end)
 	end
@@ -139,7 +136,7 @@ if SERVER then
 				return
 			end
 
-			do_zap_effect(self:WorldSpaceCenter(), IsValid(self.Core) and self.Core or self)
+			doZapEffect(self:WorldSpaceCenter(), IsValid(self.Core) and self.Core or self)
 
 			if self.BatteriesToProduce > 0 then
 				self:CreateBattery()
