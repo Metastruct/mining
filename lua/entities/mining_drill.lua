@@ -123,12 +123,15 @@ if SERVER then
 
 	function ENT:CheckSoundLoop()
 		if not self:CanWork() then
-			self:StopLoopingSound(self.SndLoop)
+			if self.SndLoop and self.SndLoop ~= -1 then
+				self:StopLoopingSound(self.SndLoop)
+			end
+
 			self.SndLoop = nil
 			return
 		end
 
-		if not self.SndLoop then
+		if not self.SndLoop or self.SndLoop == -1 then
 			self.SndLoop = self:StartLoopingSound("ambient/spacebase/spacebase_drill.wav")
 		end
 	end
