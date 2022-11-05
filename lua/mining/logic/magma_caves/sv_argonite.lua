@@ -97,8 +97,14 @@ local function generateArgoniteRocks()
 
 			timer.Simple(0.5, function()
 				if not IsValid(rock) then return end
+
 				rock:DropToFloor()
 				rock:RemoveEffects(EF_ITEM_BLINK)
+
+				if not IsValid(trigger) then return end
+				if not trigger:GetEntities()[rock] then
+					SafeRemoveEntity(rock)
+				end
 			end)
 		end
 	end
