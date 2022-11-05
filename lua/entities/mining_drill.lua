@@ -1,10 +1,10 @@
 AddCSLuaFile()
 
 local TEXT_DIST = 150
-local MAX_ENERGY = 450
+local BATTERY_CAPACITY = 150
+local MAX_ENERGY = BATTERY_CAPACITY * 3
 local ARGONITE_RARITY = 18
 local NORMAL_ORE_PRODUCTION_RATE = 10 -- 1 every 10s
-local ARGONITE_ORE_PRODUCTION_RATE = 3 -- 1 every 3s
 
 ENT.Type = "anim"
 ENT.Base = "base_anim"
@@ -193,20 +193,10 @@ if SERVER then
 		if CurTime() < self.NextDrilledOre then return end
 		if not self:CanWork() then return end
 
-		local in_volcano = false
 		local ore_rarity = ms.Ores.SelectRarityFromSpawntable()
-		--[[local trigger = ms and ms.GetTrigger and ms.GetTrigger("volcano")
-		if IsValid(trigger) then
-			local mins, maxs = trigger:GetCollisionBounds()
-			if self:GetPos():WithinAABox(trigger:GetPos() + mins, trigger:GetPos() + maxs) then
-				-- disable that for now
-				--in_volcano = true
-			end
-		end]]
-
 		local ore = ents.Create("mining_ore")
 		ore:SetPos(self:GetPos() + self:GetForward() * 75)
-		ore:SetRarity(in_volcano and ARGONITE_RARITY or ore_rarity)
+		ore:SetRarity(ore_rarity)
 		ore:Spawn()
 		ore:PhysWake()
 
@@ -218,7 +208,12 @@ if SERVER then
 
 		constraint.NoCollide(ore, self, 0, 0)
 
-		self.NextDrilledOre = CurTime() + (in_volcano and ARGONITE_ORE_PRODUCTION_RATE or NORMAL_ORE_PRODUCTION_RATE)
+		-- efficiency goes up the more its powered:
+		-- at less than 33% -> 10s,
+		-- less than 66% -> 8s
+		-- less than 100% -> 6s
+		local efficiency_rate_increase = (math.ceil(self:GetNWInt("Energy", 0) / BATTERY_CAPACITY) - 1) * 2
+		self.NextDrilledOre = CurTime() + (NORMAL_ORE_PRODUCTION_RATE - efficiency_rate_increase)
 	end
 
 	function ENT:Think()
