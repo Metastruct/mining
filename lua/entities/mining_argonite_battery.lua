@@ -60,6 +60,11 @@ if SERVER then
 
 		ms.Ores.TakePlayerOre(activator, ARGONITE_RARITY, amountToAdd)
 	end
+
+	function ENT:GravGunPickupAllowed(ply)
+		if not self.CPPIGetOwner then return end
+		return ply == self:CPPIGetOwner()
+	end
 end
 
 if CLIENT then
