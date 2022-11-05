@@ -108,9 +108,10 @@ if SERVER then
 		localPos.z = 0
 		localPos.y = 0
 
+		local oldForce = phys:GetVelocity()
 		local pullForce = 10 * self:GetPhysicsObject():LocalToWorldVector(localPos)
 		local force = forwardForce + pullForce
-		force.z = 0
+		force.z = oldForce.z
 
 		if ent:IsPlayer() or ent:IsNPC() then
 			ent:SetGroundEntity(self)
@@ -118,7 +119,7 @@ if SERVER then
 			return
 		end
 
-		phys:SetVelocity(force + self:GetUp() * -phys:GetMass())
+		phys:SetVelocity(force)
 		phys:SetAngleVelocity(VECTOR_ZERO)
 	end
 end
