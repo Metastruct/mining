@@ -84,12 +84,12 @@ if SERVER then
 		if not Ores.Automation.EnergyEntities[className] then return end
 
 		local fns = Ores.Automation.EnergyEntities[className]
-		local energyAmount = fns.get(ent)
+		local energyAmount = fns.Get(ent)
 		local curEnergy = self:GetNWInt("Energy", 0)
 		local energyToAdd = math.min(self.MaxEnergy - curEnergy, energyAmount)
 
 		self:SetNWInt("Energy", math.min(self.MaxEnergy, curEnergy + energyToAdd))
-		fns.set(ent, math.max(0, energyAmount - energyToAdd))
+		fns.Set(ent, math.max(0, energyAmount - energyToAdd))
 
 		if energyAmount - energyToAdd < 1 then
 			SafeRemoveEntity(ent)
