@@ -194,8 +194,8 @@ if SERVER then
 	end
 
 	function ENT:OnRemove()
-		if self.SndLoop then
-			self.SndLoop:Stop()
+		if self.SndLoop and self.SndLoop ~= -1 then
+			self:StopLoopingSound(self.SndLoop)
 		end
 	end
 end
