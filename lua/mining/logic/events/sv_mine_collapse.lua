@@ -177,14 +177,13 @@ local function playSoundForDuration(sound_path, delay)
 	end)
 end
 
-function Ores.MineCollapse(ply_or_pos, delay, rarityData)
+function Ores.MineCollapse(pos, delay, rarityData, ply)
 	local rocks = {}
-	local pos = type(ply_or_pos) == "player" and ply_or_pos:GetPos() or ply_or_pos
 
 	rarityData = rarityData or DEFAULT_RARITY_DATA
 
-	if type(ply_or_pos) == "player" then
-		local newRarityData = hook.Run("PlayerTriggeredMineCollapse", ply_or_pos, delay, rarityData, rarityData == DEFAULT_RARITY_DATA)
+	if IsValid(ply) then
+		local newRarityData = hook.Run("PlayerTriggeredMineCollapse", ply, pos, delay, rarityData, rarityData == DEFAULT_RARITY_DATA)
 		if istable(newRarityData) then
 			rarityData = newRarityData
 		end
@@ -308,7 +307,7 @@ hook.Add("PlayerDestroyedMiningRock", "mining_collapse", function(ply, rock)
 	if not rock.MiningIncident then return end
 	if not rock.OriginalRock then return end
 
-	Ores.MineCollapse(ply, COLLAPSE_DURATION)
+	Ores.MineCollapse(ply:EyePos(), COLLAPSE_DURATION, nil, ply)
 end)
 
 -- after the core goes off it weakens the cave structures

@@ -96,7 +96,7 @@ if SERVER then
 
 				ms.Ores.MineCollapse(self:WorldSpaceCenter(), 60, {
 					[0] = 100,
-				})
+				}, activator)
 			end
 		end)
 	end
