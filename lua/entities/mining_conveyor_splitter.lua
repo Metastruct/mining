@@ -1,5 +1,8 @@
 AddCSLuaFile()
 
+module("ms", package.seeall)
+Ores = Ores or {}
+
 ENT.Type = "anim"
 ENT.Base = "base_anim"
 ENT.RenderGroup = RENDERGROUP_OPAQUE
@@ -20,10 +23,10 @@ if SERVER then
 		self.In:SetMaterial("phoenix_storms/stripes")
 		self.In:SetPos(self:WorldSpaceCenter() + self:GetForward() * 30)
 
-		local in_ang = self:GetAngles()
-		in_ang:RotateAroundAxis(self:GetRight(), 90)
+		local inAng = self:GetAngles()
+		inAng:RotateAroundAxis(self:GetRight(), 90)
 
-		self.In:SetAngles(in_ang)
+		self.In:SetAngles(inAng)
 		self.In:Spawn()
 		self.In:SetParent(self)
 
@@ -46,10 +49,10 @@ if SERVER then
 		self.Right:SetMaterial("phoenix_storms/stripes")
 		self.Right:SetPos(self:WorldSpaceCenter() + self:GetRight() * -30)
 
-		local right_ang = self:GetAngles()
-		right_ang:RotateAroundAxis(self:GetForward(), 90)
+		local rightAng = self:GetAngles()
+		rightAng:RotateAroundAxis(self:GetForward(), 90)
 
-		self.Right:SetAngles(right_ang)
+		self.Right:SetAngles(rightAng)
 		self.Right:Spawn()
 		self.Right:SetParent(self)
 
@@ -73,10 +76,10 @@ if SERVER then
 		self.Left:SetMaterial("phoenix_storms/stripes")
 		self.Left:SetPos(self:WorldSpaceCenter() + self:GetRight() * 30)
 
-		local left_ang = self:GetAngles()
-		left_ang:RotateAroundAxis(-self:GetForward(), 90)
+		local leftAng = self:GetAngles()
+		leftAng:RotateAroundAxis(-self:GetForward(), 90)
 
-		self.Left:SetAngles(left_ang)
+		self.Left:SetAngles(leftAng)
 		self.Left:Spawn()
 		self.Left:SetParent(self)
 
@@ -115,15 +118,7 @@ if SERVER then
 
 		timer.Simple(0, function()
 			if not IsValid(self) then return end
-
-			for _, child in pairs(self:GetChildren()) do
-				child:SetOwner(self:GetOwner())
-				child:SetCreator(self:GetCreator())
-
-				if child.CPPISetOwner then
-					child:CPPISetOwner(self:CPPIGetOwner())
-				end
-			end
+			Ores.Automation.ReplicateOwnership(self, self)
 		end)
 	end
 
@@ -147,18 +142,11 @@ if SERVER then
 		end
 	end
 
-	local BAD_CLASSES = {
-		player = true,
-		mining_ore_conveyor = true,
-		mining_ore_storage = true,
-		mining_drill = true,
-		mining_conveyor_splitter = true,
-	}
 	local Z_OFFSET = Vector(0, 0, 10)
-	function ENT:OnTouch(ent, direction_from)
+	function ENT:OnTouch(ent, directionFrom)
 		if ent == self then return end
 		if self.ProcessedEnts[ent] then return end
-		if BAD_CLASSES[ent:GetClass()] then return end
+		if Ores.IgnoredClasses[ent:GetClass()] then return end
 
 		local parent = ent:GetParent()
 		if IsValid(parent) then return end
@@ -166,28 +154,28 @@ if SERVER then
 		local phys = ent:GetPhysicsObject()
 		if not IsValid(phys) then return end
 
-		local available_out_directions = {}
-		for _, existing_direction in ipairs(self.Directions) do
-			if existing_direction.Name ~= direction_from then
-				table.insert(available_out_directions, existing_direction.Function() * -1)
+		local availableOutDirections = {}
+		for _, existingDirection in ipairs(self.Directions) do
+			if existingDirection.Name ~= directionFrom then
+				table.insert(availableOutDirections, existingDirection.Function() * -1)
 			end
 		end
 
 		local maxs = ent:OBBMaxs()
-		local base_pos = self:WorldSpaceCenter() + Z_OFFSET
+		local basePos = self:WorldSpaceCenter() + Z_OFFSET
 		local offset = 40 + math.max(maxs.x, maxs.y, maxs.z)
-		local previous_speed = phys:GetVelocity():Length()
+		local previousSpeed = phys:GetVelocity():Length()
 		local dir
 		if self.CurrentOutput == 0 then
-			dir = available_out_directions[1]
+			dir = availableOutDirections[1]
 			self.CurrentOutput = 1
 		else
-			dir = available_out_directions[2]
+			dir = availableOutDirections[2]
 			self.CurrentOutput = 0
 		end
 
-		ent:SetPos(base_pos + dir * offset)
-		phys:SetVelocity(dir * previous_speed)
+		ent:SetPos(basePos + dir * offset)
+		phys:SetVelocity(dir * previousSpeed)
 
 		self.ProcessedEnts[ent] = true
 		timer.Simple(1, function()

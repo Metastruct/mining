@@ -1,8 +1,7 @@
 AddCSLuaFile()
 
-local ARGONITE_RARITY = 18
-local BATTERY_CAPACITY = 150
-local TEXT_DIST = 150
+module("ms", package.seeall)
+Ores = Ores or {}
 
 ENT.Type = "anim"
 ENT.Base = "base_anim"
@@ -91,36 +90,8 @@ if SERVER then
 		end)
 	end
 
-	local function apply_ownership(ent, parent)
-		if ent ~= parent then
-			ent:SetCreator(parent:GetCreator())
-			ent:SetOwner(parent:GetOwner())
-
-			if ent.CPPISetOwner then
-				local owner = parent:CPPIGetOwner()
-				if IsValid(owner) then
-					ent:CPPISetOwner(owner)
-
-					undo.Create(ent:GetClass())
-						undo.SetPlayer(owner)
-						undo.AddEntity(ent)
-					undo.Finish()
-				end
-			end
-		end
-
-		for _, child in pairs(ent:GetChildren()) do
-			child:SetOwner(parent:GetOwner())
-			child:SetCreator(parent:GetCreator())
-
-			if child.CPPISetOwner then
-				child:CPPISetOwner(parent:CPPIGetOwner())
-			end
-		end
-	end
-
 	function ENT:Initialize()
-		local color = ms.Ores.__R[ARGONITE_RARITY].PhysicalColor
+		local color = Ores.__R[Ores.Automation.GetOreRarityByName("Argonite")].PhysicalColor
 
 		self:SetModel("models/props_phx/construct/metal_tube.mdl")
 		self:SetMaterial("effects/tvscreen_noise002a")
@@ -161,10 +132,10 @@ if SERVER then
 		self.Core:SetColor(Color(0, 0, 0, 255))
 		self.Core:Activate()
 
-		local timer_name = ("mining_argonite_transformer_[%d]"):format(self:EntIndex())
-		timer.Create(timer_name, 1, 0, function()
+		local timerName = ("mining_argonite_transformer_[%d]"):format(self:EntIndex())
+		timer.Create(timerName, 1, 0, function()
 			if not IsValid(self) then
-				timer.Remove(timer_name)
+				timer.Remove(timerName)
 				return
 			end
 
@@ -179,28 +150,28 @@ if SERVER then
 		timer.Simple(0, function()
 			if not IsValid(self) then return end
 
-			apply_ownership(self, self)
+			Ores.Automation.ReplicateOwnership(self, self)
 		end)
 	end
 
 	function ENT:AddArgonite(amount)
 		if amount < 1 then return end
 
-		local cur_amount = self:GetNWInt("ArgoniteCount", 0)
-		local new_amount = cur_amount + amount
-		if new_amount >= BATTERY_CAPACITY then
-			local batteries_to_produce = math.floor(new_amount / BATTERY_CAPACITY)
-			local remaining = new_amount % BATTERY_CAPACITY
+		local curAmount = self:GetNWInt("ArgoniteCount", 0)
+		local newAmount = curAmount + amount
+		if newAmount >= Ores.Automation.BatteryCapacity then
+			local batteriesToProduce = math.floor(newAmount / Ores.Automation.BatteryCapacity)
+			local remaining = newAmount % Ores.Automation.BatteryCapacity
 
 			self:SetNWInt("ArgoniteCount", remaining)
-			self.BatteriesToProduce = self.BatteriesToProduce + batteries_to_produce
+			self.BatteriesToProduce = self.BatteriesToProduce + batteriesToProduce
 		else
-			self:SetNWInt("ArgoniteCount", new_amount)
+			self:SetNWInt("ArgoniteCount", newAmount)
 		end
 	end
 
-	local transformer_idx = 1
-	local function check_transformer_to_use(ply, base_transformer)
+	local transformerIndex = 1
+	local function check_transformer_to_use(ply, baseTransformer)
 		local transformers = {}
 		for _, t in ipairs(ents.FindByClass("mining_argonite_transformer")) do
 			if t:CPPIGetOwner() ~= ply then continue end
@@ -210,13 +181,13 @@ if SERVER then
 
 		table.sort(transformers, function(a, b) return a:GetCreationTime() > b:GetCreationTime() end)
 
-		local transformer = transformers[transformer_idx % (#transformers + 1)]
+		local transformer = transformers[transformerIndex % (#transformers + 1)]
 		if not transformer then
-			transformer_idx = 1
-			return transformers[transformer_idx] == base_transformer
+			transformerIndex = 1
+			return transformers[transformerIndex] == baseTransformer
 		end
 
-		return base_transformer == transformer
+		return baseTransformer == transformer
 	end
 
 	function ENT:Think()
@@ -225,26 +196,27 @@ if SERVER then
 		local owner = self:CPPIGetOwner()
 		if not IsValid(owner) then return end
 
-		local amount = math.min(BATTERY_CAPACITY, ms.Ores.GetPlayerOre(owner, ARGONITE_RARITY))
+		local argoniteRarity = Ores.Automation.GetOreRarityByName("Argonite")
+		local amount = math.min(Ores.Automation.BatteryCapacity, ms.Ores.GetPlayerOre(owner, argoniteRarity))
 		if amount < 1 then return end
 
 		if check_transformer_to_use(owner, self) then
 			self:AddArgonite(amount)
-			ms.Ores.TakePlayerOre(owner, ARGONITE_RARITY, amount)
+			ms.Ores.TakePlayerOre(owner, argoniteRarity, amount)
 
-			transformer_idx = transformer_idx + 1
+			transformerIndex = transformerIndex + 1
 		end
 	end
 
 	function ENT:CreateBattery()
 		local battery = ents.Create("mining_argonite_battery")
 		battery:SetPos(self:WorldSpaceCenter() + self:GetForward() * 50)
-		battery:SetNWInt("ArgoniteCount", BATTERY_CAPACITY)
+		battery:SetNWInt("ArgoniteCount", Ores.Automation.BatteryCapacity)
 		battery:Spawn()
 
 		timer.Simple(0, function()
 			if IsValid(self) and IsValid(battery) then
-				apply_ownership(battery, self)
+				Ores.Automation.ReplicateOwnership(battery, self, true)
 			end
 		end)
 
@@ -253,23 +225,16 @@ if SERVER then
 end
 
 if CLIENT then
-	function ENT:ShouldDrawText()
-		if LocalPlayer():EyePos():DistToSqr(self:WorldSpaceCenter()) <= TEXT_DIST * TEXT_DIST then return true end
-		if LocalPlayer():GetEyeTrace().Entity == self then return true end
-
-		return false
-	end
-
 	function ENT:Draw()
 		self:DrawModel()
 	end
 
 	hook.Add("HUDPaint", "mining_argonite_transformer", function()
-		local color = ms.Ores.__R[ARGONITE_RARITY].PhysicalColor
-		for _, battery in ipairs(ents.FindByClass("mining_argonite_transformer")) do
-			if battery:ShouldDrawText() then
-				local pos = battery:WorldSpaceCenter():ToScreen()
-				local text = ("%d%%"):format((battery:GetNWInt("ArgoniteCount", 0) / BATTERY_CAPACITY) * 100)
+		local color = ms.Ores.__R[Ores.Automation.GetOreRarityByName("Argonite")].PhysicalColor
+		for _, transformer in ipairs(ents.FindByClass("mining_argonite_transformer")) do
+			if Ores.Automation.ShouldDrawText(transformer) then
+				local pos = transformer:WorldSpaceCenter():ToScreen()
+				local text = ("%d%%"):format((transformer:GetNWInt("ArgoniteCount", 0) / Ores.Automation.BatteryCapacity) * 100)
 				surface.SetFont("DermaLarge")
 				local tw, th = surface.GetTextSize(text)
 				surface.SetTextColor(color)

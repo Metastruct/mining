@@ -1,8 +1,7 @@
 AddCSLuaFile()
 
-local CONTAINER_CAPACITY = 150
-local ARGONITE_RARITY = 18
-local TEXT_DIST = 150
+module("ms", package.seeall)
+Ores = Ores or {}
 
 ENT.Type = "anim"
 ENT.Base = "base_anim"
@@ -33,32 +32,25 @@ if SERVER then
 
 		timer.Simple(0, function()
 			if not IsValid(self) then return end
-
-			for _, child in pairs(self:GetChildren()) do
-				child:SetOwner(self:GetOwner())
-				child:SetCreator(self:GetCreator())
-
-				if child.CPPISetOwner then
-					child:CPPISetOwner(self:CPPIGetOwner())
-				end
-			end
+			Ores.Automation.ReplicateOwnership(self, self)
 		end)
 	end
 
 	function ENT:Use(activator, caller)
 		if not activator:IsPlayer() then return end
 
-		local amount = ms.Ores.GetPlayerOre(activator, ARGONITE_RARITY)
+		local argoniteRarity = Ores.Automation.GetOreRarityByName("Argonite")
+		local amount = Ores.GetPlayerOre(activator, argoniteRarity)
 		if amount < 1 then return end
 
 		local curAmount = self:GetNWInt("ArgoniteCount", 0)
-		local amountToAdd = math.min(CONTAINER_CAPACITY - curAmount, amount)
+		local amountToAdd = math.min(Ores.Automation.BatteryCapacity - curAmount, amount)
 		if amountToAdd == 0 then return end
 
-		local newAmount = math.min(CONTAINER_CAPACITY, curAmount + amountToAdd)
+		local newAmount = math.min(Ores.Automation.BatteryCapacity, curAmount + amountToAdd)
 		self:SetNWInt("ArgoniteCount", newAmount)
 
-		ms.Ores.TakePlayerOre(activator, ARGONITE_RARITY, amountToAdd)
+		Ores.TakePlayerOre(activator, argoniteRarity, amountToAdd)
 	end
 
 	function ENT:GravGunPickupAllowed(ply)
@@ -68,25 +60,14 @@ if SERVER then
 end
 
 if CLIENT then
-	local MAT = Material("models/props_combine/coredx70")
-	if MAT:IsError() then
-		MAT = Material("models/props_lab/cornerunit_cloud") -- fallback for people who dont have ep1
-	end
-
-	function ENT:ShouldDrawText()
-		if LocalPlayer():EyePos():DistToSqr(self:WorldSpaceCenter()) <= TEXT_DIST * TEXT_DIST then return true end
-		if LocalPlayer():GetEyeTrace().Entity == self then return true end
-
-		return false
-	end
-
 	function ENT:Draw()
-		local color = ms.Ores.__R[ARGONITE_RARITY].PhysicalColor
+		local argoniteRarity = Ores.Automation.GetOreRarityByName("Argonite")
+		local color = Ores.__R[argoniteRarity].PhysicalColor
 
 		self:DrawModel()
 
 		render.SetColorModulation(color.r / 100, color.g / 100, color.b / 100)
-		render.MaterialOverride(MAT)
+		render.MaterialOverride(Ores.Automation.EnergyMaterial)
 
 		self:DrawModel()
 
@@ -95,11 +76,12 @@ if CLIENT then
 	end
 
 	hook.Add("HUDPaint", "mining_argonite_battery", function()
-		local color = ms.Ores.__R[ARGONITE_RARITY].PhysicalColor
+		local argoniteRarity = Ores.Automation.GetOreRarityByName("Argonite")
+		local color = Ores.__R[argoniteRarity].PhysicalColor
 		for _, battery in ipairs(ents.FindByClass("mining_argonite_battery")) do
-			if battery:ShouldDrawText() then
+			if Ores.Automation.ShouldDrawText(battery) then
 				local pos = battery:WorldSpaceCenter():ToScreen()
-				local text = ("%d%%"):format((battery:GetNWInt("ArgoniteCount", 0) / CONTAINER_CAPACITY) * 100)
+				local text = ("%d%%"):format((battery:GetNWInt("ArgoniteCount", 0) /  Ores.Automation.BatteryCapacity) * 100)
 				surface.SetFont("DermaLarge")
 				local tw, th = surface.GetTextSize(text)
 				surface.SetTextColor(color)

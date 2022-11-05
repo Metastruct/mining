@@ -1,5 +1,8 @@
 AddCSLuaFile()
 
+module("ms", package.seeall)
+Ores = Ores or {}
+
 ENT.Type = "anim"
 ENT.Base = "base_anim"
 ENT.RenderGroup = RENDERGROUP_OPAQUE
@@ -31,30 +34,10 @@ if SERVER then
 		self.Frame:Spawn()
 		self.Frame:SetParent(self)
 
-		self.Trigger = ents.Create("base_anim")
-		self.Trigger:SetModel("models/hunter/blocks/cube1x2x1.mdl")
-		self.Trigger:SetPos(self:GetPos() + self:GetRight() * -24 + self:GetUp() * 10)
-		self.Trigger:SetAngles(self:GetAngles())
-		self.Trigger:SetParent(self)
-		self.Trigger:SetTrigger(true)
-		self.Trigger:SetNotSolid(true)
-		self.Trigger:SetNoDraw(true)
-
-		self.Trigger.Touch = function(_, ent)
-			self:Touch(ent)
-		end
-
 		timer.Simple(0, function()
 			if not IsValid(self) then return end
 
-			for _, child in pairs(self:GetChildren()) do
-				child:SetOwner(self:GetOwner())
-				child:SetCreator(self:GetCreator())
-
-				if child.CPPISetOwner then
-					child:CPPISetOwner(self:CPPIGetOwner())
-				end
-			end
+			Ores.Automation.ReplicateOwnership(self, self)
 
 			if self.CPPIGetOwner then
 				local owner = self:CPPIGetOwner()
@@ -86,16 +69,9 @@ if SERVER then
 	end
 
 	local VECTOR_ZERO = Vector(0, 0, 0)
-	local BAD_CLASSES = {
-		player = true,
-		mining_ore_conveyor = true,
-		mining_ore_storage = true,
-		mining_drill = true,
-		mining_conveyor_splitter = true,
-	}
 	function ENT:Touch(ent)
 		if self.Frame == ent then return end
-		if BAD_CLASSES[ent:GetClass()] then return end
+		if Ores.Automation.IgnoredClasses[ent:GetClass()] then return end
 		--if ent:GetClass() ~= "mining_rock" then return end
 
 		local phys = ent:GetPhysicsObject()
