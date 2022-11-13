@@ -15,12 +15,13 @@ ENT.ClassName = "mining_ore_conveyor"
 if SERVER then
 	function ENT:Initialize()
 		self:SetModel("models/props_phx/construct/wood/wood_panel1x2.mdl")
-		self:SetMaterial("models/weapons/v_stunbaton/w_shaft01a")
 		self:SetMoveType(MOVETYPE_VPHYSICS)
 		self:PhysicsInit(SOLID_VPHYSICS)
 		self:SetSolid(SOLID_VPHYSICS)
 		self:SetSaveValue("m_takedamage", 0)
 		self:PhysWake()
+		self:SetNWBool("IsPowered", true)
+		self:SetNWInt("Direction", -1)
 
 		self.Frame = ents.Create("prop_physics")
 		self.Frame:SetPos(self:GetPos() - Vector(0, 0, 10))
@@ -47,24 +48,64 @@ if SERVER then
 				end
 			end
 		end)
+
+		if _G.WireLib then
+			_G.WireLib.CreateInputs(self, {
+				"Active",
+				"Direction"
+			}, {
+				"Whether the conveyor is active or not",
+				"The direction the conveyor should transport things to",
+			})
+		end
+	end
+
+	function ENT:TriggerInput(port, state)
+		if not _G.WireLib then return end
+		if not isnumber(state) then return end
+
+		if port == "Active" then
+			local is_powered = tobool(state)
+			self:SetNWBool("IsPowered", is_powered)
+			if is_powered then
+				if IsValid(self.Frame) then
+					local mins, maxs = self.Frame:OBBMins(), self.Frame:OBBMaxs()
+					local pos = self.Frame:WorldSpaceCenter()
+					for _, ent in ipairs(ents.FindInBox(pos + mins, pos + maxs)) do
+						ent:PhysWake()
+					end
+				end
+
+				if isnumber(self.SndLoop) and self.SndLoop ~= -1 then return end
+
+				self.SndLoop = self:StartLoopingSound("ambient/machines/refinery_loop_1.wav")
+			else
+				if isnumber(self.SndLoop) and self.SndLoop ~= -1 then
+					self:StopLoopingSound(self.SndLoop)
+					self.SndLoop = nil
+				end
+			end
+		elseif port == "Direction" then
+			self:SetNWInt("Direction", state == 0 and -1 or 1)
+		end
 	end
 
 	function ENT:OnRemove()
-		if self.SndLoop and self.SndLoop ~= -1 then
+		if isnumber(self.SndLoop) and self.SndLoop ~= -1 then
 			self:StopLoopingSound(self.SndLoop)
 		end
 	end
 
 	local VECTOR_ZERO = Vector(0, 0, 0)
 	function ENT:Touch(ent)
+		if not self:GetNWBool("IsPowered", true) then return end
 		if self.Frame == ent then return end
 		if Ores.Automation.IgnoredClasses[ent:GetClass()] then return end
-		--if ent:GetClass() ~= "mining_rock" then return end
 
 		local phys = ent:GetPhysicsObject()
 		if not IsValid(phys) then return end
 
-		local coef = -200---0.1 * phys:GetMass() * 200
+		local coef = 200 * self:GetNWInt("Direction", -1)
 		local forwardForce = coef * self:GetRight()
 
 		local localPos = -self:WorldToLocal(ent:GetPos())
@@ -88,16 +129,28 @@ if SERVER then
 end
 
 if CLIENT then
-	local MAT = Material("models/weapons/v_stunbaton/w_shaft01a")
+	local BASE_MAT = Material("models/weapons/v_stunbaton/w_shaft01a")
+	function ENT:Initialize()
+		self.MaterialName = FrameNumber() .. "_mining_conveyor"
+		self.Material = CreateMaterial(self.MaterialName, "VertexLitGeneric", {
+			["$basetexture"] = BASE_MAT:GetTexture("$basetexture"):GetName(),
+			["$model"] = "1",
+		})
+
+		self.MaterialName = "!" .. self.MaterialName
+	end
+
 	local MTX = Matrix()
 	local TRANSLATION = Vector(0, 0, 0)
 	function ENT:Draw()
-		TRANSLATION.x = -CurTime() * 5
+		if self:GetNWBool("IsPowered", true) then
+			TRANSLATION.x = CurTime() * 5 * self:GetNWInt("Direction", -1)
 
-		MTX:SetTranslation(TRANSLATION)
-		MAT:SetMatrix("$basetexturetransform", MTX)
+			MTX:SetTranslation(TRANSLATION)
+			self.Material:SetMatrix("$basetexturetransform", MTX)
+		end
 
-		render.SetMaterial(MAT)
+		self:SetMaterial(self.MaterialName)
 		self:DrawModel()
 	end
 end
