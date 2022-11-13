@@ -12,12 +12,9 @@ local function explode(ent)
 	util.BlastDamage(ent, ent, ent:WorldSpaceCenter(), 50, 10)
 end
 
-local rockCount = 0
 hook.Add("EntityRemoved", "miningDetonite", function(ent)
 	if ent:GetClass() == "mining_rock" and ent:GetRarity() == DETONITE_RARITY then
 		explode(ent)
-
-		rockCount = math.max(0, rockCount - 1)
 	end
 end)
 
@@ -152,14 +149,23 @@ local function spawnDetonite(tr)
 
 		SafeRemoveEntityDelayed(drop, 8)
 	end)
+end
 
-	rockCount = rockCount + 1
+local function getDetoniteRockCount()
+	local total = 0
+	for _, rock in ipairs(ents.FindByClass("mining_rock")) do
+		if rock:GetRarity() == DETONITE_RARITY then
+			total = total + 1
+		end
+	end
+
+	return total
 end
 
 local MAX_TRIES = 5
 local MAX_DETONITE_ROCKS = 10
 local function generateDetonite()
-	if rockCount >= MAX_DETONITE_ROCKS then return end
+	if getDetoniteRockCount() >= MAX_DETONITE_ROCKS then return end
 
 	local lavaPools = ents.FindByName("*magma_lavapool*")
 	local lavaPool = lavaPools[math.random(#lavaPools)]
