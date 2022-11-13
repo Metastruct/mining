@@ -15,6 +15,7 @@ ENT.ClassName = "mining_ore_conveyor"
 if SERVER then
 	function ENT:Initialize()
 		self:SetModel("models/props_phx/construct/wood/wood_panel1x2.mdl")
+		self:SetMaterial("models/weapons/v_stunbaton/w_shaft01a") -- set that by default just in case
 		self:SetMoveType(MOVETYPE_VPHYSICS)
 		self:PhysicsInit(SOLID_VPHYSICS)
 		self:SetSolid(SOLID_VPHYSICS)
@@ -147,10 +148,18 @@ if CLIENT then
 			TRANSLATION.x = CurTime() * 5 * self:GetNWInt("Direction", -1)
 
 			MTX:SetTranslation(TRANSLATION)
-			self.Material:SetMatrix("$basetexturetransform", MTX)
+
+			-- somehow this can be missing
+			if self.Material then
+				self.Material:SetMatrix("$basetexturetransform", MTX)
+			end
 		end
 
-		self:SetMaterial(self.MaterialName)
+		-- this can be missing too
+		if self.MaterialName then
+			self:SetMaterial(self.MaterialName)
+		end
+
 		self:DrawModel()
 	end
 end
