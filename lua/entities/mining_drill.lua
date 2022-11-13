@@ -41,6 +41,7 @@ if SERVER then
 		self.NextEnergyEnt = 0
 		self.NextTraceCheck = 0
 		self.MaxEnergy = Ores.Automation.BatteryCapacity * 3
+		self.WireActive = true
 
 		-- we use this so that its easy for drills to accept power entities
 		self.Trigger = ents.Create("base_brush")
@@ -75,6 +76,23 @@ if SERVER then
 			Ores.Automation.ReplicateOwnership(self, self)
 			self.SndLoop = self:StartLoopingSound("ambient/spacebase/spacebase_drill.wav")
 		end)
+
+		if _G.WireLib then
+			_G.WireLib.CreateInputs(self, {
+				"Active",
+			}, {
+				"Whether the drill is active or not",
+			})
+		end
+	end
+
+	function ENT:TriggerInput(port, state)
+		if not _G.WireLib then return end
+		if not isnumber(state) then return end
+
+		if port == "Active" then
+			self.WireActive = tobool(state)
+		end
 	end
 
 	function ENT:Touch(ent)
@@ -102,6 +120,7 @@ if SERVER then
 	end
 
 	function ENT:CanWork()
+		if _G.WireLib and not self.WireActive then return false end
 		if CurTime() < self.NextTraceCheck then return self.TraceCheckResult end
 
 		if self:GetNWInt("Energy", 0) > 0 then
@@ -137,7 +156,7 @@ if SERVER then
 	end
 
 	function ENT:ProcessEnergy()
-		if CurTime() >= self.NextEnergyConsumption then
+		if CurTime() >= self.NextEnergyConsumption and self:CanWork() then
 			local curEnergy = self:GetNWInt("Energy", 0)
 			self:SetNWInt("Energy", math.max(0, curEnergy - 1))
 			self.NextEnergyConsumption = CurTime() + Ores.Automation.BaseOreProductionRate
