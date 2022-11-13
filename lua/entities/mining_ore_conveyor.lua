@@ -66,9 +66,9 @@ if SERVER then
 		if not isnumber(state) then return end
 
 		if port == "Active" then
-			local is_powered = tobool(state)
-			self:SetNWBool("IsPowered", is_powered)
-			if is_powered then
+			local isPowered = tobool(state)
+			self:SetNWBool("IsPowered", isPowered)
+			if isPowered then
 				if IsValid(self.Frame) then
 					local mins, maxs = self.Frame:OBBMins(), self.Frame:OBBMaxs()
 					local pos = self.Frame:WorldSpaceCenter()
@@ -132,34 +132,34 @@ end
 if CLIENT then
 	local BASE_MAT = Material("models/weapons/v_stunbaton/w_shaft01a")
 	function ENT:Initialize()
-		self.MaterialName = FrameNumber() .. "_mining_conveyor"
-		self.Material = CreateMaterial(self.MaterialName, "VertexLitGeneric", {
+		self:CreateConveyorMaterial()
+	end
+
+	function ENT:CreateConveyorMaterial()
+		local realMatName = FrameNumber() .. "_mining_conveyor"
+		self.Material = CreateMaterial(realMatName, "VertexLitGeneric", {
 			["$basetexture"] = BASE_MAT:GetTexture("$basetexture"):GetName(),
 			["$model"] = "1",
 		})
 
-		self.MaterialName = "!" .. self.MaterialName
+		self.MaterialName = "!" .. realMatName
 	end
 
 	local MTX = Matrix()
 	local TRANSLATION = Vector(0, 0, 0)
 	function ENT:Draw()
+		if not self.Material or not self.MaterialName then
+			self:CreateConveyorMaterial()
+		end
+
 		if self:GetNWBool("IsPowered", true) then
 			TRANSLATION.x = CurTime() * 5 * self:GetNWInt("Direction", -1)
 
 			MTX:SetTranslation(TRANSLATION)
-
-			-- somehow this can be missing
-			if self.Material then
-				self.Material:SetMatrix("$basetexturetransform", MTX)
-			end
+			self.Material:SetMatrix("$basetexturetransform", MTX)
 		end
 
-		-- this can be missing too
-		if self.MaterialName then
-			self:SetMaterial(self.MaterialName)
-		end
-
+		self:SetMaterial(self.MaterialName)
 		self:DrawModel()
 	end
 end
