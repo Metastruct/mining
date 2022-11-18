@@ -15,17 +15,22 @@ ENT.ClassName = "mining_coal_burner"
 if SERVER then
 	function ENT:Initialize()
 		self:SetModel("models/props_c17/TrapPropeller_Engine.mdl")
+		self:SetModelScale(0.5)
 		self:SetMoveType(MOVETYPE_VPHYSICS)
 		self:PhysicsInit(SOLID_VPHYSICS)
 		self:SetSolid(SOLID_VPHYSICS)
+		self:SetCollisionGroup(COLLISION_GROUP_WEAPON)
 		self:PhysWake()
+		self:Activate()
 		self:SetUseType(SIMPLE_USE)
 
 		self.Frame = ents.Create("prop_physics")
 		self.Frame:SetModel("models/props_phx/construct/metal_wire1x1x1.mdl")
 		self.Frame:SetMaterial("phoenix_storms/future_vents")
-		self.Frame:SetPos(self:GetPos() + self:GetForward() * 24)
+		self.Frame:SetModelScale(0.5)
+		self.Frame:SetPos(self:GetPos() + self:GetForward() * 24 / 2)
 		self.Frame:SetAngles(self:GetAngles())
+		self.Frame:SetCollisionGroup(COLLISION_GROUP_WEAPON)
 		self.Frame:Spawn()
 		self.Frame:SetParent(self)
 
