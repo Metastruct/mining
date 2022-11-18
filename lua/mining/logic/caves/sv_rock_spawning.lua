@@ -147,11 +147,11 @@ local noSetupText = "No positions set to spawn mining rocks, or invalid data - p
 local removedPosText = "Removed non-vector entry from ms.mapdata.minespots (temporary until saved with 'mapdata_save'), please check this table!"
 
 local function SpawnRock(rarity)
-	if not (mapdata.minespots and next(mapdata.minespots)) then
+	if not (mapdata and mapdata.minespots and next(mapdata.minespots)) then
 		Ores.Print(noSetupText)
 
 		timer.Create("ms.Ores_Spawn",1800,0,function()
-			if mapdata.minespots and next(mapdata.minespots) then
+			if mapdata and mapdata.minespots and next(mapdata.minespots) then
 				Ores.Print("Detected data in ms.mapdata.minespots - mining rock spawning resumed...")
 
 				timer.Create("ms.Ores_Spawn",5,0,SpawnRock)
