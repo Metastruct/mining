@@ -89,4 +89,11 @@ if SERVER then
 			end
 		end
 	end
+
+	hook.Add("PlayerUse", "mining_automation_use_fn_replication", function(ply, ent)
+		local parent = ent:GetParent()
+		if IsValid(parent) and Ores.Automation.EnergyEntities[ent:GetClass()] then
+			parent:Use(ply, ply)
+		end
+	end)
 end
