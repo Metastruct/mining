@@ -25,7 +25,17 @@ Ores.Automation = {
 			Set = function(ent, value) ent:SetNWInt("CoalCount", value) end,
 		}
 	},
-	NonStorableOres = { "Argonite", "Detonite" }
+	NonStorableOres = { "Argonite", "Detonite" },
+	EntityClasses = {
+		mining_ore_conveyor = true,
+		mining_ore_storage = true,
+		mining_drill = true,
+		mining_conveyor_splitter = true,
+		mining_argonite_battery = true,
+		mining_coal_burner = true,
+		mining_argonite_transformer = true,
+		mining_detonite_bomb = true,
+	}
 }
 
 if Ores.Automation.EnergyMaterial:IsError() then
@@ -95,5 +105,17 @@ if SERVER then
 		if IsValid(parent) and Ores.Automation.EnergyEntities[ent:GetClass()] then
 			parent:Use(ply, ply)
 		end
+	end)
+
+	CreateConVar("sbox_maxmining_automation", "40", FCVAR_ARCHIVE, "Maximum amount of mining automation entities a player can have", 0, 100)
+
+	hook.Add("PlayerSpawnedSENT", "mining_automation", function(ply, ent)
+		if Ores.Automation.EntityClasses[ent:GetClass()] then
+			ply:AddCount("mining_automation", ent)
+		end
+	end)
+
+	hook.Add("PlayerSpawnSENT", "mining_automation", function(ply, ent)
+		if not ply:CheckLimit("mining_automation") then return false end
 	end)
 end
