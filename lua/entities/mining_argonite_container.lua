@@ -100,6 +100,7 @@ if SERVER then
 
 					-- otherwise trigger meltdown
 					if mgn and mgn.IsOverloading and not mgn.IsOverloading() and mgn.InitiateOverload then
+						print("@PYTHON1320, IF YOU SEE THIS THE META CORE HAS BEEN OVERLOADED! <3")
 						mgn.InitiateOverload()
 					end
 				end
