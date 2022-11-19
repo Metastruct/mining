@@ -112,6 +112,7 @@ if SERVER then
 	hook.Add("PlayerSpawnedSENT", "mining_automation", function(ply, ent)
 		if Ores.Automation.EntityClasses[ent:GetClass()] then
 			ply:AddCount("mining_automation", ent)
+			return true
 		end
 	end)
 
