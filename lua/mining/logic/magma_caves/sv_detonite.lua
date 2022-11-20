@@ -168,7 +168,11 @@ local function generateDetonite()
 	if getDetoniteRockCount() >= MAX_DETONITE_ROCKS then return end
 
 	local lavaPools = ents.FindByName("*magma_lavapool*")
+	if #lavaPools < 1 then return end
+
 	local lavaPool = lavaPools[math.random(#lavaPools)]
+	if not IsValid(lavaPool) then return end
+
 	local maxs = lavaPool:OBBMaxs() / 2
 	local origin = lavaPool:GetPos() + Vector(math.random(-maxs.x, maxs.y), math.random(-maxs.y, maxs.y), 10)
 	local trace = util.TraceLine({
