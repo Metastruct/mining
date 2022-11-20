@@ -33,6 +33,7 @@ if SERVER then
 		self.Frame:SetCollisionGroup(COLLISION_GROUP_WEAPON)
 		self.Frame:Spawn()
 		self.Frame:SetParent(self)
+		self.Frame.OnEntityCopyTableFinish = function(data) table.Empty(data) end
 
 		timer.Simple(0, function()
 			if not IsValid(self) then return end
