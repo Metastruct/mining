@@ -238,7 +238,10 @@ function Ores.MineCollapse(pos, delay, rarityData, ply)
 			if ent:IsPlayer() then
 				timer.Simple(0, function()
 					if IsValid(ent) and ent:Alive() then
-						hook.Run("PlayerDeath", ent, rock, rock)
+						if IsValid(rock) then
+							hook.Run("PlayerDeath", ent, rock, rock)
+						end
+
 						ent:KillSilent()
 					end
 				end)
