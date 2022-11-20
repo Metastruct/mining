@@ -106,6 +106,7 @@ if SERVER then
 		self.Frame:SetAngles(self:GetAngles())
 		self.Frame:Spawn()
 		self.Frame:SetParent(self)
+		self.Frame.OnEntityCopyTableFinish = function(data) table.Empty(data) end
 
 		self.Out = ents.Create("prop_physics")
 		self.Out:SetModel("models/props_phx/construct/metal_wire1x1.mdl")
@@ -118,6 +119,7 @@ if SERVER then
 		self.Out:SetAngles(ang)
 		self.Out:Spawn()
 		self.Out:SetParent(self)
+		self.Out.OnEntityCopyTableFinish = function(data) table.Empty(data) end
 
 		self.Core = ents.Create("prop_physics")
 		self.Core:SetModel("models/hunter/misc/sphere025x025.mdl")
@@ -128,6 +130,7 @@ if SERVER then
 		self.Core:SetParent(self)
 		self.Core:SetColor(Color(0, 0, 0, 255))
 		self.Core:Activate()
+		self.Core.OnEntityCopyTableFinish = function(data) table.Empty(data) end
 
 		local timerName = ("mining_argonite_transformer_[%d]"):format(self:EntIndex())
 		timer.Create(timerName, 1, 0, function()

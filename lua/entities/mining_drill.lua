@@ -26,6 +26,7 @@ if SERVER then
 		saw:Spawn()
 		saw:SetParent(self)
 		saw:SetKeyValue("classname", "mining_drill_saw")
+		saw.OnEntityCopyTableFinish = function(data) table.Empty(data) end
 
 		return saw
 	end
@@ -51,6 +52,7 @@ if SERVER then
 		self.Trigger:SetSolid(SOLID_BBOX)
 		self.Trigger:SetNotSolid(true)
 		self.Trigger:SetCollisionBounds(Vector(-100, -100, -100), Vector(100, 100, 100))
+		self.Trigger.OnEntityCopyTableFinish = function(data) table.Empty(data) end
 		self.Trigger.Touch = function(_, ent)
 			self:Touch(ent)
 		end
@@ -66,6 +68,7 @@ if SERVER then
 		self.Frame:SetAngles(ang)
 		self.Frame:Spawn()
 		self.Frame:SetParent(self)
+		self.Frame.OnEntityCopyTableFinish = function(data) table.Empty(data) end
 
 		addSawEntity(self, self:GetForward() * -40 + self:GetRight() * 10)
 		addSawEntity(self, self:GetForward() * -40)
