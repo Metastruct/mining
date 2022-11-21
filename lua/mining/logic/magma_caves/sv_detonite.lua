@@ -163,7 +163,7 @@ local function getDetoniteRockCount()
 end
 
 local MAX_TRIES = 5
-local MAX_DETONITE_ROCKS = 10
+local MAX_DETONITE_ROCKS = 5
 local function generateDetonite()
 	if getDetoniteRockCount() >= MAX_DETONITE_ROCKS then return end
 
