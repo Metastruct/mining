@@ -117,9 +117,12 @@ if SERVER then
 			if not IsValid(child) then continue end
 
 			child.OnEntityCopyTableFinish = function(_, data)
+				-- this works with the vanilla duplicator but not with the AdvDupe2
+				-- see: https://github.com/wiremod/advdupe2/issues/406
+				--[[
 				for k, v in pairs(data) do
 					data[k] = nil
-				end
+				end]]
 			end
 		end
 	end
