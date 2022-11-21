@@ -100,6 +100,22 @@ if SERVER then
 		end
 	end
 
+	function Ores.Automation.PrepareForDuplication(ent)
+		function ent:PostEntityPaste(_, _, createdEntities)
+			for _, e in pairs(createdEntities) do
+				local parent = e:GetParent()
+				if IsValid(parent) and parent == ent then
+					SafeRemoveEntity(e)
+				end
+			end
+		end
+
+		for _, child in pairs(ent:GetChildren()) do
+			if not IsValid(child) then continue end
+			child.OnEntityCopyTableFinish = function(_, data) table.Empty(data) end
+		end
+	end
+
 	hook.Add("PlayerUse", "mining_automation_use_fn_replication", function(ply, ent)
 		local parent = ent:GetParent()
 		if IsValid(parent) and Ores.Automation.EnergyEntities[ent:GetClass()] then
