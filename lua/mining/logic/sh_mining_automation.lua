@@ -103,6 +103,9 @@ if SERVER then
 	function Ores.Automation.PrepareForDuplication(ent)
 		function ent:PostEntityPaste(_, _, createdEntities)
 			for _, e in pairs(createdEntities) do
+				if not IsValid(e) then continue end
+				if not e.GetParent then continue end
+
 				local parent = e:GetParent()
 				if IsValid(parent) and parent == ent then
 					SafeRemoveEntity(e)
@@ -112,7 +115,12 @@ if SERVER then
 
 		for _, child in pairs(ent:GetChildren()) do
 			if not IsValid(child) then continue end
-			child.OnEntityCopyTableFinish = function(_, data) table.Empty(data) end
+
+			child.OnEntityCopyTableFinish = function(_, data)
+				for k, v in pairs(data) do
+					data[k] = nil
+				end
+			end
 		end
 	end
 
