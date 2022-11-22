@@ -40,7 +40,7 @@ Ores.Automation = {
 }
 
 if Ores.Automation.EnergyMaterial:IsError() then
-	Ores.Automation.EnergyMaterial = Material("models/props_lab/cornerunit_cloud")
+	Ores.Automation.EnergyMaterial = Material("effects/tvscreen_noise001a")
 end
 
 local cache = {}
