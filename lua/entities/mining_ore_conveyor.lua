@@ -168,7 +168,7 @@ if CLIENT then
 	function ENT:OnGraphDraw(x, y)
 		draw.NoTexture()
 
-		if ent:GetNWBool("IsPowered", true) then
+		if self:GetNWBool("IsPowered", true) then
 			surface.SetDrawColor(30, 30, 30, 255)
 		else
 			surface.SetDrawColor(60, 0, 0, 255)
@@ -176,16 +176,16 @@ if CLIENT then
 
 		local GU = Ores.Automation.GraphUnit
 
-		surface.DrawTexturedRectRotated(x, y, GU, GU * 2, -ent:GetAngles().y)
+		surface.DrawTexturedRectRotated(x, y, GU, GU * 2, -self:GetAngles().y)
 
-		if ent:GetNWBool("IsPowered", true) then
+		if self:GetNWBool("IsPowered", true) then
 			surface.SetDrawColor(200, 200, 200, 255)
 
-			local dir = ent:GetRight()
-			local dir_side = ent:GetForward()
+			local dir = self:GetRight()
+			local dir_side = self:GetForward()
 			surface.DrawLine(x + dir.x * -GU, y + dir.y * -GU, x + dir.x * GU, y + dir.y * GU)
 
-			if ent:GetNWInt("Direction", -1) == -1 then
+			if self:GetNWInt("Direction", -1) == -1 then
 				surface.DrawLine(x + dir.x * -GU, y + dir.y * -GU, x + dir.x * -GU / 2 + dir_side.x * -GU / 2, y + dir.y * -GU / 2 + dir_side.y * -GU / 2)
 				surface.DrawLine(x + dir.x * -GU, y + dir.y * -GU, x + dir.x * -GU / 2 + dir_side.x * GU / 2, y + dir.y * -GU / 2 + dir_side.y * GU / 2)
 			else
