@@ -241,7 +241,7 @@ if CLIENT then
 		surface.DrawOutlinedRect(x - GU / 2, y - GU / 2, GU, GU, 2)
 
 		surface.SetTextColor(argoniteColor)
-		local perc = (math.Round((ent:GetNWInt("ArgoniteCount", 0) / Ores.Automation.BatteryCapacity) * 100)) .. "%"
+		local perc = (math.Round((self:GetNWInt("ArgoniteCount", 0) / Ores.Automation.BatteryCapacity) * 100)) .. "%"
 		surface.SetFont("DermaDefault")
 		local tw, th = surface.GetTextSize(perc)
 		surface.SetTextPos(x - tw / 2, y - th / 2)

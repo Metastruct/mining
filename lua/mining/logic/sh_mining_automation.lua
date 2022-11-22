@@ -69,13 +69,16 @@ if CLIENT then
 		return false
 	end
 
+	local ENTITY_INFO_EXTRAS = { mining_argonite_container = true }
 	hook.Add("HUDPaint", "mining_automation_entity_info", function()
 		for _, ent in ipairs(ents.FindByClass("mining_*")) do
-			if not Ores.Automation.EntityClasses[ent:GetClass()] then continue end
-			if not Ores.Automation.ShouldDrawText(ent) then continue end
+			local entClass = ent:GetClass()
+			if Ores.Automation.EntityClasses[entClass] or ENTITY_INFO_EXTRAS[entClass] then
+				if not Ores.Automation.ShouldDrawText(ent) then continue end
 
-			if isfunction(ent.OnDrawEntityInfo) then
-				ent:OnDrawEntityInfo()
+				if isfunction(ent.OnDrawEntityInfo) then
+					ent:OnDrawEntityInfo()
+				end
 			end
 		end
 	end)
