@@ -249,23 +249,39 @@ if CLIENT then
 		self:DrawModel()
 	end
 
-	local WHITE_COLOR = Color(255, 255, 255)
-	hook.Add("HUDPaint", "mining_drill", function()
-		for _, drill in ipairs(ents.FindByClass("mining_drill")) do
-			if Ores.Automation.ShouldDrawText(drill) then
-				local pos = drill:WorldSpaceCenter():ToScreen()
-				local text = ("%d%%"):format((drill:GetNWInt("Energy", 0) / drill.MaxEnergy) * 100)
-				surface.SetFont("DermaLarge")
-				local tw, th = surface.GetTextSize(text)
-				surface.SetTextColor(WHITE_COLOR)
-				surface.SetTextPos(pos.x - tw / 2, pos.y - th / 2)
-				surface.DrawText(text)
+	function ENT:OnGraphDraw(x, y)
+		local argoniteRarity = Ores.Automation.GetOreRarityByName("Argonite")
+		local argoniteColor = Ores.__R[argoniteRarity].HudColor
+		local GU = Ores.Automation.GraphUnit
 
-				text = "Energy"
-				tw, th = surface.GetTextSize(text)
-				surface.SetTextPos(pos.x - tw / 2, pos.y - th * 2)
-				surface.DrawText(text)
-			end
-		end
-	end)
+		surface.SetDrawColor(argoniteColor)
+		surface.SetMaterial(Ores.Automation.EnergyMaterial)
+		surface.DrawTexturedRect(x - GU / 2, y - GU / 2, GU, GU)
+
+		surface.SetDrawColor(125, 125, 125, 255)
+		surface.DrawOutlinedRect(x - GU / 2, y - GU / 2, GU, GU, 2)
+
+		surface.SetTextColor(255, 255, 255, 255)
+		local perc = (math.Round((ent:GetNWInt("Energy", 0) / (Ores.Automation.BatteryCapacity * 3)) * 100)) .. "%"
+		surface.SetFont("DermaDefault")
+		local tw, th = surface.GetTextSize(perc)
+		surface.SetTextPos(x - tw / 2, y - th / 2)
+		surface.DrawText(perc)
+	end
+
+	local WHITE_COLOR = Color(255, 255, 255)
+	function ENT:OnDrawEntityInfo()
+		local pos = self:WorldSpaceCenter():ToScreen()
+		local text = ("%d%%"):format((self:GetNWInt("Energy", 0) / self.MaxEnergy) * 100)
+		surface.SetFont("DermaLarge")
+		local tw, th = surface.GetTextSize(text)
+		surface.SetTextColor(WHITE_COLOR)
+		surface.SetTextPos(pos.x - tw / 2, pos.y - th / 2)
+		surface.DrawText(text)
+
+		text = "Energy"
+		tw, th = surface.GetTextSize(text)
+		surface.SetTextPos(pos.x - tw / 2, pos.y - th * 2)
+		surface.DrawText(text)
+	end
 end

@@ -152,30 +152,26 @@ if CLIENT then
 		render.SetColorModulation(1, 1, 1)
 
 		self:DrawModel()
+	end
 
-		if Ores.Automation.ShouldDrawText(self) then
-			cam.IgnoreZ(true)
-			cam.Start2D()
-				local pos = self:WorldSpaceCenter():ToScreen()
-				local text = ("%d%%"):format((self:GetNWInt("ArgoniteCount", 0) / CONTAINER_CAPACITY) * 100)
-				surface.SetFont("DermaLarge")
-				local tw, th = surface.GetTextSize(text)
-				surface.SetTextColor(color)
-				surface.SetTextPos(pos.x - tw / 2, pos.y - th / 2)
-				surface.DrawText(text)
+	function ENT:OnDrawEntityInfo()
+		local pos = self:WorldSpaceCenter():ToScreen()
+		local text = ("%d%%"):format((self:GetNWInt("ArgoniteCount", 0) / CONTAINER_CAPACITY) * 100)
+		surface.SetFont("DermaLarge")
+		local tw, th = surface.GetTextSize(text)
+		surface.SetTextColor(color)
+		surface.SetTextPos(pos.x - tw / 2, pos.y - th / 2)
+		surface.DrawText(text)
 
-				tw, th = surface.GetTextSize("Excess Argonite Container")
-				surface.SetTextPos(pos.x - tw / 2, pos.y - th * 2)
-				surface.DrawText("Excess Argonite Container")
+		tw, th = surface.GetTextSize("Excess Argonite Container")
+		surface.SetTextPos(pos.x - tw / 2, pos.y - th * 2)
+		surface.DrawText("Excess Argonite Container")
 
-				if self:GetNWBool("ArgoniteOverload", false) then
-					surface.SetTextColor(255, 0, 0, 255)
-					tw, th = surface.GetTextSize("/!\\ DANGER ARGONITE LEAKAGE /!\\")
-					surface.SetTextPos(pos.x - tw / 2, pos.y - th * 4)
-					surface.DrawText("/!\\ DANGER ARGONITE LEAKAGE /!\\")
-				end
-			cam.End2D()
-			cam.IgnoreZ(false)
+		if self:GetNWBool("ArgoniteOverload", false) then
+			surface.SetTextColor(255, 0, 0, 255)
+			tw, th = surface.GetTextSize("/!\\ DANGER ARGONITE LEAKAGE /!\\")
+			surface.SetTextPos(pos.x - tw / 2, pos.y - th * 4)
+			surface.DrawText("/!\\ DANGER ARGONITE LEAKAGE /!\\")
 		end
 	end
 

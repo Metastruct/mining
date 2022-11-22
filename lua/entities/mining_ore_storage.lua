@@ -81,35 +81,57 @@ if CLIENT then
 		self:DrawModel()
 	end
 
+	function ENT:OnGraphDraw(x, y)
+		local GU = Ores.Automation.GraphUnit
+
+		surface.SetDrawColor(125, 125, 125, 255)
+		surface.DrawRect(x - GU / 2, y - GU / 2, GU, GU)
+
+		surface.SetDrawColor(255, 255, 255, 255)
+		surface.DrawOutlinedRect(x - GU / 2, y - GU / 2, GU, GU, 2)
+
+		local th = draw.GetFontHeight("DermaDefault")
+		local globalOreData = self:GetNWString("OreData", ""):Trim()
+		if #globalOreData < 1 then continue end
+
+		local data = globalOreData:Split(";")
+		for i, dataChunk in ipairs(data) do
+			local rarityData = dataChunk:Split("=")
+			local oreData = Ores.__R[tonumber(rarityData[1])]
+			local text = ("x%s"):format(rarityData[2])
+
+			surface.SetTextColor(oreData.HudColor)
+			surface.SetTextPos(x + GU + 5, y + ((i - 1) * th))
+			surface.DrawText(text)
+		end
+	end
+
 	local COLOR_WHITE = Color(255, 255, 255)
-	hook.Add("HUDPaint", "mining_ore_storage", function()
+	function ENT:OnDrawEntityInfo()
 		local key = (input.LookupBinding("+use", true) or "?"):upper()
-		for _, storage in ipairs(ents.FindByClass("mining_ore_storage")) do
-			if not Ores.Automation.ShouldDrawText(storage) then continue end
+		local pos = self:WorldSpaceCenter():ToScreen()
 
-			local pos = storage:WorldSpaceCenter():ToScreen()
-			surface.SetFont("DermaLarge")
+		surface.SetFont("DermaLarge")
 
-			local th = draw.GetFontHeight("DermaLarge")
-			local globalOreData = storage:GetNWString("OreData", ""):Trim()
-			if #globalOreData < 1 then continue end
+		local th = draw.GetFontHeight("DermaLarge")
+		local globalOreData = self:GetNWString("OreData", ""):Trim()
+		if #globalOreData < 1 then continue end
 
-			local data = globalOreData:Split(";")
-			for i, dataChunk in ipairs(data) do
-				local rarityData = dataChunk:Split("=")
-				local oreData = Ores.__R[tonumber(rarityData[1])]
-				local text = ("x%s %s"):format(rarityData[2], oreData.Name)
+		local data = globalOreData:Split(";")
+		for i, dataChunk in ipairs(data) do
+			local rarityData = dataChunk:Split("=")
+			local oreData = Ores.__R[tonumber(rarityData[1])]
+			local text = ("x%s %s"):format(rarityData[2], oreData.Name)
 
-				surface.SetTextColor(oreData.HudColor)
-				surface.SetTextPos(pos.x, pos.y + ((i - 1) * th))
-				surface.DrawText(text)
+			surface.SetTextColor(oreData.HudColor)
+			surface.SetTextPos(pos.x, pos.y + ((i - 1) * th))
+			surface.DrawText(text)
 
-				if i >= #data and storage.CPPIGetOwner and storage:CPPIGetOwner() == LocalPlayer() then
-					surface.SetTextColor(COLOR_WHITE)
-					surface.SetTextPos(pos.x, pos.y + (i * th))
-					surface.DrawText(("[ %s ] Claim ore(s)"):format(key))
-				end
+			if i >= #data and self.CPPIGetOwner and self:CPPIGetOwner() == LocalPlayer() then
+				surface.SetTextColor(COLOR_WHITE)
+				surface.SetTextPos(pos.x, pos.y + (i * th))
+				surface.DrawText(("[ %s ] Claim ore(s)"):format(key))
 			end
 		end
-	end)
+	end
 end

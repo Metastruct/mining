@@ -111,50 +111,45 @@ if CLIENT then
 		self:DrawModel()
 	end
 
-	hook.Add("HUDPaint", "mining_detonite_bomb", function()
+	function ENT:OnDrawEntityInfo()
 		local color = Ores.__R[Ores.Automation.GetOreRarityByName("Detonite")].HudColor
 		local key = (input.LookupBinding("+use", true) or "?"):upper()
+		local pos = self:WorldSpaceCenter():ToScreen()
+		local ready = self:GetNWInt("DetoniteAmount", 0) == Ores.Automation.BombCapacity
 
-		for _, bomb in ipairs(ents.FindByClass("mining_detonite_bomb")) do
-			if not Ores.Automation.ShouldDrawText(bomb) then continue end
+		surface.SetFont("DermaLarge")
+		surface.SetTextColor(color)
 
-			local pos = bomb:WorldSpaceCenter():ToScreen()
-			local ready = bomb:GetNWInt("DetoniteAmount", 0) == Ores.Automation.BombCapacity
+		local text = "Detonite Bomb"
+		local tw, th = surface.GetTextSize(text)
 
-			surface.SetFont("DermaLarge")
-			surface.SetTextColor(color)
+		surface.SetTextPos(pos.x - tw / 2, pos.y - th / 2)
+		surface.DrawText(text)
 
-			local text = "Detonite Bomb"
-			local tw, th = surface.GetTextSize(text)
+		if not ready then
+			text = ("%d out of %d detonite ore(s)"):format(self:GetNWInt("DetoniteAmount", 0), Ores.Automation.BombCapacity)
+			tw, th = surface.GetTextSize(text)
 
-			surface.SetTextPos(pos.x - tw / 2, pos.y - th / 2)
+			surface.SetTextPos(pos.x - tw / 2, pos.y + th / 2)
 			surface.DrawText(text)
 
-			if not ready then
-				text = ("%d out of %d detonite ore(s)"):format(bomb:GetNWInt("DetoniteAmount", 0), Ores.Automation.BombCapacity)
-				tw, th = surface.GetTextSize(text)
+			text = ("[ %s ] Fill"):format(key)
+			tw, th = surface.GetTextSize(text)
 
-				surface.SetTextPos(pos.x - tw / 2, pos.y + th / 2)
-				surface.DrawText(text)
+			surface.SetTextPos(pos.x - tw / 2, pos.y + th * 2)
+			surface.DrawText(text)
+		elseif self:GetNWBool("Detonating", false) then
+			text = "DETONATING!!!"
+			tw, th = surface.GetTextSize(text)
 
-				text = ("[ %s ] Fill"):format(key)
-				tw, th = surface.GetTextSize(text)
+			surface.SetTextPos(pos.x - tw / 2, pos.y + th / 2)
+			surface.DrawText(text)
+		else
+			text = self.CPPIGetOwner and self:CPPIGetOwner() == LocalPlayer() and ("[ %s ] Explode"):format(key) or "Ready to explode"
+			tw, th = surface.GetTextSize(text)
 
-				surface.SetTextPos(pos.x - tw / 2, pos.y + th * 2)
-				surface.DrawText(text)
-			elseif bomb:GetNWBool("Detonating", false) then
-				text = "DETONATING!!!"
-				tw, th = surface.GetTextSize(text)
-
-				surface.SetTextPos(pos.x - tw / 2, pos.y + th / 2)
-				surface.DrawText(text)
-			else
-				text = bomb.CPPIGetOwner and bomb:CPPIGetOwner() == LocalPlayer() and ("[ %s ] Explode"):format(key) or "Ready to explode"
-				tw, th = surface.GetTextSize(text)
-
-				surface.SetTextPos(pos.x - tw / 2, pos.y + th / 2)
-				surface.DrawText(text)
-			end
+			surface.SetTextPos(pos.x - tw / 2, pos.y + th / 2)
+			surface.DrawText(text)
 		end
-	end)
+	end
 end

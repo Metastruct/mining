@@ -35,7 +35,8 @@ Ores.Automation = {
 		mining_coal_burner = true,
 		mining_argonite_transformer = true,
 		mining_detonite_bomb = true,
-	}
+	},
+	GraphUnit = 40,
 }
 
 if Ores.Automation.EnergyMaterial:IsError() then
@@ -68,48 +69,58 @@ if CLIENT then
 		return false
 	end
 
-	local POWER_ENTITIES = { mining_argonite_battery = true, mining_coal_burner = true }
-	local GRAPH_UNIT = 40
+	hook.Add("HUDPaint", "mining_automation_entity_info", function()
+		for _, ent in ipairs(ents.FindByClass("mining_*")) do
+			if not Ores.Automation.EntityClasses[ent:GetClass()] then continue end
+			if not Ores.Automation.ShouldDrawText(ent) then continue end
 
-	local entities = {}
-	local minX, maxX = 2e9, -2e9
-	local minY, maxY = 2e9, -2e9
-	local minZ, maxZ = 2e9, -2e9
+			if isfunction(ent.OnDrawEntityInfo) then
+				ent:OnDrawEntityInfo()
+			end
+		end
+	end)
+
+	local graphEntities = {}
+	local graphMinX, graphMaxX = 2e9, -2e9
+	local graphMinY, graphMaxY = 2e9, -2e9
+	local graphMinZ, graphMaxZ = 2e9, -2e9
 
 	function Ores.Automation.BuildGraph()
-		entities = {}
-		minX, maxX = 2e9, -2e9
-		minY, maxY = 2e9, -2e9
-		minZ, maxZ = 2e9, -2e9
+		graphEntities = {}
+		graphMinX, graphMaxX = 2e9, -2e9
+		graphMinY, graphMaxY = 2e9, -2e9
+		graphMinZ, graphMaxZ = 2e9, -2e9
 
-		local has_automation_entity = false
+		local has_automation_entities = false
 		for _, ent in ipairs(ents.FindByClass("mining_*")) do
 			local entClass = ent:GetClass()
 			if not Ores.Automation.EntityClasses[entClass] then continue end
 
 			if (ent.CPPIGetOwner and ent:CPPIGetOwner() == LocalPlayer()) or not ent.CPPIGetOwner then
-				table.insert(entities, ent)
+				table.insert(graphEntities, ent)
 
-				if not POWER_ENTITIES[entClass] then
+				if not Ores.Automation.EnergyEntities[entClass] then
 					local pos = ent:WorldSpaceCenter()
-					minX, minY, minZ = math.min(minX, pos.x), math.min(minY, pos.y), math.min(minZ, pos.z)
-					maxX, maxY, maxZ = math.max(maxX, pos.y), math.max(maxY, pos.y), math.max(maxZ, pos.z)
-					has_automation_entity = true
+					graphMinX, graphMinY, graphMinZ = math.min(graphMinX, pos.x), math.min(graphMinY, pos.y), math.min(graphMinZ, pos.z)
+					graphMaxX, graphMaxY, graphMaxZ = math.max(graphMaxX, pos.y), math.max(graphMaxY, pos.y), math.max(graphMaxZ, pos.z)
+					has_automation_entities = true
 				end
 			end
 		end
 
 		-- reset because we dont care about single batteries or burners
-		if not has_automation_entity then
-			entities = {}
+		if not has_automation_entities then
+			graphEntities = {}
 		end
 
 		-- sort by Z position and add localplayer for the graph
-		if #entities > 0 then
-			table.insert(entities, LocalPlayer())
-			table.sort(entities, function(a, b) return a:WorldSpaceCenter().z < b:WorldSpaceCenter().z end)
+		if #graphEntities > 0 then
+			table.insert(graphEntities, LocalPlayer())
+			table.sort(graphEntities, function(a, b) return a:WorldSpaceCenter().z < b:WorldSpaceCenter().z end)
 		end
 	end
+
+	Ores.Automation.BuildGraph() -- in case we re-run it
 
 	local MINING_GRAPH = CreateClientConVar("mining_automation_graph", "1", true, true, "Whether to display a graph of your current automation setup or not", 0, 1)
 	local function graphHookCallback(ent)
@@ -122,120 +133,36 @@ if CLIENT then
 	end
 
 	hook.Add("OnEntityCreated", "mining_rig_automation_graph_hud", graphHookCallback)
-	hook.Add("EntityRemoved", "mining_rig_automation_graph_hud", graphHookCallback)
 
 	local GRAPH_ENT_DRAW = {
 		player = function(ply, x, y)
+			local GU = Ores.Automation.GraphUnit
 			surface.SetDrawColor(255, 255, 255, 255)
-			surface.DrawRect(x - GRAPH_UNIT / 4, y - GRAPH_UNIT / 4, GRAPH_UNIT / 2, GRAPH_UNIT / 2, 3)
-		end,
-
-		mining_argonite_transformer = function(ent, x, y)
-			local argoniteRarity = Ores.Automation.GetOreRarityByName("Argonite")
-			local argoniteColor = Ores.__R[argoniteRarity].HudColor
-
-			surface.SetDrawColor(argoniteColor)
-			surface.SetMaterial(Ores.Automation.EnergyMaterial)
-			surface.DrawTexturedRect(x - GRAPH_UNIT / 2, y - GRAPH_UNIT / 2, GRAPH_UNIT, GRAPH_UNIT)
-
-			surface.SetDrawColor(argoniteColor)
-			surface.DrawOutlinedRect(x - GRAPH_UNIT / 2, y - GRAPH_UNIT / 2, GRAPH_UNIT, GRAPH_UNIT, 2)
-
-			surface.SetTextColor(argoniteColor)
-			local perc = (math.Round((ent:GetNWInt("ArgoniteCount", 0) / Ores.Automation.BatteryCapacity) * 100)) .. "%"
-			surface.SetFont("DermaDefault")
-			local tw, th = surface.GetTextSize(perc)
-			surface.SetTextPos(x - tw / 2, y - th / 2)
-			surface.DrawText(perc)
-		end,
-
-		mining_drill = function(ent, x, y)
-			local argoniteRarity = Ores.Automation.GetOreRarityByName("Argonite")
-			local argoniteColor = Ores.__R[argoniteRarity].HudColor
-
-			surface.SetDrawColor(argoniteColor)
-			surface.SetMaterial(Ores.Automation.EnergyMaterial)
-			surface.DrawTexturedRect(x - GRAPH_UNIT / 2, y - GRAPH_UNIT / 2, GRAPH_UNIT, GRAPH_UNIT)
-
-			surface.SetDrawColor(125, 125, 125, 255)
-			surface.DrawOutlinedRect(x - GRAPH_UNIT / 2, y - GRAPH_UNIT / 2, GRAPH_UNIT, GRAPH_UNIT, 2)
-
-			surface.SetTextColor(255, 255, 255, 255)
-			local perc = (math.Round((ent:GetNWInt("Energy", 0) / (Ores.Automation.BatteryCapacity * 3)) * 100)) .. "%"
-			surface.SetFont("DermaDefault")
-			local tw, th = surface.GetTextSize(perc)
-			surface.SetTextPos(x - tw / 2, y - th / 2)
-			surface.DrawText(perc)
-		end,
-
-		mining_ore_conveyor = function(ent, x, y)
-			--surface.SetMaterial(METAL_MAT)
-			draw.NoTexture()
-			if ent:GetNWBool("IsPowered", true) then
-				surface.SetDrawColor(30, 30, 30, 255)
-			else
-				surface.SetDrawColor(60, 0, 0, 255)
-			end
-			--surface.DrawRect(x, y, GRAPH_UNIT, GRAPH_UNIT, 2)
-			surface.DrawTexturedRectRotated(x, y, GRAPH_UNIT, GRAPH_UNIT * 2, ent:GetAngles().y)
-
-			if ent:GetNWBool("IsPowered", true) then
-				surface.SetDrawColor(200, 200, 200, 255)
-
-				local dir = ent:GetRight()
-				local dir_side = ent:GetForward()
-				surface.DrawLine(x + dir.x * -GRAPH_UNIT, y + dir.y * -GRAPH_UNIT, x + dir.x * GRAPH_UNIT, y + dir.y * GRAPH_UNIT)
-
-				if ent:GetNWInt("Direction", -1) == -1 then
-					surface.DrawLine(x + dir.x * -GRAPH_UNIT, y + dir.y * -GRAPH_UNIT, x + dir.x * -GRAPH_UNIT / 2 + dir_side.x * -GRAPH_UNIT / 2, y + dir.y * -GRAPH_UNIT / 2 + dir_side.y * -GRAPH_UNIT / 2)
-					surface.DrawLine(x + dir.x * -GRAPH_UNIT, y + dir.y * -GRAPH_UNIT, x + dir.x * -GRAPH_UNIT / 2 + dir_side.x * GRAPH_UNIT / 2, y + dir.y * -GRAPH_UNIT / 2 + dir_side.y * GRAPH_UNIT / 2)
-				else
-					surface.DrawLine(x + dir.x * GRAPH_UNIT, y + dir.y * GRAPH_UNIT, x + dir.x * GRAPH_UNIT / 2 + dir_side.x * -GRAPH_UNIT / 2, y + dir.y * GRAPH_UNIT / 2 + dir_side.y * -GRAPH_UNIT / 2)
-					surface.DrawLine(x + dir.x * GRAPH_UNIT, y + dir.y * GRAPH_UNIT, x + dir.x * GRAPH_UNIT / 2 + dir_side.x * GRAPH_UNIT / 2, y + dir.y * GRAPH_UNIT / 2 + dir_side.y * GRAPH_UNIT / 2)
-				end
-			end
-		end,
-
-		mining_ore_storage = function(ent, x, y)
-			surface.SetDrawColor(125, 125, 125, 255)
-			surface.DrawRect(x - GRAPH_UNIT / 2, y - GRAPH_UNIT / 2, GRAPH_UNIT, GRAPH_UNIT)
-
-			surface.SetDrawColor(255, 255, 255, 255)
-			surface.DrawOutlinedRect(x - GRAPH_UNIT / 2, y - GRAPH_UNIT / 2, GRAPH_UNIT, GRAPH_UNIT, 2)
-		end,
-
-		mining_argonite_battery = function(ent, x, y)
-			local argoniteRarity = Ores.Automation.GetOreRarityByName("Argonite")
-			local argoniteColor = Ores.__R[argoniteRarity].HudColor
-			surface.SetDrawColor(argoniteColor)
-			surface.DrawRect(x - GRAPH_UNIT / 4, y - GRAPH_UNIT / 4, GRAPH_UNIT / 2, GRAPH_UNIT / 2)
-
-			surface.SetDrawColor(125, 125, 125, 255)
-			surface.DrawOutlinedRect(x - GRAPH_UNIT / 4, y - GRAPH_UNIT / 4, GRAPH_UNIT / 2, GRAPH_UNIT / 2, 2)
+			surface.DrawRect(x - GU / 4, y - GU / 4, GU / 2, GU / 2, 3)
 		end,
 	}
 
 	hook.Add("HUDPaint", "mining_rig_automation_graph_hud", function()
 		if not MINING_GRAPH:GetBool() then return end
-		if #entities == 0 then return end
+		if #graphEntities == 0 then return end
 
-		local centerX, centerY = ScrW() / 3 * 2, ScrH() / 2 - (maxY - minY) / 2
-		for i, ent in ipairs(entities) do
+		local centerX, centerY = ScrW() / 3 * 2, ScrH() / 2 - (graphMaxY - graphMinY) / 2
+		for i, ent in ipairs(graphEntities) do
 			if not IsValid(ent) then
-				table.remove(entities, i)
+				table.remove(graphEntities, i)
 				continue
 			end
 
-			local entClass = ent:GetClass()
-			if not GRAPH_ENT_DRAW[entClass] then continue end
+			local drawFunc = isfunction(ent.OnGraphDraw) and ent.OnGraphDraw or GRAPH_ENT_DRAW[ent:GetClass()]
+			if not drawFunc then continue end
 
 			local pos = ent:WorldSpaceCenter()
-			local x, y = centerX + (pos.x - (minX - 20)), centerY + (pos.y - (minY - 20))
-			local alpha = 0.25 + (pos.z - minZ) / (maxZ - minZ)
+			local x, y = centerX + (pos.x - (graphMinX - 20)), centerY + (pos.y - (graphMinY - 20))
+			local alpha = 0.25 + (pos.z - graphMinZ) / (graphMaxZ - graphMinZ)
 			local prevAlpha = surface.GetAlphaMultiplier()
 
 			surface.SetAlphaMultiplier(alpha)
-			GRAPH_ENT_DRAW[entClass](ent, x, y)
+			drawFunc(ent, x, y)
 			surface.SetAlphaMultiplier(prevAlpha)
 		end
 	end)
@@ -299,7 +226,7 @@ if SERVER then
 		end
 	end)
 
-	CreateConVar("sbox_maxmining_automation", "40", FCVAR_ARCHIVE, "Maximum amount of mining automation entities a player can have", 0, 100)
+	CreateConVar("sbox_maxmining_automation", "40", FCVAR_ARCHIVE, "Maximum amount of mining automation graphEntities a player can have", 0, 100)
 
 	hook.Add("PlayerSpawnedSENT", "mining_automation", function(ply, ent)
 		if Ores.Automation.EntityClasses[ent:GetClass()] then
