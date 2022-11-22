@@ -149,6 +149,7 @@ if CLIENT then
 		if not MINING_GRAPH:GetBool() then return end
 		if #graphEntities == 0 then return end
 
+		local has_automation_entities = false
 		local centerX, centerY = ScrW() / 3 * 2, ScrH() / 2 - (graphMaxY - graphMinY) / 2
 		for i, ent in ipairs(graphEntities) do
 			if not IsValid(ent) then
@@ -167,6 +168,13 @@ if CLIENT then
 			surface.SetAlphaMultiplier(alpha)
 			drawFunc(ent, x, y)
 			surface.SetAlphaMultiplier(prevAlpha)
+
+			has_automation_entities = true
+		end
+
+		-- reset the graph there are no more automation entities
+		if not has_automation_entities then
+			graphEntities = {}
 		end
 	end)
 end
