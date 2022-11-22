@@ -92,7 +92,7 @@ if CLIENT then
 
 		local th = draw.GetFontHeight("DermaDefault")
 		local globalOreData = self:GetNWString("OreData", ""):Trim()
-		if #globalOreData < 1 then continue end
+		if #globalOreData < 1 then return end
 
 		local data = globalOreData:Split(";")
 		for i, dataChunk in ipairs(data) do
