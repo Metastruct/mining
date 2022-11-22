@@ -228,23 +228,39 @@ if CLIENT then
 		self:DrawModel()
 	end
 
-	hook.Add("HUDPaint", "mining_argonite_transformer", function()
-		local color = ms.Ores.__R[Ores.Automation.GetOreRarityByName("Argonite")].PhysicalColor
-		for _, transformer in ipairs(ents.FindByClass("mining_argonite_transformer")) do
-			if Ores.Automation.ShouldDrawText(transformer) then
-				local pos = transformer:WorldSpaceCenter():ToScreen()
-				local text = ("%d%%"):format((transformer:GetNWInt("ArgoniteCount", 0) / Ores.Automation.BatteryCapacity) * 100)
-				surface.SetFont("DermaLarge")
-				local tw, th = surface.GetTextSize(text)
-				surface.SetTextColor(color)
-				surface.SetTextPos(pos.x - tw / 2, pos.y - th / 2)
-				surface.DrawText(text)
+	function ENT:OnGraphDraw(x, y)
+		local argoniteRarity = Ores.Automation.GetOreRarityByName("Argonite")
+		local argoniteColor = Ores.__R[argoniteRarity].HudColor
+		local GU = Ores.Automation.GraphUnit
 
-				text = "Next Battery"
-				tw, th = surface.GetTextSize(text)
-				surface.SetTextPos(pos.x - tw / 2, pos.y - th * 2)
-				surface.DrawText(text)
-			end
-		end
-	end)
+		surface.SetDrawColor(argoniteColor)
+		surface.SetMaterial(Ores.Automation.EnergyMaterial)
+		surface.DrawTexturedRect(x - GU / 2, y - GU / 2, GU, GU)
+
+		surface.SetDrawColor(argoniteColor)
+		surface.DrawOutlinedRect(x - GU / 2, y - GU / 2, GU, GU, 2)
+
+		surface.SetTextColor(argoniteColor)
+		local perc = (math.Round((ent:GetNWInt("ArgoniteCount", 0) / Ores.Automation.BatteryCapacity) * 100)) .. "%"
+		surface.SetFont("DermaDefault")
+		local tw, th = surface.GetTextSize(perc)
+		surface.SetTextPos(x - tw / 2, y - th / 2)
+		surface.DrawText(perc)
+	end
+
+	function ENT:OnDrawEntityInfo()
+		local color = ms.Ores.__R[Ores.Automation.GetOreRarityByName("Argonite")].PhysicalColor
+		local pos = self:WorldSpaceCenter():ToScreen()
+		local text = ("%d%%"):format((self:GetNWInt("ArgoniteCount", 0) / Ores.Automation.BatteryCapacity) * 100)
+		surface.SetFont("DermaLarge")
+		local tw, th = surface.GetTextSize(text)
+		surface.SetTextColor(color)
+		surface.SetTextPos(pos.x - tw / 2, pos.y - th / 2)
+		surface.DrawText(text)
+
+		text = "Next Battery"
+		tw, th = surface.GetTextSize(text)
+		surface.SetTextPos(pos.x - tw / 2, pos.y - th * 2)
+		surface.DrawText(text)
+	end
 end

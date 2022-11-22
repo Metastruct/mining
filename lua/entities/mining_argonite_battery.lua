@@ -82,30 +82,39 @@ if CLIENT then
 		render.SetColorModulation(1, 1, 1)
 	end
 
-	hook.Add("HUDPaint", "mining_argonite_battery", function()
+	function ENT:OnGraphDraw(x, y)
+		local argoniteRarity = Ores.Automation.GetOreRarityByName("Argonite")
+		local argoniteColor = Ores.__R[argoniteRarity].HudColor
+		local GU = Ores.Automation.GraphUnit
+
+		surface.SetDrawColor(argoniteColor)
+		surface.DrawRect(x - GU / 4, y - GU / 4, GU / 2, GU / 2)
+
+		surface.SetDrawColor(125, 125, 125, 255)
+		surface.DrawOutlinedRect(x - GU / 4, y - GU / 4, GU / 2, GU / 2, 2)
+	end
+
+	function ENT:OnDrawEntityInfo()
 		local argoniteRarity = Ores.Automation.GetOreRarityByName("Argonite")
 		local color = Ores.__R[argoniteRarity].PhysicalColor
-		for _, battery in ipairs(ents.FindByClass("mining_argonite_battery")) do
-			if Ores.Automation.ShouldDrawText(battery) then
-				local pos = battery:WorldSpaceCenter():ToScreen()
-				local text = ("%d%%"):format((battery:GetNWInt("ArgoniteCount", 0) /  Ores.Automation.BatteryCapacity) * 100)
-				surface.SetFont("DermaLarge")
-				local tw, th = surface.GetTextSize(text)
-				surface.SetTextColor(color)
-				surface.SetTextPos(pos.x - tw / 2, pos.y - th / 2)
-				surface.DrawText(text)
+		local pos = self:WorldSpaceCenter():ToScreen()
+		local text = ("%d%%"):format((self:GetNWInt("ArgoniteCount", 0) /  Ores.Automation.BatteryCapacity) * 100)
 
-				text = "Argonite Battery"
-				tw, th = surface.GetTextSize(text)
-				surface.SetTextPos(pos.x - tw / 2, pos.y - th * 2)
-				surface.DrawText(text)
+		surface.SetFont("DermaLarge")
+		local tw, th = surface.GetTextSize(text)
+		surface.SetTextColor(color)
+		surface.SetTextPos(pos.x - tw / 2, pos.y - th / 2)
+		surface.DrawText(text)
 
-				local key = input.LookupBinding("+use", true) or "?"
-				text = ("[ %s ] Fill"):format(key:upper())
-				tw, th = surface.GetTextSize(text)
-				surface.SetTextPos(pos.x - tw / 2, pos.y + th)
-				surface.DrawText(text)
-			end
-		end
-	end)
+		text = "Argonite Battery"
+		tw, th = surface.GetTextSize(text)
+		surface.SetTextPos(pos.x - tw / 2, pos.y - th * 2)
+		surface.DrawText(text)
+
+		local key = input.LookupBinding("+use", true) or "?"
+		text = ("[ %s ] Fill"):format(key:upper())
+		tw, th = surface.GetTextSize(text)
+		surface.SetTextPos(pos.x - tw / 2, pos.y + th)
+		surface.DrawText(text)
+	end
 end

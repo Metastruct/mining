@@ -71,30 +71,37 @@ if CLIENT then
 		self:DrawModel()
 	end
 
+	function ENT:OnGraphDraw(x, y)
+		local coalRarity = Ores.Automation.GetOreRarityByName("Coal")
+		local coalColor = Ores.__R[coalRarity].HudColor
+		local GU = Ores.Automation.GraphUnit
+
+		surface.SetDrawColor(coalColor)
+		surface.DrawRect(x - GU / 4, y - GU / 4, GU / 2, GU / 2)
+
+		surface.SetDrawColor(125, 125, 125, 255)
+		surface.DrawOutlinedRect(x - GU / 4, y - GU / 4, GU / 2, GU / 2, 2)
+	end
+
 	local COLOR_WHITE = Color(255, 255, 255)
-	hook.Add("HUDPaint", "mining_coal_burner", function()
-		local color = COLOR_WHITE
-		for _, burner in ipairs(ents.FindByClass("mining_coal_burner")) do
-			if Ores.Automation.ShouldDrawText(burner) then
-				local pos = burner:WorldSpaceCenter():ToScreen()
-				local text = ("%d%%"):format((burner:GetNWInt("CoalCount", 0) / Ores.Automation.BatteryCapacity) * 100)
-				surface.SetFont("DermaLarge")
-				local tw, th = surface.GetTextSize(text)
-				surface.SetTextColor(color)
-				surface.SetTextPos(pos.x - tw / 2, pos.y - th / 2)
-				surface.DrawText(text)
+	function ENT:OnDrawEntityInfo()
+		local pos = self:WorldSpaceCenter():ToScreen()
+		local text = ("%d%%"):format((self:GetNWInt("CoalCount", 0) / Ores.Automation.BatteryCapacity) * 100)
+		surface.SetFont("DermaLarge")
+		local tw, th = surface.GetTextSize(text)
+		surface.SetTextColor(COLOR_WHITE)
+		surface.SetTextPos(pos.x - tw / 2, pos.y - th / 2)
+		surface.DrawText(text)
 
-				text = "Coal Burner"
-				tw, th = surface.GetTextSize(text)
-				surface.SetTextPos(pos.x - tw / 2, pos.y - th * 2)
-				surface.DrawText(text)
+		text = "Coal Burner"
+		tw, th = surface.GetTextSize(text)
+		surface.SetTextPos(pos.x - tw / 2, pos.y - th * 2)
+		surface.DrawText(text)
 
-				local key = input.LookupBinding("+use", true) or "?"
-				text = ("[ %s ] Fill"):format(key:upper())
-				tw, th = surface.GetTextSize(text)
-				surface.SetTextPos(pos.x - tw / 2, pos.y + th)
-				surface.DrawText(text)
-			end
-		end
-	end)
+		local key = input.LookupBinding("+use", true) or "?"
+		text = ("[ %s ] Fill"):format(key:upper())
+		tw, th = surface.GetTextSize(text)
+		surface.SetTextPos(pos.x - tw / 2, pos.y + th)
+		surface.DrawText(text)
+	end
 end
