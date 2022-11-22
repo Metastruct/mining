@@ -33,6 +33,7 @@ if SERVER then
 		self.Frame:SetAngles(ang)
 		self.Frame:SetModel("models/props_phx/construct/metal_wire1x1x2.mdl")
 		self.Frame:SetMaterial("phoenix_storms/future_vents")
+		self.Frame:SetCollisionGroup(COLLISION_GROUP_WEAPON) -- this can help players get their ores if there are too many, if they get stuck etc
 		self.Frame:Spawn()
 		self.Frame:SetParent(self)
 
