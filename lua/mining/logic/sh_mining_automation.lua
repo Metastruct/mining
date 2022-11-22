@@ -222,7 +222,7 @@ if CLIENT then
 		local centerX, centerY = ScrW() / 3 * 2, ScrH() / 2 - (maxY - minY) / 2
 		for i, ent in ipairs(entities) do
 			if not IsValid(ent) then
-				table.remove(entites, i)
+				table.remove(entities, i)
 				continue
 			end
 
