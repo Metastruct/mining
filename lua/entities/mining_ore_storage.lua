@@ -84,24 +84,26 @@ if CLIENT then
 	function ENT:OnGraphDraw(x, y)
 		local GU = Ores.Automation.GraphUnit
 
-		surface.SetDrawColor(125, 125, 125, 255)
-		surface.DrawRect(x - GU / 2, y - GU / 2, GU, GU)
-
-		surface.SetDrawColor(255, 255, 255, 255)
-		surface.DrawOutlinedRect(x - GU / 2, y - GU / 2, GU, GU, 2)
-
-		local th = draw.GetFontHeight("DermaDefault")
+		surface.SetFont("DermaDefaultBold")
+		local th = draw.GetFontHeight("DermaDefaultBold")
 		local globalOreData = self:GetNWString("OreData", ""):Trim()
 		if #globalOreData < 1 then return end
 
 		local data = globalOreData:Split(";")
+
+		surface.SetDrawColor(125, 125, 125, 255)
+		surface.DrawRect(x - GU / 2, y - GU / 2, GU + 10, #data * th + 10)
+
+		surface.SetDrawColor(255, 255, 255, 255)
+		surface.DrawOutlinedRect(x - GU / 2, y - GU / 2, GU + 10, #data * th + 10, 2)
+
 		for i, dataChunk in ipairs(data) do
 			local rarityData = dataChunk:Split("=")
 			local oreData = Ores.__R[tonumber(rarityData[1])]
 			local text = ("x%s"):format(rarityData[2])
 
 			surface.SetTextColor(oreData.HudColor)
-			surface.SetTextPos(x + GU + 5, y + ((i - 1) * th))
+			surface.SetTextPos(x - 15, y - GU / #data - #data + ((i - 1) * th))
 			surface.DrawText(text)
 		end
 	end
@@ -115,7 +117,7 @@ if CLIENT then
 
 		local th = draw.GetFontHeight("DermaLarge")
 		local globalOreData = self:GetNWString("OreData", ""):Trim()
-		if #globalOreData < 1 then continue end
+		if #globalOreData < 1 then return end
 
 		local data = globalOreData:Split(";")
 		for i, dataChunk in ipairs(data) do
