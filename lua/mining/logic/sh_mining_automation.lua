@@ -249,4 +249,34 @@ if SERVER then
 	hook.Add("PlayerSpawnSENT", "mining_automation", function(ply, ent)
 		if not ply:CheckLimit("mining_automation") then return false end
 	end)
+
+	do
+		-- this might help with some of the lag
+		local ent_GetClass, ent_GetParent = FindMetaTable("Entity").GetClass, FindMetaTable("Entity").GetParent
+		local str_match = string.match
+		local isValid = _G.IsValid
+		local miningClassPattern = "^mining_"
+		hook.Add("ShouldCollide", "mining_automation", function(ent1, ent2)
+			local entClass1, entClass2 = ent_GetClass(ent1), ent_GetClass(ent2)
+
+			if entClass1 == entClass2 and str_match(entClass1, miningClassPattern) then
+				return false
+			end
+
+			local parent1 = ent_GetParent(ent1)
+			if isValid(parent1) and ent_GetClass(parent1) == entClass2 and str_match(entClass2, miningClassPattern) then
+				return false
+			end
+
+			local parent2 = ent_GetParent(ent2)
+			if isValid(parent2) and ent_GetClass(parent2) == entClass1 and str_match(entClass1, miningClassPattern) then
+				return false
+			end
+
+			local parentClass = isValid(parent1) and ent_GetClass(parent1)
+			if parentClass and isValid(parent2) and parentClass == ent_GetClass(parent2) and str_match(parentClass, miningClassPattern) then
+				return false
+			end
+		end)
+	end
 end
