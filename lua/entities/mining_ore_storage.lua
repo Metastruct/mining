@@ -90,6 +90,15 @@ if CLIENT then
 		if #globalOreData < 1 then return end
 
 		local data = globalOreData:Split(";")
+		if #data < 1 then
+			surface.SetDrawColor(125, 125, 125, 255)
+			surface.DrawRect(x - GU / 2, y - GU / 2, GU, GU)
+
+			surface.SetDrawColor(255, 255, 255, 255)
+			surface.DrawOutlinedRect(x - GU / 2, y - GU / 2, GU, GU, 2)
+
+			return
+		end
 
 		surface.SetDrawColor(125, 125, 125, 255)
 		surface.DrawRect(x - GU / 2, y - GU / 2, GU + 10, #data * th + 10)
