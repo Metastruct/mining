@@ -100,35 +100,54 @@ if SERVER then
 		end
 	end
 
-	local VECTOR_ZERO = Vector(0, 0, 0)
-	function ENT:Touch(ent)
-		if not self:GetNWBool("IsPowered", true) then return end
-		if self.Frame == ent then return end
-		if Ores.Automation.IgnoredClasses[ent:GetClass()] then return end
+	do
+		local VECTOR_ZERO = Vector(0, 0, 0)
+		local FORCE_COEF = 200
+		local PULL_FORCE_COEF = 10
 
-		local phys = ent:GetPhysicsObject()
-		if not IsValid(phys) then return end
+		-- micro optimization
+		local is_valid = IsValid
 
-		local coef = 200 * self:GetNWInt("Direction", -1)
-		local forwardForce = coef * self:GetRight()
+		local ENT_META = FindMetaTable("Entity")
+		local get_nw_bool = ENT_META.GetNWBool
+		local get_nw_int = ENT_META.GetNWInt
+		local get_right = ENT_META.GetRight
+		local get_class = ENT_META.GetClass
+		local get_gpo = ENT_META.GetPhysicsObject
+		local world_to_local = ENT_META.WorldToLocal
+		local get_pos = ENT_META.GetPos
+		local set_ground_entity = ENT_META.SetGroundEntity
 
-		local localPos = -self:WorldToLocal(ent:GetPos())
-		localPos.z = 0
-		localPos.y = 0
+		local PHYS_META = FindMetaTable("PhysObj")
+		local get_velocity = PHYS_META.GetVelocity
+		local set_velocity = PHYS_META.SetVelocity
+		local set_angle_velocity = PHYS_META.SetAngleVelocity
+		local local_to_world_vector = PHYS_META.LocalToWorldVector
 
-		local oldForce = phys:GetVelocity()
-		local pullForce = 10 * self:GetPhysicsObject():LocalToWorldVector(localPos)
-		local force = forwardForce + pullForce
-		force.z = oldForce.z
+		function ENT:Touch(ent)
+			if not get_nw_bool(self, "IsPowered", true) then return end
+			if self.Frame == ent then return end
+			if Ores.Automation.IgnoredClasses[get_class(ent)] then return end
 
-		if ent:IsPlayer() or ent:IsNPC() then
-			ent:SetGroundEntity(self)
-			ent:SetVelocity(force)
-			return
+			local phys = get_gpo(ent)
+			if not is_valid(phys) then return end
+
+			local coef = FORCE_COEF * get_nw_int(self, "Direction", -1)
+			local forwardForce = coef * get_right(self)
+
+			local localPos = -world_to_local(self, get_pos(ent))
+			localPos.z = 0
+			localPos.y = 0
+
+			local oldForce = get_velocity(phys)
+			local pullForce = PULL_FORCE_COEF * local_to_world_vector(get_gpo(self), localPos)
+			local force = forwardForce + pullForce
+			force.z = oldForce.z
+
+			set_ground_entity(ent, self)
+			set_velocity(phys, force)
+			set_angle_velocity(phys, VECTOR_ZERO)
 		end
-
-		phys:SetVelocity(force)
-		phys:SetAngleVelocity(VECTOR_ZERO)
 	end
 end
 
