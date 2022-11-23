@@ -117,6 +117,7 @@ if SERVER then
 		local world_to_local = ENT_META.WorldToLocal
 		local get_pos = ENT_META.GetPos
 		local set_ground_entity = ENT_META.SetGroundEntity
+		local get_parent = ENT_META.GetParent
 
 		local PHYS_META = FindMetaTable("PhysObj")
 		local get_velocity = PHYS_META.GetVelocity
@@ -128,6 +129,8 @@ if SERVER then
 			if not get_nw_bool(self, "IsPowered", true) then return end
 			if self.Frame == ent then return end
 			if Ores.Automation.IgnoredClasses[get_class(ent)] then return end
+
+			if is_valid(get_parent(ent)) then return end -- dont push parented entities
 
 			local phys = get_gpo(ent)
 			if not is_valid(phys) then return end
