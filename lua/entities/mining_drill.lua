@@ -122,8 +122,8 @@ if SERVER then
 		self.NextEnergyEnt = CurTime() + 2
 	end
 
-	function ENT:CanWork()
-		if _G.WireLib and not self.WireActive then return false end
+	local function can_work(self)
+		if not self.WireActive and _G.WireLib then return false end
 		if CurTime() < self.NextTraceCheck then return self.TraceCheckResult end
 
 		if self:GetNWInt("Energy", 0) > 0 then
@@ -144,7 +144,7 @@ if SERVER then
 	end
 
 	function ENT:CheckSoundLoop()
-		if not self:CanWork() then
+		if not can_work(self) then
 			if self.SndLoop and self.SndLoop ~= -1 then
 				self:StopLoopingSound(self.SndLoop)
 			end
@@ -159,7 +159,7 @@ if SERVER then
 	end
 
 	function ENT:ProcessEnergy()
-		if CurTime() >= self.NextEnergyConsumption and self:CanWork() then
+		if CurTime() >= self.NextEnergyConsumption and can_work(self) then
 			local curEnergy = self:GetNWInt("Energy", 0)
 			self:SetNWInt("Energy", math.max(0, curEnergy - 1))
 			self.NextEnergyConsumption = CurTime() + Ores.Automation.BaseOreProductionRate
@@ -170,7 +170,7 @@ if SERVER then
 		local ang = self:GetAngles()
 		ang:RotateAroundAxis(self:GetForward(), 90)
 
-		if self:CanWork() then
+		if can_work(self) then
 			ang:RotateAroundAxis(self:GetRight(), CurTime() * 400 % 360)
 		end
 
@@ -183,7 +183,7 @@ if SERVER then
 
 	function ENT:DrillOres()
 		if CurTime() < self.NextDrilledOre then return end
-		if not self:CanWork() then return end
+		if not can_work(self) then return end
 
 		local oreRarity = Ores.SelectRarityFromSpawntable()
 		local ore = ents.Create("mining_ore")
