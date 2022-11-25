@@ -193,6 +193,14 @@ if SERVER then
 		ore:PhysWake()
 		ore:SetNWBool("SpawnedByDrill", true)
 
+		-- optimization hopefully
+		do
+			ore:SetTrigger(false)
+			ore:SetCollisionGroup(COLLISION_GROUP_INTERACTIVE_DEBRIS) -- so they dont collide between each others
+			ore.Think = function() end
+			ore.Touch = function() end
+		end
+
 		if self.CPPIGetOwner then
 			ore.GraceOwner = self:CPPIGetOwner()
 			ore.GraceOwnerExpiry = CurTime() + (60 * 60)

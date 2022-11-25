@@ -150,15 +150,14 @@ if CLIENT then
 
 	local GRAPH_ENT_DRAW = {
 		player = function(ply, x, y)
-			local GU = Ores.Automation.GraphUnit
-			surface.SetDrawColor(255, 255, 255, 255)
-			local size = GU / 4
+			local size = Ores.Automation.GraphUnit / 4
 
+			surface.SetDrawColor(255, 255, 255, 255)
 			surface.DrawRect(x - size / 2, y - size / 2, size, size)
 		end,
 		mining_ore = function(ore, x, y)
 			local color = Ores.__R[ore:GetRarity()].HudColor
-			local size = GU / 4
+			local size = Ores.Automation.GraphUnit / 4
 
 			surface.SetDrawColor(color)
 			surface.DrawRect(x - size / 2, y - size / 2, size, size)
