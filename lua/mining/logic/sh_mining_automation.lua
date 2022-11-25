@@ -266,7 +266,9 @@ if SERVER then
 	end)
 
 	hook.Add("PlayerSpawnSENT", "mining_automation", function(ply, ent)
-		if not ply:CheckLimit("mining_automation") then return false end
+		if Ores.Automation.EntityClasses[ent:GetClass()] and not ply:CheckLimit("mining_automation") then
+			return false
+		end
 	end)
 
 --[[do
