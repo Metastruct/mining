@@ -19,6 +19,7 @@ if SERVER then
 		self:SetMoveType(MOVETYPE_VPHYSICS)
 		self:PhysicsInit(SOLID_VPHYSICS)
 		self:SetSolid(SOLID_VPHYSICS)
+		self:SetTrigger(true)
 		self:SetSaveValue("m_takedamage", 0)
 		self:PhysWake()
 		self:SetNWBool("IsPowered", true)
