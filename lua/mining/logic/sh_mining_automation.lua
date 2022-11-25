@@ -130,12 +130,11 @@ if CLIENT then
 		if not MINING_GRAPH:GetBool() then return end
 		if not Ores.Automation.EntityClasses[ent:GetClass()] then return end
 
-		timer.Simple(1, function()
-			Ores.Automation.BuildGraph()
-		end)
+		Ores.Automation.BuildGraph()
 	end
 
 	hook.Add("OnEntityCreated", "mining_rig_automation_graph_hud", graphHookCallback)
+	hook.Add("NetworkEntityCreated", "mining_rig_automation_graph_hud", graphHookCallback)
 
 	local GRAPH_ENT_DRAW = {
 		player = function(ply, x, y)
