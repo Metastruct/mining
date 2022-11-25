@@ -104,10 +104,10 @@ if CLIENT then
 		for _, ent in ipairs(ents.FindByClass("mining_*")) do
 			local entClass = ent:GetClass()
 
-			if entClass == "mining_ore" and ent:GetNWBool("SpawnedByDrill", false) and compare_ent_owner(ent, ply) then
+			--[[if entClass == "mining_ore" and ent:GetNWBool("SpawnedByDrill", false) and compare_ent_owner(ent, ply) then
 				table.insert(graphEntities, ent)
 				continue
-			end
+			end]]
 
 			if not Ores.Automation.EntityClasses[entClass] then continue end
 
@@ -155,13 +155,13 @@ if CLIENT then
 			surface.SetDrawColor(255, 255, 255, 255)
 			surface.DrawRect(x - size / 2, y - size / 2, size, size)
 		end,
-		mining_ore = function(ore, x, y)
+		--[[mining_ore = function(ore, x, y)
 			local color = Ores.__R[ore:GetRarity()].HudColor
 			local size = Ores.Automation.GraphUnit / 4
 
 			surface.SetDrawColor(color)
 			surface.DrawRect(x - size / 2, y - size / 2, size, size)
-		end
+		end]]
 	}
 
 	hook.Add("HUDPaint", "mining_rig_automation_graph_hud", function()
@@ -269,7 +269,7 @@ if SERVER then
 		if not ply:CheckLimit("mining_automation") then return false end
 	end)
 
-	do
+--[[do
 		-- this might help with some of the lag
 		local ent_GetClass, ent_GetParent = FindMetaTable("Entity").GetClass, FindMetaTable("Entity").GetParent
 		local str_match = string.match
@@ -297,5 +297,5 @@ if SERVER then
 				return false
 			end
 		end)
-	end
+	end]]
 end
