@@ -192,7 +192,7 @@ if SERVER then
 		ore:SetRarity(oreRarity)
 		ore:Spawn()
 		ore:PhysWake()
-		ore:SetNWBool("SpawnedByDrill", true)
+		--ore:SetNWBool("SpawnedByDrill", true)
 
 		-- optimization hopefully
 		do
@@ -203,10 +203,10 @@ if SERVER then
 			ore.Touch = EMPTY_FN
 		end
 
-		if self.CPPIGetOwner and ore.CPPISetOwner then
+		if self.CPPIGetOwner then
 			ore.GraceOwner = self:CPPIGetOwner()
 			ore.GraceOwnerExpiry = CurTime() + (60 * 60)
-			ore:CPPISetOwner(ore.GraceOwner)
+			--ore:CPPISetOwner(ore.GraceOwner)
 		end
 
 		constraint.NoCollide(ore, self, 0, 0)
