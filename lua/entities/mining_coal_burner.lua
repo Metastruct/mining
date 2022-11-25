@@ -33,6 +33,7 @@ if SERVER then
 		self.Frame:SetCollisionGroup(COLLISION_GROUP_WEAPON)
 		self.Frame:Spawn()
 		self.Frame:SetParent(self)
+		self.Frame:SetTransmitWithParent(true)
 
 		Ores.Automation.PrepareForDuplication(self)
 
@@ -63,6 +64,10 @@ if SERVER then
 	function ENT:GravGunPickupAllowed(ply)
 		if not self.CPPIGetOwner then return end
 		return ply == self:CPPIGetOwner()
+	end
+
+	function ENT:UpdateTransmitState()
+		return TRANSMIT_ALWAYS
 	end
 end
 

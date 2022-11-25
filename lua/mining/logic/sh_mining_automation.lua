@@ -88,7 +88,13 @@ if CLIENT then
 	local graphMinY, graphMaxY = 2e9, -2e9
 	local graphMinZ, graphMaxZ = 2e9, -2e9
 
-	function Ores.Automation.BuildGraph()
+	local function compare_ent_owner(ent, ply)
+		return (ent.CPPIGetOwner and ent:CPPIGetOwner() == ply) or false
+	end
+
+	function Ores.Automation.BuildGraph(ply)
+		ply = ply or LocalPlayer()
+
 		graphEntities = {}
 		graphMinX, graphMaxX = 2e9, -2e9
 		graphMinY, graphMaxY = 2e9, -2e9
@@ -97,9 +103,15 @@ if CLIENT then
 		local has_automation_entities = false
 		for _, ent in ipairs(ents.FindByClass("mining_*")) do
 			local entClass = ent:GetClass()
+
+			if entClass == "mining_ore" and ent:GetNWBool("SpawnedByDrill", false) and compare_ent_owner(ent, ply) then
+				table.insert(graphEntities, ent)
+				continue
+			end
+
 			if not Ores.Automation.EntityClasses[entClass] then continue end
 
-			if (ent.CPPIGetOwner and ent:CPPIGetOwner() == LocalPlayer()) or not ent.CPPIGetOwner then
+			if compare_ent_owner(ent, ply) then
 				table.insert(graphEntities, ent)
 
 				if not Ores.Automation.EnergyEntities[entClass] then
@@ -118,7 +130,7 @@ if CLIENT then
 
 		-- sort by Z position and add localplayer for the graph
 		if #graphEntities > 0 then
-			table.insert(graphEntities, LocalPlayer())
+			table.insert(graphEntities, ply)
 			table.sort(graphEntities, function(a, b) return a:WorldSpaceCenter().z < b:WorldSpaceCenter().z end)
 		end
 	end
@@ -140,8 +152,17 @@ if CLIENT then
 		player = function(ply, x, y)
 			local GU = Ores.Automation.GraphUnit
 			surface.SetDrawColor(255, 255, 255, 255)
-			surface.DrawRect(x - GU / 4, y - GU / 4, GU / 2, GU / 2, 3)
+			local size = GU / 4
+
+			surface.DrawRect(x - size / 2, y - size / 2, size, size)
 		end,
+		mining_ore = function(ore, x, y)
+			local color = Ores.__R[ore:GetRarity()].HudColor
+			local size = GU / 4
+
+			surface.SetDrawColor(color)
+			surface.DrawRect(x - size / 2, y - size / 2, size, size)
+		end
 	}
 
 	hook.Add("HUDPaint", "mining_rig_automation_graph_hud", function()
