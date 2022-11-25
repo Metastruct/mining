@@ -125,6 +125,7 @@ if SERVER then
 		local set_velocity = PHYS_META.SetVelocity
 		local set_angle_velocity = PHYS_META.SetAngleVelocity
 		local local_to_world_vector = PHYS_META.LocalToWorldVector
+		local wake = PHYS_META.Wake
 
 		function ENT:Touch(ent)
 			if not get_nw_bool(self, "IsPowered", true) then return end
@@ -148,6 +149,7 @@ if SERVER then
 			local force = forwardForce + pullForce
 			force.z = oldForce.z
 
+			wake(phys)
 			set_ground_entity(ent, self)
 			set_velocity(phys, force)
 			set_angle_velocity(phys, VECTOR_ZERO)
