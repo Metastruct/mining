@@ -181,6 +181,7 @@ if SERVER then
 		end
 	end
 
+	local EMPTY_FN = function() end
 	function ENT:DrillOres()
 		if CurTime() < self.NextDrilledOre then return end
 		if not can_work(self) then return end
@@ -198,11 +199,11 @@ if SERVER then
 			SafeRemoveEntityDelayed(ore, 20)
 			ore:SetTrigger(false)
 			ore:SetCollisionGroup(COLLISION_GROUP_INTERACTIVE_DEBRIS) -- so they dont collide between each others
-			ore.Think = function() end
-			ore.Touch = function() end
+			ore.Think = EMPTY_FN
+			ore.Touch = EMPTY_FN
 		end
 
-		if self.CPPIGetOwner then
+		if self.CPPIGetOwner and ore.CPPISetOwner then
 			ore.GraceOwner = self:CPPIGetOwner()
 			ore.GraceOwnerExpiry = CurTime() + (60 * 60)
 			ore:CPPISetOwner(ore.GraceOwner)
