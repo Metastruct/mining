@@ -19,7 +19,6 @@ if SERVER then
 		self:SetMoveType(MOVETYPE_VPHYSICS)
 		self:PhysicsInit(SOLID_VPHYSICS)
 		self:SetSolid(SOLID_VPHYSICS)
-		self:SetTrigger(true)
 		self:SetSaveValue("m_takedamage", 0)
 		self:PhysWake()
 		self:SetNWBool("IsPowered", true)
@@ -37,6 +36,18 @@ if SERVER then
 		self.Frame:SetCollisionGroup(COLLISION_GROUP_WEAPON) -- this can help players get their ores if there are too many, if they get stuck etc
 		self.Frame:Spawn()
 		self.Frame:SetParent(self)
+
+		-- we use this so that its easy for drills to accept power entities
+		self.Trigger = ents.Create("base_brush")
+		self.Trigger:SetPos(self:WorldSpaceCenter())
+		self.Trigger:SetParent(self)
+		self.Trigger:SetTrigger(true)
+		self.Trigger:SetSolid(SOLID_BBOX)
+		self.Trigger:SetNotSolid(true)
+		self.Trigger:SetCollisionBounds(Vector(-100, -100, -100), Vector(100, 100, 100))
+		self.Trigger.Touch = function(_, ent)
+			self:Touch(ent)
+		end
 
 		Ores.Automation.PrepareForDuplication(self)
 
@@ -102,6 +113,8 @@ if SERVER then
 	end
 
 	do
+		local FRAME_MINS = Vector(-24.035413742065, -24.013647079468, -0.28125)
+		local FRAME_MAXS = Vector(71.436912536621, 24.003890991211, 47.736278533936)
 		local VECTOR_ZERO = Vector(0, 0, 0)
 		local FORCE_COEF = 200
 		local PULL_FORCE_COEF = 10
@@ -127,7 +140,11 @@ if SERVER then
 		local local_to_world_vector = PHYS_META.LocalToWorldVector
 		local wake = PHYS_META.Wake
 
-		function ENT:Touch(ent)
+		local VECTOR_META = FindMetaTable("Vector")
+		local within_aabox = VECTOR_META.WithinAABox
+
+		function ENT:OnTouch(ent)
+			if not within_aabox(get_pos(ent), FRAME_MINS, FRAME_MAXS) then return end
 			if not get_nw_bool(self, "IsPowered", true) then return end
 			if self.Frame == ent then return end
 			if Ores.Automation.IgnoredClasses[get_class(ent)] then return end
