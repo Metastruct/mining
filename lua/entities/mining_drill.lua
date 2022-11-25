@@ -191,12 +191,12 @@ if SERVER then
 		ore:SetRarity(oreRarity)
 		ore:Spawn()
 		ore:PhysWake()
-		--ore:SetNWBool("SpawnedByDrill", true)
+		ore:SetNWBool("SpawnedByDrill", true)
 
 		if self.CPPIGetOwner then
 			ore.GraceOwner = self:CPPIGetOwner()
 			ore.GraceOwnerExpiry = CurTime() + (60 * 60)
-			ore:SetCPPIOwner(ore.GraceOwner)
+			ore:CPPISetOwner(ore.GraceOwner)
 			SafeRemoveEntityDelayed(ore, 2 * 60)
 		end
 
