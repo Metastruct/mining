@@ -195,6 +195,7 @@ if SERVER then
 
 		-- optimization hopefully
 		do
+			SafeRemoveEntityDelayed(ore, 20)
 			ore:SetTrigger(false)
 			ore:SetCollisionGroup(COLLISION_GROUP_INTERACTIVE_DEBRIS) -- so they dont collide between each others
 			ore.Think = function() end
@@ -205,7 +206,6 @@ if SERVER then
 			ore.GraceOwner = self:CPPIGetOwner()
 			ore.GraceOwnerExpiry = CurTime() + (60 * 60)
 			ore:CPPISetOwner(ore.GraceOwner)
-			SafeRemoveEntityDelayed(ore, 2 * 60)
 		end
 
 		constraint.NoCollide(ore, self, 0, 0)
