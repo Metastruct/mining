@@ -14,7 +14,7 @@ ENT.ClassName = "mining_drill"
 ENT.NextTraceCheck = 0
 
 local function can_work(self, time)
-	if SERVER and not self.WireActive and _G.WireLib then return false end
+	if not self:GetNWBool("IsPowered", true) then return false end
 	if time < self.NextTraceCheck then return self.TraceCheckResult end
 
 	if self:GetNWInt("Energy", 0) > 0 then
@@ -50,7 +50,7 @@ if SERVER then
 		self.NextEnergyEnt = 0
 		self.NextTraceCheck = 0
 		self.MaxEnergy = Ores.Automation.BatteryCapacity * 3
-		self.WireActive = true
+		self:SetNWBool("IsPowered", true)
 
 		-- we use this so that its easy for drills to accept power entities
 		self.Trigger = ents.Create("base_brush")
@@ -98,7 +98,7 @@ if SERVER then
 		if not isnumber(state) then return end
 
 		if port == "Active" then
-			self.WireActive = tobool(state)
+			self:SetNWBool("IsPowered", tobool(state))
 		end
 	end
 
