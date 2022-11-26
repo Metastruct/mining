@@ -135,18 +135,17 @@ if CLIENT then
 		end
 	end
 
-	Ores.Automation.BuildGraph() -- in case we re-run it
-
 	local MINING_GRAPH = CreateClientConVar("mining_automation_graph", "1", true, true, "Whether to display a graph of your current automation setup or not", 0, 1)
 	local function graphHookCallback(ent)
 		if not MINING_GRAPH:GetBool() then return end
-		if not Ores.Automation.EntityClasses[ent:GetClass()] then return end
+		if IsValid(ent) and not Ores.Automation.EntityClasses[ent:GetClass()] then return end
 
 		Ores.Automation.BuildGraph()
 	end
 
 	hook.Add("OnEntityCreated", "mining_rig_automation_graph_hud", graphHookCallback)
 	hook.Add("NetworkEntityCreated", "mining_rig_automation_graph_hud", graphHookCallback)
+	timer.Create("mining_rig_automation_graph_hud", 1, 0, graphHookCallback)
 
 	local GRAPH_ENT_DRAW = {
 		player = function(ply, x, y)
@@ -266,6 +265,8 @@ if SERVER then
 	end)
 
 	hook.Add("PlayerSpawnSENT", "mining_automation", function(ply, className)
+		if not className then return end
+
 		if Ores.Automation.EntityClasses[className] and not ply:CheckLimit("mining_automation") then
 			return false
 		end
