@@ -240,9 +240,6 @@ if CLIENT then
 	end
 
 	local EFFECT_NAME = "WheelDust"
-	local EFFECT_DATA = EffectData()
-	EFFECT_DATA:SetScale(1.5)
-
 	function ENT:Draw()
 		self:DrawModel()
 
@@ -253,8 +250,10 @@ if CLIENT then
 		if can_work(self, time) then
 			ang:RotateAroundAxis(self:GetRight(), time * 400 % 360)
 
-			EFFECT_DATA:SetOrigin(self:GetPos() + self:GetForward() * -40)
-			util.Effect(EFFECT_NAME, EFFECT_DATA)
+			local effectData = EffectData()
+			effectData:SetScale(1.5)
+			effectData:SetOrigin(self:GetPos() + self:GetForward() * -40)
+			util.Effect(EFFECT_NAME, effectData)
 		end
 
 		for _, saw in ipairs(self.Saws) do
