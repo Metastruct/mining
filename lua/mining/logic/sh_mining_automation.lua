@@ -37,6 +37,7 @@ Ores.Automation = {
 		mining_detonite_bomb = true,
 	},
 	GraphUnit = 40,
+	GraphHeightMargin = 75,
 }
 
 if Ores.Automation.EnergyMaterial:IsError() then
@@ -100,7 +101,7 @@ if CLIENT then
 		graphMinY, graphMaxY = 2e9, -2e9
 		graphMinZ, graphMaxZ = 2e9, -2e9
 
-		local has_automation_entities = false
+		local hasAutomationEntities = false
 		for _, ent in ipairs(ents.FindByClass("mining_*")) do
 			local entClass = ent:GetClass()
 
@@ -118,13 +119,13 @@ if CLIENT then
 					local pos = ent:WorldSpaceCenter()
 					graphMinX, graphMinY, graphMinZ = math.min(graphMinX, pos.x), math.min(graphMinY, pos.y), math.min(graphMinZ, pos.z)
 					graphMaxX, graphMaxY, graphMaxZ = math.max(graphMaxX, pos.y), math.max(graphMaxY, pos.y), math.max(graphMaxZ, pos.z)
-					has_automation_entities = true
+					hasAutomationEntities = true
 				end
 			end
 		end
 
 		-- reset because we dont care about single batteries or burners
-		if not has_automation_entities then
+		if not hasAutomationEntities then
 			graphEntities = {}
 		end
 
@@ -132,6 +133,8 @@ if CLIENT then
 		if #graphEntities > 0 then
 			table.insert(graphEntities, ply)
 			table.sort(graphEntities, function(a, b) return a:WorldSpaceCenter().z < b:WorldSpaceCenter().z end)
+
+			graphMinZ, graphMaxZ = graphMinZ - Ores.Automation.GraphHeightMargin, graphMaxZ + Ores.Automation.GraphHeightMargin
 		end
 	end
 
@@ -167,8 +170,9 @@ if CLIENT then
 		if not MINING_GRAPH:GetBool() then return end
 		if #graphEntities == 0 then return end
 
-		local has_automation_entities = false
+		local hasAutomationEntities = false
 		local centerX, centerY = ScrW() / 3 * 2, ScrH() / 2 - (graphMaxY - graphMinY) / 2
+		local totalGraphHeight = graphMaxZ - graphMinZ
 		for i, ent in ipairs(graphEntities) do
 			if not IsValid(ent) then
 				table.remove(graphEntities, i)
@@ -180,18 +184,18 @@ if CLIENT then
 
 			local pos = ent:WorldSpaceCenter()
 			local x, y = centerX + (pos.x - (graphMinX - 20)), centerY + (pos.y - (graphMinY - 20))
-			local alpha = 0.25 + (pos.z - graphMinZ) / (graphMaxZ - graphMinZ)
+			local alpha = totalGraphHeight <= 0 and 1 or 0.25 + ((pos.z - graphMinZ) / totalGraphHeight)
 			local prevAlpha = surface.GetAlphaMultiplier()
 
 			surface.SetAlphaMultiplier(alpha)
 			drawFunc(ent, x, y)
 			surface.SetAlphaMultiplier(prevAlpha)
 
-			has_automation_entities = true
+			hasAutomationEntities = true
 		end
 
 		-- reset the graph there are no more automation entities
-		if not has_automation_entities then
+		if not hasAutomationEntities then
 			graphEntities = {}
 		end
 	end)
