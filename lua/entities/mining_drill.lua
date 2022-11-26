@@ -129,8 +129,6 @@ if SERVER then
 		self.NextEnergyEnt = time + 2
 	end
 
-
-
 	function ENT:CheckSoundLoop(time)
 		if time < self.NextEnergyConsumption then return end
 
@@ -241,6 +239,10 @@ if CLIENT then
 		}
 	end
 
+	local EFFECT_NAME = "WheelDust"
+	local EFFECT_DATA = EffectData()
+	EFFECT_DATA:SetScale(1.5)
+
 	function ENT:Draw()
 		self:DrawModel()
 
@@ -257,6 +259,9 @@ if CLIENT then
 				saw:SetAngles(ang)
 			end
 		end
+
+		EFFECT_DATA:SetOrigin(self:GetPos() + self:GetForward() * -40)
+		util.Effect(EFFECT_NAME, EFFECT_DATA)
 	end
 
 	function ENT:OnRemove()
