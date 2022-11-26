@@ -252,6 +252,9 @@ if CLIENT then
 
 		if can_work(self, time) then
 			ang:RotateAroundAxis(self:GetRight(), time * 400 % 360)
+
+			EFFECT_DATA:SetOrigin(self:GetPos() + self:GetForward() * -40)
+			util.Effect(EFFECT_NAME, EFFECT_DATA)
 		end
 
 		for _, saw in ipairs(self.Saws) do
@@ -259,9 +262,6 @@ if CLIENT then
 				saw:SetAngles(ang)
 			end
 		end
-
-		EFFECT_DATA:SetOrigin(self:GetPos() + self:GetForward() * -40)
-		util.Effect(EFFECT_NAME, EFFECT_DATA)
 	end
 
 	function ENT:OnRemove()
