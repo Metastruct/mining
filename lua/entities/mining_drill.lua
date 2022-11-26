@@ -26,7 +26,6 @@ if SERVER then
 		saw:Spawn()
 		saw:SetParent(self)
 		saw:SetKeyValue("classname", "mining_drill_saw")
-		saw.OnEntityCopyTableFinish = function(data) table.Empty(data) end
 
 		return saw
 	end
@@ -53,7 +52,7 @@ if SERVER then
 		self.Trigger:SetNotSolid(true)
 		self.Trigger:SetCollisionBounds(Vector(-100, -100, -100), Vector(100, 100, 100))
 		self.Trigger.Touch = function(_, ent)
-			self:Touch(ent)
+			self:OnTouch(ent)
 		end
 
 		self.Frame = ents.Create("prop_physics")
@@ -98,20 +97,23 @@ if SERVER then
 		end
 	end
 
-	function ENT:Touch(ent)
-		if ent.MiningInvalidPower then return end
-		if CurTime() < self.NextEnergyEnt then return end
+	function ENT:Touch() end -- make sure this isnt called
 
+	function ENT:OnTouch(ent)
 		local className = ent:GetClass()
-		if not Ores.Automation.EnergyEntities[className] then return end
+		local energyAccesors = Ores.Automation.EnergyEntities[className]
+		if not energyAccesors then return end
 
-		local fns = Ores.Automation.EnergyEntities[className]
-		local energyAmount = fns.Get(ent)
+		local time = CurTime()
+		if time < self.NextEnergyEnt then return end
+		if ent.MiningInvalidPower then return end
+
+		local energyAmount = energyAccesors.Get(ent)
 		local curEnergy = self:GetNWInt("Energy", 0)
 		local energyToAdd = math.min(self.MaxEnergy - curEnergy, energyAmount)
 
 		self:SetNWInt("Energy", math.min(self.MaxEnergy, curEnergy + energyToAdd))
-		fns.Set(ent, math.max(0, energyAmount - energyToAdd))
+		energyAccesors.Set(ent, math.max(0, energyAmount - energyToAdd))
 
 		if energyAmount - energyToAdd < 1 then
 			SafeRemoveEntity(ent)
@@ -119,12 +121,12 @@ if SERVER then
 		end
 
 		self:EmitSound(")ambient/machines/thumper_top.wav", 75, 70)
-		self.NextEnergyEnt = CurTime() + 2
+		self.NextEnergyEnt = time + 2
 	end
 
-	local function can_work(self)
+	local function can_work(self, time)
 		if not self.WireActive and _G.WireLib then return false end
-		if CurTime() < self.NextTraceCheck then return self.TraceCheckResult end
+		if time < self.NextTraceCheck then return self.TraceCheckResult end
 
 		if self:GetNWInt("Energy", 0) > 0 then
 			local tr = util.TraceLine({
@@ -133,18 +135,20 @@ if SERVER then
 				mask = MASK_SOLID_BRUSHONLY,
 			})
 
-			self.NextTraceCheck = CurTime() + 1.5
+			self.NextTraceCheck = time + 1.5
 			self.TraceCheckResult = tr.Hit
 			return tr.Hit
 		end
 
-		self.NextTraceCheck = CurTime() + 1.5
+		self.NextTraceCheck = time + 1.5
 		self.TraceCheckResult = false
 		return false
 	end
 
-	function ENT:CheckSoundLoop()
-		if not can_work(self) then
+	function ENT:CheckSoundLoop(time)
+		if time < self.NextEnergyConsumption then return end
+
+		if not can_work(self, time) then
 			if self.SndLoop and self.SndLoop ~= -1 then
 				self:StopLoopingSound(self.SndLoop)
 			end
@@ -158,33 +162,36 @@ if SERVER then
 		end
 	end
 
-	function ENT:ProcessEnergy()
-		if CurTime() >= self.NextEnergyConsumption and can_work(self) then
-			local curEnergy = self:GetNWInt("Energy", 0)
-			self:SetNWInt("Energy", math.max(0, curEnergy - 1))
-			self.NextEnergyConsumption = CurTime() + Ores.Automation.BaseOreProductionRate
-		end
+	function ENT:ProcessEnergy(time)
+		if not can_work(self, time) then return end
+		if time < self.NextEnergyConsumption then return end
+
+		local curEnergy = self:GetNWInt("Energy", 0)
+		self:SetNWInt("Energy", math.max(0, curEnergy - 1))
+		self.NextEnergyConsumption = time + Ores.Automation.BaseOreProductionRate
 	end
 
-	function ENT:RotateSaws()
+	function ENT:RotateSaws(time)
 		local ang = self:GetAngles()
 		ang:RotateAroundAxis(self:GetForward(), 90)
 
-		if can_work(self) then
-			ang:RotateAroundAxis(self:GetRight(), CurTime() * 400 % 360)
+		if can_work(self, time) then
+			ang:RotateAroundAxis(self:GetRight(), time * 400 % 360)
 		end
 
-		for _, saw in ipairs(self:GetChildren()) do
-			if IsValid(saw) and saw:GetModel() == "models/props_junk/sawblade001a.mdl" then
-				saw:SetAngles(ang)
+		if time >= self.NextEnergyConsumption then
+			for _, saw in ipairs(self:GetChildren()) do
+				if IsValid(saw) and saw:GetModel() == "models/props_junk/sawblade001a.mdl" then
+					saw:SetAngles(ang)
+				end
 			end
 		end
 	end
 
 	local EMPTY_FN = function() end
-	function ENT:DrillOres()
-		if CurTime() < self.NextDrilledOre then return end
-		if not can_work(self) then return end
+	function ENT:DrillOres(time)
+		if time < self.NextDrilledOre then return end
+		if not can_work(self, time) then return end
 
 		local oreRarity = Ores.SelectRarityFromSpawntable()
 		local ore = ents.Create("mining_ore")
@@ -205,25 +212,26 @@ if SERVER then
 
 		if self.CPPIGetOwner then
 			ore.GraceOwner = self:CPPIGetOwner()
-			ore.GraceOwnerExpiry = CurTime() + (60 * 60)
+			ore.GraceOwnerExpiry = time + (60 * 60)
 			--ore:CPPISetOwner(ore.GraceOwner)
 		end
 
-		constraint.NoCollide(ore, self, 0, 0)
+		-- constraint.NoCollide(ore, self, 0, 0)
 
 		-- efficiency goes up the more its powered:
 		-- at less than 33% -> 10s,
 		-- less than 66% -> 8s
 		-- less than 100% -> 6s
 		local effiencyRateIncrease = (math.ceil(self:GetNWInt("Energy", 0) / Ores.Automation.BatteryCapacity) - 1) * 2
-		self.NextDrilledOre = CurTime() + (Ores.Automation.BaseOreProductionRate - effiencyRateIncrease)
+		self.NextDrilledOre = time + (Ores.Automation.BaseOreProductionRate - effiencyRateIncrease)
 	end
 
 	function ENT:Think()
-		self:CheckSoundLoop()
-		self:ProcessEnergy()
-		self:RotateSaws()
-		self:DrillOres()
+		local time = CurTime()
+		self:CheckSoundLoop(time)
+		self:RotateSaws(time)
+		self:DrillOres(time)
+		self:ProcessEnergy(time)
 	end
 
 	function ENT:OnRemove()
