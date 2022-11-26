@@ -11,24 +11,33 @@ ENT.Category = "Mining"
 ENT.RenderGroup = RENDERGROUP_OPAQUE
 ENT.Spawnable = true
 ENT.ClassName = "mining_drill"
+ENT.NextTraceCheck = 0
+
+local function can_work(self, time)
+	if SERVER and not self.WireActive and _G.WireLib then return false end
+	if time < self.NextTraceCheck then return self.TraceCheckResult end
+
+	if self:GetNWInt("Energy", 0) > 0 then
+		local tr = util.TraceLine({
+			start = self:GetPos() + self:GetForward() * -20,
+			endpos = self:GetPos() + self:GetForward() * -75,
+			mask = MASK_SOLID_BRUSHONLY,
+		})
+
+		self.NextTraceCheck = time + 1.5
+		self.TraceCheckResult = tr.Hit
+		return tr.Hit
+	end
+
+	self.NextTraceCheck = time + 1.5
+	self.TraceCheckResult = false
+	return false
+end
 
 if SERVER then
 	ENT.NextEnergyEnt = 0
 	ENT.NextDrilledOre = 0
 	ENT.NextEnergyConsumption = 0
-	ENT.NextTraceCheck = 0
-
-	local function addSawEntity(self, offset)
-		local saw = ents.Create("prop_physics")
-		saw:SetModel("models/props_junk/sawblade001a.mdl")
-		saw:SetModelScale(2)
-		saw:SetPos(self:GetPos() + offset)
-		saw:Spawn()
-		saw:SetParent(self)
-		saw:SetKeyValue("classname", "mining_drill_saw")
-
-		return saw
-	end
 
 	function ENT:Initialize()
 		self:SetModel("models/props_combine/headcrabcannister01a.mdl")
@@ -66,10 +75,6 @@ if SERVER then
 		self.Frame:SetAngles(ang)
 		self.Frame:Spawn()
 		self.Frame:SetParent(self)
-
-		addSawEntity(self, self:GetForward() * -40 + self:GetRight() * 10)
-		addSawEntity(self, self:GetForward() * -40)
-		addSawEntity(self, self:GetForward() * -40 + self:GetRight() * -10)
 
 		timer.Simple(0, function()
 			if not IsValid(self) then return end
@@ -124,26 +129,7 @@ if SERVER then
 		self.NextEnergyEnt = time + 2
 	end
 
-	local function can_work(self, time)
-		if not self.WireActive and _G.WireLib then return false end
-		if time < self.NextTraceCheck then return self.TraceCheckResult end
 
-		if self:GetNWInt("Energy", 0) > 0 then
-			local tr = util.TraceLine({
-				start = self:GetPos() + self:GetForward() * -20,
-				endpos = self:GetPos() + self:GetForward() * -75,
-				mask = MASK_SOLID_BRUSHONLY,
-			})
-
-			self.NextTraceCheck = time + 1.5
-			self.TraceCheckResult = tr.Hit
-			return tr.Hit
-		end
-
-		self.NextTraceCheck = time + 1.5
-		self.TraceCheckResult = false
-		return false
-	end
 
 	function ENT:CheckSoundLoop(time)
 		if time < self.NextEnergyConsumption then return end
@@ -169,23 +155,6 @@ if SERVER then
 		local curEnergy = self:GetNWInt("Energy", 0)
 		self:SetNWInt("Energy", math.max(0, curEnergy - 1))
 		self.NextEnergyConsumption = time + Ores.Automation.BaseOreProductionRate
-	end
-
-	function ENT:RotateSaws(time)
-		local ang = self:GetAngles()
-		ang:RotateAroundAxis(self:GetForward(), 90)
-
-		if can_work(self, time) then
-			ang:RotateAroundAxis(self:GetRight(), time * 400 % 360)
-		end
-
-		if time >= self.NextEnergyConsumption then
-			for _, saw in ipairs(self:GetChildren()) do
-				if IsValid(saw) and saw:GetModel() == "models/props_junk/sawblade001a.mdl" then
-					saw:SetAngles(ang)
-				end
-			end
-		end
 	end
 
 	local EMPTY_FN = function() end
@@ -229,7 +198,6 @@ if SERVER then
 	function ENT:Think()
 		local time = CurTime()
 		self:CheckSoundLoop(time)
-		self:RotateSaws(time)
 		self:DrillOres(time)
 		self:ProcessEnergy(time)
 	end
@@ -242,30 +210,59 @@ if SERVER then
 end
 
 if CLIENT then
-	function ENT:Initialize()
-		self.MaxEnergy = Ores.Automation.BatteryCapacity * 3
+	local SAW_MDL = "models/props_junk/sawblade001a.mdl"
+	local function addSawEntity(self, offset)
+		local saw = ClientsideModel(SAW_MDL)
+		saw:SetModelScale(2)
+		saw:SetPos(self:GetPos() + offset)
+		saw:Spawn()
+		saw:SetParent(self)
+
+		local argoniteRarity = Ores.Automation.GetOreRarityByName("Argonite")
+		saw.RenderOverride = function()
+			local color = Ores.__R[argoniteRarity].PhysicalColor
+			render.SetColorModulation(color.r / 100, color.g / 100, color.b / 100)
+			render.MaterialOverride(Ores.Automation.EnergyMaterial)
+			saw:DrawModel()
+			render.MaterialOverride()
+			render.SetColorModulation(1, 1, 1)
+		end
+
+		return saw
 	end
 
-	hook.Add("OnEntityCreated", "mining_drill_saw_mat", function(ent)
-		if ent:GetModel() ~= "models/props_junk/sawblade001a.mdl" then return end
-		if isfunction(ent.RenderOverride) then return end
-
-		local parent = ent:GetParent()
-		if IsValid(parent) and parent:GetClass() == "mining_drill" then
-			local argoniteRarity = Ores.Automation.GetOreRarityByName("Argonite")
-			ent.RenderOverride = function(self)
-				local color = Ores.__R[argoniteRarity].PhysicalColor
-				render.SetColorModulation(color.r / 100, color.g / 100, color.b / 100)
-				render.MaterialOverride(Ores.Automation.EnergyMaterial)
-				self:DrawModel()
-				render.MaterialOverride()
-				render.SetColorModulation(1, 1, 1)
-			end
-		end
-	end)
+	function ENT:Initialize()
+		self.NextTraceCheck = 0
+		self.MaxEnergy = Ores.Automation.BatteryCapacity * 3
+		self.Saws = {
+			addSawEntity(self, self:GetForward() * -40 + self:GetRight() * 10),
+			addSawEntity(self, self:GetForward() * -40),
+			addSawEntity(self, self:GetForward() * -40 + self:GetRight() * -10),
+		}
+	end
 
 	function ENT:Draw()
 		self:DrawModel()
+
+		local time = CurTime()
+		local ang = self:GetAngles()
+		ang:RotateAroundAxis(self:GetForward(), 90)
+
+		if can_work(self, time) then
+			ang:RotateAroundAxis(self:GetRight(), time * 400 % 360)
+		end
+
+		for _, saw in ipairs(self.Saws) do
+			if IsValid(saw) and saw:GetModel() == SAW_MDL then
+				saw:SetAngles(ang)
+			end
+		end
+	end
+
+	function ENT:OnRemove()
+		for _, saw in ipairs(self.Saws) do
+			SafeRemoveEntity(saw)
+		end
 	end
 
 	function ENT:OnGraphDraw(x, y)
