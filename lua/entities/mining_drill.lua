@@ -256,8 +256,12 @@ if CLIENT then
 			util.Effect(EFFECT_NAME, effectData)
 		end
 
-		for _, saw in ipairs(self.Saws) do
+		for k, saw in ipairs(self.Saws) do
 			if IsValid(saw) and saw:GetModel() == SAW_MDL then
+				if not IsValid(saw:GetParent()) then
+					saw:SetPos(self:GetPos() + self:GetForward() * -40 + self:GetRight() * (-10 + (10 * k)))
+					saw:SetParent(self)
+				end
 				saw:SetAngles(ang)
 			end
 		end
