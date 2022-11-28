@@ -259,7 +259,7 @@ if CLIENT then
 		for k, saw in ipairs(self.Saws) do
 			if IsValid(saw) and saw:GetModel() == SAW_MDL then
 				if not IsValid(saw:GetParent()) then
-					saw:SetPos(self:GetPos() + self:GetForward() * -40 + self:GetRight() * (-10 + (10 * k)))
+					saw:SetPos(self:GetPos() + self:GetForward() * -40 + self:GetRight() * (-10 + (10 * (k - 1))))
 					saw:SetParent(self)
 				end
 				saw:SetAngles(ang)
