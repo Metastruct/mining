@@ -248,19 +248,35 @@ if CLIENT then
 		surface.DrawText(perc)
 	end
 
+	local FRAME_WIDTH = 225
+	local FRAME_HEIGHT = 100
 	function ENT:OnDrawEntityInfo()
-		local color = ms.Ores.__R[Ores.Automation.GetOreRarityByName("Argonite")].PhysicalColor
 		local pos = self:WorldSpaceCenter():ToScreen()
-		local text = ("%d%%"):format((self:GetNWInt("ArgoniteCount", 0) / Ores.Automation.BatteryCapacity) * 100)
-		surface.SetFont("DermaLarge")
-		local tw, th = surface.GetTextSize(text)
-		surface.SetTextColor(color)
-		surface.SetTextPos(pos.x - tw / 2, pos.y - th / 2)
-		surface.DrawText(text)
+		local x, y = pos.x - FRAME_WIDTH / 2, pos.y - FRAME_HEIGHT / 2
 
-		text = "Next Battery"
-		tw, th = surface.GetTextSize(text)
-		surface.SetTextPos(pos.x - tw / 2, pos.y - th * 2)
-		surface.DrawText(text)
+		surface.SetMaterial(Ores.Automation.HudFrameMaterial)
+		surface.SetDrawColor(255,255,255,255)
+		surface.DrawTexturedRect(x, y, FRAME_WIDTH, FRAME_HEIGHT)
+
+		surface.SetFont("mining_automation_hud")
+		surface.SetTextColor(255, 255, 255, 255)
+		surface.SetTextPos(x + Ores.Automation.HudPadding, y + Ores.Automation.HudPadding)
+		surface.DrawText("TRANSFORMER")
+
+		surface.SetDrawColor(Ores.Automation.HudSepColor)
+		surface.DrawRect(x + Ores.Automation.HudPadding, y + 45, FRAME_WIDTH - Ores.Automation.HudPadding * 2, 2)
+
+		surface.SetTextPos(x + Ores.Automation.HudPadding, y + 55)
+		surface.DrawText("BATTERY")
+
+		local perc = (math.Round((self:GetNWInt("ArgoniteCount", 0) / ms.Ores.Automation.BatteryCapacity) * 100))
+		local r = 255
+		local g = 255 / 100 * perc
+		local b = 255 / 100 * perc
+
+		surface.SetTextColor(r, g, b, 255)
+		local tw, _ = surface.GetTextSize(perc)
+		surface.SetTextPos(x + FRAME_WIDTH - (tw + Ores.Automation.HudPadding * 2), y + 55)
+		surface.DrawText(perc)
 	end
 end

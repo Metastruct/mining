@@ -99,27 +99,47 @@ if CLIENT then
 		surface.DrawOutlinedRect(x - GU / 4, y - GU / 4, GU / 2, GU / 2, 2)
 	end
 
+	local FRAME_WIDTH = 225
+	local FRAME_HEIGHT = 100
 	function ENT:OnDrawEntityInfo()
-		local argoniteRarity = Ores.Automation.GetOreRarityByName("Argonite")
-		local color = Ores.__R[argoniteRarity].PhysicalColor
+		local owned = self.CPPIGetOwner and self:CPPIGetOwner() == LocalPlayer()
+		local finalHeight = owned and FRAME_HEIGHT + 50 or FRAME_HEIGHT
+
 		local pos = self:WorldSpaceCenter():ToScreen()
-		local text = ("%d%%"):format((self:GetNWInt("ArgoniteCount", 0) /  Ores.Automation.BatteryCapacity) * 100)
+		local x, y = pos.x - FRAME_WIDTH / 2, pos.y - finalHeight / 2
 
-		surface.SetFont("DermaLarge")
-		local tw, th = surface.GetTextSize(text)
-		surface.SetTextColor(color)
-		surface.SetTextPos(pos.x - tw / 2, pos.y - th / 2)
-		surface.DrawText(text)
+		surface.SetMaterial(Ores.Automation.HudFrameMaterial)
+		surface.SetDrawColor(255, 255, 255, 255)
+		surface.DrawTexturedRect(x, y, FRAME_WIDTH, finalHeight)
 
-		text = "Argonite Battery"
-		tw, th = surface.GetTextSize(text)
-		surface.SetTextPos(pos.x - tw / 2, pos.y - th * 2)
-		surface.DrawText(text)
+		surface.SetFont("mining_automation_hud")
+		surface.SetTextColor(255, 255, 255, 255)
+		surface.SetTextPos(x + Ores.Automation.HudPadding, y + Ores.Automation.HudPadding)
+		surface.DrawText("BATTERY")
 
-		local key = input.LookupBinding("+use", true) or "?"
-		text = ("[ %s ] Fill"):format(key:upper())
-		tw, th = surface.GetTextSize(text)
-		surface.SetTextPos(pos.x - tw / 2, pos.y + th)
-		surface.DrawText(text)
+		surface.SetDrawColor(Ores.Automation.HudSepColor)
+		surface.DrawRect(x + Ores.Automation.HudPadding, y + 45, FRAME_WIDTH - Ores.Automation.HudPadding * 2, 2)
+
+		surface.SetTextPos(x + Ores.Automation.HudPadding, y + 55)
+		surface.DrawText("CHARGE")
+
+		local perc = (math.Round((self:GetNWInt("ArgoniteCount", 0) / Ores.Automation.BatteryCapacity) * 100))
+		local r = 255
+		local g = 255 / 100 * perc
+		local b = 255 / 100 * perc
+
+		surface.SetTextColor(r, g, b, 255)
+		local tw, _ = surface.GetTextSize(perc)
+		surface.SetTextPos(x + FRAME_WIDTH - (tw + Ores.Automation.HudPadding * 2), y + 55)
+		surface.DrawText(perc)
+
+		if owned then
+			local text = ("[ %s ] FILL"):format((input.LookupBinding("+use", true) or "?"):upper())
+			surface.SetFont("mining_automation_hud2")
+			tw, _ = surface.GetTextSize(text)
+			surface.SetTextColor(ACTION_COLOR)
+			surface.SetTextPos(x + FRAME_WIDTH - (tw + Ores.Automation.HudPadding * 2), y + finalHeight - 50)
+			surface.DrawText(text)
+		end
 	end
 end
