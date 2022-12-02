@@ -82,6 +82,8 @@ if SERVER then
 			end
 
 			self:Remove()
+		else
+			self:EmitSound("physics/metal/metal_grenade_impact_hard2.wav", 70, math.random(20, 30))
 		end
 	end
 end
