@@ -26,8 +26,9 @@ local DEFAULT_RARITY_DATA = {
 	{ Rarity = 1, Chance = 100 - COAL_CHANCE }
 }
 
-local function spawnRockDebris(rocks, pos, ang)
+local function spawnRockDebris(rocks, pos, ang, lifeTime)
 	local rock = ents.Create("mining_collapse_rock")
+	rock:SetLifeTime(lifeTime)
 	rock:SetPos(pos + VectorRand(-50, 50))
 	rock:SetAngles(ang)
 	rock:Spawn()
@@ -240,7 +241,7 @@ function Ores.MineCollapse(pos, delay, rarityData, ply)
 		timer.Simple(0.25, function()
 			for _ = 1, math.random(5, 10) do
 				local debrisAng = AngleRand(-45, 45)
-				spawnRockDebris(rocks, pos, debrisAng)
+				spawnRockDebris(rocks, pos, debrisAng, delay - 1)
 			end
 		end)
 
