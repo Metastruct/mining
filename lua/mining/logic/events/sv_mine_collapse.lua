@@ -210,7 +210,7 @@ function Ores.MineCollapse(pos, delay, rarityData, ply)
 		util.Effect("litesmoke", effectData, true, true)
 
 		for _, ent in ipairs(ents.FindInSphere(pos, COLLAPSE_DMG_RADIUS)) do
-			local rock = spawnRockDebris(rocks, Vector(0, 0, 0), Angle(0, 0, 0))
+			local rock = spawnRockDebris(rocks, Vector(0, 0, 0), Angle(0, 0, 0), delay - 1)
 			local force = Vector(math.random() > 0.5 and 100 or -100, math.random() > 0.5 and 100 or -100, math.random() > 0.5 and 100 or -100) * math.random(4, 8)
 			local dmg = DamageInfo()
 			dmg:SetInflictor(rock)
