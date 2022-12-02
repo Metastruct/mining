@@ -31,8 +31,8 @@ if SERVER then
 		self:Activate()
 		self:SetMaterial(ROCK_MAT)
 		self:SetMoveType(MOVETYPE_VPHYSICS)
-		self:PhysicsInit(SOLID_BBOX)
-		self:SetSolid(SOLID_BBOX)
+		self:PhysicsInit(SOLID_VPHYSICS)
+		self:SetSolid(SOLID_VPHYSICS)
 		self:PhysWake()
 		self:SetHealth(BASE_HEALTH * scale)
 		self.OriginalScale = scale
