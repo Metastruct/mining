@@ -38,6 +38,10 @@ Ores.Automation = {
 	},
 	GraphUnit = 40,
 	GraphHeightMargin = 75,
+	HudFrameMaterial = Material("mining/automation/hud_frame.png", "smooth noclamp"),
+	HudPadding = 10,
+	HudSepColor = Color(100, 100, 100, 255),
+	HudActionColor = Color(225, 100, 0, 255),
 }
 
 if Ores.Automation.EnergyMaterial:IsError() then
@@ -61,6 +65,20 @@ function Ores.Automation.GetOreRarityByName(name)
 end
 
 if CLIENT then
+	surface.CreateFont("mining_automation_hud", {
+		font = "Tahoma",
+		extended = true,
+		weight = 1000,
+		size = 30
+	})
+
+	surface.CreateFont("mining_automation_hud2", {
+		font = "Tahoma",
+		extended = true,
+		weight = 1000,
+		size = 25
+	})
+
 	function Ores.Automation.ShouldDrawText(ent)
 		local localPlayer = LocalPlayer()
 
@@ -202,6 +220,8 @@ if CLIENT then
 end
 
 if SERVER then
+	resource.AddFile("materials/mining/automation/hud_frame.png")
+
 	function Ores.Automation.ReplicateOwnership(ent, parent, addToUndo)
 		if ent ~= parent then
 			ent:SetCreator(parent:GetCreator())
