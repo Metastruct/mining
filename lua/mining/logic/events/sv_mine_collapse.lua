@@ -1,17 +1,6 @@
 module("ms", package.seeall)
 Ores = Ores or {}
 
-local ROCK_MDLS = {
-	"models/props_wasteland/rockcliff01b.mdl",
-	"models/props_wasteland/rockcliff01c.mdl",
-	"models/props_wasteland/rockcliff01e.mdl",
-	"models/props_wasteland/rockcliff01f.mdl",
-	"models/props_wasteland/rockcliff01g.mdl",
-	"models/props_wasteland/rockcliff01j.mdl",
-	"models/props_wasteland/rockcliff01k.mdl",
-	"models/props_wasteland/rockcliff05a.mdl",
-}
-
 local FALLING_ROCKS_MDLS = {
 	"models/props_debris/concrete_chunk04a.mdl",
 	"models/props_debris/concrete_chunk05g.mdl",
@@ -38,16 +27,12 @@ local DEFAULT_RARITY_DATA = {
 }
 
 local function spawnRockDebris(rocks, pos, ang)
-	local rock = ents.Create("prop_physics")
+	local rock = ents.Create("mining_collapse_rock")
 	rock:SetPos(pos + VectorRand(-50, 50))
-	rock:SetModel(table.Random(ROCK_MDLS))
-	rock:SetModelScale(math.random(0.5, 1.25), 0.0001)
-	rock:SetMaterial(ROCK_MAT)
 	rock:SetAngles(ang)
 	rock:Spawn()
 	rock:Activate()
 	rock:PhysWake()
-	rock:SetKeyValue("classname", "Rock")
 
 	rock.ms_notouch = true
 
