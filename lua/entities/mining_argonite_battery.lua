@@ -137,7 +137,7 @@ if CLIENT then
 			local text = ("[ %s ] FILL"):format((input.LookupBinding("+use", true) or "?"):upper())
 			surface.SetFont("mining_automation_hud2")
 			tw, _ = surface.GetTextSize(text)
-			surface.SetTextColor(ACTION_COLOR)
+			surface.SetTextColor(Ores.Automation.HudActionColor)
 			surface.SetTextPos(x + FRAME_WIDTH - (tw + Ores.Automation.HudPadding * 2), y + finalHeight - 50)
 			surface.DrawText(text)
 		end
