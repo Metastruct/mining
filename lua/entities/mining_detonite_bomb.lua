@@ -111,45 +111,28 @@ if CLIENT then
 		self:DrawModel()
 	end
 
+	local COLOR_RED = Color(255, 0, 0)
 	function ENT:OnDrawEntityInfo()
-		local color = Ores.__R[Ores.Automation.GetOreRarityByName("Detonite")].HudColor
-		local key = (input.LookupBinding("+use", true) or "?"):upper()
-		local pos = self:WorldSpaceCenter():ToScreen()
 		local ready = self:GetNWInt("DetoniteAmount", 0) == Ores.Automation.BombCapacity
+		local owned = self.CPPIGetOwner and self:CPPIGetOwner() == LocalPlayer()
 
-		surface.SetFont("DermaLarge")
-		surface.SetTextColor(color)
+		local data = {
+			{ Type = "Label", Text = "BOMB", Border = true },
+			{ Type = "Data", Label = "CHARGES", Value = ("%d/%d"):format(self:GetNWInt("DetoniteAmount", 0), Ores.Automation.BombCapacity) },
+		}
 
-		local text = "Detonite Bomb"
-		local tw, th = surface.GetTextSize(text)
-
-		surface.SetTextPos(pos.x - tw / 2, pos.y - th / 2)
-		surface.DrawText(text)
-
-		if not ready then
-			text = ("%d out of %d detonite ore(s)"):format(self:GetNWInt("DetoniteAmount", 0), Ores.Automation.BombCapacity)
-			tw, th = surface.GetTextSize(text)
-
-			surface.SetTextPos(pos.x - tw / 2, pos.y + th / 2)
-			surface.DrawText(text)
-
-			text = ("[ %s ] Fill"):format(key)
-			tw, th = surface.GetTextSize(text)
-
-			surface.SetTextPos(pos.x - tw / 2, pos.y + th * 2)
-			surface.DrawText(text)
-		elseif self:GetNWBool("Detonating", false) then
-			text = "DETONATING!!!"
-			tw, th = surface.GetTextSize(text)
-
-			surface.SetTextPos(pos.x - tw / 2, pos.y + th / 2)
-			surface.DrawText(text)
-		else
-			text = self.CPPIGetOwner and self:CPPIGetOwner() == LocalPlayer() and ("[ %s ] Explode"):format(key) or "Ready to explode"
-			tw, th = surface.GetTextSize(text)
-
-			surface.SetTextPos(pos.x - tw / 2, pos.y + th / 2)
-			surface.DrawText(text)
+		if self:GetNWBool("Detonating", false) then
+			table.insert(data, { Type = "Label", Text = "DETONATING!!!", Color = COLOR_RED })
+		elseif ready then
+			if owned then
+				table.insert(data, { Type = "Action", Binding = "+use", Text = "DETONATE" })
+			else
+				table.insert(data, { Type = "Label", Text = "READY", Color = COLOR_RED })
+			end
+		elseif owned then
+			table.insert(data, { Type = "Action", Binding = "+use", Text = "FILL" })
 		end
+
+		return data
 	end
 end
