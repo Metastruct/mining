@@ -123,18 +123,19 @@ if CLIENT then
 				surface.SetTextPos(x + Ores.Automation.HudPadding, y + offset)
 				surface.DrawText(lineData.Label)
 
+				local text = tostring(lineData.Value)
 				if lineData.MaxValue then
-					local perc = (math.Round((lineData.Value / lineData.MaxValue) * 100))
+					local perc = math.Round((lineData.Value / lineData.MaxValue) * 100)
 					local r = 255
 					local g = 255 / 100 * perc
 					local b = 255 / 100 * perc
 
 					surface.SetTextColor(r, g, b, 255)
+					text = tostring(perc)
 				elseif lineData.ValueColor then
 					surface.SetTextColor(lineData.ValueColor)
 				end
 
-				local text = tostring(lineData.Value)
 				local tw, th = surface.GetTextSize(text)
 				surface.SetTextPos(x + FRAME_WIDTH - (tw + Ores.Automation.HudPadding * 2), y + offset)
 				surface.DrawText(text)
