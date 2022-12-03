@@ -134,5 +134,7 @@ if CLIENT then
 		if self.CPPIGetOwner and self:CPPIGetOwner() == LocalPlayer() then
 			table.insert(data, { Type = "Action", Binding = "+use", Text = "CLAIM" })
 		end
+
+		return data
 	end
 end
