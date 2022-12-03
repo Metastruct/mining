@@ -88,47 +88,21 @@ if CLIENT then
 		surface.DrawOutlinedRect(x - GU / 4, y - GU / 4, GU / 2, GU / 2, 2)
 	end
 
-	local FRAME_WIDTH = 225
-	local FRAME_HEIGHT = 100
 	function ENT:OnDrawEntityInfo()
-		local owned = self.CPPIGetOwner and self:CPPIGetOwner() == LocalPlayer()
-		local finalHeight = owned and FRAME_HEIGHT + 50 or FRAME_HEIGHT
+		if not self.MiningFrameInfo then
+			local data = {
+				{ Type = "Label", Text = "BURNER", Border = true },
+				{ Type = "Data", Label = "FUEL", Value = self:GetNWInt("CoalCount", 0), MaxValue = ms.Ores.Automation.BatteryCapacity },
+			}
 
-		local pos = self:WorldSpaceCenter():ToScreen()
-		local x, y = pos.x - FRAME_WIDTH / 2, pos.y - finalHeight / 2
+			if self.CPPIGetOwner and self:CPPIGetOwner() == LocalPlayer() then
+				table.insert(data, { Type = "Action", Binding = "+use", Text = "FILL" })
+			end
 
-		surface.SetMaterial(Ores.Automation.HudFrameMaterial)
-		surface.SetDrawColor(255, 255, 255, 255)
-		surface.DrawTexturedRect(x, y, FRAME_WIDTH, finalHeight)
-
-		surface.SetFont("mining_automation_hud")
-		surface.SetTextColor(255, 255, 255, 255)
-		surface.SetTextPos(x + Ores.Automation.HudPadding, y + Ores.Automation.HudPadding)
-		surface.DrawText("BURNER")
-
-		surface.SetDrawColor(Ores.Automation.HudSepColor)
-		surface.DrawRect(x + Ores.Automation.HudPadding, y + 45, FRAME_WIDTH - Ores.Automation.HudPadding * 2, 2)
-
-		surface.SetTextPos(x + Ores.Automation.HudPadding, y + 55)
-		surface.DrawText("FUEL")
-
-		local perc = (math.Round((self:GetNWInt("ArgoniteCount", 0) / Ores.Automation.BatteryCapacity) * 100))
-		local r = 255
-		local g = 255 / 100 * perc
-		local b = 255 / 100 * perc
-
-		surface.SetTextColor(r, g, b, 255)
-		local tw, _ = surface.GetTextSize(perc)
-		surface.SetTextPos(x + FRAME_WIDTH - (tw + Ores.Automation.HudPadding * 2), y + 55)
-		surface.DrawText(perc)
-
-		if owned then
-			local text = ("[ %s ] FILL"):format((input.LookupBinding("+use", true) or "?"):upper())
-			surface.SetFont("mining_automation_hud2")
-			tw, _ = surface.GetTextSize(text)
-			surface.SetTextColor(Ores.Automation.HudActionColor)
-			surface.SetTextPos(x + FRAME_WIDTH - (tw + Ores.Automation.HudPadding * 2), y + finalHeight - 50)
-			surface.DrawText(text)
+			self.MiningFrameInfo = data
 		end
+
+		self.MiningFrameInfo[2].Value = self:GetNWInt("CoalCount", 0)
+		return self.MiningFrameInfo
 	end
 end
