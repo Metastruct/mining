@@ -97,6 +97,8 @@ if CLIENT then
 	local function drawEntityInfoFrame(ent, data)
 		local totalHeight = ent.MiningInfoFrameHeight or (FRAME_HEIGHT + (#data * (FONT_HEIGHT + Ores.Automation.HudPadding)))
 		local pos = ent:WorldSpaceCenter():ToScreen()
+		if not pos.visible then return end
+
 		local x, y = pos.x - FRAME_WIDTH / 2, pos.y - totalHeight / 2
 
 		surface.SetMaterial(Ores.Automation.HudFrameMaterial)
