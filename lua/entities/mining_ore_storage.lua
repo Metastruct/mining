@@ -128,7 +128,7 @@ if CLIENT then
 			local rarityData = dataChunk:Split("=")
 			local oreData = Ores.__R[tonumber(rarityData[1])]
 
-			table.insert(data, { Type = "Data", Label = oreData.Name, Value = rarityData[2], LabelColor = oreData.HudColor, ValueColor = oreData.HudColor })
+			table.insert(data, { Type = "Data", Label = oreData.Name:upper(), Value = rarityData[2], LabelColor = oreData.HudColor, ValueColor = oreData.HudColor })
 		end
 
 		if self.CPPIGetOwner and self:CPPIGetOwner() == LocalPlayer() then
