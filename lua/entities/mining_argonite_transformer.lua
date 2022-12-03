@@ -256,7 +256,7 @@ if CLIENT then
 			}
 		end
 
-		self.MiningFrameInfo[2].Value = perc
+		self.MiningFrameInfo[2].Value = self:GetNWInt("ArgoniteCount", 0)
 		return self.MiningFrameInfo
 	end
 end
