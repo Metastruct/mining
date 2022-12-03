@@ -89,16 +89,89 @@ if CLIENT then
 	end
 
 	local ENTITY_INFO_EXTRAS = { mining_argonite_container = true }
+	local FONT_HEIGHT = 30
+	local FRAME_WIDTH = 225
+	local FRAME_HEIGHT = 100
+	local COLOR_WHITE = Color(255, 255, 255, 255)
+	local function drawEntityInfoFrame(ent, data)
+		local totalHeight = ent.MiningInfoFrameHeight or (FRAME_HEIGHT + (#data * (FONT_HEIGHT + Ores.Automation.HudPadding)))
+		local pos = ent:WorldSpaceCenter():ToScreen()
+		local x, y = pos.x - FRAME_WIDTH / 2, pos.y - totalHeight / 2
+
+		surface.SetMaterial(Ores.Automation.HudFrameMaterial)
+		surface.SetDrawColor(255, 255, 255, 255)
+		surface.DrawTexturedRect(x, y, FRAME_WIDTH, totalHeight)
+
+		local offset = Ores.Automation.HudPadding
+		for _, lineData in ipairs(data) do
+			if lineData.Type == "Action" then
+				surface.SetFont("mining_automation_hud2")
+
+				local key = (input.LookupBinding(lineData.Binding, true) or "?"):upper()
+				local text = ("[ %s ] %s"):format(key, lineData.Text)
+				local tw, th = surface.GetTextSize(text)
+
+				surface.SetTextColor(Ores.Automation.HudActionColor)
+				surface.SetTextPos(x + FRAME_WIDTH - (tw + Ores.Automation.HudPadding * 2), y + offset)
+				surface.DrawText(text)
+
+				offset =  offset + th + Ores.Automation.HudPadding
+			elseif lineData.Type == "Data" then
+				surface.SetFont("mining_automation_hud")
+
+				surface.SetTextColor(lineData.LabelColor or COLOR_WHITE)
+				surface.SetTextPos(x + Ores.Automation.HudPadding, y + offset)
+				surface.DrawText(lineData.Label)
+
+				if lineData.MaxValue then
+					local perc = (math.Round((lineData.Value / lineData.MaxValue) * 100))
+					local r = 255
+					local g = 255 / 100 * perc
+					local b = 255 / 100 * perc
+
+					surface.SetTextColor(r, g, b, 255)
+				end
+
+				local tw, th = surface.GetTextSize(perc)
+				surface.SetTextPos(x + FRAME_WIDTH - (tw + Ores.Automation.HudPadding * 2), y + offset)
+				surface.DrawText(lineData.Value)
+
+				offset =  offset + th + Ores.Automation.HudPadding
+			else
+				if not isstring(lineData.Text) then continue end
+
+				surface.SetFont("mining_automation_hud")
+
+				surface.SetTextColor(lineData.Color or COLOR_WHITE)
+				surface.SetTextPos(x + Ores.Automation.HudPadding, y + offset)
+				surface.DrawText(lineData.Text)
+
+				local _, th = surface.GetTextSize(lineData.Text)
+				offset = offset + th + Ores.Automation.HudPadding
+
+				if lineData.Border == true then
+					surface.SetDrawColor(Ores.Automation.HudSepColor)
+					surface.DrawRect(x + Ores.Automation.HudPadding, y + offset, FRAME_WIDTH - Ores.Automation.HudPadding * 2, 2)
+					offset = offset + Ores.Automation.HudPadding
+				end
+			end
+		end
+
+		-- more accurate height
+		ent.MiningInfoFrameHeight = offset + Ores.Automation.HudPadding
+	end
+
 	hook.Add("HUDPaint", "mining_automation_entity_info", function()
 		for _, ent in ipairs(ents.FindByClass("mining_*")) do
 			local entClass = ent:GetClass()
-			if Ores.Automation.EntityClasses[entClass] or ENTITY_INFO_EXTRAS[entClass] then
-				if not Ores.Automation.ShouldDrawText(ent) then continue end
+			if not Ores.Automation.EntityClasses[entClass] and not ENTITY_INFO_EXTRAS[entClass] then continue end
+			if not Ores.Automation.ShouldDrawText(ent) then continue end
+			if not isfunction(ent.OnDrawEntityInfo) then continue end
 
-				if isfunction(ent.OnDrawEntityInfo) then
-					ent:OnDrawEntityInfo()
-				end
-			end
+			local data = ent:OnDrawEntityInfo()
+			if not istable(data) then continue end
+
+			drawEntityInfoFrame(ent, data)
 		end
 	end)
 

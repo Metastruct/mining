@@ -248,35 +248,15 @@ if CLIENT then
 		surface.DrawText(perc)
 	end
 
-	local FRAME_WIDTH = 225
-	local FRAME_HEIGHT = 100
 	function ENT:OnDrawEntityInfo()
-		local pos = self:WorldSpaceCenter():ToScreen()
-		local x, y = pos.x - FRAME_WIDTH / 2, pos.y - FRAME_HEIGHT / 2
+		if not self.MiningFrameInfo then
+			self.MiningFrameInfo = {
+				{ Type = "Label", Text = "TRANSFORMER", Border = true },
+				{ Type = "Data", Label = "BATTERY", Value = self:GetNWInt("ArgoniteCount", 0), MaxValue = ms.Ores.Automation.BatteryCapacity },
+			}
+		end
 
-		surface.SetMaterial(Ores.Automation.HudFrameMaterial)
-		surface.SetDrawColor(255,255,255,255)
-		surface.DrawTexturedRect(x, y, FRAME_WIDTH, FRAME_HEIGHT)
-
-		surface.SetFont("mining_automation_hud")
-		surface.SetTextColor(255, 255, 255, 255)
-		surface.SetTextPos(x + Ores.Automation.HudPadding, y + Ores.Automation.HudPadding)
-		surface.DrawText("TRANSFORMER")
-
-		surface.SetDrawColor(Ores.Automation.HudSepColor)
-		surface.DrawRect(x + Ores.Automation.HudPadding, y + 45, FRAME_WIDTH - Ores.Automation.HudPadding * 2, 2)
-
-		surface.SetTextPos(x + Ores.Automation.HudPadding, y + 55)
-		surface.DrawText("BATTERY")
-
-		local perc = (math.Round((self:GetNWInt("ArgoniteCount", 0) / ms.Ores.Automation.BatteryCapacity) * 100))
-		local r = 255
-		local g = 255 / 100 * perc
-		local b = 255 / 100 * perc
-
-		surface.SetTextColor(r, g, b, 255)
-		local tw, _ = surface.GetTextSize(perc)
-		surface.SetTextPos(x + FRAME_WIDTH - (tw + Ores.Automation.HudPadding * 2), y + 55)
-		surface.DrawText(perc)
+		self.MiningFrameInfo[2].Value = perc
+		return self.MiningFrameInfo
 	end
 end
