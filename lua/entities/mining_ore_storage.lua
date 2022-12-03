@@ -116,32 +116,23 @@ if CLIENT then
 		end
 	end
 
-	local COLOR_WHITE = Color(255, 255, 255)
 	function ENT:OnDrawEntityInfo()
-		local key = (input.LookupBinding("+use", true) or "?"):upper()
-		local pos = self:WorldSpaceCenter():ToScreen()
-
-		surface.SetFont("DermaLarge")
-
-		local th = draw.GetFontHeight("DermaLarge")
 		local globalOreData = self:GetNWString("OreData", ""):Trim()
 		if #globalOreData < 1 then return end
 
-		local data = globalOreData:Split(";")
-		for i, dataChunk in ipairs(data) do
+		local data = {
+			{ Type = "Label", Text = "STORAGE", Border = true },
+		}
+
+		for i, dataChunk in ipairs(globalOreData:Split(";")) do
 			local rarityData = dataChunk:Split("=")
 			local oreData = Ores.__R[tonumber(rarityData[1])]
-			local text = ("x%s %s"):format(rarityData[2], oreData.Name)
 
-			surface.SetTextColor(oreData.HudColor)
-			surface.SetTextPos(pos.x, pos.y + ((i - 1) * th))
-			surface.DrawText(text)
+			table.insert(data, { Type = "Data", Label = oreData.Name, Value = rarityData[2], LabelColor = oreData.HudColor, ValueColor = oreData.HudColor })
+		end
 
-			if i >= #data and self.CPPIGetOwner and self:CPPIGetOwner() == LocalPlayer() then
-				surface.SetTextColor(COLOR_WHITE)
-				surface.SetTextPos(pos.x, pos.y + (i * th))
-				surface.DrawText(("[ %s ] Claim ore(s)"):format(key))
-			end
+		if self.CPPIGetOwner and self:CPPIGetOwner() == LocalPlayer() then
+			table.insert(data, { Type = "Action", Binding = "+use", Text = "CLAIM" })
 		end
 	end
 end

@@ -41,7 +41,7 @@ Ores.Automation = {
 	HudFrameMaterial = Material("mining/automation/hud_frame.png", "smooth noclamp"),
 	HudPadding = 10,
 	HudSepColor = Color(100, 100, 100, 255),
-	HudActionColor = Color(225, 100, 0, 255),
+	HudActionColor = Color(255, 125, 0, 255),
 }
 
 if Ores.Automation.EnergyMaterial:IsError() then
@@ -130,6 +130,8 @@ if CLIENT then
 					local b = 255 / 100 * perc
 
 					surface.SetTextColor(r, g, b, 255)
+				elseif lineData.ValueColor then
+					surface.SetTextColor(lineData.ValueColor)
 				end
 
 				local tw, th = surface.GetTextSize(perc)
