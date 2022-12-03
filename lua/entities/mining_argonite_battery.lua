@@ -115,7 +115,7 @@ if CLIENT then
 
 		self.MiningFrameInfo[2].Value = self:GetNWInt("ArgoniteCount", 0)
 		if self.CPPIGetOwner and self:CPPIGetOwner() == LocalPlayer() and not self.MiningFrameInfo[3] then
-			table.insert(data, { Type = "Action", Binding = "+use", Text = "FILL" })
+			table.insert(self.MiningFrameInfo, { Type = "Action", Binding = "+use", Text = "FILL" })
 		end
 
 		return self.MiningFrameInfo
