@@ -93,6 +93,7 @@ if CLIENT then
 	local FRAME_WIDTH = 225
 	local FRAME_HEIGHT = 100
 	local COLOR_WHITE = Color(255, 255, 255, 255)
+	local FRAME_PADDING = 5
 	local function drawEntityInfoFrame(ent, data)
 		local totalHeight = ent.MiningInfoFrameHeight or (FRAME_HEIGHT + (#data * (FONT_HEIGHT + Ores.Automation.HudPadding)))
 		local pos = ent:WorldSpaceCenter():ToScreen()
@@ -102,7 +103,7 @@ if CLIENT then
 		surface.SetDrawColor(255, 255, 255, 255)
 		surface.DrawTexturedRect(x, y, FRAME_WIDTH, totalHeight)
 
-		local offset = Ores.Automation.HudPadding
+		local offset = Ores.Automation.HudPadding + FRAME_PADDING
 		for _, lineData in ipairs(data) do
 			if lineData.Type == "Action" then
 				surface.SetFont("mining_automation_hud2")
@@ -120,7 +121,7 @@ if CLIENT then
 				surface.SetFont("mining_automation_hud")
 
 				surface.SetTextColor(lineData.LabelColor or COLOR_WHITE)
-				surface.SetTextPos(x + Ores.Automation.HudPadding, y + offset)
+				surface.SetTextPos(x + Ores.Automation.HudPadding + FRAME_PADDING, y + offset)
 				surface.DrawText(lineData.Label)
 
 				local text = tostring(lineData.Value)
@@ -147,7 +148,7 @@ if CLIENT then
 				surface.SetFont("mining_automation_hud")
 
 				surface.SetTextColor(lineData.Color or COLOR_WHITE)
-				surface.SetTextPos(x + Ores.Automation.HudPadding, y + offset)
+				surface.SetTextPos(x + Ores.Automation.HudPadding + FRAME_PADDING, y + offset)
 				surface.DrawText(lineData.Text)
 
 				local _, th = surface.GetTextSize(lineData.Text)
@@ -162,7 +163,7 @@ if CLIENT then
 		end
 
 		-- more accurate height
-		ent.MiningInfoFrameHeight = offset + Ores.Automation.HudPadding
+		ent.MiningInfoFrameHeight = offset + Ores.Automation.HudPadding + FRAME_PADDING
 	end
 
 	hook.Add("HUDPaint", "mining_automation_entity_info", function()
