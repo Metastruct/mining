@@ -134,9 +134,10 @@ if CLIENT then
 					surface.SetTextColor(lineData.ValueColor)
 				end
 
-				local tw, th = surface.GetTextSize(perc)
+				local text = tostring(lineData.Value)
+				local tw, th = surface.GetTextSize(text)
 				surface.SetTextPos(x + FRAME_WIDTH - (tw + Ores.Automation.HudPadding * 2), y + offset)
-				surface.DrawText(lineData.Value)
+				surface.DrawText(text)
 
 				offset =  offset + th + Ores.Automation.HudPadding
 			else
