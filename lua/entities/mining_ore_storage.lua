@@ -21,6 +21,7 @@ if SERVER then
 		self:SetSolid(SOLID_VPHYSICS)
 		self:SetUseType(SIMPLE_USE)
 		self:SetTrigger(true)
+		self:SetNotSolid(true)
 		--self:SetCollisionGroup(COLLISION_GROUP_DEBRIS)
 		--self:PhysWake()
 
