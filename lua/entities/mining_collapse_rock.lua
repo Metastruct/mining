@@ -33,6 +33,7 @@ if SERVER then
 		self:SetMoveType(MOVETYPE_VPHYSICS)
 		self:PhysicsInit(SOLID_VPHYSICS)
 		self:SetSolid(SOLID_VPHYSICS)
+		self:SetCollisionGroup(COLLISION_GROUP_INTERACTIVE_DEBRIS)
 		self:PhysWake()
 		self:SetHealth(BASE_HEALTH * scale)
 		self.OriginalScale = scale
