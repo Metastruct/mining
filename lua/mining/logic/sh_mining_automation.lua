@@ -88,18 +88,35 @@ if CLIENT then
 		return false
 	end
 
+	local MINING_INFO_HUD = CreateClientConVar("mining_automation_hud_frames", "1", true, true, "Display info frames for mining automation entities", 0, 1)
+
 	local ENTITY_INFO_EXTRAS = { mining_argonite_container = true }
 	local FONT_HEIGHT = 30
 	local FRAME_WIDTH = 225
 	local FRAME_HEIGHT = 100
 	local COLOR_WHITE = Color(255, 255, 255, 255)
 	local FRAME_PADDING = 5
+
+	local MTX_TRANSLATION = Vector(0, 0)
+	local MTX_SCALE = Vector(1, 1, 1)
 	local function drawEntityInfoFrame(ent, data)
+		if not MINING_INFO_HUD:GetBool() then return end
+
 		local totalHeight = ent.MiningInfoFrameHeight or (FRAME_HEIGHT + (#data * (FONT_HEIGHT + Ores.Automation.HudPadding)))
 		local pos = ent:WorldSpaceCenter():ToScreen()
 		if not pos.visible then return end
 
 		local x, y = pos.x - FRAME_WIDTH / 2, pos.y - totalHeight / 2
+
+		MTX_TRANSLATION.x = x
+		MTX_TRANSLATION.y = y
+
+		local mtx = Matrix()
+		mtx:Translate(MTX_TRANSLATION)
+		mtx:Scale(MTX_SCALE * math.max(0.6, ScrW() / 2560))
+		mtx:Translate(-MTX_TRANSLATION)
+
+		cam.PushModelMatrix(mtx, true)
 
 		surface.SetMaterial(Ores.Automation.HudFrameMaterial)
 		surface.SetDrawColor(255, 255, 255, 255)
@@ -166,6 +183,8 @@ if CLIENT then
 
 		-- more accurate height
 		ent.MiningInfoFrameHeight = offset + Ores.Automation.HudPadding + FRAME_PADDING
+
+		cam.PopModelMatrix()
 	end
 
 	hook.Add("HUDPaint", "mining_automation_entity_info", function()
