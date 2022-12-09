@@ -35,9 +35,8 @@ local function can_work(self, time)
 end
 
 if SERVER then
-	ENT.NextEnergyEnt = 0
 	ENT.NextDrilledOre = 0
-	ENT.NextEnergyConsumption = 0
+	ENT.NextSoundCheck = 0
 
 	function ENT:Initialize()
 		self:SetModel("models/props_combine/headcrabcannister01a.mdl")
@@ -45,24 +44,10 @@ if SERVER then
 		self:PhysicsInit(SOLID_VPHYSICS)
 		self:SetSolid(SOLID_VPHYSICS)
 		self:PhysWake()
-		self.NextEnergyConsumption = 0
+		self.NextSoundCheck = 0
 		self.NextDrilledOre = 0
-		self.NextEnergyEnt = 0
 		self.NextTraceCheck = 0
-		self.MaxEnergy = Ores.Automation.BatteryCapacity * 3
 		self:SetNWBool("IsPowered", true)
-
-		-- we use this so that its easy for drills to accept power entities
-		self.Trigger = ents.Create("base_brush")
-		self.Trigger:SetPos(self:WorldSpaceCenter())
-		self.Trigger:SetParent(self)
-		self.Trigger:SetTrigger(true)
-		self.Trigger:SetSolid(SOLID_BBOX)
-		self.Trigger:SetNotSolid(true)
-		self.Trigger:SetCollisionBounds(Vector(-100, -100, -100), Vector(100, 100, 100))
-		self.Trigger.Touch = function(_, ent)
-			self:OnTouch(ent)
-		end
 
 		self.Frame = ents.Create("prop_physics")
 		self.Frame:SetModel("models/props_phx/construct/metal_wire1x1x2.mdl")
@@ -91,6 +76,7 @@ if SERVER then
 		end
 
 		Ores.Automation.PrepareForDuplication(self)
+		Ores.Automation.RegisterEnergyPoweredEntity(self, Ores.Automation.BatteryCapacity * 3, Ores.Automation.BaseOreProductionRate)
 	end
 
 	function ENT:TriggerInput(port, state)
@@ -102,35 +88,11 @@ if SERVER then
 		end
 	end
 
-	function ENT:Touch() end -- make sure this isnt called
-
-	function ENT:OnTouch(ent)
-		local className = ent:GetClass()
-		local energyAccesors = Ores.Automation.EnergyEntities[className]
-		if not energyAccesors then return end
-
-		local time = CurTime()
-		if time < self.NextEnergyEnt then return end
-		if ent.MiningInvalidPower then return end
-
-		local energyAmount = energyAccesors.Get(ent)
-		local curEnergy = self:GetNWInt("Energy", 0)
-		local energyToAdd = math.min(self.MaxEnergy - curEnergy, energyAmount)
-
-		self:SetNWInt("Energy", math.min(self.MaxEnergy, curEnergy + energyToAdd))
-		energyAccesors.Set(ent, math.max(0, energyAmount - energyToAdd))
-
-		if energyAmount - energyToAdd < 1 then
-			SafeRemoveEntity(ent)
-			ent.MiningInvalidPower = true
-		end
-
-		self:EmitSound(")ambient/machines/thumper_top.wav", 75, 70)
-		self.NextEnergyEnt = time + 2
-	end
-
 	function ENT:CheckSoundLoop(time)
-		if time < self.NextEnergyConsumption then return end
+		if time < self.NextSoundCheck then
+			self.NextSoundCheck = time + 5
+			return
+		end
 
 		if not can_work(self, time) then
 			if self.SndLoop and self.SndLoop ~= -1 then
@@ -138,21 +100,21 @@ if SERVER then
 			end
 
 			self.SndLoop = nil
+			self.NextSoundCheck = time + 5
 			return
 		end
 
 		if not self.SndLoop or self.SndLoop == -1 then
 			self.SndLoop = self:StartLoopingSound("ambient/spacebase/spacebase_drill.wav")
 		end
+
+		self.NextSoundCheck = time + 5
 	end
 
-	function ENT:ProcessEnergy(time)
-		if not can_work(self, time) then return end
-		if time < self.NextEnergyConsumption then return end
+	function ENT:CanConsumeEnergy()
+		if not can_work(self, CurTime()) then return false end
 
-		local curEnergy = self:GetNWInt("Energy", 0)
-		self:SetNWInt("Energy", math.max(0, curEnergy - 1))
-		self.NextEnergyConsumption = time + Ores.Automation.BaseOreProductionRate
+		return true
 	end
 
 	local EMPTY_FN = function() end
@@ -197,7 +159,6 @@ if SERVER then
 		local time = CurTime()
 		self:CheckSoundLoop(time)
 		self:DrillOres(time)
-		self:ProcessEnergy(time)
 	end
 
 	function ENT:OnRemove()
@@ -231,7 +192,6 @@ if CLIENT then
 
 	function ENT:Initialize()
 		self.NextTraceCheck = 0
-		self.MaxEnergy = Ores.Automation.BatteryCapacity * 3
 		self.Saws = {
 			addSawEntity(self, self:GetForward() * -40 + self:GetRight() * 10),
 			addSawEntity(self, self:GetForward() * -40),
@@ -286,7 +246,7 @@ if CLIENT then
 		surface.DrawOutlinedRect(x - GU / 2, y - GU / 2, GU, GU, 2)
 
 		surface.SetTextColor(255, 255, 255, 255)
-		local perc = (math.Round((self:GetNWInt("Energy", 0) / (Ores.Automation.BatteryCapacity * 3)) * 100)) .. "%"
+		local perc = (math.Round((self:GetNWInt("Energy", 0) / self:GetNWInt("MaxEnergy", 100)) * 100)) .. "%"
 		surface.SetFont("DermaDefault")
 		local tw, th = surface.GetTextSize(perc)
 		surface.SetTextPos(x - tw / 2, y - th / 2)
@@ -297,7 +257,7 @@ if CLIENT then
 		if not self.MiningFrameInfo then
 			self.MiningFrameInfo = {
 				{ Type = "Label", Text = "DRILL", Border = true },
-				{ Type = "Data", Label = "ENERGY", Value = self:GetNWInt("Energy", 0), MaxValue = ms.Ores.Automation.BatteryCapacity * 3 },
+				{ Type = "Data", Label = "ENERGY", Value = self:GetNWInt("Energy", 0), MaxValue = self:GetNWInt("MaxEnergy", 100) },
 			}
 		end
 

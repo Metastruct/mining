@@ -371,6 +371,84 @@ if SERVER then
 		end
 	end
 
+	local function gainEnergy(poweredEnt, ent)
+		local className = ent:GetClass()
+		local energyAccesors = Ores.Automation.EnergyEntities[className]
+		if not energyAccesors then return end
+
+		local time = CurTime()
+		if time < poweredEnt.NextEnergyEnt then return end
+		if ent.MiningInvalidPower then return end
+
+		local energyAmount = energyAccesors.Get(ent)
+		local curEnergy = poweredEnt:GetNWInt("Energy", 0)
+		local energyToAdd = math.min(poweredEnt:GetNWInt("MaxEnergy", 100) - curEnergy, energyAmount)
+
+		poweredEnt:SetNWInt("Energy", math.min(poweredEnt:GetNWInt("MaxEnergy", 100), curEnergy + energyToAdd))
+		energyAccesors.Set(ent, math.max(0, energyAmount - energyToAdd))
+
+		if energyAmount - energyToAdd < 1 then
+			SafeRemoveEntity(ent)
+			ent.MiningInvalidPower = true
+		end
+
+		poweredEnt:EmitSound(")ambient/machines/thumper_top.wav", 75, 70)
+		poweredEnt.NextEnergyEnt = time + 2
+	end
+
+	local BRUSH_BOUNDS = Vector(100, 100, 100)
+	local function makeBrushForPoweredEntity(ent)
+		local brush = ents.Create("base_brush")
+		brush:SetPos(ent:WorldSpaceCenter())
+		brush:SetParent(ent)
+		brush:SetTrigger(true)
+		brush:SetSolid(SOLID_BBOX)
+		brush:SetNotSolid(true)
+		brush:SetCollisionBounds(-BRUSH_BOUNDS, BRUSH_BOUNDS)
+
+		function brush:Touch(touchedEnt)
+			gainEnergy(ent, touchedEnt)
+		end
+
+		return brush
+	end
+
+	function Ores.Automation.RegisterEnergyPoweredEntity(ent, maxEnergy, consumptionRate)
+		ent:SetNWInt("Energy", 0)
+		ent:SetNWInt("MaxEnergy", maxEnergy)
+
+		local timerName = ("mining_automation_power_entity_[%d]"):format(ent:EntIndex())
+		local lastRan = CurTime()
+		local brush = makeBrushForPoweredEntity(ent)
+		timer.Create(timerName, 1, 0, function()
+			if not IsValid(ent) then
+				timer.Remove(timerName)
+				SafeRemoveEntity(brush)
+				return
+			end
+
+			local timeSinceLastRan = CurTime() - lastRan
+			local consumptionTimes = math.Round(timeSinceLastRan / consumptionRate)
+			if consumptionTimes > 0 then
+				local canConsumeEnergy = isfunction(ent.CanConsumeEnergy) and ent:CanConsumeEnergy()
+				if canConsumeEnergy == nil then canConsumeEnergy = true end
+
+				if canConsumeEnergy then
+					for _ = 1, consumptionTimes do
+						local curEnergy = ent:GetNWInt("Energy", 0)
+						ent:SetNWInt("Energy", math.max(0, curEnergy - 1))
+					end
+				end
+			end
+
+			if not IsValid(brush) then
+				brush = makeBrushForPoweredEntity(ent)
+			end
+
+			lastRan = CurTime()
+		end)
+	end
+
 	hook.Add("PlayerUse", "mining_automation_use_fn_replication", function(ply, ent)
 		local parent = ent:GetParent()
 		if IsValid(parent) and Ores.Automation.EnergyEntities[ent:GetClass()] then
