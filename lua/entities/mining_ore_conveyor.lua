@@ -104,10 +104,12 @@ if SERVER then
 	do
 		local VECTOR_ZERO = Vector(0, 0, 0)
 		local FORCE_COEF = 200
-		local PULL_FORCE_COEF = 10
+		local PULL_FORCE_COEF = 500
 
 		-- micro optimization
 		local is_valid = IsValid
+		local frame_time = FrameTime
+		local max = math.max
 
 		local ENT_META = FindMetaTable("Entity")
 		local get_nw_bool = ENT_META.GetNWBool
@@ -145,9 +147,9 @@ if SERVER then
 			localPos.y = 0
 
 			local oldForce = get_velocity(phys)
-			local pullForce = PULL_FORCE_COEF * local_to_world_vector(get_gpo(self), localPos)
+			local pullForce = PULL_FORCE_COEF * frame_time() * local_to_world_vector(get_gpo(self), localPos)
 			local force = forwardForce + pullForce
-			force.z = oldForce.z
+			force.z = max(0, oldForce.z)
 
 			wake(phys)
 			set_ground_entity(ent, self)
