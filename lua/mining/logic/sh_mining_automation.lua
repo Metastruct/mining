@@ -422,6 +422,7 @@ if SERVER then
 		local timerName = ("mining_automation_power_entity_[%d]"):format(ent:EntIndex())
 		local lastRan = CurTime()
 		local brush = makeBrushForPoweredEntity(ent)
+		local count = 0
 		timer.Create(timerName, 1, 0, function()
 			if not IsValid(ent) then
 				timer.Remove(timerName)
@@ -430,8 +431,11 @@ if SERVER then
 			end
 
 			local timeSinceLastRan = CurTime() - lastRan
-			local consumptionTimes = math.Round(timeSinceLastRan / consumptionRate)
-			if consumptionTimes > 0 then
+			local consumptionTimes = math.ceil(timeSinceLastRan / consumptionRate)
+
+			count = count + 1
+
+			if count > consumptionRate then
 				local canConsumeEnergy = isfunction(ent.CanConsumeEnergy) and ent:CanConsumeEnergy()
 				if canConsumeEnergy == nil then canConsumeEnergy = true end
 
@@ -441,6 +445,8 @@ if SERVER then
 						ent:SetNWInt("Energy", math.max(0, curEnergy - 1))
 					end
 				end
+
+				count = 0
 			end
 
 			if not IsValid(brush) then
