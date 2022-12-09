@@ -89,10 +89,7 @@ if SERVER then
 	end
 
 	function ENT:CheckSoundLoop(time)
-		if time < self.NextSoundCheck then
-			self.NextSoundCheck = time + 5
-			return
-		end
+		if time < self.NextSoundCheck then return end
 
 		if not can_work(self, time) then
 			if self.SndLoop and self.SndLoop ~= -1 then
