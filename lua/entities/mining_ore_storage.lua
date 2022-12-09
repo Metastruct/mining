@@ -44,7 +44,7 @@ if SERVER then
 		self:SetNWString("OreData", table.concat(t, ";"))
 	end
 
-	function ENT:Touch(ent)
+	function ENT:StartTouch(ent)
 		if ent.MiningContainerCollected then return end
 		if ent:GetClass() ~= "mining_ore" then return end
 
@@ -59,11 +59,9 @@ if SERVER then
 		ent.MiningContainerCollected = true
 		SafeRemoveEntity(ent)
 	end
-	ENT.StartTouch = ENT.Touch
-	ENT.EndTouch = ENT.Touch
 
 	function ENT:PhysicsCollide(data)
-		self:Touch(data.HitEntity)
+		self:StartTouch(data.HitEntity)
 	end
 
 	function ENT:Use(activator)
