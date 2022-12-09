@@ -23,7 +23,7 @@ if SERVER then
 		self:SetTrigger(true)
 	end
 
-	function ENT:Touch(ent)
+	function ENT:StartTouch(ent)
 		local curAmount = self:GetNWInt("DetoniteAmount", 0)
 		if curAmount >= Ores.Automation.BombCapacity then return end
 
