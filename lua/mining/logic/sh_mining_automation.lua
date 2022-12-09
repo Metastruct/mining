@@ -377,7 +377,7 @@ if SERVER then
 		if not energyAccesors then return end
 
 		local time = CurTime()
-		if time < poweredEnt.NextEnergyEnt then return end
+		if time < (poweredEnt.NextEnergyEntity or 0) then return end
 		if ent.MiningInvalidPower then return end
 
 		local energyAmount = energyAccesors.Get(ent)
@@ -393,7 +393,7 @@ if SERVER then
 		end
 
 		poweredEnt:EmitSound(")ambient/machines/thumper_top.wav", 75, 70)
-		poweredEnt.NextEnergyEnt = time + 2
+		poweredEnt.NextEnergyEntity = time + 2
 	end
 
 	local BRUSH_BOUNDS = Vector(100, 100, 100)
