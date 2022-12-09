@@ -28,9 +28,6 @@ if SERVER then
 		self:SetNWInt("Energy", 0)
 		self:SetNWBool("IsPowered", true)
 		self:Activate()
-		self.NextEnergyEnt = 0
-		self.NextEnergyConsumption = 0
-		self.MaxEnergy = Ores.Automation.BatteryCapacity
 
 		self.Frame = ents.Create("prop_physics")
 		self.Frame:SetModel("models/props_phx/construct/metal_wire1x1x2.mdl")
@@ -80,6 +77,7 @@ if SERVER then
 		end
 
 		Ores.Automation.PrepareForDuplication(self)
+		Ores.Automation.RegisterEnergyPoweredEntity(self, Ores.Automation.BatteryCapacity, Ores.Automation.BaseOreProductionRate)
 	end
 
 	function ENT:TriggerInput(port, state)
@@ -103,7 +101,7 @@ if SERVER then
 	function ENT:ProduceRefinedOre(rarity)
 	end
 
-	function ENT:SmeltOre(ent)
+	function ENT:Touch(ent)
 		if ent.MiningSmelterCollected then return end
 		if ent:GetClass() ~= "mining_ore" then return end
 
@@ -125,48 +123,6 @@ if SERVER then
 
 		ent.MiningSmelterCollected = true
 		SafeRemoveEntity(ent)
-	end
-
-	function ENT:GainEnergy(ent)
-		local className = ent:GetClass()
-		local energyAccesors = Ores.Automation.EnergyEntities[className]
-		if not energyAccesors then return end
-
-		local time = CurTime()
-		if time < self.NextEnergyEnt then return end
-		if ent.MiningInvalidPower then return end
-
-		local energyAmount = energyAccesors.Get(ent)
-		local curEnergy = self:GetNWInt("Energy", 0)
-		local energyToAdd = math.min(self.MaxEnergy - curEnergy, energyAmount)
-
-		self:SetNWInt("Energy", math.min(self.MaxEnergy, curEnergy + energyToAdd))
-		energyAccesors.Set(ent, math.max(0, energyAmount - energyToAdd))
-
-		if energyAmount - energyToAdd < 1 then
-			SafeRemoveEntity(ent)
-			ent.MiningInvalidPower = true
-		end
-
-		self:EmitSound(")ambient/machines/thumper_top.wav", 75, 70)
-		self.NextEnergyEnt = time + 2
-	end
-
-	function ENT:Touch(ent)
-		self:SmeltOre(ent)
-		self:GainEnergy(ent)
-	end
-
-	function ENT:ProcessEnergy(time)
-		if time < self.NextEnergyConsumption then return end
-
-		local curEnergy = self:GetNWInt("Energy", 0)
-		self:SetNWInt("Energy", math.max(0, curEnergy - 1))
-		self.NextEnergyConsumption = time + Ores.Automation.BaseOreProductionRate
-	end
-
-	function ENT:Think()
-		self:ProcessEnergy(CurTime())
 	end
 
 	function ENT:OnRemove()
@@ -217,7 +173,7 @@ if CLIENT then
 	function ENT:OnDrawEntityInfo()
 		local data = {
 			{ Type = "Label", Text = "SMELTER", Border = true },
-			{ Type = "Data", Label = "ENERGY", Value = self:GetNWInt("Energy", 0), MaxValue = Ores.Automation.BatteryCapacity }
+			{ Type = "Data", Label = "ENERGY", Value = self:GetNWInt("Energy", 0), MaxValue = self:GetNWInt("MaxEnergy", 100) }
 		}
 
 		local globalOreData = self:GetNWString("OreData", ""):Trim()
