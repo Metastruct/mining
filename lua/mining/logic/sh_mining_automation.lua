@@ -441,16 +441,18 @@ if SERVER then
 
 				local timeSinceLastRan = CurTime() - lastRan
 				local consumptionTimes = math.ceil(timeSinceLastRan / energyData.ConsumptionRate)
+				local canConsumeEnergy = true
+				if isfunction(ent.CanConsumeEnergy) then
+					local ret = ent:CanConsumeEnergy(energyData.Type)
+					if ret ~= nil then canConsumeEnergy = ret end
+				end
 
 				count = count + 1
 
-				if count > energyData.ConsumptionRate then
-					local canConsumeEnergy = isfunction(ent.CanConsumeEnergy) and ent:CanConsumeEnergy(energyData.Type)
-					if canConsumeEnergy == nil or canConsumeEnergy == true then
-						for _ = 1, consumptionTimes do
-							local curEnergy = ent:GetNWInt(energyData.Type, 0)
-							ent:SetNWInt(energyData.Type, math.max(0, curEnergy - 1))
-						end
+				if count > energyData.ConsumptionRate and canConsumeEnergy then
+					for _ = 1, consumptionTimes do
+						local curEnergy = ent:GetNWInt(energyData.Type, 0)
+						ent:SetNWInt(energyData.Type, math.max(0, curEnergy - 1))
 					end
 
 					count = 0
