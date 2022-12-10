@@ -24,13 +24,18 @@ if SERVER then
 		self:SetUseType(SIMPLE_USE)
 
 		Ores.Automation.PrepareForDuplication(self)
+
+		timer.Simple(0, function()
+			if not IsValid(self) then return end
+			Ores.Automation.ReplicateOwnership(self, self)
+		end)
 	end
 
 	function ENT:Use(activator, caller)
 		if not activator:IsPlayer() then return end
 
 		local coalRarity = Ores.Automation.GetOreRarityByName("Coal")
-		local amount = ms.Ores.GetPlayerOre(activator, coalRarity)
+		local amount = Ores.GetPlayerOre(activator, coalRarity)
 		if amount < 1 then return end
 
 		local curAmount = self:GetNWInt("CoalCount", 0)
@@ -40,7 +45,7 @@ if SERVER then
 		local newAmount = math.min(Ores.Automation.BatteryCapacity, curAmount + amountToAdd)
 		self:SetNWInt("CoalCount", newAmount)
 
-		ms.Ores.TakePlayerOre(activator, coalRarity, amountToAdd)
+		Ores.TakePlayerOre(activator, coalRarity, amountToAdd)
 	end
 
 	function ENT:GravGunPickupAllowed(ply)
