@@ -118,7 +118,7 @@ if SERVER then
 	end
 
 	function ENT:ProduceRefinedOre(rarity)
-		local ingot = ents.Create("mining_refined_ore")
+		local ingot = ents.Create("mining_ore_ingot")
 		ingot:SetRarity(rarity)
 		ingot:SetPos(self:GetPos() + self:GetUp() * -30 + self:GetRight() * -40)
 		ingot:Spawn()
