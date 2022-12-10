@@ -80,7 +80,7 @@ if SERVER then
 			{
 				Type = "Energy",
 				MaxValue = Ores.Automation.BatteryCapacity * 3,
-				ConsumptionRate = Ores.Automation.BaseOreProductionRate,
+				ConsumptionRate = 10, -- 1 unit every 10 seconds
 			}
 		})
 	end
