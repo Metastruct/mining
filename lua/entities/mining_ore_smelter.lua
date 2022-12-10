@@ -9,7 +9,7 @@ ENT.PrintName = "Ore Smelter"
 ENT.Author = "Earu"
 ENT.Category = "Mining"
 ENT.RenderGroup = RENDERGROUP_OPAQUE
-ENT.Spawnable = false
+ENT.Spawnable = true
 ENT.ClassName = "mining_ore_smelter"
 
 function ENT:CanWork()
@@ -279,47 +279,31 @@ if CLIENT then
 	end
 
 	function ENT:OnGraphDraw(x, y)
-		local GU = Ores.Automation.GraphUnit
 		local argoniteRarity = Ores.Automation.GetOreRarityByName("Argonite")
-		local argoniteColor = Ores.__R[argoniteRarity].PhysicalColor
-
-		surface.SetFont("DermaDefaultBold")
-		local th = draw.GetFontHeight("DermaDefaultBold")
-		local globalOreData = self:GetNWString("OreData", ""):Trim()
-		if #globalOreData < 1 then
-			surface.SetDrawColor(125, 125, 125, 255)
-			surface.DrawRect(x - GU / 2, y - GU / 2, GU, GU)
-
-			surface.SetDrawColor(argoniteColor)
-			surface.DrawOutlinedRect(x - GU / 2, y - GU / 2, GU, GU, 2)
-			return
-		end
-
-		local data = globalOreData:Split(";")
-		if #data < 1 then return end
+		local argoniteColor = Ores.__R[argoniteRarity].HudColor
+		local GU = Ores.Automation.GraphUnit
 
 		surface.SetDrawColor(125, 125, 125, 255)
-		surface.DrawRect(x - GU / 2, y - GU / 2, GU + 10, #data * th + 10)
+		surface.DrawRect(x - GU, y - GU / 2, GU * 2, GU)
 
 		surface.SetDrawColor(argoniteColor)
-		surface.DrawOutlinedRect(x - GU / 2, y - GU / 2, GU + 10, #data * th + 10, 2)
+		surface.DrawOutlinedRect(x - GU, y - GU / 2, GU * 2, GU, 2)
 
-		for i, dataChunk in ipairs(data) do
-			local rarityData = dataChunk:Split("=")
-			local oreData = Ores.__R[tonumber(rarityData[1])]
-			local text = ("x%s"):format(rarityData[2])
-
-			surface.SetTextColor(oreData.HudColor)
-			surface.SetTextPos(x - 15, y - GU / #data - #data + ((i - 1) * th))
-			surface.DrawText(text)
-		end
+		surface.SetTextColor(255, 255, 255, 255)
+		local percEnergy = (math.Round((self:GetNWInt("Energy", 0) / self:GetNWInt("MaxEnergy", 100)) * 100))
+		local percFuel = (math.Round((self:GetNWInt("Fuel", 0) / self:GetNWInt("MaxFuel", 100)) * 100))
+		local perc = ("%d%% / %d%%"):format(percEnergy, percFuel)
+		surface.SetFont("DermaDefault")
+		local tw, th = surface.GetTextSize(perc)
+		surface.SetTextPos(x - tw / 2, y - th / 2)
+		surface.DrawText(perc)
 	end
 
 	function ENT:OnDrawEntityInfo()
 		local data = {
 			{ Type = "Label", Text = "SMELTER", Border = true },
 			{ Type = "Data", Label = "ENERGY", Value = self:GetNWInt("Energy", 0), MaxValue = self:GetNWInt("MaxEnergy", 100) },
-			{ Type = "Data", Label = "FUEL", Value = self:GetNWInt("Fuel", 0), MaxValue = self:GetNWInt("MaxFuel", MAX_COAL), Border = true },
+			{ Type = "Data", Label = "FUEL", Value = self:GetNWInt("Fuel", 0), MaxValue = self:GetNWInt("MaxFuel", MAX_COAL) },
 		}
 
 		local globalOreData = self:GetNWString("OreData", ""):Trim()
