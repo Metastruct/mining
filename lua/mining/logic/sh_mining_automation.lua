@@ -176,12 +176,12 @@ if CLIENT then
 
 				local _, th = surface.GetTextSize(lineData.Text)
 				offset = offset + th + Ores.Automation.HudPadding
+			end
 
-				if lineData.Border == true then
-					surface.SetDrawColor(Ores.Automation.HudSepColor)
-					surface.DrawRect(x + Ores.Automation.HudPadding, y + offset, FRAME_WIDTH - Ores.Automation.HudPadding * 2, 2)
-					offset = offset + Ores.Automation.HudPadding
-				end
+			if lineData.Border == true then
+				surface.SetDrawColor(Ores.Automation.HudSepColor)
+				surface.DrawRect(x + Ores.Automation.HudPadding, y + offset, FRAME_WIDTH - Ores.Automation.HudPadding * 2, 2)
+				offset = offset + Ores.Automation.HudPadding
 			end
 		end
 
