@@ -249,7 +249,7 @@ if CLIENT then
 		surface.DrawOutlinedRect(x - GU / 2, y - GU / 2, GU, GU, 2)
 
 		surface.SetTextColor(255, 255, 255, 255)
-		local perc = (math.Round((self:GetNWInt("Energy", 0) / self:GetNWInt("MaxEnergy", 100)) * 100)) .. "%"
+		local perc = (math.Round((self:GetNWInt("Energy", 0) / self:GetNWInt("MaxEnergy", Ores.Automation.BatteryCapacity * 3)) * 100)) .. "%"
 		surface.SetFont("DermaDefault")
 		local tw, th = surface.GetTextSize(perc)
 		surface.SetTextPos(x - tw / 2, y - th / 2)
@@ -260,7 +260,7 @@ if CLIENT then
 		if not self.MiningFrameInfo then
 			self.MiningFrameInfo = {
 				{ Type = "Label", Text = "DRILL", Border = true },
-				{ Type = "Data", Label = "ENERGY", Value = self:GetNWInt("Energy", 0), MaxValue = self:GetNWInt("MaxEnergy", 100) },
+				{ Type = "Data", Label = "ENERGY", Value = self:GetNWInt("Energy", 0), MaxValue = self:GetNWInt("MaxEnergy", Ores.Automation.BatteryCapacity * 3) },
 			}
 		end
 
