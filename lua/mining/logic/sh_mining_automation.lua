@@ -437,9 +437,7 @@ if SERVER then
 
 			if count > consumptionRate then
 				local canConsumeEnergy = isfunction(ent.CanConsumeEnergy) and ent:CanConsumeEnergy()
-				if canConsumeEnergy == nil then canConsumeEnergy = true end
-
-				if canConsumeEnergy then
+				if canConsumeEnergy == nil or canConsumeEnergy == true then
 					for _ = 1, consumptionTimes do
 						local curEnergy = ent:GetNWInt("Energy", 0)
 						ent:SetNWInt("Energy", math.max(0, curEnergy - 1))
