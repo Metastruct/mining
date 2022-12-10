@@ -5,16 +5,16 @@ Ores = Ores or {}
 
 ENT.Type = "anim"
 ENT.Base = "base_anim"
-ENT.PrintName = "Coal Burner"
+ENT.PrintName = "Fuel Tank"
 ENT.Author = "Earu"
 ENT.Category = "Mining"
 ENT.RenderGroup = RENDERGROUP_OPAQUE
 ENT.Spawnable = true
-ENT.ClassName = "mining_coal_burner"
+ENT.ClassName = "mining_fuel_tank"
 
 if SERVER then
 	function ENT:Initialize()
-		self:SetModel("models/props_c17/TrapPropeller_Engine.mdl")
+		self:SetModel("models/props_c17/oildrum001.mdl")
 		self:SetModelScale(0.5)
 		self:SetMoveType(MOVETYPE_VPHYSICS)
 		self:PhysicsInit(SOLID_VPHYSICS)
@@ -24,23 +24,7 @@ if SERVER then
 		self:Activate()
 		self:SetUseType(SIMPLE_USE)
 
-		self.Frame = ents.Create("prop_physics")
-		self.Frame:SetModel("models/props_phx/construct/metal_wire1x1x1.mdl")
-		self.Frame:SetMaterial("phoenix_storms/future_vents")
-		self.Frame:SetModelScale(0.5)
-		self.Frame:SetPos(self:GetPos() + self:GetForward() * 24 / 2)
-		self.Frame:SetAngles(self:GetAngles())
-		self.Frame:SetCollisionGroup(COLLISION_GROUP_WEAPON)
-		self.Frame:Spawn()
-		self.Frame:SetParent(self)
-		self.Frame:SetTransmitWithParent(true)
-
 		Ores.Automation.PrepareForDuplication(self)
-
-		timer.Simple(0, function()
-			if not IsValid(self) then return end
-			Ores.Automation.ReplicateOwnership(self, self)
-		end)
 	end
 
 	function ENT:Use(activator, caller)
@@ -58,7 +42,6 @@ if SERVER then
 		self:SetNWInt("CoalCount", newAmount)
 
 		ms.Ores.TakePlayerOre(activator, coalRarity, amountToAdd)
-		self:Fire("ignite")
 	end
 
 	function ENT:GravGunPickupAllowed(ply)
@@ -91,7 +74,7 @@ if CLIENT then
 	function ENT:OnDrawEntityInfo()
 		if not self.MiningFrameInfo then
 			local data = {
-				{ Type = "Label", Text = "BURNER", Border = true },
+				{ Type = "Label", Text = "TANK", Border = true },
 				{ Type = "Data", Label = "FUEL", Value = self:GetNWInt("CoalCount", 0), MaxValue = ms.Ores.Automation.BatteryCapacity },
 			}
 
