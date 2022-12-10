@@ -76,7 +76,13 @@ if SERVER then
 		end
 
 		Ores.Automation.PrepareForDuplication(self)
-		Ores.Automation.RegisterEnergyPoweredEntity(self, Ores.Automation.BatteryCapacity * 3, Ores.Automation.BaseOreProductionRate)
+		Ores.Automation.RegisterEnergyPoweredEntity(self, {
+			{
+				Type = "Energy",
+				MaxValue = Ores.Automation.BatteryCapacity * 3,
+				ConsumptionRate = Ores.Automation.BaseOreProductionRate,
+			}
+		})
 	end
 
 	function ENT:TriggerInput(port, state)
