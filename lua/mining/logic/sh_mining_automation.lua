@@ -20,10 +20,12 @@ Ores.Automation = {
 		mining_argonite_battery = {
 			Get = function(ent) return ent:GetNWInt("ArgoniteCount", 0) end,
 			Set = function(ent, value) ent:SetNWInt("ArgoniteCount", value) end,
+			Type = "Energy",
 		},
 		mining_coal_burner = {
 			Get = function(ent) return math.ceil(ent:GetNWInt("CoalCount", 0) / 2) end,
 			Set = function(ent, value) ent:SetNWInt("CoalCount", value) end,
+			Type = "Fuel"
 		}
 	},
 	NonStorableOres = { "Argonite", "Detonite" },
@@ -383,10 +385,10 @@ if SERVER then
 		if ent.MiningInvalidPower then return end
 
 		local energyAmount = energyAccesors.Get(ent)
-		local curEnergy = poweredEnt:GetNWInt("Energy", 0)
-		local energyToAdd = math.min(poweredEnt:GetNWInt("MaxEnergy", 100) - curEnergy, energyAmount)
+		local curEnergy = poweredEnt:GetNWInt(energyAccesors.Type, 0)
+		local energyToAdd = math.min(poweredEnt:GetNWInt("Max" .. energyAccesors.Type, 100) - curEnergy, energyAmount)
 
-		poweredEnt:SetNWInt("Energy", math.min(poweredEnt:GetNWInt("MaxEnergy", 100), curEnergy + energyToAdd))
+		poweredEnt:SetNWInt(energyAccesors.Type, math.min(poweredEnt:GetNWInt("Max" .. energyAccesors.Type, 100), curEnergy + energyToAdd))
 		energyAccesors.Set(ent, math.max(0, energyAmount - energyToAdd))
 
 		if energyAmount - energyToAdd < 1 then
@@ -415,44 +417,46 @@ if SERVER then
 		return brush
 	end
 
-	function Ores.Automation.RegisterEnergyPoweredEntity(ent, maxEnergy, consumptionRate)
-		ent:SetNWInt("Energy", 0)
-		ent:SetNWInt("MaxEnergy", maxEnergy)
+	function Ores.Automation.RegisterEnergyPoweredEntity(ent, energyDataSettings)
+		for _, energyData in pairs(energyDataSettings) do
+			ent:SetNWInt(energyData.Type, energyData.StartValue or 0)
+			ent:SetNWInt("Max" .. energyData, energyData.MaxValue)
 
-		local timerName = ("mining_automation_power_entity_[%d]"):format(ent:EntIndex())
-		local lastRan = CurTime()
-		local brush = makeBrushForPoweredEntity(ent)
-		local count = 0
-		timer.Create(timerName, 1, 0, function()
-			if not IsValid(ent) then
-				timer.Remove(timerName)
-				SafeRemoveEntity(brush)
-				return
-			end
-
-			local timeSinceLastRan = CurTime() - lastRan
-			local consumptionTimes = math.ceil(timeSinceLastRan / consumptionRate)
-
-			count = count + 1
-
-			if count > consumptionRate then
-				local canConsumeEnergy = isfunction(ent.CanConsumeEnergy) and ent:CanConsumeEnergy()
-				if canConsumeEnergy == nil or canConsumeEnergy == true then
-					for _ = 1, consumptionTimes do
-						local curEnergy = ent:GetNWInt("Energy", 0)
-						ent:SetNWInt("Energy", math.max(0, curEnergy - 1))
-					end
+			local timerName = ("mining_automation_power_[%s]_entity_[%d]"):format(energyData.Type, ent:EntIndex())
+			local lastRan = CurTime()
+			local brush = makeBrushForPoweredEntity(ent)
+			local count = 0
+			timer.Create(timerName, 1, 0, function()
+				if not IsValid(ent) then
+					timer.Remove(timerName)
+					SafeRemoveEntity(brush)
+					return
 				end
 
-				count = 0
-			end
+				local timeSinceLastRan = CurTime() - lastRan
+				local consumptionTimes = math.ceil(timeSinceLastRan / energyData.ConsumptionRate)
 
-			if not IsValid(brush) then
-				brush = makeBrushForPoweredEntity(ent)
-			end
+				count = count + 1
 
-			lastRan = CurTime()
-		end)
+				if count > energyData.ConsumptionRate then
+					local canConsumeEnergy = isfunction(ent.CanConsumeEnergy) and ent:CanConsumeEnergy(energyData.Type)
+					if canConsumeEnergy == nil or canConsumeEnergy == true then
+						for _ = 1, consumptionTimes do
+							local curEnergy = ent:GetNWInt(energyData.Type, 0)
+							ent:SetNWInt(energyData.Type, math.max(0, curEnergy - 1))
+						end
+					end
+
+					count = 0
+				end
+
+				if not IsValid(brush) then
+					brush = makeBrushForPoweredEntity(ent)
+				end
+
+				lastRan = CurTime()
+			end)
+		end
 	end
 
 	hook.Add("PlayerUse", "mining_automation_use_fn_replication", function(ply, ent)
