@@ -25,36 +25,53 @@ if SERVER then
 		self:SetMaterial("phoenix_storms/future_vents")
 		self:SetModelScale(0.4)
 		self:SetMoveType(MOVETYPE_VPHYSICS)
-		self:PhysicsInit(SOLID_BBOX)
-		self:SetSolid(SOLID_BBOX)
+		self:PhysicsInit(SOLID_VPHYSICS)
+		self:SetSolid(SOLID_VPHYSICS)
 		self:SetUseType(SIMPLE_USE)
 		self:SetTrigger(true)
-		self:UseTriggerBounds(true, 32)
+		self:UseTriggerBounds(true, 128)
 		self:PhysWake()
 		self:SetNWBool("IsPowered", true)
 		self:Activate()
 
-		self.Frame = ents.Create("prop_physics")
-		self.Frame:SetModel("models/props_phx/construct/metal_wire1x1x2.mdl")
-		self.Frame:SetMaterial("phoenix_storms/future_vents")
-		self.Frame:SetPos(self:GetPos() + self:GetUp() * -35 + self:GetRight() * -24)
+		do
+			self.Frame = ents.Create("prop_physics")
+			self.Frame:SetModel("models/props_phx/construct/metal_wire1x1x2.mdl")
+			self.Frame:SetMaterial("phoenix_storms/future_vents")
+			self.Frame:SetPos(self:GetPos() + self:GetUp() * -35 + self:GetRight() * -24)
 
-		local ang = self:GetAngles()
-		ang:RotateAroundAxis(self:GetForward(), 90)
-		ang:RotateAroundAxis(self:GetRight(), 90)
+			local ang = self:GetAngles()
+			ang:RotateAroundAxis(self:GetForward(), 90)
+			ang:RotateAroundAxis(self:GetRight(), 90)
 
-		self.Frame:SetAngles(ang)
-		self.Frame:Spawn()
-		self.Frame:SetParent(self)
+			self.Frame:SetAngles(ang)
+			self.Frame:Spawn()
+			self.Frame:SetParent(self)
 
-		self.Frame2 = ents.Create("prop_physics")
-		self.Frame2:SetModel("models/props_phx/construct/metal_tube.mdl")
-		self.Frame2:SetMaterial("models/mspropp/metalgrate014a")
-		self.Frame2:SetModelScale(0.9)
-		self.Frame2:SetPos(self:GetPos() + self:GetUp() * -35 + self:GetRight() * -24)
-		self.Frame2:SetAngles(ang)
-		self.Frame2:Spawn()
-		self.Frame2:SetParent(self)
+			self.Frame2 = ents.Create("prop_physics")
+			self.Frame2:SetModel("models/props_phx/construct/metal_tube.mdl")
+			self.Frame2:SetMaterial("models/mspropp/metalgrate014a")
+			self.Frame2:SetModelScale(0.9)
+			self.Frame2:SetPos(self:GetPos() + self:GetUp() * -35 + self:GetRight() * -24)
+			self.Frame2:SetAngles(ang)
+			self.Frame2:Spawn()
+			self.Frame2:SetParent(self)
+		end
+
+		do
+			self.Out = ents.Create("prop_physics")
+			self.Out:SetModel("models/props_phx/construct/metal_wire1x1.mdl")
+			self.Out:SetMaterial("phoenix_storms/stripes")
+			self.Out:SetPos(self:WorldSpaceCenter() + self:GetUp() * -35 + self:GetRight() * -30)
+
+			local ang = self:GetAngles()
+			ang:RotateAroundAxis(self:GetForward(), 90)
+			ang:RotateAroundAxis(self:GetRight(), 90)
+
+			self.Out:SetAngles(ang)
+			self.Out:Spawn()
+			self.Out:SetParent(self)
+		end
 
 		timer.Simple(0, function()
 			if not IsValid(self) then return end
@@ -118,7 +135,7 @@ if SERVER then
 	function ENT:ProduceRefinedOre(rarity)
 		local ingot = ents.Create("mining_ore_ingot")
 		ingot:SetRarity(rarity)
-		ingot:SetPos(self:GetPos() + self:GetUp() * -30 + self:GetRight() * -40)
+		ingot:SetPos(self:GetPos() + self:GetUp() * -30 + self:GetRight() * -50)
 		ingot:Spawn()
 		ingot:PhysWake()
 
@@ -262,7 +279,9 @@ if CLIENT then
 	end
 
 	function ENT:OnGraphDraw(x, y)
-		--[[local GU = Ores.Automation.GraphUnit
+		local GU = Ores.Automation.GraphUnit
+		local argoniteRarity = Ores.Automation.GetOreRarityByName("Argonite")
+		local argoniteColor = Ores.__R[argoniteRarity].PhysicalColor
 
 		surface.SetFont("DermaDefaultBold")
 		local th = draw.GetFontHeight("DermaDefaultBold")
@@ -271,7 +290,7 @@ if CLIENT then
 			surface.SetDrawColor(125, 125, 125, 255)
 			surface.DrawRect(x - GU / 2, y - GU / 2, GU, GU)
 
-			surface.SetDrawColor(255, 255, 255, 255)
+			surface.SetDrawColor(argoniteColor)
 			surface.DrawOutlinedRect(x - GU / 2, y - GU / 2, GU, GU, 2)
 			return
 		end
@@ -282,7 +301,7 @@ if CLIENT then
 		surface.SetDrawColor(125, 125, 125, 255)
 		surface.DrawRect(x - GU / 2, y - GU / 2, GU + 10, #data * th + 10)
 
-		surface.SetDrawColor(255, 255, 255, 255)
+		surface.SetDrawColor(argoniteColor)
 		surface.DrawOutlinedRect(x - GU / 2, y - GU / 2, GU + 10, #data * th + 10, 2)
 
 		for i, dataChunk in ipairs(data) do
@@ -293,14 +312,14 @@ if CLIENT then
 			surface.SetTextColor(oreData.HudColor)
 			surface.SetTextPos(x - 15, y - GU / #data - #data + ((i - 1) * th))
 			surface.DrawText(text)
-		end]]
+		end
 	end
 
 	function ENT:OnDrawEntityInfo()
 		local data = {
 			{ Type = "Label", Text = "SMELTER", Border = true },
 			{ Type = "Data", Label = "ENERGY", Value = self:GetNWInt("Energy", 0), MaxValue = self:GetNWInt("MaxEnergy", 100) },
-			{ Type = "Data", Label = "FUEL", Value = self:GetNWInt("Fuel", 0), MaxValue = self:GetNWInt("MaxFuel", MAX_COAL) },
+			{ Type = "Data", Label = "FUEL", Value = self:GetNWInt("Fuel", 0), MaxValue = self:GetNWInt("MaxFuel", MAX_COAL), Border = true },
 		}
 
 		local globalOreData = self:GetNWString("OreData", ""):Trim()
