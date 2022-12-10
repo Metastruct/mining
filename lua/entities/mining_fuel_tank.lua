@@ -15,7 +15,6 @@ ENT.ClassName = "mining_fuel_tank"
 if SERVER then
 	function ENT:Initialize()
 		self:SetModel("models/props_c17/oildrum001.mdl")
-		self:SetModelScale(0.5)
 		self:SetMoveType(MOVETYPE_VPHYSICS)
 		self:PhysicsInit(SOLID_VPHYSICS)
 		self:SetSolid(SOLID_VPHYSICS)
