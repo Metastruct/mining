@@ -87,12 +87,12 @@ if SERVER then
 			{
 				Type = "Energy",
 				MaxValue = Ores.Automation.BatteryCapacity,
-				ConsumptionRate = Ores.Automation.BaseOreProductionRate,
+				ConsumptionRate = 10, -- 1 unit every 10 seconds
 			},
 			{
 				Type = "Fuel",
 				MaxValue = MAX_COAL,
-				ConsumptionRate = Ores.Automation.BaseOreProductionRate / 2,
+				ConsumptionRate = 5, -- 1 unit every 5 seconds => MAX is 50, FUEL TANK is 150, so 1 fuel tank => 15 minutes
 			}
 		})
 	end
