@@ -61,8 +61,6 @@ if SERVER then
 			Ores.Automation.ReplicateOwnership(self, self)
 			self.SndLoop = self:StartLoopingSound("ambient/machines/machine_whine1.wav")
 			self:Activate()
-
-			self:SetNWInt("Energy", 100)
 		end)
 
 		if _G.WireLib then
