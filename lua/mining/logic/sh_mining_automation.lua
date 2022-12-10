@@ -380,6 +380,9 @@ if SERVER then
 		local energyAccesors = Ores.Automation.EnergyEntities[className]
 		if not energyAccesors then return end
 
+		-- can't put fuel inside energy, etc...
+		if not poweredEnt.AcceptedPowerTypes[energyAccesors.Type] then return end
+
 		local time = CurTime()
 		if time < (poweredEnt.NextEnergyEntity or 0) then return end
 		if ent.MiningInvalidPower then return end
@@ -420,7 +423,10 @@ if SERVER then
 	function Ores.Automation.RegisterEnergyPoweredEntity(ent, energyDataSettings)
 		for _, energyData in pairs(energyDataSettings) do
 			ent:SetNWInt(energyData.Type, energyData.StartValue or 0)
-			ent:SetNWInt("Max" .. energyData, energyData.MaxValue)
+			ent:SetNWInt("Max" .. energyData.Type, energyData.MaxValue)
+
+			ent.AcceptedPowerTypes = ent.AcceptedPowerTypes or {}
+			ent.AcceptedPowerTypes[energyData.Type] = true
 
 			local timerName = ("mining_automation_power_[%s]_entity_[%d]"):format(energyData.Type, ent:EntIndex())
 			local lastRan = CurTime()
