@@ -62,7 +62,7 @@ if SERVER then
 			self.Out = ents.Create("prop_physics")
 			self.Out:SetModel("models/props_phx/construct/metal_wire1x1.mdl")
 			self.Out:SetMaterial("phoenix_storms/stripes")
-			self.Out:SetPos(self:WorldSpaceCenter() + self:GetUp() * -35 + self:GetRight() * -30)
+			self.Out:SetPos(self:WorldSpaceCenter() + self:GetUp() * -38 + self:GetRight() * -30)
 
 			local ang = self:GetAngles()
 			ang:RotateAroundAxis(self:GetForward(), 90)
