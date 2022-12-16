@@ -46,6 +46,8 @@ Ores.Automation = {
 	HudPadding = 10,
 	HudSepColor = Color(100, 100, 100, 255),
 	HudActionColor = Color(255, 125, 0, 255),
+	IngotWorth = 2,
+	IngotSize = 5,
 }
 
 if Ores.Automation.EnergyMaterial:IsError() then
