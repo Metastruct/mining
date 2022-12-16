@@ -64,14 +64,22 @@ if SERVER then
 		if self:Health() <= 0 then
 			if not self.DoNotBreakInPieces then
 				for _ = 1, math.random(3, 4) do
-					local subRock = ents.Create("mining_collapse_rock")
-					subRock:SetModel("models/props_wasteland/rockgranite02a.mdl")
-					subRock:Activate()
-					subRock:SetPos(self:WorldSpaceCenter() + VectorRand(-100, 100))
-					subRock:SetModelScale(self.OriginalScale / 4)
-					subRock:Spawn()
-					subRock:SetLifeTime(self.EndTime - CurTime())
-					subRock.DoNotBreakInPieces = true
+					local rock
+					if math.random() <= 0.1 then
+						rock = ents.Create("mining_rock")
+						rock:SetRarity(ms.Ores.Automation.GetOreRarityByName("Coal"))
+						rock:SetSize(math.random() > 0.33 and 1 or 2)
+					else
+						rock = ents.Create("mining_collapse_rock")
+						rock:SetModel("models/props_wasteland/rockgranite02a.mdl")
+						rock:SetModelScale(self.OriginalScale / 4)
+						rock:Activate()
+						rock:SetLifeTime(self.EndTime - CurTime())
+						rock.DoNotBreakInPieces = true
+					end
+
+					rock:SetPos(self:WorldSpaceCenter() + VectorRand(-100, 100))
+					rock:Spawn()
 				end
 			end
 
