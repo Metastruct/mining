@@ -39,6 +39,7 @@ Ores.Automation = {
 		mining_argonite_transformer = true,
 		mining_detonite_bomb = true,
 		mining_ore_smelter = true,
+		mining_coin_minter = true,
 	},
 	GraphUnit = 40,
 	GraphHeightMargin = 75,
