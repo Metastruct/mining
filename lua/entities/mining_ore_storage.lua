@@ -44,15 +44,18 @@ if SERVER then
 		self:SetNWString("OreData", table.concat(t, ";"))
 	end
 
+	local ORE_CLASS_VALUES = { mining_ore = 1, mining_ore_ingot = 5 }
 	function ENT:StartTouch(ent)
 		if ent.MiningContainerCollected then return end
-		if ent:GetClass() ~= "mining_ore" then return end
+
+		local value = ORE_CLASS_VALUES[ent:GetClass()]
+		if not value then return end
 
 		if self.CPPIGetOwner and ent.GraceOwner ~= self:CPPIGetOwner() then return end -- lets not have people highjack each others
 
 		local rarity = ent:GetRarity()
 		if not self.BadOreRarities[rarity] then
-			self.Ores[rarity] = (self.Ores[rarity] or 0) + 1
+			self.Ores[rarity] = (self.Ores[rarity] or 0) + value
 			self:UpdateNetworkOreData()
 		end
 
