@@ -16,7 +16,6 @@ function ENT:CanWork()
 	return self:GetNWInt("Energy", 0) > 0 and self:GetNWInt("Fuel", 0) > 0
 end
 
-local STACK_SIZE = 5
 local MAX_COAL = 50
 
 if SERVER then
@@ -171,7 +170,7 @@ if SERVER then
 		if not self.BadOreRarities[rarity] then
 			local newValue = (self.Ores[rarity] or 0) + 1
 			self.Ores[rarity] = newValue
-			if newValue >= STACK_SIZE then
+			if newValue >= Ores.Automation.IngotSize then
 				self:ProduceRefinedOre(rarity)
 				self.Ores[rarity] = nil
 			end
@@ -313,7 +312,7 @@ if CLIENT then
 			local rarityData = dataChunk:Split("=")
 			local oreData = Ores.__R[tonumber(rarityData[1])]
 
-			table.insert(data, { Type = "Data", Label = oreData.Name:upper()[1] .. ". INGOT", Value = tonumber(rarityData[2]) or 0	, MaxValue = STACK_SIZE, LabelColor = oreData.HudColor, ValueColor = oreData.HudColor })
+			table.insert(data, { Type = "Data", Label = oreData.Name:upper()[1] .. ". INGOT", Value = tonumber(rarityData[2]) or 0, MaxValue = Ores.Automation.IngotSize, LabelColor = oreData.HudColor, ValueColor = oreData.HudColor })
 		end
 
 		return data
