@@ -323,7 +323,7 @@ if CLIENT then
 		local data = {
 			{ Type = "Label", Text = "SMELTER", Border = true },
 			{ Type = "Data", Label = "ENERGY", Value = self:GetNWInt("Energy", 0), MaxValue = self:GetNWInt("MaxEnergy", Ores.Automation.BatteryCapacity) },
-			{ Type = "Data", Label = "FUEL", Value = self:GetNWInt("Fuel", 0), MaxValue = self:GetNWInt("MaxFuel", MAX_COAL) },
+			{ Type = "Data", Label = "FUEL", Value = self:GetNWInt("Fuel", 0), MaxValue = self:GetNWInt("MaxFuel", MAX_COAL), Border = true },
 		}
 
 		local globalOreData = self:GetNWString("OreData", ""):Trim()
@@ -333,7 +333,7 @@ if CLIENT then
 			local rarityData = dataChunk:Split("=")
 			local oreData = Ores.__R[tonumber(rarityData[1])]
 
-			table.insert(data, { Type = "Data", Label = oreData.Name:upper()[1] .. ". INGOT", Value = tonumber(rarityData[2]) or 0, MaxValue = Ores.Automation.IngotSize, LabelColor = oreData.HudColor, ValueColor = oreData.HudColor })
+			table.insert(data, { Type = "Data", Label = oreData.Name:upper()[1] .. ". INGOT", Value = ("%s/%d"):format(rarityData[2], Ores.Automation.IngotSize), LabelColor = oreData.HudColor, ValueColor = oreData.HudColor })
 		end
 
 		return data
