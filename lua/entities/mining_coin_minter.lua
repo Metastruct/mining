@@ -34,12 +34,15 @@ if SERVER then
 
 	function ENT:StartTouch(ent)
 		if ent.MiningMinterCollected then return end
-		if ent:GetClass() ~= "mining_ore_ingot" then return end
 
+		local className = ent:GetClass()
+		if className ~= "mining_ore_ingot" and className ~= "mining_ore" then return end
+
+		local classWorth = className == "mining_ore_ingot" and Ores.Automation.IngotWorth or 1
 		local rarity = ent:GetRarity()
 		local oreData = Ores.__R[rarity]
 		if oreData then
-			local earnings = oreData.Worth * Ores.Automation.IngotSize * Ores.Automation.IngotWorth
+			local earnings = oreData.Worth * Ores.Automation.IngotSize * classWorth
 			if self.CPPIGetOwner and IsValid(self:CPPIGetOwner()) then
 				earnings = earnings * Ores.GetPlayerMultiplier(self:CPPIGetOwner())
 			end
