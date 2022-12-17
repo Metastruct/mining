@@ -60,7 +60,7 @@ if SERVER then
 		if self.CPPIGetOwner and self:CPPIGetOwner() ~= activator then return end
 
 		local curCoins = self:GetNWInt("MintedCoins", 0)
-		if activator.GiveCoins then
+		if activator.GiveCoins and curCoins > 0 then
 			activator:GiveCoins(curCoins, "mining automation => minter")
 		end
 
