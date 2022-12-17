@@ -13,6 +13,7 @@ Ores.Automation = {
 		mining_drill = true,
 		mining_conveyor_splitter = true,
 		mining_ore_smelter = true,
+		mining_coin_minter = true,
 	},
 	BaseOreProductionRate = 10, -- 1 per 10 seconds
 	EnergyMaterial = Material("models/props_combine/coredx70"),
