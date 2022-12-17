@@ -100,7 +100,7 @@ if CLIENT then
 
 	local ENTITY_INFO_EXTRAS = { mining_argonite_container = true }
 	local FONT_HEIGHT = 30
-	local FRAME_WIDTH = 225
+	local FRAME_WIDTH = 250
 	local FRAME_HEIGHT = 100
 	local COLOR_WHITE = Color(255, 255, 255, 255)
 	local FRAME_PADDING = 5
