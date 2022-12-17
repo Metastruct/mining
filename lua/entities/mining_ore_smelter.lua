@@ -20,57 +20,74 @@ local MAX_COAL = 50
 
 if SERVER then
 	function ENT:Initialize()
-		self:SetModel("models/xqm/podremake.mdl")
-		self:SetMaterial("phoenix_storms/future_vents")
-		self:SetModelScale(0.4)
+		self:SetModel("models/hunter/blocks/cube075x2x1.mdl")
 		self:SetMoveType(MOVETYPE_VPHYSICS)
 		self:PhysicsInit(SOLID_VPHYSICS)
 		self:SetSolid(SOLID_VPHYSICS)
 		self:SetUseType(SIMPLE_USE)
 		self:SetTrigger(true)
-		self:UseTriggerBounds(true, 128)
+		self:UseTriggerBounds(true, 16)
 		self:PhysWake()
 		self:SetNWBool("IsPowered", true)
 		self:Activate()
 
-		do
-			self.Frame = ents.Create("prop_physics")
-			self.Frame:SetModel("models/props_phx/construct/metal_wire1x1x2.mdl")
-			self.Frame:SetMaterial("phoenix_storms/future_vents")
-			self.Frame:SetPos(self:GetPos() + self:GetUp() * -35 + self:GetRight() * -24)
+		self.Frame = ents.Create("prop_physics")
+		self.Frame:SetModel("models/props_phx/construct/metal_wire1x1x2.mdl")
+		self.Frame:SetMaterial("phoenix_storms/future_vents")
+		self.Frame:SetPos(self:GetPos() + self:GetUp() * -24 + self:GetRight() * 24 + self:GetForward() * -6)
 
-			local ang = self:GetAngles()
-			ang:RotateAroundAxis(self:GetForward(), 90)
-			ang:RotateAroundAxis(self:GetRight(), 90)
+		local ang = self:GetAngles()
+		ang:RotateAroundAxis(self:GetUp(), 90)
 
-			self.Frame:SetAngles(ang)
-			self.Frame:Spawn()
-			self.Frame:SetParent(self)
+		self.Frame:SetAngles(ang)
+		self.Frame:Spawn()
+		self.Frame:SetParent(self)
+		self.Frame:SetNotSolid(true)
 
-			self.Frame2 = ents.Create("prop_physics")
-			self.Frame2:SetModel("models/props_phx/construct/metal_tube.mdl")
-			self.Frame2:SetMaterial("models/mspropp/metalgrate014a")
-			self.Frame2:SetModelScale(0.9)
-			self.Frame2:SetPos(self:GetPos() + self:GetUp() * -35 + self:GetRight() * -24)
-			self.Frame2:SetAngles(ang)
-			self.Frame2:Spawn()
-			self.Frame2:SetParent(self)
-		end
+		self.Frame2 = ents.Create("prop_physics")
+		self.Frame2:SetModel("models/props_phx/construct/metal_tube.mdl")
+		self.Frame2:SetMaterial("models/mspropp/metalgrate014a")
+		self.Frame2:SetPos(self:GetPos() + self:GetRight() * -23 + self:GetForward() * 17)
 
-		do
-			self.Out = ents.Create("prop_physics")
-			self.Out:SetModel("models/props_phx/construct/metal_wire1x1.mdl")
-			self.Out:SetMaterial("phoenix_storms/stripes")
-			self.Out:SetPos(self:WorldSpaceCenter() + self:GetUp() * -38 + self:GetRight() * -30)
+		ang = self:GetAngles()
+		ang:RotateAroundAxis(self:GetRight(), 90)
+		ang:RotateAroundAxis(self:GetForward(), 90)
 
-			local ang = self:GetAngles()
-			ang:RotateAroundAxis(self:GetForward(), 90)
-			ang:RotateAroundAxis(self:GetRight(), 90)
+		self.Frame2:SetAngles(ang)
+		self.Frame2:Spawn()
+		self.Frame2:SetParent(self)
+		self.Frame2:SetNotSolid(true)
 
-			self.Out:SetAngles(ang)
-			self.Out:Spawn()
-			self.Out:SetParent(self)
-		end
+		self.Machine = ents.Create("prop_physics")
+		self.Machine:SetModel("models/xqm/podremake.mdl")
+		self.Machine:SetMaterial("phoenix_storms/future_vents")
+		self.Machine:SetModelScale(0.4)
+
+
+		ang = self:GetAngles()
+		ang:RotateAroundAxis(self:GetRight(), 90)
+		ang:RotateAroundAxis(self:GetUp(), 90)
+
+		self.Machine:SetAngles(ang)
+		self.Machine:SetPos(self:GetPos() + self:GetRight() * 12 + self:GetForward() * -6 + self:GetUp() * -3)
+		self.Machine:Spawn()
+		self.Machine:SetParent(self)
+		self.Machine:SetNotSolid(true)
+
+		self.Out = ents.Create("prop_physics")
+		self.Out:SetModel("models/props_phx/construct/metal_wire1x1.mdl")
+		self.Out:SetMaterial("phoenix_storms/stripes")
+		self.Out:SetPos(self:GetPos() + self:GetRight() * -23 + self:GetForward() * 24)
+
+		ang = self:GetAngles()
+		ang:RotateAroundAxis(self:GetRight(), 90)
+		ang:RotateAroundAxis(self:GetForward(), 90)
+
+		self.Out:SetAngles(ang)
+		self.Out:Spawn()
+		self.Out:SetParent(self)
+		self.Out:SetNotSolid(true)
+
 
 		timer.Simple(0, function()
 			if not IsValid(self) then return end
@@ -134,7 +151,7 @@ if SERVER then
 	function ENT:ProduceRefinedOre(rarity)
 		local ingot = ents.Create("mining_ore_ingot")
 		ingot:SetRarity(rarity)
-		ingot:SetPos(self:GetPos() + self:GetUp() * -30 + self:GetRight() * -50)
+		ingot:SetPos(self:GetPos() + self:GetRight() * -24 + self:GetForward() * 40 + self:GetUp() * 5)
 		ingot:Spawn()
 		ingot:PhysWake()
 
@@ -238,20 +255,24 @@ if CLIENT then
 	end
 
 	function ENT:Initialize()
-		self.Wheel = addWheelEntity(self, self:GetUp() * -15)
+		self.Wheel = addWheelEntity(self, self:GetRight() * -4 + self:GetForward() * -6)
+
+		local ang = self:GetAngles()
+		ang:RotateAroundAxis(self:GetUp(), 90)
+		self.Wheel:SetAngles(ang)
 	end
 
 	function ENT:Draw()
-		self:DrawModel()
+		--self:DrawModel()
 
 		local hasEnergy = self:CanWork()
 		if hasEnergy then
 			local offset = -10
 			for i = 1, 2 do
 				local effectData = EffectData()
-				effectData:SetAngles((-self:GetUp()):Angle())
+				effectData:SetAngles((-self:GetRight()):Angle())
 				effectData:SetScale(2)
-				effectData:SetOrigin(self:GetPos() + self:GetUp() * -20 + self:GetRight() * math.sin(CurTime()) * offset + self:GetForward() * math.cos(CurTime()) * offset)
+				effectData:SetOrigin(self:GetPos() + self:GetRight() * -6 + self:GetUp() * math.sin(CurTime()) * offset + self:GetForward() * math.cos(CurTime()) * offset)
 				util.Effect("MuzzleEffect", effectData, true, true)
 
 				offset = offset + 22
@@ -259,14 +280,14 @@ if CLIENT then
 		end
 
 		if IsValid(self.Wheel) then
-			self.Wheel:SetPos(self:GetPos() + self:GetUp() * -15)
+			self.Wheel:SetPos(self:GetPos() + self:GetRight() * -4 + self:GetForward() * -6)
 			self.Wheel:SetParent(self)
 
 			local ang = self:GetAngles()
-			ang:RotateAroundAxis(self:GetRight(), 90)
+			ang:RotateAroundAxis(self:GetUp(), 90)
 
 			if hasEnergy then
-				ang:RotateAroundAxis(self:GetUp(), CurTime() * -40 % 360)
+				ang:RotateAroundAxis(self:GetRight(), CurTime() * 45 % 360)
 			end
 
 			self.Wheel:SetAngles(ang)
