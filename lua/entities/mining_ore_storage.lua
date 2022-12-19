@@ -44,7 +44,7 @@ if SERVER then
 		self:SetNWString("OreData", table.concat(t, ";"))
 	end
 
-	function ENT:StartTouch(ent)
+	function ENT:Touch(ent)
 		if ent.MiningContainerCollected then return end
 
 		local className = ent:GetClass()

@@ -418,6 +418,7 @@ if SERVER then
 		brush:SetCollisionBounds(-BRUSH_BOUNDS, BRUSH_BOUNDS)
 
 		function brush:Touch(touchedEnt)
+			touchedEnt:PhysWake()
 			gainEnergy(ent, touchedEnt)
 		end
 

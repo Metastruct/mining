@@ -32,7 +32,7 @@ if SERVER then
 		end)
 	end
 
-	function ENT:StartTouch(ent)
+	function ENT:Touch(ent)
 		if ent.MiningMinterCollected then return end
 
 		local className = ent:GetClass()
