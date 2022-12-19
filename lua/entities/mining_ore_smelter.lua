@@ -199,6 +199,13 @@ if SERVER then
 		SafeRemoveEntity(ent)
 	end
 
+	function ENT:AllowPassThrough(allow)
+		local phys = self:GetPhysicsObject()
+		if IsValid(phys) then
+			phys:EnableCollisions(not allow)
+		end
+	end
+
 	function ENT:CheckSoundLoop(time)
 		if time < self.NextSoundCheck then return end
 
@@ -209,6 +216,7 @@ if SERVER then
 
 			self.SndLoop = nil
 			self.NextSoundCheck = time + 2.5
+			self:AllowPassThrough(true)
 			return
 		end
 
@@ -217,6 +225,7 @@ if SERVER then
 		end
 
 		self.NextSoundCheck = time + 2.5
+		self:AllowPassThrough(false)
 	end
 
 	function ENT:Think()

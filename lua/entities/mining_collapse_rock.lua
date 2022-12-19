@@ -63,9 +63,9 @@ if SERVER then
 
 		if self:Health() <= 0 then
 			if not self.DoNotBreakInPieces then
-				for _ = 1, math.random(3, 4) do
+				for _ = 1, math.random(0, 3) do
 					local rock
-					if math.random() <= 0.1 then
+					if math.random() <= 0.25 then
 						rock = ents.Create("mining_rock")
 						rock:SetRarity(ms.Ores.Automation.GetOreRarityByName("Coal"))
 						rock:SetSize(math.random() > 0.33 and 1 or 2)
@@ -80,6 +80,7 @@ if SERVER then
 
 					rock:SetPos(self:WorldSpaceCenter() + VectorRand(-100, 100))
 					rock:Spawn()
+					rock:PhysWake()
 				end
 			end
 
