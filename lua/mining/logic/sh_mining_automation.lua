@@ -24,7 +24,7 @@ Ores.Automation = {
 			Type = "Energy",
 		},
 		mining_fuel_tank = {
-			Get = function(ent) return math.ceil(ent:GetNWInt("CoalCount", 0) / 2) end,
+			Get = function(ent) return ent:GetNWInt("CoalCount", 0) end,
 			Set = function(ent, value) ent:SetNWInt("CoalCount", value) end,
 			Type = "Fuel"
 		}
