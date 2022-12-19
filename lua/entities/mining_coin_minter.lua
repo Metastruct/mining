@@ -39,10 +39,11 @@ if SERVER then
 		if className ~= "mining_ore_ingot" and className ~= "mining_ore" then return end
 
 		local classWorth = className == "mining_ore_ingot" and Ores.Automation.IngotWorth or 1
+		local classSize = className == "mining_ore_ingot" and Ores.Automation.IngotSize or 1
 		local rarity = ent:GetRarity()
 		local oreData = Ores.__R[rarity]
 		if oreData then
-			local earnings = oreData.Worth * Ores.Automation.IngotSize * classWorth
+			local earnings = oreData.Worth * classSize * classWorth
 			if self.CPPIGetOwner and IsValid(self:CPPIGetOwner()) then
 				earnings = earnings * Ores.GetPlayerMultiplier(self:CPPIGetOwner())
 			end
