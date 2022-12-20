@@ -339,7 +339,8 @@ if SERVER then
 	end
 
 	local QUEUE_FLUSH_TRESHOLD = 100
-	timer.Create("mining_automation_set_nw_int_opti", 0.1, 0, function()
+	local QUEUE_CONSUMPTION_RATE = 0.25
+	timer.Create("mining_automation_set_nw_int_opti", QUEUE_CONSUMPTION_RATE, 0, function()
 		if #nwIntQueue < 1 then return end
 
 		local data = table.remove(nwIntQueue, 1)
