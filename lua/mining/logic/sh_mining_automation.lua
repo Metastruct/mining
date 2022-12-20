@@ -2,7 +2,6 @@ module("ms", package.seeall)
 Ores = Ores or {}
 
 local IsValid = _G.IsValid
-local isnumber = _G.isnumber
 local isstring = _G.isstring
 
 Ores.Automation = {
@@ -24,12 +23,12 @@ Ores.Automation = {
 	EnergyEntities = {
 		mining_argonite_battery = {
 			Get = function(ent) return ent:GetNWInt("ArgoniteCount", 0) end,
-			Set = function(ent, value) Ores.Automation.SetNWInt(ent, "ArgoniteCount", value) end,
+			Set = function(ent, value) ent:SetNWInt("ArgoniteCount", value) end,
 			Type = "Energy",
 		},
 		mining_fuel_tank = {
 			Get = function(ent) return ent:GetNWInt("CoalCount", 0) end,
-			Set = function(ent, value) Ores.Automation.SetNWInt(ent, "CoalCount", value) end,
+			Set = function(ent, value) ent:SetNWInt("CoalCount", value) end,
 			Type = "Fuel"
 		}
 	},
@@ -333,31 +332,6 @@ end
 if SERVER then
 	resource.AddFile("materials/mining/automation/hud_frame.png")
 
-	local nwIntQueue = {}
-	function Ores.Automation.SetNWInt(ent, key, value)
-		table.insert(nwIntQueue, { ent, key, value })
-	end
-
-	local QUEUE_FLUSH_TRESHOLD = 100
-	local QUEUE_CONSUMPTION_RATE = 0.25
-	timer.Create("mining_automation_set_nw_int_opti", QUEUE_CONSUMPTION_RATE, 0, function()
-		if #nwIntQueue < 1 then return end
-
-		local data = table.remove(nwIntQueue, 1)
-		if IsValid(data[1]) and isstring(data[2]) and isnumber(data[3]) then
-			data[1]:SetNWInt(data[2], data[3])
-		end
-
-		if #nwIntQueue >= QUEUE_FLUSH_TRESHOLD then
-			while #nwIntQueue > 1 do
-				data = table.remove(nwIntQueue, 1)
-				if IsValid(data[1]) and isstring(data[2]) and isnumber(data[3]) then
-					data[1]:SetNWInt(data[2], data[3])
-				end
-			end
-		end
-	end)
-
 	function Ores.Automation.ReplicateOwnership(ent, parent, addToUndo)
 		if ent ~= parent then
 			ent:SetCreator(parent:GetCreator())
@@ -421,10 +395,10 @@ if SERVER then
 		if ent.MiningInvalidPower then return end
 
 		local energyAmount = energyAccesors.Get(ent)
-		local curEnergy = poweredEnt:GetNWInt(energyAccesors.Type, 0)
-		local energyToAdd = math.min(poweredEnt:GetNWInt("Max" .. energyAccesors.Type, 100) - curEnergy, energyAmount)
+		local curEnergy = poweredEnt:GetNW2Int(energyAccesors.Type, 0)
+		local energyToAdd = math.min(poweredEnt:GetNW2Int("Max" .. energyAccesors.Type, 100) - curEnergy, energyAmount)
 
-		Ores.Automation.SetNWInt(poweredEnt, energyAccesors.Type, math.min(poweredEnt:GetNWInt("Max" .. energyAccesors.Type, 100), curEnergy + energyToAdd))
+		poweredEnt:SetNW2Int(energyAccesors.Type, math.min(poweredEnt:GetNW2Int("Max" .. energyAccesors.Type, 100), curEnergy + energyToAdd))
 		energyAccesors.Set(ent, math.max(0, energyAmount - energyToAdd))
 
 		if energyAmount - energyToAdd < 1 then
@@ -464,8 +438,8 @@ if SERVER then
 
 	function Ores.Automation.RegisterEnergyPoweredEntity(ent, energyDataSettings)
 		for _, energyData in pairs(energyDataSettings) do
-			Ores.Automation.SetNWInt(ent, energyData.Type, energyData.StartValue or 0)
-			Ores.Automation.SetNWInt(ent, "Max" .. energyData.Type, energyData.MaxValue)
+			ent:SetNW2Int(energyData.Type, energyData.StartValue or 0)
+			ent:SetNW2Int("Max" .. energyData.Type, energyData.MaxValue)
 
 			ent.AcceptedPowerTypes = ent.AcceptedPowerTypes or {}
 			ent.AcceptedPowerTypes[energyData.Type] = true
@@ -486,10 +460,10 @@ if SERVER then
 				end
 
 				if canConsumeEnergy then
-					local curEnergy = ent:GetNWInt(energyData.Type, 0)
+					local curEnergy = ent:GetNW2Int(energyData.Type, 0)
 					local newEnergy = math.max(0, curEnergy - 1)
 					if curEnergy ~= newEnergy then
-						Ores.Automation.SetNWInt(ent, newEnergy)
+						ent:SetNW2Int(newEnergy)
 					end
 				end
 			end)
