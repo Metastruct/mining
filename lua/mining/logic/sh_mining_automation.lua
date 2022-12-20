@@ -347,7 +347,7 @@ if SERVER then
 			data[1]:SetNWInt(data[2], data[3])
 		end
 
-		if nwIntQueue >= QUEUE_FLUSH_TRESHOLD then
+		if #nwIntQueue >= QUEUE_FLUSH_TRESHOLD then
 			while #nwIntQueue > 1 do
 				data = table.remove(nwIntQueue, 1)
 				if IsValid(data[1]) and isstring(data[2]) and isnumber(data[3]) then
