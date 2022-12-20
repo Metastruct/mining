@@ -17,7 +17,7 @@ local function can_work(self, time)
 	if not self:GetNWBool("IsPowered", true) then return false end
 	if time < self.NextTraceCheck then return self.TraceCheckResult end
 
-	if self:GetNWInt("Energy", 0) > 0 then
+	if self:GetNW2Int("Energy", 0) > 0 then
 		local tr = util.TraceLine({
 			start = self:GetPos() + self:GetForward() * -20,
 			endpos = self:GetPos() + self:GetForward() * -75,
@@ -154,7 +154,7 @@ if SERVER then
 		-- at less than 33% -> 10s,
 		-- less than 66% -> 8s
 		-- less than 100% -> 6s
-		local effiencyRateIncrease = (math.ceil(self:GetNWInt("Energy", 0) / Ores.Automation.BatteryCapacity) - 1) * 2
+		local effiencyRateIncrease = (math.ceil(self:GetNW2Int("Energy", 0) / Ores.Automation.BatteryCapacity) - 1) * 2
 		self.NextDrilledOre = time + (Ores.Automation.BaseOreProductionRate - effiencyRateIncrease)
 	end
 
@@ -249,7 +249,7 @@ if CLIENT then
 		surface.DrawOutlinedRect(x - GU / 2, y - GU / 2, GU, GU, 2)
 
 		surface.SetTextColor(255, 255, 255, 255)
-		local perc = (math.Round((self:GetNWInt("Energy", 0) / self:GetNWInt("MaxEnergy", Ores.Automation.BatteryCapacity * 3)) * 100)) .. "%"
+		local perc = (math.Round((self:GetNW2Int("Energy", 0) / self:GetNW2Int("MaxEnergy", Ores.Automation.BatteryCapacity * 3)) * 100)) .. "%"
 		surface.SetFont("DermaDefault")
 		local tw, th = surface.GetTextSize(perc)
 		surface.SetTextPos(x - tw / 2, y - th / 2)
@@ -260,11 +260,11 @@ if CLIENT then
 		if not self.MiningFrameInfo then
 			self.MiningFrameInfo = {
 				{ Type = "Label", Text = "DRILL", Border = true },
-				{ Type = "Data", Label = "ENERGY", Value = self:GetNWInt("Energy", 0), MaxValue = self:GetNWInt("MaxEnergy", Ores.Automation.BatteryCapacity * 3) },
+				{ Type = "Data", Label = "ENERGY", Value = self:GetNW2Int("Energy", 0), MaxValue = self:GetNW2Int("MaxEnergy", Ores.Automation.BatteryCapacity * 3) },
 			}
 		end
 
-		self.MiningFrameInfo[2].Value = self:GetNWInt("Energy", 0)
+		self.MiningFrameInfo[2].Value = self:GetNW2Int("Energy", 0)
 		return self.MiningFrameInfo
 	end
 end

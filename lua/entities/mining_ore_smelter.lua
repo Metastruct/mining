@@ -13,7 +13,7 @@ ENT.Spawnable = true
 ENT.ClassName = "mining_ore_smelter"
 
 function ENT:CanWork()
-	return self:GetNWInt("Energy", 0) > 0 and self:GetNWInt("Fuel", 0) > 0
+	return self:GetNW2Int("Energy", 0) > 0 and self:GetNW2Int("Fuel", 0) > 0
 end
 
 local MAX_COAL = 50
@@ -316,8 +316,8 @@ if CLIENT then
 		surface.DrawOutlinedRect(x - GU, y - GU / 2, GU * 2, GU, 2)
 
 		surface.SetTextColor(255, 255, 255, 255)
-		local percEnergy = (math.Round((self:GetNWInt("Energy", 0) / self:GetNWInt("MaxEnergy", Ores.Automation.BatteryCapacity)) * 100))
-		local percFuel = (math.Round((self:GetNWInt("Fuel", 0) / self:GetNWInt("MaxFuel", MAX_COAL)) * 100))
+		local percEnergy = (math.Round((self:GetNW2Int("Energy", 0) / self:GetNW2Int("MaxEnergy", Ores.Automation.BatteryCapacity)) * 100))
+		local percFuel = (math.Round((self:GetNW2Int("Fuel", 0) / self:GetNW2Int("MaxFuel", MAX_COAL)) * 100))
 		local perc = ("%d%% / %d%%"):format(percEnergy, percFuel)
 		surface.SetFont("DermaDefault")
 		local tw, th = surface.GetTextSize(perc)
@@ -328,8 +328,8 @@ if CLIENT then
 	function ENT:OnDrawEntityInfo()
 		local data = {
 			{ Type = "Label", Text = "SMELTER", Border = true },
-			{ Type = "Data", Label = "ENERGY", Value = self:GetNWInt("Energy", 0), MaxValue = self:GetNWInt("MaxEnergy", Ores.Automation.BatteryCapacity) },
-			{ Type = "Data", Label = "FUEL", Value = self:GetNWInt("Fuel", 0), MaxValue = self:GetNWInt("MaxFuel", MAX_COAL), Border = true },
+			{ Type = "Data", Label = "ENERGY", Value = self:GetNW2Int("Energy", 0), MaxValue = self:GetNW2Int("MaxEnergy", Ores.Automation.BatteryCapacity) },
+			{ Type = "Data", Label = "FUEL", Value = self:GetNW2Int("Fuel", 0), MaxValue = self:GetNW2Int("MaxFuel", MAX_COAL), Border = true },
 		}
 
 		local globalOreData = self:GetNWString("OreData", ""):Trim()
