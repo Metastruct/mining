@@ -401,6 +401,8 @@ if SERVER then
 		if energyAmount - energyToAdd < 1 then
 			SafeRemoveEntity(ent)
 			ent.MiningInvalidPower = true
+		else
+			ent:PhysWake()
 		end
 
 		poweredEnt:EmitSound(")ambient/machines/thumper_top.wav", 75, 70)
@@ -418,8 +420,14 @@ if SERVER then
 		brush:SetCollisionBounds(-BRUSH_BOUNDS, BRUSH_BOUNDS)
 
 		function brush:Touch(touchedEnt)
-			touchedEnt:PhysWake()
 			gainEnergy(ent, touchedEnt)
+		end
+
+		function brush:OnRemove()
+			timer.Simple(1, function()
+				if not IsValid(ent) then return end
+				makeBrushForPoweredEntity(ent)
+			end)
 		end
 
 		return brush
@@ -433,41 +441,25 @@ if SERVER then
 			ent.AcceptedPowerTypes = ent.AcceptedPowerTypes or {}
 			ent.AcceptedPowerTypes[energyData.Type] = true
 
-			local timerName = ("mining_automation_power_[%s]_entity_[%d]"):format(energyData.Type, ent:EntIndex())
-			local lastRan = CurTime()
 			local brush = makeBrushForPoweredEntity(ent)
-			local count = 0
-			timer.Create(timerName, 1, 0, function()
+			local timerName = ("mining_automation_power_[%s]_entity_[%d]"):format(energyData.Type, ent:EntIndex())
+			timer.Create(timerName, energyData.ConsumptionRate, 0, function()
 				if not IsValid(ent) then
 					timer.Remove(timerName)
 					SafeRemoveEntity(brush)
 					return
 				end
 
-				local timeSinceLastRan = CurTime() - lastRan
-				local consumptionTimes = math.ceil(timeSinceLastRan / energyData.ConsumptionRate)
 				local canConsumeEnergy = true
 				if isfunction(ent.CanConsumeEnergy) then
 					local ret = ent:CanConsumeEnergy(energyData.Type)
 					if ret ~= nil then canConsumeEnergy = ret end
 				end
 
-				count = count + 1
-
-				if count > energyData.ConsumptionRate and canConsumeEnergy then
-					for _ = 1, consumptionTimes do
-						local curEnergy = ent:GetNWInt(energyData.Type, 0)
-						ent:SetNWInt(energyData.Type, math.max(0, curEnergy - 1))
-					end
-
-					count = 0
+				if canConsumeEnergy then
+					local curEnergy = ent:GetNWInt(energyData.Type, 0)
+					ent:SetNWInt(energyData.Type, math.max(0, curEnergy - 1))
 				end
-
-				if not IsValid(brush) then
-					brush = makeBrushForPoweredEntity(ent)
-				end
-
-				lastRan = CurTime()
 			end)
 		end
 	end
