@@ -173,9 +173,6 @@ if SERVER then
 
 		local rarity = ent:GetRarity()
 		if Ores.Automation.GetOreRarityByName("Coal") == rarity then
-			local curFuel = self:GetNWInt("Fuel", 0)
-			self:SetNWInt("Fuel", math.min(MAX_COAL, curFuel + 1))
-
 			ent.MiningSmelterCollected = true
 			SafeRemoveEntity(ent)
 			return
