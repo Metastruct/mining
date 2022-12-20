@@ -461,10 +461,7 @@ if SERVER then
 
 				if canConsumeEnergy then
 					local curEnergy = ent:GetNW2Int(energyData.Type, 0)
-					local newEnergy = math.max(0, curEnergy - 1)
-					if curEnergy ~= newEnergy then
-						ent:SetNW2Int(newEnergy)
-					end
+					ent:SetNW2Int(energyData.Type, math.max(0, curEnergy - 1))
 				end
 			end)
 		end
