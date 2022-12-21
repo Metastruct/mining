@@ -61,7 +61,7 @@ local function createOre(pos,owner,rarity,magicFindChance,foolsDay)
 
 			if curPos:DistToSqr(targetPos) <= 10000 then
 				SafeRemoveEntity(self)
-				ms.Ores.GivePlayerOre(owner, rarity, 1)
+				ms.Ores.GivePlayerOre(owner, oreRarity, 1)
 			end
 		end
 	end
