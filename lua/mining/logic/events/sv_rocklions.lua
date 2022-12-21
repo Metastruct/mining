@@ -81,7 +81,7 @@ local function createOreDrops(rarity, pos, ent, amount)
 		end
 
 		function ore:Think()
-			if not IsValid(ent) then
+			if not IsValid(ent) or not ent:IsPlayer() then
 				SafeRemoveEntity(self)
 				return
 			end

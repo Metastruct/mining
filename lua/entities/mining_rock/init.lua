@@ -47,7 +47,7 @@ local function createOre(pos,owner,rarity,magicFindChance,foolsDay)
 
 	if not foolsTime then
 		function ore:Think()
-			if not IsValid(owner) then
+			if not IsValid(ent) or not ent:IsPlayer() then
 				SafeRemoveEntity(self)
 				return
 			end
