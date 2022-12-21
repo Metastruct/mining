@@ -491,6 +491,35 @@ if SERVER then
 		end
 	end)
 
+	hook.Add("Initialize", "mining_automation_funcs", function()
+		for class, _ in pairs(Ores.Automation.EntityClasses) do
+			local storedData = scripted_ents.GetStored(class)
+			if not storedData then continue end
+			if not storedData.t then continue end
+
+			storedData.t.SpawnFunction = function(self, ply, tr, className)
+				if not tr.Hit then return end
+
+				local ent = ents.Create(className)
+				ent:Activate()
+
+				local maxs, mins = ent:OBBMaxs(), ent:OBBMins()
+				local maxAxis = math.max(math.abs(maxs.x), math.abs(mins.x), math.abs(maxs.y), math.abs(mins.y), math.abs(maxs.z), math.abs(mins.z))
+				local spawnPos = tr.HitPos + tr.HitNormal * (maxAxis + 5)
+
+				ent:SetPos(spawnPos)
+				ent:Spawn()
+
+				local phys = ent:GetPhysicsObject()
+				if IsValid(phys) then
+					phys:EnableMotion(false)
+				end
+
+				return ent
+			end
+		end
+	end)
+
 --[[do
 		-- this might help with some of the lag
 		local ent_GetClass, ent_GetParent = FindMetaTable("Entity").GetClass, FindMetaTable("Entity").GetParent
