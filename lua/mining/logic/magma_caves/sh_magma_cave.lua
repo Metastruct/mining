@@ -317,7 +317,9 @@ if SERVER then
 		timer.Simple(5, spawnMagmaCaveEnts) -- too early otherwise
 	end)
 
-	hook.Add("PostCleanupMap", "magma_cave_valves", spawnMagmaCaveEnts)
+	hook.Add("PostCleanupMap", "magma_cave_valves", function()
+		timer.Simple(5, spawnMagmaCaveEnts) -- too early otherwise
+	end)
 
 	-- delete rocks that are not reachable
 	hook.Add("OnEntityWaterLevelChanged", "magma_cave_ore_lava_check", function(ent, oldLevel, newLevel)
