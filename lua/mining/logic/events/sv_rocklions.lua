@@ -95,6 +95,7 @@ local function createOreDrops(rarity, pos, ent, amount)
 
 			if curPos:DistToSqr(targetPos) <= 10000 then
 				SafeRemoveEntity(self)
+				Ores.GivePlayerOre(ent, rarity, 1)
 			end
 		end
 
