@@ -37,10 +37,32 @@ local function createOre(pos,owner,rarity,magicFindChance,foolsDay)
 
 	local ophys = ore:GetPhysicsObject()
 	if ophys:IsValid() then
-		local vec = VectorRand()*math.random(64,128)
+		local vec = VectorRand() * math.random(64,128)
 		vec.z = math.abs(vec.z)
 
 		ophys:AddVelocity(vec)
+		ophys:EnableCollisions(false)
+		ophys:EnableGravity(false)
+	end
+
+	if not foolsTime then
+		function ore:Think()
+			if not IsValid(owner) then
+				SafeRemoveEntity(self)
+				return
+			end
+
+			local curPos = self:GetPos()
+			local targetPos = owner:WorldSpaceCenter()
+			local phys = self:GetPhysicsObject()
+			if IsValid(phys) then
+				phys:SetVelocity((targetPos - curPos):GetNormalized() * 1000)
+			end
+
+			if curPos:DistToSqr(targetPos) <= 10000 then
+				SafeRemoveEntity(self)
+			end
+		end
 	end
 
 	if rarity != oreRarity then

@@ -76,6 +76,26 @@ local function createOreDrops(rarity, pos, ent, amount)
 			vec.z = math.abs(vec.z)
 
 			orePhys:AddVelocity(vec)
+			orePhys:EnableCollisions(false)
+			orePhys:EnableGravity(false)
+		end
+
+		function ore:Think()
+			if not IsValid(ent) then
+				SafeRemoveEntity(self)
+				return
+			end
+
+			local curPos = self:GetPos()
+			local targetPos = ent:WorldSpaceCenter()
+			local phys = self:GetPhysicsObject()
+			if IsValid(phys) then
+				phys:SetVelocity((targetPos - curPos):GetNormalized() * 1000)
+			end
+
+			if curPos:DistToSqr(targetPos) <= 10000 then
+				SafeRemoveEntity(self)
+			end
 		end
 
 		SafeRemoveEntityDelayed(ore, 60)
