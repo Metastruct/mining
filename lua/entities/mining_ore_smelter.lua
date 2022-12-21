@@ -16,8 +16,6 @@ function ENT:CanWork()
 	return self:GetNW2Int("Energy", 0) > 0 and self:GetNW2Int("Fuel", 0) > 0
 end
 
-local MAX_COAL = 50
-
 if SERVER then
 	function ENT:Initialize()
 		self:SetModel("models/hunter/blocks/cube075x2x1.mdl")
@@ -124,7 +122,7 @@ if SERVER then
 			},
 			{
 				Type = "Fuel",
-				MaxValue = MAX_COAL,
+				MaxValue = Ores.Automation.BatteryCapacity,
 				ConsumptionRate = 5, -- 1 unit every 5 seconds => MAX is 50, FUEL TANK is 150, so 1 fuel tank => 15 minutes
 			}
 		})
@@ -317,7 +315,7 @@ if CLIENT then
 
 		surface.SetTextColor(255, 255, 255, 255)
 		local percEnergy = (math.Round((self:GetNW2Int("Energy", 0) / self:GetNW2Int("MaxEnergy", Ores.Automation.BatteryCapacity)) * 100))
-		local percFuel = (math.Round((self:GetNW2Int("Fuel", 0) / self:GetNW2Int("MaxFuel", MAX_COAL)) * 100))
+		local percFuel = (math.Round((self:GetNW2Int("Fuel", 0) / self:GetNW2Int("MaxFuel", Ores.Automation.BatteryCapacity)) * 100))
 		local perc = ("%d%% / %d%%"):format(percEnergy, percFuel)
 		surface.SetFont("DermaDefault")
 		local tw, th = surface.GetTextSize(perc)
@@ -329,7 +327,7 @@ if CLIENT then
 		local data = {
 			{ Type = "Label", Text = "SMELTER", Border = true },
 			{ Type = "Data", Label = "ENERGY", Value = self:GetNW2Int("Energy", 0), MaxValue = self:GetNW2Int("MaxEnergy", Ores.Automation.BatteryCapacity) },
-			{ Type = "Data", Label = "FUEL", Value = self:GetNW2Int("Fuel", 0), MaxValue = self:GetNW2Int("MaxFuel", MAX_COAL), Border = true },
+			{ Type = "Data", Label = "FUEL", Value = self:GetNW2Int("Fuel", 0), MaxValue = self:GetNW2Int("MaxFuel", Ores.Automation.BatteryCapacity), Border = true },
 		}
 
 		local globalOreData = self:GetNWString("OreData", ""):Trim()
