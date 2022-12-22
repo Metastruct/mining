@@ -507,7 +507,7 @@ if SERVER then
 
 				local maxs, mins = ent:OBBMaxs(), ent:OBBMins()
 				local maxAxis = math.max(math.abs(maxs.x), math.abs(mins.x), math.abs(maxs.y), math.abs(mins.y), math.abs(maxs.z), math.abs(mins.z))
-				local spawnPos = tr.HitPos + tr.HitNormal * (maxAxis + 5)
+				local spawnPos = tr.HitPos + tr.HitNormal * (16 + (maxAxis * 2))
 
 				ent:SetPos(spawnPos)
 				ent:Spawn()
