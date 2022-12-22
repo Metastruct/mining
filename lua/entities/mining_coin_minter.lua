@@ -68,6 +68,23 @@ if SERVER then
 		self:SetNWInt("MintedCoins", 0)
 		self:EmitSound(")physics/surfaces/underwater_impact_bullet3.wav", 75, 70)
 	end
+
+	function ENT:SpawnFunction(ply, tr, className)
+		if not tr.Hit then return end
+
+		local spawnPos = tr.HitPos + tr.HitNormal * 30
+		local ent = ents.Create(className)
+		ent:SetPos(spawnPos)
+		ent:Activate()
+		ent:Spawn()
+
+		local phys = ent:GetPhysicsObject()
+		if IsValid(phys) then
+			phys:EnableMotion(false)
+		end
+
+		return ent
+	end
 end
 
 if CLIENT then
