@@ -44,9 +44,9 @@ if SERVER then
 		local oreData = Ores.__R[rarity]
 		if oreData then
 			local earnings = oreData.Worth * classSize * classWorth
-			if self.CPPIGetOwner and IsValid(self:CPPIGetOwner()) then
-				earnings = earnings * Ores.GetPlayerMultiplier(self:CPPIGetOwner())
-			end
+			--if self.CPPIGetOwner and IsValid(self:CPPIGetOwner()) then
+			--	earnings = earnings * Ores.GetPlayerMultiplier(self:CPPIGetOwner())
+			--end
 
 			local curCoins = self:GetNWInt("MintedCoins", 0)
 			self:SetNWInt("MintedCoins", curCoins + math.ceil(earnings))
