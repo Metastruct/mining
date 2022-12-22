@@ -17,6 +17,7 @@ Ores.Automation = {
 		mining_conveyor_splitter = true,
 		mining_ore_smelter = true,
 		mining_coin_minter = true,
+		mining_oil_extractor = true,
 	},
 	BaseOreProductionRate = 10, -- 1 per 10 seconds
 	EnergyMaterial = Material("models/props_combine/coredx70"),
@@ -44,6 +45,7 @@ Ores.Automation = {
 		mining_detonite_bomb = true,
 		mining_ore_smelter = true,
 		mining_coin_minter = true,
+		mining_oil_extractor = true,
 	},
 	GraphUnit = 40,
 	GraphHeightMargin = 75,
