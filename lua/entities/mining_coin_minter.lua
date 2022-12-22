@@ -72,7 +72,7 @@ if SERVER then
 	function ENT:SpawnFunction(ply, tr, className)
 		if not tr.Hit then return end
 
-		local spawnPos = tr.HitPos + tr.HitNormal * 30
+		local spawnPos = tr.HitPos + tr.HitNormal * 50
 		local ent = ents.Create(className)
 		ent:SetPos(spawnPos)
 		ent:Activate()
