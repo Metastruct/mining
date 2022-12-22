@@ -34,7 +34,6 @@ local function can_work(self, time)
 	return false
 end
 
-local EXTRACTION_RATE = 10 * 60 -- 1 fuel tank per 10 mins
 if SERVER then
 	ENT.NextSoundCheck = 0
 
@@ -98,7 +97,7 @@ if SERVER then
 			{
 				Type = "Energy",
 				MaxValue = Ores.Automation.BatteryCapacity * 3,
-				ConsumptionRate = 10, -- 1 unit every 10 seconds
+				ConsumptionRate = 5, -- 1 unit every 10 seconds
 			}
 		})
 	end
@@ -154,7 +153,7 @@ if SERVER then
 			end
 		end)
 
-		self:SetNWInt("NextOil", time + EXTRACTION_RATE)
+		self:SetNWInt("NextOil", time + Ores.Automation.BaseExtractionRate)
 	end
 
 	function ENT:Think()
@@ -270,12 +269,12 @@ if CLIENT then
 			self.MiningFrameInfo = {
 				{ Type = "Label", Text = "EXTRACTOR", Border = true },
 				{ Type = "Data", Label = "ENERGY", Value = self:GetNW2Int("Energy", 0), MaxValue = self:GetNW2Int("MaxEnergy", Ores.Automation.BatteryCapacity * 3), Border = true },
-				{ Type = "Data", Label = "OIL", Value = math.max(0, self:GetNWInt("NextOil", 0) - CurTime()), MaxValue = EXTRACTION_RATE },
+				{ Type = "Data", Label = "OIL", Value = math.max(0, self:GetNWInt("NextOil", 0) - CurTime()), MaxValue = Ores.Automation.OilExtractionRate },
 			}
 		end
 
 		self.MiningFrameInfo[2].Value = self:GetNW2Int("Energy", 0)
-		self.MiningFrameInfo[3].Value = EXTRACTION_RATE - math.max(0, self:GetNWInt("NextOil", 0) - CurTime())
+		self.MiningFrameInfo[3].Value = Ores.Automation.OilExtractionRate - math.max(0, self:GetNWInt("NextOil", 0) - CurTime())
 		return self.MiningFrameInfo
 	end
 end
