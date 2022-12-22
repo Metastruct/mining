@@ -147,6 +147,8 @@ if SERVER then
 		fuelTank:Spawn()
 		fuelTank:PhysWake()
 
+		SafeRemoveEntityDelayed(fuelTank, Ores.Automation.OilExtractionRate)
+
 		timer.Simple(0, function()
 			if IsValid(self) and IsValid(fuelTank) then
 				Ores.Automation.ReplicateOwnership(fuelTank, self, true)

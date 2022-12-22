@@ -55,7 +55,7 @@ Ores.Automation = {
 	HudActionColor = Color(255, 125, 0, 255),
 	IngotWorth = 2,
 	IngotSize = 5,
-	OilExtractionRate = 13, -- 1 fuel tank per 13 seconds
+	OilExtractionRate = 10 * 60, -- 1 fuel tank per 13 seconds
 }
 
 if Ores.Automation.EnergyMaterial:IsError() then
