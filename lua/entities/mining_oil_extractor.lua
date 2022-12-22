@@ -153,7 +153,7 @@ if SERVER then
 			end
 		end)
 
-		self:SetNWInt("NextOil", time + Ores.Automation.BaseExtractionRate)
+		self:SetNWInt("NextOil", time + Ores.Automation.OilExtractionRate)
 	end
 
 	function ENT:Think()
