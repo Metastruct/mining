@@ -254,6 +254,10 @@ if CLIENT then
 		local tw, th = surface.GetTextSize(perc)
 		surface.SetTextPos(x - tw / 2, y - th / 2)
 		surface.DrawText(perc)
+
+		local state = can_work(self, CurTime())
+		surface.SetDrawColor(state and 0 or 255, state and 255 or 0, 0, 255)
+		surface.DrawOutlinedRect(x - GU / 2 + 2, y - GU / 2 + 2, GU - 4, 2)
 	end
 
 	function ENT:OnDrawEntityInfo()
@@ -261,10 +265,12 @@ if CLIENT then
 			self.MiningFrameInfo = {
 				{ Type = "Label", Text = "DRILL", Border = true },
 				{ Type = "Data", Label = "ENERGY", Value = self:GetNW2Int("Energy", 0), MaxValue = self:GetNW2Int("MaxEnergy", Ores.Automation.BatteryCapacity * 3) },
+				{ Type = "State", Value = can_work(self, CurTime()) }
 			}
 		end
 
 		self.MiningFrameInfo[2].Value = self:GetNW2Int("Energy", 0)
+		self.MiningFrameInfo[3].Value = can_work(self, CurTime())
 		return self.MiningFrameInfo
 	end
 end

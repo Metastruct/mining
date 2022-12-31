@@ -175,6 +175,10 @@ if CLIENT then
 				surface.DrawText(text)
 
 				offset =  offset + th + Ores.Automation.HudPadding
+			elseif lineData.Type == "State" then
+				local state = tobool(lineData.Value) or false
+				surface.SetDrawColor(state and 0 or 255, state and 255 or 0, 0, 255)
+				surface.DrawRect(x + FRAME_WIDTH - 50, 40, 40)
 			else
 				if not isstring(lineData.Text) then continue end
 
