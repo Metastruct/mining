@@ -13,7 +13,7 @@ ENT.Spawnable = true
 ENT.ClassName = "mining_ore_smelter"
 
 function ENT:CanWork()
-	return self:GetNW2Int("Energy", 0) > 0 and self:GetNW2Int("Fuel", 0) > 0
+	return self:GetNW2Int("Energy", 0) > 0 and self:GetNW2Int("Fuel", 0) > 0 and self:GetNWBool("IsPowered", true)
 end
 
 if SERVER then
@@ -177,7 +177,6 @@ if SERVER then
 		end
 
 		if not self:CanWork() then return end
-		if not self:GetNWBool("IsPowered", true) then return end
 
 		if not self.BadOreRarities[rarity] then
 			local newValue = (self.Ores[rarity] or 0) + 1
@@ -338,10 +337,15 @@ if CLIENT then
 		local tw, th = surface.GetTextSize(perc)
 		surface.SetTextPos(x - tw / 2, y - th / 2)
 		surface.DrawText(perc)
+
+		local state = self:CanWork()
+		surface.SetDrawColor(state and 0 or 255, state and 255 or 0, 0, 255)
+		surface.DrawOutlinedRect(x - GU / 2 + 2, y - GU / 2 + 2, GU - 4, 2)
 	end
 
 	function ENT:OnDrawEntityInfo()
 		local data = {
+			{ Type = "State", Value = self:CanWork() },
 			{ Type = "Label", Text = "SMELTER", Border = true },
 			{ Type = "Data", Label = "ENERGY", Value = self:GetNW2Int("Energy", 0), MaxValue = self:GetNW2Int("MaxEnergy", Ores.Automation.BatteryCapacity) },
 			{ Type = "Data", Label = "FUEL", Value = self:GetNW2Int("Fuel", 0), MaxValue = self:GetNW2Int("MaxFuel", Ores.Automation.BatteryCapacity), Border = true },
