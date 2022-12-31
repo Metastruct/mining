@@ -178,7 +178,7 @@ if CLIENT then
 			elseif lineData.Type == "State" then
 				local state = tobool(lineData.Value) or false
 				surface.SetDrawColor(state and 0 or 255, state and 255 or 0, 0, 255)
-				surface.DrawRect(x + FRAME_WIDTH - 50, 50, 40, 40)
+				surface.DrawRect(x + FRAME_WIDTH - 25, y + 15, 15, 15)
 			else
 				if not isstring(lineData.Text) then continue end
 
