@@ -481,7 +481,7 @@ if SERVER then
 		end
 	end)
 
-	CreateConVar("sbox_maxmining_automation", "40", FCVAR_ARCHIVE, "Maximum amount of mining automation graphEntities a player can have", 0, 100)
+	CreateConVar("sbox_maxmining_automation", "40", FCVAR_ARCHIVE, "Maximum amount of mining automation entities a player can have", 0, 100)
 
 	hook.Add("PlayerSpawnedSENT", "mining_automation", function(ply, ent)
 		if Ores.Automation.EntityClasses[ent:GetClass()] then
