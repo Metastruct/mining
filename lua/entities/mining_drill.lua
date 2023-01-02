@@ -182,7 +182,7 @@ if SERVER then
 	hook.Add("PlayerSpawnSENT", "mining_drill", function(ply, className)
 		if not className then return end
 
-		if ply:CheckLimit("mining_drill") then
+		if className == "mining_drill" and not ply:CheckLimit("mining_drill") then
 			return false
 		end
 	end)
