@@ -346,7 +346,7 @@ if SERVER then
 end
 
 if CLIENT then
-	local COUNTDOWN_URL = "https://dl.dropboxusercontent.com/s/sotoqttc61w9ei2/volcano_countdown.ogg" -- change later
+	local COUNTDOWN_URL = "https://g2cf.metastruct.net/m3tamusic/volcano_countdown.ogg"
 	local WIDTH = 50
 	local HEIGHT = 600
 	local BASE_POS_X, BASE_POS_Y = ScrW() - 100, 50
