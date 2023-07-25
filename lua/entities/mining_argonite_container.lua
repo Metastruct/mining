@@ -59,8 +59,12 @@ if SERVER then
 		top.CanTool = function() return false end
 	end
 
-	function ENT:AddArgonite(amount)
+	function ENT:AddArgonite(amount,initator)
 		if self:GetNWBool("ArgoniteOverload") then return end
+		self.initators=self.initators or {}
+		if initator then
+			self.initators[initator]=(self.initators[initator] or 0)+amount
+		end
 
 		local curAmount = self:GetNWInt("ArgoniteCount", 0)
 		local newAmount = math.min(CONTAINER_CAPACITY, curAmount + amount * 10)
@@ -97,11 +101,16 @@ if SERVER then
 					end
 				else
 					ms.core_effect:SetSize(75) -- bik
-
+					table.Empty(self.initators)
 					-- otherwise trigger meltdown
 					if mgn and mgn.IsOverloading and not mgn.IsOverloading() and mgn.InitiateOverload then
-						print("@PYTHON1320, IF YOU SEE THIS THE META CORE HAS BEEN OVERLOADED! <3")
-						mgn.InitiateOverload()
+						MsgC(Color(255,100,100),"Core overloaded due to excessive argonite mining caused byproducts. Initator(s):")
+						PrintTable(self.initators)
+						--TODO: Message players also
+						if IsValid(initator) then
+							initator:EmitSound('npc/overwatch/cityvoice/fcitadel_3minutestosingularity.wav')
+						end
+						mgn.InitiateOverload() -- TODO: initator
 					end
 				end
 			end

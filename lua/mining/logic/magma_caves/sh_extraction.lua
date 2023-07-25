@@ -363,7 +363,7 @@ if SERVER then
 			local argonite_amount = ms.Ores.GetPlayerOre(ply, ARGONITE_RARITY)
 			local container = ents.FindByClass("mining_argonite_container")[1]
 			if IsValid(container) and argonite_amount > 0 then
-				container:AddArgonite(argonite_amount)
+				container:AddArgonite(argonite_amount,ply)
 			end
 
 			for rarity, _ in pairs(RARITY_DATA) do
