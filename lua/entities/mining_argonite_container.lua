@@ -101,11 +101,12 @@ if SERVER then
 					end
 				else
 					ms.core_effect:SetSize(75) -- bik
-					table.Empty(self.initators)
 					-- otherwise trigger meltdown
 					if mgn and mgn.IsOverloading and not mgn.IsOverloading() and mgn.InitiateOverload then
 						MsgC(Color(255,100,100),"Core overloaded due to excessive argonite mining caused byproducts. Initator(s):")
 						PrintTable(self.initators)
+						hook.Run("ArgoniteOverload",self.initators,self,initator)
+						table.Empty(self.initators)
 						--TODO: Message players also
 						if IsValid(initator) then
 							initator:EmitSound('npc/overwatch/cityvoice/fcitadel_3minutestosingularity.wav')
