@@ -472,6 +472,16 @@ if SERVER then
 	end
 
 	function Ores.Automation.RegisterEnergyPoweredEntity(ent, energyDataSettings)
+		if _G.WireLib then
+			local wireOutputs = {}
+			for _, energyData in pairs(energyDataSettings) do
+				table.insert(wireOutputs, ("%s (Outputs the current %s level) [NORMAL]"):format(energyData.Type, energyData.Type:lower())) -- current level
+				table.insert(wireOutputs, ("Max%s (Outputs the max level of %s) [NORMAL]"):format(energyData.Type, energyData.Type:lower())) -- max level
+			end
+
+			_G.WireLib.CreateOutputs(ent, wireOutputs)
+		end
+
 		for _, energyData in pairs(energyDataSettings) do
 			ent:SetNW2Int(energyData.Type, energyData.StartValue or 0)
 			ent:SetNW2Int("Max" .. energyData.Type, energyData.MaxValue)
@@ -480,11 +490,6 @@ if SERVER then
 			ent.AcceptedPowerTypes[energyData.Type] = true
 
 			if _G.WireLib then
-				_G.WireLib.CreateOutputs(ent, {
-					("%s (Outputs the current %s level) [NORMAL]"):format(energyData.Type, energyData.Type:lower()), -- current level
-					("Max%s (Outputs the max level of %s) [NORMAL]"):format(energyData.Type, energyData.Type:lower()), -- max level
-				})
-
 				_G.WireLib.TriggerOutput(ent, energyData.Type, energyData.StartValue)
 				_G.WireLib.TriggerOutput(ent, "Max" .. energyData.Type, energyData.MaxValue)
 			end
