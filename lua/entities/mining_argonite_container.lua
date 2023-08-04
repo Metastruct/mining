@@ -73,7 +73,7 @@ if SERVER then
 			})
 
 			_G.WireLib.TriggerOutput(self, "Amount", 0)
-			_G.WireLib.TriggerOutput(self, "MaxCapacity", Ores.Automation.BatteryCapacity)
+			_G.WireLib.TriggerOutput(self, "MaxCapacity", CONTAINER_CAPACITY)
 		end
 	end
 
