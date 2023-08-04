@@ -14,9 +14,8 @@ ENT.ClassName = "mining_argonite_battery"
 
 if SERVER then
 	function ENT:Initialize()
-		self:SetModel("models/hunter/blocks/cube075x075x075.mdl")
+		self:SetModel("models/hunter/blocks/cube05x05x05.mdl")
 		self:SetMaterial("phoenix_storms/glass")
-		self:SetModelScale(0.5)
 		self:SetMoveType(MOVETYPE_VPHYSICS)
 		self:PhysicsInit(SOLID_VPHYSICS)
 		self:SetSolid(SOLID_VPHYSICS)
