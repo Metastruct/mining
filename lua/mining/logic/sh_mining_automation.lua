@@ -387,6 +387,34 @@ if SERVER then
 
 			child.DoNotDuplicate = true -- flag for advdupe2 and dupe
 		end
+
+		-- this ensures duped mining equipment will be spawned back with wirelinks
+		local baseWireEnt = scripted_ents.Get("baseWireEntity")
+		if baseWireEnt and _G.WireLib then
+			local wireFunctions = {
+				"OnRemove",
+				"OnRestore",
+				"BuildDupeInfo",
+				"ApplyDupeInfo",
+				"PreEntityCopy",
+				"OnEntityCopyTableFinish",
+				"OnDuplicated",
+				"PostEntityPaste",
+			}
+
+			for _, functionName in ipairs(wireFunctions) do
+				local oldFunction = ent[functionName]
+				local wireFunction = baseWireEnt[functionName]
+				if oldFunction then
+					ent[functionName] = function(...)
+						oldFunction(...)
+						wireFunction(...)
+					end
+				else
+					ent[functionName] = wireFunction
+				end
+			end
+		end
 	end
 
 	local function gainEnergy(poweredEnt, ent)
@@ -451,6 +479,16 @@ if SERVER then
 			ent.AcceptedPowerTypes = ent.AcceptedPowerTypes or {}
 			ent.AcceptedPowerTypes[energyData.Type] = true
 
+			if _G.WireLib then
+				_G.WireLib.CreateOutputs(ent, {
+					("%s (Outputs the current %s level) [NORMAL]"):format(energyData.Type, energyData.Type:lower()), -- current level
+					("Max%s (Outputs the max level of %s) [NORMAL]"):format(energyData.Type, energyData.Type:lower()), -- max level
+				})
+
+				_G.WireLib.TriggerOutput(ent, energyData.Type, energyData.StartValue)
+				_G.WireLib.TriggerOutput(ent, "Max" .. energyData.Type, energyData.MaxValue)
+			end
+
 			local brush = makeBrushForPoweredEntity(ent)
 			local timerName = ("mining_automation_power_[%s]_entity_[%d]"):format(energyData.Type, ent:EntIndex())
 			timer.Create(timerName, energyData.ConsumptionRate, 0, function()
@@ -468,7 +506,12 @@ if SERVER then
 
 				if canConsumeEnergy then
 					local curEnergy = ent:GetNW2Int(energyData.Type, 0)
-					ent:SetNW2Int(energyData.Type, math.max(0, curEnergy - 1))
+					local newEnergyValue = math.max(0, curEnergy - 1)
+					ent:SetNW2Int(energyData.Type, newEnergyValue)
+
+					if _G.WireLib then
+						_G.WireLib.TriggerOutput(ent, energyData.Type, newEnergyValue)
+					end
 				end
 			end)
 		end
