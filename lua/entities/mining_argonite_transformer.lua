@@ -225,7 +225,7 @@ if SERVER then
 
 	function ENT:Think()
 		if not self.CPPIGetOwner then return end
-		if not t:GetNWBool("IsPowered", true) then continue end
+		if not self:GetNWBool("IsPowered", true) then return end
 
 		local owner = self:CPPIGetOwner()
 		if not IsValid(owner) then return end
