@@ -13,8 +13,13 @@ ENT.RenderGroup = RENDERGROUP_OPAQUE
 ENT.Spawnable = false
 ENT.AdminOnly = true
 ENT.CanConstruct = function() return false end
-ENT.CanTool = function() return false end
 ENT.ms_notouch = true
+
+function ENT:CanTool(_, _, toolName, _, _)
+	if toolName == "wire_adv" then return true end -- allows wiring to outputs
+
+	return false
+end
 
 if SERVER then
 	util.PrecacheModel("models/hunter/tubes/tube1x1x4.mdl")
