@@ -49,7 +49,7 @@ if SERVER then
 				"MaxCapacity (Outputs the maximum argonite capacity) [NORMAL]"
 			})
 
-			_G.WireLib.TriggerOutput(self, "Amount", energyData.StartValue)
+			_G.WireLib.TriggerOutput(self, "Amount", 0)
 			_G.WireLib.TriggerOutput(self, "MaxCapacity", Ores.Automation.BatteryCapacity)
 		end
 	end
