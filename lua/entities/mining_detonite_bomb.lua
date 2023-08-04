@@ -21,6 +21,34 @@ if SERVER then
 		self:PhysWake()
 		self:SetUseType(SIMPLE_USE)
 		self:SetTrigger(true)
+
+		if _G.WireLib then
+			_G.WireLib.CreateInputs(self, {
+				"Detonate",
+			}, {
+				"Detonates the bomb if its ready",
+			})
+
+			_G.WireLib.CreateOutputs(self, {
+				"Amount (Outputs the current amount of detonite filled in) [NORMAL]",
+				"MaxCapacity (Outputs the maximum detonite capacity) [NORMAL]"
+			})
+
+			_G.WireLib.TriggerOutput(self, "Amount", 0)
+			_G.WireLib.TriggerOutput(self, "MaxCapacity", Ores.Automation.BombCapacity)
+		end
+
+		Ores.Automation.PrepareForDuplication(self)
+	end
+
+	function ENT:TriggerInput(port, state)
+		if not _G.WireLib then return end
+		if not isnumber(state) then return end
+
+		local shouldDetonate = tobool(state)
+		if port == "Detonate" and shouldDetonate then
+			self:TriggerDetonation(self.CPPIGetOwner and self:CPPIGetOwner())
+		end
 	end
 
 	function ENT:StartTouch(ent)
@@ -33,6 +61,10 @@ if SERVER then
 			ent:Remove()
 			ent.MiningBombRemoved = true
 			self:SetNWInt("DetoniteAmount", math.min(Ores.Automation.BombCapacity, curAmount + 1))
+
+			if _G.WireLib then
+				_G.WireLib.TriggerOutput(self, "Amount", curAmount + 1)
+			end
 		end
 	end
 
@@ -63,23 +95,11 @@ if SERVER then
 		SafeRemoveEntity(self)
 	end
 
-	function ENT:Use(activator)
-		if not activator:IsPlayer() then return end
-		if self.CPPIGetOwner and self:CPPIGetOwner() ~= activator then return end
-		if not activator:IsInZone("cave") then return end -- lets not annoy people in build
-
+	function ENT:TriggerDetonation(activator)
 		local curAmount = self:GetNWInt("DetoniteAmount", 0)
-		if curAmount < Ores.Automation.BombCapacity then
-			local detoniteRarity = Ores.Automation.GetOreRarityByName("Detonite")
-			local plyAmount = Ores.GetPlayerOre(activator, detoniteRarity)
-			if plyAmount > 0 then
-				local amountToAdd = math.min(Ores.Automation.BombCapacity - curAmount, plyAmount)
-				Ores.TakePlayerOre(activator, detoniteRarity, amountToAdd)
-				self:SetNWInt("DetoniteAmount", curAmount + amountToAdd)
-			end
-
-			return
-		end
+		if curAmount < Ores.Automation.BombCapacity then return end
+		if self:GetNWBool("Detonating", false) then return end
+		if IsValid(activator) and not activator:IsInZone("cave") then return end -- lets not annoy people in build
 
 		self:SetNWBool("Detonating", true)
 
@@ -98,6 +118,30 @@ if SERVER then
 				}, activator)
 			end
 		end)
+	end
+
+	function ENT:Use(activator)
+		if not activator:IsPlayer() then return end
+		if self.CPPIGetOwner and self:CPPIGetOwner() ~= activator then return end
+
+		local curAmount = self:GetNWInt("DetoniteAmount", 0)
+		if curAmount < Ores.Automation.BombCapacity then
+			local detoniteRarity = Ores.Automation.GetOreRarityByName("Detonite")
+			local plyAmount = Ores.GetPlayerOre(activator, detoniteRarity)
+			if plyAmount > 0 then
+				local amountToAdd = math.min(Ores.Automation.BombCapacity - curAmount, plyAmount)
+				Ores.TakePlayerOre(activator, detoniteRarity, amountToAdd)
+				self:SetNWInt("DetoniteAmount", curAmount + amountToAdd)
+
+				if _G.WireLib then
+					_G.WireLib.TriggerOutput(self, "Amount", curAmount + amountToAdd)
+				end
+			end
+
+			return
+		end
+
+		self:TriggerDetonation(activator)
 	end
 
 	function ENT:GravGunPickupAllowed(ply)

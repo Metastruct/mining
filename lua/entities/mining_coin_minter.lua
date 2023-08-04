@@ -30,6 +30,10 @@ if SERVER then
 
 			Ores.Automation.ReplicateOwnership(self, self)
 		end)
+
+		if _G.WireLib then
+			_G.WireLib.CreateOutputs(self, {"Amount (Outputs the current amount of coins minted) [NORMAL]" })
+		end
 	end
 
 	function ENT:Touch(ent)
@@ -49,7 +53,12 @@ if SERVER then
 			--end
 
 			local curCoins = self:GetNWInt("MintedCoins", 0)
-			self:SetNWInt("MintedCoins", curCoins + math.ceil(earnings))
+			local newAmount = curCoins + math.ceil(earnings)
+			self:SetNWInt("MintedCoins", newAmount)
+
+			if _G.WireLib then
+				_G.WireLib.TriggerOutput(self, "Amount", newAmount)
+			end
 		end
 
 		SafeRemoveEntity(ent)

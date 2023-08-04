@@ -98,6 +98,7 @@ if SERVER then
 		self:PhysWake()
 		self:SetColor(color)
 		self.BatteriesToProduce = 0
+		self:SetNWBool("IsPowered", true)
 
 		self.Frame = ents.Create("prop_physics")
 		self.Frame:SetModel("models/props_phx/construct/metal_wire1x1x1.mdl")
@@ -144,13 +145,37 @@ if SERVER then
 			end
 		end)
 
+		if _G.WireLib then
+			_G.WireLib.CreateInputs(self, {
+				"Active",
+			}, {
+				"Whether the drill is active or not",
+			})
+
+			_G.WireLib.CreateOutputs(self, {
+				"Amount (Outputs the current amount of argonite filled in) [NORMAL]",
+				"MaxCapacity (Outputs the maximum argonite capacity) [NORMAL]"
+			})
+
+			_G.WireLib.TriggerOutput(self, "Amount", 0)
+			_G.WireLib.TriggerOutput(self, "MaxCapacity", Ores.Automation.BatteryCapacity)
+		end
+
+		Ores.Automation.PrepareForDuplication(self)
 		timer.Simple(0, function()
 			if not IsValid(self) then return end
 
 			Ores.Automation.ReplicateOwnership(self, self)
 		end)
+	end
 
-		Ores.Automation.PrepareForDuplication(self)
+	function ENT:TriggerInput(port, state)
+		if not _G.WireLib then return end
+		if not isnumber(state) then return end
+
+		if port == "Active" then
+			self:SetNWBool("IsPowered", tobool(state))
+		end
 	end
 
 	function ENT:AddArgonite(amount)
@@ -164,8 +189,16 @@ if SERVER then
 
 			self:SetNWInt("ArgoniteCount", remaining)
 			self.BatteriesToProduce = self.BatteriesToProduce + batteriesToProduce
+
+			if _G.WireLib then
+				_G.WireLib.TriggerOutput(self, "Amount", remaining)
+			end
 		else
 			self:SetNWInt("ArgoniteCount", newAmount)
+
+			if _G.WireLib then
+				_G.WireLib.TriggerOutput(self, "Amount", newAmount)
+			end
 		end
 	end
 
@@ -174,6 +207,7 @@ if SERVER then
 		local transformers = {}
 		for _, t in ipairs(ents.FindByClass("mining_argonite_transformer")) do
 			if t:CPPIGetOwner() ~= ply then continue end
+			if not t:GetNWBool("IsPowered", true) then continue end
 
 			table.insert(transformers, t)
 		end
@@ -191,6 +225,7 @@ if SERVER then
 
 	function ENT:Think()
 		if not self.CPPIGetOwner then return end
+		if not t:GetNWBool("IsPowered", true) then continue end
 
 		local owner = self:CPPIGetOwner()
 		if not IsValid(owner) then return end
@@ -212,6 +247,10 @@ if SERVER then
 		battery:SetPos(self:WorldSpaceCenter() + self:GetForward() * 50)
 		battery:SetNWInt("ArgoniteCount", Ores.Automation.BatteryCapacity)
 		battery:Spawn()
+
+		if _G.WireLib then
+			_G.WireLib.TriggerOutput(battery, "Amount", Ores.Automation.BatteryCapacity)
+		end
 
 		timer.Simple(0, function()
 			if IsValid(self) and IsValid(battery) then
@@ -253,6 +292,7 @@ if CLIENT then
 			self.MiningFrameInfo = {
 				{ Type = "Label", Text = "TRANSFORMER", Border = true },
 				{ Type = "Data", Label = "BATTERY", Value = self:GetNWInt("ArgoniteCount", 0), MaxValue = ms.Ores.Automation.BatteryCapacity },
+				{ Type = "State", Value = self:GetNWBool("IsPowered", true) }
 			}
 		end
 

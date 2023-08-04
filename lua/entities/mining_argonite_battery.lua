@@ -42,6 +42,16 @@ if SERVER then
 			if not IsValid(self) then return end
 			Ores.Automation.ReplicateOwnership(self, self)
 		end)
+
+		if _G.WireLib then
+			_G.WireLib.CreateOutputs(self, {
+				"Amount (Outputs the current amount of argonite filled in) [NORMAL]",
+				"MaxCapacity (Outputs the maximum argonite capacity) [NORMAL]"
+			})
+
+			_G.WireLib.TriggerOutput(self, "Amount", energyData.StartValue)
+			_G.WireLib.TriggerOutput(self, "MaxCapacity", Ores.Automation.BatteryCapacity)
+		end
 	end
 
 	function ENT:Use(activator, caller)
@@ -57,6 +67,10 @@ if SERVER then
 
 		local newAmount = math.min(Ores.Automation.BatteryCapacity, curAmount + amountToAdd)
 		self:SetNWInt("ArgoniteCount", newAmount)
+
+		if _G.WireLib then
+			_G.WireLib.TriggerOutput(self, "Amount", newAmount)
+		end
 
 		Ores.TakePlayerOre(activator, argoniteRarity, amountToAdd)
 	end

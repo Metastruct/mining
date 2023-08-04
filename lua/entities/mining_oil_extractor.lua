@@ -147,6 +147,10 @@ if SERVER then
 		fuelTank:Spawn()
 		fuelTank:PhysWake()
 
+		if _G.WireLib then
+			_G.WireLib.TriggerOutput(fuelTank, "Amount", 150)
+		end
+
 		SafeRemoveEntityDelayed(fuelTank, Ores.Automation.OilExtractionRate)
 
 		timer.Simple(0, function()

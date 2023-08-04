@@ -33,6 +33,8 @@ if SERVER then
 
 			self.BadOreRarities[rarity] = true
 		end
+
+		Ores.Automation.PrepareForDuplication(self)
 	end
 
 	function ENT:UpdateNetworkOreData()

@@ -57,18 +57,33 @@ if SERVER then
 		top.ms_notouch = true
 		top.CanConstruct = function() return false end
 		top.CanTool = function() return false end
+
+		-- why not have wire outputs if people want to plug their contraptions into the container
+		if _G.WireLib then
+			_G.WireLib.CreateOutputs(self, {
+				"Amount (Outputs the current amount of argonite filled in) [NORMAL]",
+				"MaxCapacity (Outputs the maximum argonite capacity) [NORMAL]"
+			})
+
+			_G.WireLib.TriggerOutput(self, "Amount", energyData.StartValue)
+			_G.WireLib.TriggerOutput(self, "MaxCapacity", Ores.Automation.BatteryCapacity)
+		end
 	end
 
 	function ENT:AddArgonite(amount,initator)
 		if self:GetNWBool("ArgoniteOverload") then return end
-		self.initators=self.initators or {}
+		self.initators = self.initators or {}
 		if initator then
-			self.initators[initator]=(self.initators[initator] or 0)+amount
+			self.initators[initator] = (self.initators[initator] or 0) + amount
 		end
 
 		local curAmount = self:GetNWInt("ArgoniteCount", 0)
 		local newAmount = math.min(CONTAINER_CAPACITY, curAmount + amount * 10)
 		self:SetNWInt("ArgoniteCount", newAmount)
+
+		if _G.WireLib then
+			_G.WireLib.TriggerOutput(self, "Amount", newAmount)
+		end
 
 		if newAmount >= CONTAINER_CAPACITY then
 			-- proper timing for the meltdown
@@ -83,6 +98,10 @@ if SERVER then
 
 				newAmount = math.max(0, newAmount - 2.15)
 				self:SetNWInt("ArgoniteCount", newAmount)
+
+				if _G.WireLib then
+					_G.WireLib.TriggerOutput(self, "Amount", newAmount)
+				end
 
 				if newAmount <= 0 then
 					self:SetNWBool("ArgoniteOverload", false)
@@ -109,7 +128,7 @@ if SERVER then
 						table.Empty(self.initators)
 						--TODO: Message players also
 						if IsValid(initator) then
-							initator:EmitSound('npc/overwatch/cityvoice/fcitadel_3minutestosingularity.wav')
+							initator:EmitSound("npc/overwatch/cityvoice/fcitadel_3minutestosingularity.wav")
 						end
 						mgn.InitiateOverload() -- TODO: initator
 					end
