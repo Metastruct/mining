@@ -23,8 +23,10 @@ if SERVER then
 		self:SetModel("models/hunter/tubes/tube1x1x4.mdl")
 		self:SetMaterial("phoenix_storms/glass")
 		self:SetMoveType(MOVETYPE_NONE)
-		self:PhysicsInit(SOLID_VPHYSICS)
-		self:SetSolid(SOLID_VPHYSICS)
+		self:PhysicsInit(SOLID_OBB)
+		self:SetSolid(SOLID_OBB)
+		self:PhysWake()
+		self:Activate()
 
 		local phys = self:GetPhysicsObject()
 		if IsValid(phys) then

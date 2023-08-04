@@ -42,10 +42,10 @@ if SERVER then
 		self:SetMaterial("phoenix_storms/future_vents")
 		self:SetModelScale(0.4)
 		self:SetMoveType(MOVETYPE_VPHYSICS)
-		self:PhysicsInit(SOLID_VPHYSICS)
-		self:SetSolid(SOLID_VPHYSICS)
-		self:Activate()
+		self:PhysicsInit(SOLID_OBB)
+		self:SetSolid(SOLID_OBB)
 		self:PhysWake()
+		self:Activate()
 		self.NextSoundCheck = 0
 		self.NextTraceCheck = 0
 		self:SetNWBool("IsPowered", true)
