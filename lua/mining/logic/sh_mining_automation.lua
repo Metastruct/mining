@@ -433,9 +433,6 @@ if SERVER then
 					ent[functionName] = wireFunction
 				end
 			end
-
-			-- required for re-duping
-			duplicator.RegisterEntityClass(ent:GetClass(), _G.WireLib.MakeWireEnt, "Data")
 		end
 	end
 
@@ -565,6 +562,34 @@ if SERVER then
 
 		if Ores.Automation.EntityClasses[className] and not ply:CheckLimit("mining_automation") then
 			return false
+		end
+	end)
+
+	hook.Add("InitPostEntity", "mining_automation", function()
+		if not _G.WireLib then return end
+
+		-- required for re-duping, ps: I hate wiremod
+		for className, _ in pairs(Ores.Automation.EntityClasses) do
+			duplicator.RegisterEntityClass(className, function(ply, data, ...)
+				local dupedEnt = ents.Create(data.Class)
+				if not IsValid(dupedEnt) then return false end
+
+				duplicator.DoGeneric(dupedEnt, data)
+				dupedEnt:Spawn()
+				dupedEnt:Activate()
+				duplicator.DoGenericPhysics(dupedEnt, ply, data) -- Is deprecated, but is the only way to access duplicator.EntityPhysics.Load (its local)
+
+				dupedEnt:SetPlayer(ply)
+				if dupedEnt.Setup then dupedEnt:Setup(...) end
+
+				local phys = dupedEnt:GetPhysicsObject()
+				if IsValid(phys) then
+					if data.frozen then phys:EnableMotion(false) end
+					if data.nocollide then phys:EnableCollisions(false) end
+				end
+
+				return dupedEnt
+			end, "Data")
 		end
 	end)
 end
