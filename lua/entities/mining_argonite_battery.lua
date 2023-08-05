@@ -43,7 +43,8 @@ if SERVER then
 
 			local phys = self:GetPhysicsObject()
 			if IsValid(phys) then
-				phys:SetBuoyancyRatio(2)
+				phys:SetBuoyancyRatio(10)
+				phys:Wake()
 			end
 		end)
 
