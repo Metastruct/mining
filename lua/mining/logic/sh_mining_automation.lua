@@ -398,7 +398,7 @@ if SERVER then
 			ent.LINK_STATUS_DEACTIVATED = 2 -- alias
 			ent.LINK_STATUS_ACTIVE = 3
 			ent.LINK_STATUS_ACTIVATED = 3 -- alias
-			ent.WireDebugName = ent.WireDebugName or (ent.PrintName and ent.PrintName:sub(6)) or ent:GetClass():gsub("gmod_wire", "")
+			ent.WireDebugName = ent:GetClass()
 
 			local wireFunctions = {
 				"OnRemove",
@@ -410,13 +410,15 @@ if SERVER then
 				"OnDuplicated",
 				"PostEntityPaste",
 				"ColorByLinkStatus",
+				"SetPlayer", -- required for re-duping
 			}
 
 			local baseEnt = scripted_ents.Get("base_entity")
 			for _, functionName in ipairs(wireFunctions) do
-				local oldFunction = ent[functionName]
 				local wireFunction = baseWireEnt[functionName]
+				if not type(wireFunction) then continue end
 
+				local oldFunction = ent[functionName]
 				local hasActualFunction = oldFunction and oldFunction ~= wireFunction
 				if baseEnt then
 					hasActualFunction = hasActualFunction and oldFunction ~= baseEnt[functionName]
@@ -431,6 +433,9 @@ if SERVER then
 					ent[functionName] = wireFunction
 				end
 			end
+
+			-- required for re-duping
+			duplicator.RegisterEntityClass(ent:GetClass(), _G.WireLib.MakeWireEnt, "Data")
 		end
 	end
 
