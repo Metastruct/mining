@@ -98,8 +98,6 @@ if SERVER then
 			self.Inputs = _G.WireLib.CreateInputs(self, {
 				"Active (If non-zero, activate the smelter.)"
 			})
-
-			self:SetOverlayText("Smelter")
 		end
 
 		self.NextSoundCheck = 0
