@@ -137,7 +137,9 @@ if SERVER then
 				return
 			end
 
-			doZapEffect(self:WorldSpaceCenter(), IsValid(self.Core) and self.Core or self)
+			if self:GetNWBool("IsPowered", true) then
+				doZapEffect(self:WorldSpaceCenter(), IsValid(self.Core) and self.Core or self)
+			end
 
 			if self.BatteriesToProduce > 0 then
 				self:CreateBattery()
