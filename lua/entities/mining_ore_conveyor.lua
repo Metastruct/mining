@@ -55,13 +55,10 @@ if SERVER then
 		end)
 
 		if _G.WireLib then
-			_G.WireLib.CreateInputs(self, {
-				"Active",
-				"Direction"
-			}, {
-				"Whether the conveyor is active or not",
-				"The direction the conveyor should transport things to",
-			})
+			self.Inputs = Wirelib.CreateInputs(self, {
+					"Active",
+					"Direction (If this is non-zero, reverse the direction.)"
+				}
 		end
 	end
 
@@ -223,3 +220,11 @@ if CLIENT then
 		end
 	end
 end
+
+if _G.WireLib then
+	duplicator.RegisterEntityClass("gmod_wire_pod", WireLib.MakeWireEnt, "Data")
+else
+	duplicator.RegisterEntityClass("gmod_wire_pod", duplicator.GenericDuplicatorFunction, "Data")	
+end
+	
+		
