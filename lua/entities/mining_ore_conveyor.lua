@@ -59,6 +59,7 @@ if SERVER then
 					"Active",
 					"Direction (If this is non-zero, reverse the direction.)"
 				}
+			self:SetOverlayText("Ore Conveyor")
 		end
 	end
 
