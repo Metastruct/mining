@@ -146,11 +146,7 @@ if SERVER then
 		end)
 
 		if _G.WireLib then
-			_G.WireLib.CreateInputs(self, {
-				"Active",
-			}, {
-				"Whether the drill is active or not",
-			})
+			self.Inputs = _G.WireLib.CreateInputs(self, {"Active (If this is non-zero, activate the drill)"})
 
 			_G.WireLib.CreateOutputs(self, {
 				"Amount (Outputs the current amount of argonite filled in) [NORMAL]",

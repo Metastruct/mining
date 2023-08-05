@@ -75,9 +75,9 @@ if SERVER then
 				ConsumptionRate = 10, -- 1 unit every 10 seconds
 			}
 		})
-		
+
 		if _G.WireLib then
-			self.Inputs = WireLib.CreateInputs(self, {"Active (If this is non-zero, activate the drill)"})
+			self.Inputs = _G.WireLib.CreateInputs(self, {"Active (If this is non-zero, activate the drill)"})
 			self:SetOverlayText("Mining Drill")
 		end
 	end

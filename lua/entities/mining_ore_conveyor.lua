@@ -56,9 +56,10 @@ if SERVER then
 
 		if _G.WireLib then
 			self.Inputs = Wirelib.CreateInputs(self, {
-					"Active",
-					"Direction (If this is non-zero, reverse the direction.)"
-				}
+				"Active",
+				"Direction (If this is non-zero, reverse the direction.)"
+			})
+
 			self:SetOverlayText("Ore Conveyor")
 		end
 	end
@@ -223,9 +224,9 @@ if CLIENT then
 end
 
 if _G.WireLib then
-	duplicator.RegisterEntityClass("mining_ore_conveyor", WireLib.MakeWireEnt, "Data")
+	duplicator.RegisterEntityClass("mining_ore_conveyor", _G.WireLib.MakeWireEnt, "Data")
 else
-	duplicator.RegisterEntityClass("mining_ore_conveyor", duplicator.GenericDuplicatorFunction, "Data")	
+	duplicator.RegisterEntityClass("mining_ore_conveyor", duplicator.GenericDuplicatorFunction, "Data")
 end
-	
-		
+
+
