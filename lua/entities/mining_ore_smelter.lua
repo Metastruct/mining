@@ -95,9 +95,10 @@ if SERVER then
 		end)
 
 		if _G.WireLib then
-			self.Inputs = WireLib.CreateInputs(self, {
-					"Active (If non-zero, activate the smelter.)"
-				}
+			self.Inputs = _G.WireLib.CreateInputs(self, {
+				"Active (If non-zero, activate the smelter.)"
+			})
+
 			self:SetOverlayText("Smelter")
 		end
 
@@ -362,7 +363,7 @@ if CLIENT then
 end
 
 if _G.WireLib then
-	duplicator.RegisterEntityClass("mining_ore_smelter", WireLib.MakeWireEnt, "Data")
+	duplicator.RegisterEntityClass("mining_ore_smelter", _G.WireLib.MakeWireEnt, "Data")
 else
 	duplicator.RegisterEntityClass("mining_ore_smelter", duplicator.GenericDuplicatorFunction, "Data")
 end
