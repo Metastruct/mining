@@ -389,7 +389,7 @@ if SERVER then
 		end
 
 		-- this ensures duped mining equipment will be spawned back with wirelinks
-		local baseWireEnt = scripted_ents.Get("baseWireEntity")
+		local baseWireEnt = scripted_ents.Get("base_wire_entity")
 		if baseWireEnt and _G.WireLib then
 			-- Helper function for entities that can be linked
 			ent.LINK_STATUS_UNLINKED = 1
