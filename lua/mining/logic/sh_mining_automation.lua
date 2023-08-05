@@ -391,6 +391,15 @@ if SERVER then
 		-- this ensures duped mining equipment will be spawned back with wirelinks
 		local baseWireEnt = scripted_ents.Get("baseWireEntity")
 		if baseWireEnt and _G.WireLib then
+			-- Helper function for entities that can be linked
+			ent.LINK_STATUS_UNLINKED = 1
+			ent.LINK_STATUS_LINKED = 2
+			ent.LINK_STATUS_INACTIVE = 2 -- alias
+			ent.LINK_STATUS_DEACTIVATED = 2 -- alias
+			ent.LINK_STATUS_ACTIVE = 3
+			ent.LINK_STATUS_ACTIVATED = 3 -- alias
+			ent.WireDebugName = ent.WireDebugName or (ent.PrintName and ent.PrintName:sub(6)) or ent:GetClass():gsub("gmod_wire", "")
+
 			local wireFunctions = {
 				"OnRemove",
 				"OnRestore",
@@ -400,6 +409,7 @@ if SERVER then
 				"OnEntityCopyTableFinish",
 				"OnDuplicated",
 				"PostEntityPaste",
+				"ColorByLinkStatus",
 			}
 
 			for _, functionName in ipairs(wireFunctions) do
@@ -408,7 +418,7 @@ if SERVER then
 				if oldFunction then
 					ent[functionName] = function(...)
 						oldFunction(...)
-						wireFunction(...)
+						return wireFunction(...)
 					end
 				else
 					ent[functionName] = wireFunction
