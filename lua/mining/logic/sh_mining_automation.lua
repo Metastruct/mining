@@ -412,10 +412,17 @@ if SERVER then
 				"ColorByLinkStatus",
 			}
 
+			local baseEnt = scripted_ents.Get("base_entity")
 			for _, functionName in ipairs(wireFunctions) do
 				local oldFunction = ent[functionName]
 				local wireFunction = baseWireEnt[functionName]
-				if oldFunction and oldFunction ~= wireFunction then
+
+				local hasActualFunction = oldFunction and oldFunction ~= wireFunction
+				if baseEnt then
+					hasActualFunction = hasActualFunction and oldFunction ~= baseEnt[functionName]
+				end
+
+				if hasActualFunction then
 					ent[functionName] = function(...)
 						oldFunction(...)
 						return wireFunction(...)
