@@ -222,9 +222,9 @@ if CLIENT then
 end
 
 if _G.WireLib then
-	duplicator.RegisterEntityClass("gmod_wire_pod", WireLib.MakeWireEnt, "Data")
+	duplicator.RegisterEntityClass("mining_ore_conveyor", WireLib.MakeWireEnt, "Data")
 else
-	duplicator.RegisterEntityClass("gmod_wire_pod", duplicator.GenericDuplicatorFunction, "Data")	
+	duplicator.RegisterEntityClass("mining_ore_conveyor", duplicator.GenericDuplicatorFunction, "Data")	
 end
 	
 		
