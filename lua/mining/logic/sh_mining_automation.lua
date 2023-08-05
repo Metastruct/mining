@@ -451,9 +451,14 @@ if SERVER then
 		local energyAmount = energyAccesors.Get(ent)
 		local curEnergy = poweredEnt:GetNW2Int(energyAccesors.Type, 0)
 		local energyToAdd = math.min(poweredEnt:GetNW2Int("Max" .. energyAccesors.Type, 100) - curEnergy, energyAmount)
+		local newAmount = math.min(poweredEnt:GetNW2Int("Max" .. energyAccesors.Type, 100), curEnergy + energyToAdd)
 
-		poweredEnt:SetNW2Int(energyAccesors.Type, math.min(poweredEnt:GetNW2Int("Max" .. energyAccesors.Type, 100), curEnergy + energyToAdd))
+		poweredEnt:SetNW2Int(energyAccesors.Type, newAmount)
 		energyAccesors.Set(ent, math.max(0, energyAmount - energyToAdd))
+
+		if _G.WireLib then
+			_G.WireLib.TriggerOutput(poweredEnt, energyAccesors.Type, newAmount)
+		end
 
 		if energyAmount - energyToAdd < 1 then
 			SafeRemoveEntity(ent)
