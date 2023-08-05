@@ -39,6 +39,7 @@ if SERVER then
 
 		self.Frame:SetAngles(ang)
 		self.Frame:Spawn()
+		self.Frame.PhysgunDisabled = true
 		self.Frame:SetParent(self)
 		self.Frame:SetNotSolid(true)
 
@@ -53,6 +54,7 @@ if SERVER then
 
 		self.Frame2:SetAngles(ang)
 		self.Frame2:Spawn()
+		self.Frame2.PhysgunDisabled = true
 		self.Frame2:SetParent(self)
 		self.Frame2:SetNotSolid(true)
 
