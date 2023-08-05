@@ -220,11 +220,3 @@ if CLIENT then
 		end
 	end
 end
-
-if _G.WireLib then
-	duplicator.RegisterEntityClass("mining_ore_conveyor", _G.WireLib.MakeWireEnt, "Data")
-else
-	duplicator.RegisterEntityClass("mining_ore_conveyor", duplicator.GenericDuplicatorFunction, "Data")
-end
-
-
