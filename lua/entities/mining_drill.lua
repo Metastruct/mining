@@ -78,6 +78,7 @@ if SERVER then
 		
 		if _G.WireLib then
 			self.Inputs = WireLib.CreateInputs(self, {"Active (If this is non-zero, activate the drill)"})
+			self:SetOverlayText("Mining Drill")
 		end
 	end
 
