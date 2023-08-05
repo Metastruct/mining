@@ -59,6 +59,7 @@ if SERVER then
 
 		self.Frame:SetAngles(ang)
 		self.Frame:Spawn()
+		self.Frame.PhysgunDisabled = true
 		self.Frame:SetParent(self)
 
 		timer.Simple(0, function()
