@@ -95,11 +95,10 @@ if SERVER then
 		end)
 
 		if _G.WireLib then
-			_G.WireLib.CreateInputs(self, {
-				"Active",
-			}, {
-				"Whether the smelter is active or not",
-			})
+			self.Inputs = WireLib.CreateInputs(self, {
+					"Active (If non-zero, activate the smelter.)"
+				}
+			self:SetOverlayText("Smelter")
 		end
 
 		self.NextSoundCheck = 0
@@ -129,9 +128,6 @@ if SERVER then
 	end
 
 	function ENT:TriggerInput(port, state)
-		if not _G.WireLib then return end
-		if not isnumber(state) then return end
-
 		if port == "Active" then
 			self:SetNWBool("IsPowered", tobool(state))
 		end
@@ -363,4 +359,10 @@ if CLIENT then
 
 		return data
 	end
+end
+
+if _G.WireLib then
+	duplicator.RegisterEntityClass("mining_ore_smelter", WireLib.MakeWireEnt, "Data")
+else
+	duplicator.RegisterEntityClass("mining_ore_smelter", duplicator.GenericDuplicatorFunction, "Data")
 end

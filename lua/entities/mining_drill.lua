@@ -67,14 +67,6 @@ if SERVER then
 			self.SndLoop = self:StartLoopingSound("ambient/spacebase/spacebase_drill.wav")
 		end)
 
-		if _G.WireLib then
-			_G.WireLib.CreateInputs(self, {
-				"Active",
-			}, {
-				"Whether the drill is active or not",
-			})
-		end
-
 		Ores.Automation.PrepareForDuplication(self)
 		Ores.Automation.RegisterEnergyPoweredEntity(self, {
 			{
@@ -83,15 +75,15 @@ if SERVER then
 				ConsumptionRate = 10, -- 1 unit every 10 seconds
 			}
 		})
+		
+		if _G.WireLib then
+			self.Inputs = WireLib.CreateInputs(self, {"Active (If this is non-zero, activate the drill)"})
+			self:SetOverlayText("Mining Drill")
+		end
 	end
 
 	function ENT:TriggerInput(port, state)
-		if not _G.WireLib then return end
-		if not isnumber(state) then return end
-
-		if port == "Active" then
-			self:SetNWBool("IsPowered", tobool(state))
-		end
+		if port == "Active" then self:SetNWBool("IsPowered", tobool(state)) end
 	end
 
 	function ENT:CheckSoundLoop(time)
@@ -291,3 +283,10 @@ if CLIENT then
 		return self.MiningFrameInfo
 	end
 end
+
+if _G.WireLib then
+	duplicator.RegisterEntityClass("mining_drill", WireLib.MakeWireEnt, "Data")
+else
+	duplicator.RegisterEntityClass("mining_drill", duplicator.GenericDuplicatorFunction, "Data")
+end
+
