@@ -42,16 +42,18 @@ if SERVER then
 		local className = ent:GetClass()
 		if className ~= "mining_ore_ingot" and className ~= "mining_ore" then return end
 
-		local classWorth = className == "mining_ore_ingot" and Ores.Automation.IngotWorth or 1
+		-- use the player multiplier if its higher than the ingot worth
+		local ingotWorth = Ores.Automation.IngotWorth
+		if self.CPPIGetOwner and IsValid(self:CPPIGetOwner()) then
+			ingotWorth = math.max(ingotWorth, Ores.GetPlayerMultiplier(self:CPPIGetOwner()))
+		end
+
+		local classWorth = className == "mining_ore_ingot" and ingotWorth or 1
 		local classSize = className == "mining_ore_ingot" and Ores.Automation.IngotSize or 1
 		local rarity = ent:GetRarity()
 		local oreData = Ores.__R[rarity]
 		if oreData then
 			local earnings = oreData.Worth * classSize * classWorth
-			--if self.CPPIGetOwner and IsValid(self:CPPIGetOwner()) then
-			--	earnings = earnings * Ores.GetPlayerMultiplier(self:CPPIGetOwner())
-			--end
-
 			local curCoins = self:GetNWInt("MintedCoins", 0)
 			local newAmount = curCoins + math.ceil(earnings)
 			self:SetNWInt("MintedCoins", newAmount)
