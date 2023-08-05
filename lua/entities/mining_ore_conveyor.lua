@@ -36,6 +36,7 @@ if SERVER then
 		self.Frame:SetMaterial("phoenix_storms/future_vents")
 		self.Frame:SetCollisionGroup(COLLISION_GROUP_WEAPON) -- this can help players get their ores if there are too many, if they get stuck etc
 		self.Frame:Spawn()
+		self.Frame.PhysgunDisabled = true
 		self.Frame:SetParent(self)
 
 		Ores.Automation.PrepareForDuplication(self)
