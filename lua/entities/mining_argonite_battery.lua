@@ -20,7 +20,13 @@ if SERVER then
 		self:PhysicsInit(SOLID_VPHYSICS)
 		self:SetSolid(SOLID_VPHYSICS)
 		self:SetCollisionGroup(COLLISION_GROUP_WEAPON)
-		self:PhysWake()
+
+		local phys = self:GetPhysicsObject()
+		if IsValid(phys) then
+			phys:SetBuoyancyRatio(1)
+			phys:Wake()
+		end
+
 		self:Activate()
 		self:SetUseType(SIMPLE_USE)
 
@@ -40,12 +46,6 @@ if SERVER then
 		timer.Simple(0, function()
 			if not IsValid(self) then return end
 			Ores.Automation.ReplicateOwnership(self, self)
-
-			local phys = self:GetPhysicsObject()
-			if IsValid(phys) then
-				phys:SetBuoyancyRatio(10)
-				phys:Wake()
-			end
 		end)
 
 		if _G.WireLib then
