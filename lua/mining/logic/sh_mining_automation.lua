@@ -415,7 +415,7 @@ if SERVER then
 			for _, functionName in ipairs(wireFunctions) do
 				local oldFunction = ent[functionName]
 				local wireFunction = baseWireEnt[functionName]
-				if oldFunction then
+				if oldFunction and oldFunction ~= wireFunction then
 					ent[functionName] = function(...)
 						oldFunction(...)
 						return wireFunction(...)
