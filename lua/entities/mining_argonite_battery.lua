@@ -40,6 +40,11 @@ if SERVER then
 		timer.Simple(0, function()
 			if not IsValid(self) then return end
 			Ores.Automation.ReplicateOwnership(self, self)
+
+			local phys = self:GetPhysicsObject()
+			if IsValid(phys) then
+				phys:SetBuoyancyRatio(2)
+			end
 		end)
 
 		if _G.WireLib then
