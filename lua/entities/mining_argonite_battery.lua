@@ -38,6 +38,7 @@ if SERVER then
 		self.Frame:SetPos(self:GetPos() + self:GetForward() * 24 / 2)
 		self.Frame:SetAngles(self:GetAngles())
 		self.Frame:Spawn()
+		self.Frame.PhysgunDisabled = true
 		self.Frame:SetParent(self)
 		self.Frame:SetTransmitWithParent(true)
 

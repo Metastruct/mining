@@ -106,6 +106,7 @@ if SERVER then
 		self.Frame:SetPos(self:WorldSpaceCenter() + self:GetForward() * 24)
 		self.Frame:SetAngles(self:GetAngles())
 		self.Frame:Spawn()
+		self.Frame.PhysgunDisabled = true
 		self.Frame:SetParent(self)
 
 		self.Out = ents.Create("prop_physics")
@@ -119,6 +120,7 @@ if SERVER then
 		self.Out:SetAngles(ang)
 		self.Out:Spawn()
 		self.Out:SetParent(self)
+		self.Out:SetNotSolid(true)
 
 		self.Core = ents.Create("prop_physics")
 		self.Core:SetModel("models/hunter/misc/sphere025x025.mdl")
@@ -126,6 +128,7 @@ if SERVER then
 		self.Core:SetMaterial("models/debug/white")
 		self.Core:SetPos(self:WorldSpaceCenter())
 		self.Core:Spawn()
+		self.Core.PhysgunDisabled = true
 		self.Core:SetParent(self)
 		self.Core:SetColor(Color(0, 0, 0, 255))
 		self.Core:Activate()
