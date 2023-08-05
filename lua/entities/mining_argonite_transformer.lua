@@ -297,6 +297,7 @@ if CLIENT then
 		end
 
 		self.MiningFrameInfo[2].Value = self:GetNWInt("ArgoniteCount", 0)
+		self.MiningFrameInfo[3].Value = self:GetNWBool("IsPowered", true)
 		return self.MiningFrameInfo
 	end
 end
