@@ -282,10 +282,3 @@ if CLIENT then
 		return self.MiningFrameInfo
 	end
 end
-
-if _G.WireLib then
-	duplicator.RegisterEntityClass("mining_drill", WireLib.MakeWireEnt, "Data")
-else
-	duplicator.RegisterEntityClass("mining_drill", duplicator.GenericDuplicatorFunction, "Data")
-end
-

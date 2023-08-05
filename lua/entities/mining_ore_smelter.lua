@@ -359,9 +359,3 @@ if CLIENT then
 		return data
 	end
 end
-
-if _G.WireLib then
-	duplicator.RegisterEntityClass("mining_ore_smelter", _G.WireLib.MakeWireEnt, "Data")
-else
-	duplicator.RegisterEntityClass("mining_ore_smelter", duplicator.GenericDuplicatorFunction, "Data")
-end
