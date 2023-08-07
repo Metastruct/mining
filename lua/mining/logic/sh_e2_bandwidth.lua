@@ -58,6 +58,8 @@ if SERVER then
 	end)
 
 	hook.Add("PlayerReceivedOre", tag, function(ply, amount, rarity)
+		if not e2_owners[ply] then return end
+
 		local detonite_rarity = ms.Ores.Automation.GetOreRarityByName("Detonite")
 		if rarity ~= detonite_rarity then return end
 
