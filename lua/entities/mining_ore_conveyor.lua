@@ -56,7 +56,7 @@ if SERVER then
 		end)
 
 		if _G.WireLib then
-			self.Inputs = Wirelib.CreateInputs(self, {
+			self.Inputs = _G.WireLib.CreateInputs(self, {
 				"Active",
 				"Direction (If this is non-zero, reverse the direction.)"
 			})
