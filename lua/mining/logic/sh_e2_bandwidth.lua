@@ -37,9 +37,7 @@ if SERVER then
 
 		timer.Simple(1, function()
 			if not IsValid(data.player) then return end
-			if not IsValid(data.enttity) then return end
-
-			data.player._miningChipsOwned[data.entity] = false
+			if not IsValid(data.entity) then return end
 
 			if only_e2_chips(data.player) and data.player:GetNWInt(tag, 0) > 0 then
 				data.player._miningBlocked = false
@@ -97,17 +95,13 @@ if SERVER then
 			local owned_detonite = owner:GetNWInt(tag, 0)
 			local required_detonite = math.max(1, math.ceil(total_ops / 100))
 			if owned_detonite >= required_detonite then
-				print(owner, owned_detonite, required_detonite)
 				owner:SetNWInt(tag, math.max(0, owned_detonite - required_detonite))
 
 				if only_e2_chips(owner) then
 					owner._miningBlocked = false
 				end
 			else
-				for ent, _ in pairs(owner._miningChipsOwned or {}) do
-					owner._miningChipsOwned[ent] = true
-					ent:EmitSound("ambient/machines/thumper_shutdown1.wav")
-				end
+				owner:SendLua([[surface.PlaySound("ambient/machines/thumper_shutdown1.wav")]])
 
 				if only_e2_chips(owner) then
 					owner._miningBlocked = true
