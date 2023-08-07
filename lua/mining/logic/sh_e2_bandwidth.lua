@@ -35,6 +35,12 @@ if SERVER then
 
 		e2_owners[data.player] = true
 
+		if data.player.IsInZone and data.player:IsInZone("cave") then
+			local detonite_rarity = ms.Ores.Automation.GetOreRarityByName("Detonite")
+			local detonite_name = ms.Ores.__R[detonite_rarity].Name
+			ms.Ores.SendChatMessage(data.player, ("To use your chip while mining collect %s! The more chip bandwidth (%s) you have the more workloads your chips will be able to process!"):format(detonite_name))
+		end
+
 		timer.Simple(1, function()
 			if not IsValid(data.player) then return end
 			if not IsValid(data.entity) then return end
