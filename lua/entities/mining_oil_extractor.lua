@@ -145,7 +145,7 @@ if SERVER then
 
 	function ENT:ExtractOil(time)
 		if _G.WireLib then
-			local curOil = math.max(0, self:GetNWInt("NextOil", 0) - CurTime()) / Ores.Automation.OilExtractionRate
+			local curOil = math.Round((1 - math.max(0, self:GetNWInt("NextOil", 0) - CurTime()) / Ores.Automation.OilExtractionRate) * 100)
 			_G.WireLib.TriggerOutput(self, "Oil", curOil)
 		end
 
