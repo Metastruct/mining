@@ -18,6 +18,7 @@ Ores.Automation = {
 		mining_ore_smelter = true,
 		mining_coin_minter = true,
 		mining_oil_extractor = true,
+		mining_chip_router = true,
 	},
 	BaseOreProductionRate = 10, -- 1 per 10 seconds
 	EnergyMaterial = Material("models/props_combine/coredx70"),
@@ -46,6 +47,7 @@ Ores.Automation = {
 		mining_ore_smelter = true,
 		mining_coin_minter = true,
 		mining_oil_extractor = true,
+		mining_chip_router = true,
 	},
 	GraphUnit = 40,
 	GraphHeightMargin = 75,
@@ -55,7 +57,7 @@ Ores.Automation = {
 	HudActionColor = Color(255, 125, 0, 255),
 	IngotWorth = 2,
 	IngotSize = 5,
-	OilExtractionRate = 10 * 60, -- 1 fuel tank per 13 seconds
+	OilExtractionRate = 10 * 60, -- 1 fuel tank per 60 seconds
 }
 
 if Ores.Automation.EnergyMaterial:IsError() then
@@ -495,7 +497,7 @@ if SERVER then
 		return brush
 	end
 
-	function Ores.Automation.RegisterEnergyPoweredEntity(ent, energyDataSettings)
+	function Ores.Automation.RegisterEnergyPoweredEntity(ent, energyDataSettings, extraOutputs)
 		if _G.WireLib then
 			local wireOutputs = {}
 			for _, energyData in pairs(energyDataSettings) do
@@ -503,7 +505,20 @@ if SERVER then
 				table.insert(wireOutputs, ("Max%s (Outputs the max level of %s) [NORMAL]"):format(energyData.Type, energyData.Type:lower())) -- max level
 			end
 
+			if istable(extraOutputs) then
+				for _, output in pairs(extraOutputs) do
+					table.insert(wireOutputs, output.Identifier)
+				end
+			end
+
 			_G.WireLib.CreateOutputs(ent, wireOutputs)
+
+			if istable(extraOutputs) then
+				for _, output in pairs(extraOutputs) do
+					local outputName = output.Identifier:Split(" ")[0]
+					_G.WireLib.TriggerOutput(ent, outputName, output.StartValue)
+				end
+			end
 		end
 
 		for _, energyData in pairs(energyDataSettings) do
@@ -518,7 +533,11 @@ if SERVER then
 				_G.WireLib.TriggerOutput(ent, "Max" .. energyData.Type, energyData.MaxValue)
 			end
 
-			local brush = makeBrushForPoweredEntity(ent)
+			local brush
+			if not energyData.NoBrush then
+			 	brush = makeBrushForPoweredEntity(ent)
+			end
+
 			local timerName = ("mining_automation_power_[%s]_entity_[%d]"):format(energyData.Type, ent:EntIndex())
 			timer.Create(timerName, energyData.ConsumptionRate, 0, function()
 				if not IsValid(ent) then
@@ -535,7 +554,7 @@ if SERVER then
 
 				if canConsumeEnergy then
 					local curEnergy = ent:GetNW2Int(energyData.Type, 0)
-					local newEnergyValue = math.max(0, curEnergy - 1)
+					local newEnergyValue = math.max(0, curEnergy - (energyData.ConsumptionAmount or 1))
 					ent:SetNW2Int(energyData.Type, newEnergyValue)
 
 					if _G.WireLib then
