@@ -105,9 +105,18 @@ if SERVER then
 
 			local totalOps = 0
 			local chipCount = 0
-			for _, chip in ipairs(self:GetChips()) do
-				local ops = chip.OverlayData.prfbench
-				totalOps = totalOps + ops
+			for _, chip in pairs(self:GetChips()) do
+				local chipClass = chip:GetClass()
+				if chipClass == "gmod_wire_expression2" then
+					local ops = chip.OverlayData.prfbench
+					totalOps = totalOps + ops
+				elseif chipClass == "starfall_processor" then
+					if chip.instance then
+						local ops = (chip.instance.cpu_average / chip.instance.cpuQuota) * 1000
+						totalOps = totalOps + ops
+					end
+				end
+
 				chipCount = chipCount + 1
 			end
 
@@ -148,10 +157,17 @@ if SERVER then
 
 		local chips = {}
 		for _, ent in pairs(constraint.GetAllConstrainedEntities(self)) do
-			if ent:GetClass() ~= "gmod_wire_expression2" then continue end
+			if ent:GetClass() ~= "gmod_wire_expression2" and ent:GetClass() ~= "starfall_processor" then continue end
 			if ent.CPPIGetOwner and ent:CPPIGetOwner() ~= owner then continue end
 
-			table.insert(chips, ent)
+			chips[ent] = ent
+		end
+
+		for _, ent in ipairs(self:GetChildren()) do
+			if ent:GetClass() ~= "gmod_wire_expression2" and ent:GetClass() ~= "starfall_processor" then continue end
+			if ent.CPPIGetOwner and ent:CPPIGetOwner() ~= owner then continue end
+
+			chips[ent] = ent
 		end
 
 		return chips
@@ -191,19 +207,36 @@ if SERVER then
 
 		local should_check = false
 		local chips = self:GetChips()
-		for _, chip in ipairs(chips) do
+		for _, chip in pairs(chips) do
 			Ores.Automation.ChipsRouted[owner] = Ores.Automation.ChipsRouted[owner] or {}
 			Ores.Automation.ChipsRouted[owner][chip] = enabled
 
+			local chipClass = chip:GetClass()
+
 			if enabled then
-				if chip.error then
-					chip:Reset()
-					should_check = true
+				if chipClass == "starfall_processor" then
+					if not chip.instance then
+						chip:Compile()
+						BroadcastLua(([[local c = Entity(%d) if IsValid(c) then c:Compile() end]]):format(chip:EntIndex()))
+					end
+				elseif chipClass == "gmod_wire_expression2" then
+					if chip.error then
+						chip:Reset()
+						should_check = true
+					end
 				end
 			else
-				if chip.error ~= true then
-					chip:Error("Unsufficient Bandwidth", "Unsufficient Bandwidth")
-					should_check = true
+				if chipClass == "starfall_processor" then
+					if chip.instance then
+						chip:Destroy()
+						chip:Error({ message = "Unsufficient Bandwidth", traceback = "" })
+						BroadcastLua(([[local c = Entity(%d) if IsValid(c) then c:Destroy() c:Error({message="Unsufficient Bandwidth",traceback=""}) end]]):format(chip:EntIndex()))
+					end
+				elseif chipClass == "gmod_wire_expression2" then
+					if chip.error ~= true then
+						chip:Error("Unsufficient Bandwidth", "Unsufficient Bandwidth")
+						should_check = true
+					end
 				end
 			end
 		end
@@ -219,7 +252,7 @@ if SERVER then
 
 		if Ores.Automation.ChipsRouted[owner] then
 			local chips = self:GetChips(owner)
-			for _, chip in ipairs(chips) do
+			for _, chip in pairs(chips) do
 				Ores.Automation.ChipsRouted[owner][chip] = nil
 			end
 
