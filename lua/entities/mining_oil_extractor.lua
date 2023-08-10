@@ -98,7 +98,12 @@ if SERVER then
 			{
 				Type = "Energy",
 				MaxValue = Ores.Automation.BatteryCapacity * 3,
-				ConsumptionRate = 5, -- 1 unit every 10 seconds
+				ConsumptionRate = 5, -- 1 unit every 5 seconds
+			}
+		}, {
+			{
+				Identifier = "Oil (Outputs the current amount of extracted oil) [NORMAL]",
+				StartValue = 0,
 			}
 		})
 	end
@@ -139,6 +144,11 @@ if SERVER then
 	end
 
 	function ENT:ExtractOil(time)
+		if _G.WireLib then
+			local curOil = math.max(0, self:GetNWInt("NextOil", 0) - CurTime()) / Ores.Automation.OilExtractionRate
+			_G.WireLib.TriggerOutput(self, "Oil", curOil)
+		end
+
 		if time < self:GetNWInt("NextOil", 0) then return end
 		if not can_work(self, time) then return end
 
