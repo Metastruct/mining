@@ -135,6 +135,10 @@ if SERVER then
 	end
 
 	function ENT:CanConsumeEnergy(energyType)
+		if self:GetNWInt("BandwidthUsage", 0) < 1 then
+			return false
+		end
+
 		return self:GetNW2Int("Bandwidth", 0) >= self:GetNWInt("BandwidthUsage", 0)
 	end
 
