@@ -1,3 +1,8 @@
+AddCSLuaFile()
+
+module("ms", package.seeall)
+Ores = Ores or {}
+
 local tag = "mining_e2_chip_bandwidth"
 local MAX_CUCKAGE = 300
 
@@ -28,26 +33,30 @@ if SERVER then
 	end
 
 	local e2_owners = {}
-	E2Lib.registerCallback("construct", function(data)
-		if data.player:GetNWInt(tag, 0) <= 0 then
-			data.player:SetNWInt(tag, 0)
-		end
+	util.OnInitialize(function()
+		if not istable(_G.E2Lib) then return end
 
-		e2_owners[data.player] = true
-
-		if data.player.IsInZone and data.player:IsInZone("cave") then
-			local detonite_rarity = ms.Ores.Automation.GetOreRarityByName("Detonite")
-			local detonite_name = ms.Ores.__R[detonite_rarity].Name
-			ms.Ores.SendChatMessage(data.player, ("To use your chip while mining collect %s! The more chip bandwidth (%s) you have the more workloads your chips will be able to process!"):format(detonite_name))
-		end
-
-		timer.Simple(1, function()
-			if not IsValid(data.player) then return end
-			if not IsValid(data.entity) then return end
-
-			if only_e2_chips(data.player) and data.player:GetNWInt(tag, 0) > 0 then
-				data.player._miningBlocked = false
+		_G.E2Lib.registerCallback("construct", function(data)
+			if data.player:GetNWInt(tag, 0) <= 0 then
+				data.player:SetNWInt(tag, 0)
 			end
+
+			e2_owners[data.player] = true
+
+			if data.player.IsInZone and data.player:IsInZone("cave") then
+				local detonite_rarity = Ores.Automation.GetOreRarityByName("Detonite")
+				local detonite_name = Ores.__R[detonite_rarity].Name
+				Ores.SendChatMessage(data.player, ("To use your chip while mining collect %s! The more chip bandwidth (%s) you have the more workloads your chips will be able to process!"):format(detonite_name, detonite_name))
+			end
+
+			timer.Simple(1, function()
+				if not IsValid(data.player) then return end
+				if not IsValid(data.entity) then return end
+
+				if only_e2_chips(data.player) and data.player:GetNWInt(tag, 0) > 0 then
+					data.player._miningBlocked = false
+				end
+			end)
 		end)
 	end)
 
@@ -64,21 +73,21 @@ if SERVER then
 	hook.Add("PlayerReceivedOre", tag, function(ply, amount, rarity)
 		if not e2_owners[ply] then return end
 
-		local detonite_rarity = ms.Ores.Automation.GetOreRarityByName("Detonite")
+		local detonite_rarity = Ores.Automation.GetOreRarityByName("Detonite")
 		if rarity ~= detonite_rarity then return end
 
 		local cur_detonite = ply:GetNWInt(tag, 0)
 		if cur_detonite >= MAX_CUCKAGE then return end
 
 		ply:SetNWInt(tag, math.min(cur_detonite + amount, MAX_CUCKAGE))
-		ms.Ores.TakePlayerOre(ply, detonite_rarity, amount)
+		Ores.TakePlayerOre(ply, detonite_rarity, amount)
 	end)
 
 	hook.Add("OnEntityCreated", tag, function(ent)
 		if ent:GetClass() ~= "mining_ore" then return end
 
 		timer.Simple(0, function()
-			local detonite_rarity = ms.Ores.Automation.GetOreRarityByName("Detonite")
+			local detonite_rarity = Ores.Automation.GetOreRarityByName("Detonite")
 			local rarity = ent:GetRarity()
 
 			if rarity ~= detonite_rarity then return end
@@ -128,7 +137,7 @@ if CLIENT then
 
 		local X, Y = ScrW() * 3 / 4, ScrH() - 120
 
-		surface.SetMaterial(ms.Ores.Automation.HudFrameMaterial)
+		surface.SetMaterial(Ores.Automation.HudFrameMaterial)
 		surface.SetDrawColor(255, 255, 255, 255)
 		surface.DrawTexturedRect(X, Y, 250, 110)
 
