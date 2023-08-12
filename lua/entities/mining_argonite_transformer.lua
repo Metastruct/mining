@@ -108,6 +108,7 @@ if SERVER then
 		self.Frame:Spawn()
 		self.Frame.PhysgunDisabled = true
 		self.Frame:SetParent(self)
+		self.Frame:SetTrigger(true)
 
 		self.Out = ents.Create("prop_physics")
 		self.Out:SetModel("models/props_phx/construct/metal_wire1x1.mdl")
@@ -121,6 +122,7 @@ if SERVER then
 		self.Out:Spawn()
 		self.Out:SetParent(self)
 		self.Out:SetNotSolid(true)
+		self.Out:SetTrigger(true)
 
 		self.Core = ents.Create("prop_physics")
 		self.Core:SetModel("models/hunter/misc/sphere025x025.mdl")
@@ -132,6 +134,7 @@ if SERVER then
 		self.Core:SetParent(self)
 		self.Core:SetColor(Color(0, 0, 0, 255))
 		self.Core:Activate()
+		self.Core:SetTrigger(true)
 
 		local timerName = ("mining_argonite_transformer_[%d]"):format(self:EntIndex())
 		timer.Create(timerName, 1, 0, function()
