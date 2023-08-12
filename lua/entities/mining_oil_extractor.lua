@@ -62,6 +62,7 @@ if SERVER then
 		self.Frame:Spawn()
 		self.Frame.PhysgunDisabled = true
 		self.Frame:SetParent(self)
+		self.Frame:SetTrigger(true)
 
 		self.Out = ents.Create("prop_physics")
 		self.Out:SetModel("models/props_phx/construct/metal_wire1x1.mdl")

@@ -42,6 +42,7 @@ if SERVER then
 		self.Frame.PhysgunDisabled = true
 		self.Frame:SetParent(self)
 		self.Frame:SetNotSolid(true)
+		self.Frame:SetTrigger(true)
 
 		self.Frame2 = ents.Create("prop_physics")
 		self.Frame2:SetModel("models/props_phx/construct/metal_tube.mdl")
@@ -57,12 +58,12 @@ if SERVER then
 		self.Frame2.PhysgunDisabled = true
 		self.Frame2:SetParent(self)
 		self.Frame2:SetNotSolid(true)
+		self.Frame2:SetTrigger(true)
 
 		self.Machine = ents.Create("prop_physics")
 		self.Machine:SetModel("models/xqm/podremake.mdl")
 		self.Machine:SetMaterial("phoenix_storms/future_vents")
 		self.Machine:SetModelScale(0.4)
-
 
 		ang = self:GetAngles()
 		ang:RotateAroundAxis(self:GetRight(), 90)
@@ -73,6 +74,7 @@ if SERVER then
 		self.Machine:Spawn()
 		self.Machine:SetParent(self)
 		self.Machine:SetNotSolid(true)
+		self.Machine:SetTrigger(true)
 
 		self.Out = ents.Create("prop_physics")
 		self.Out:SetModel("models/props_phx/construct/metal_wire1x1.mdl")
@@ -87,7 +89,7 @@ if SERVER then
 		self.Out:Spawn()
 		self.Out:SetParent(self)
 		self.Out:SetNotSolid(true)
-
+		self.Out:SetTrigger(true)
 
 		timer.Simple(0, function()
 			if not IsValid(self) then return end

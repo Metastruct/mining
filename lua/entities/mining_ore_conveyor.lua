@@ -38,6 +38,7 @@ if SERVER then
 		self.Frame:Spawn()
 		self.Frame.PhysgunDisabled = true
 		self.Frame:SetParent(self)
+		self.Frame:SetTrigger(true)
 
 		Ores.Automation.PrepareForDuplication(self)
 

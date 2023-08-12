@@ -61,6 +61,7 @@ if SERVER then
 		self.Frame:Spawn()
 		self.Frame.PhysgunDisabled = true
 		self.Frame:SetParent(self)
+		self.Frame:SetTrigger(true)
 
 		timer.Simple(0, function()
 			if not IsValid(self) then return end
