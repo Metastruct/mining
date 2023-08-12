@@ -45,7 +45,7 @@ if SERVER then
 		-- use the player multiplier if its higher than the ingot worth
 		local ingotWorth = Ores.Automation.IngotWorth
 		if self.CPPIGetOwner and IsValid(self:CPPIGetOwner()) then
-			ingotWorth = math.max(ingotWorth, Ores.GetPlayerMultiplier(self:CPPIGetOwner()))
+			ingotWorth = math.max(ingotWorth, Ores.GetPlayerMultiplier(self:CPPIGetOwner()) * 1.5)
 		end
 
 		local classWorth = className == "mining_ore_ingot" and ingotWorth or 1

@@ -248,6 +248,10 @@ if SERVER then
 
 		return ent
 	end
+
+	function ENT:CanConsumeEnergy()
+		return self:CanWork()
+	end
 end
 
 if CLIENT then
