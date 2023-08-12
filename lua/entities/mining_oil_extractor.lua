@@ -144,6 +144,8 @@ if SERVER then
 	end
 
 	function ENT:ExtractOil(time)
+		if not can_work(self, CurTime()) then return end
+
 		if _G.WireLib then
 			local curOil = math.Round((1 - math.max(0, self:GetNWInt("NextOil", 0) - CurTime()) / Ores.Automation.OilExtractionRate) * 100)
 			_G.WireLib.TriggerOutput(self, "Oil", curOil)
@@ -286,17 +288,19 @@ if CLIENT then
 	end
 
 	function ENT:OnDrawEntityInfo()
+		local oilValue = self:GetNWBool("IsPowered", true) and math.max(0, self:GetNWInt("NextOil", 0) - CurTime()) or 0
+
 		if not self.MiningFrameInfo then
 			self.MiningFrameInfo = {
 				{ Type = "Label", Text = "EXTRACTOR", Border = true },
 				{ Type = "Data", Label = "ENERGY", Value = self:GetNW2Int("Energy", 0), MaxValue = self:GetNW2Int("MaxEnergy", Ores.Automation.BatteryCapacity * 3), Border = true },
-				{ Type = "Data", Label = "OIL", Value = math.max(0, self:GetNWInt("NextOil", 0) - CurTime()), MaxValue = Ores.Automation.OilExtractionRate },
+				{ Type = "Data", Label = "OIL", Value = oilValue, MaxValue = Ores.Automation.OilExtractionRate },
 				{ Type = "State", Value = can_work(self, CurTime()) },
 			}
 		end
 
 		self.MiningFrameInfo[2].Value = self:GetNW2Int("Energy", 0)
-		self.MiningFrameInfo[3].Value = Ores.Automation.OilExtractionRate - math.max(0, self:GetNWInt("NextOil", 0) - CurTime())
+		self.MiningFrameInfo[3].Value = Ores.Automation.OilExtractionRate - oilValue
 		self.MiningFrameInfo[4].Value = can_work(self, CurTime())
 		return self.MiningFrameInfo
 	end
