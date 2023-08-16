@@ -174,23 +174,37 @@ if SERVER then
 	end
 
 	local function check_blocked_state(ply)
-		if not Ores.Automation.ChipsRouted[ply] then return end
-
-		local all_chips_ok = true
-		local has_chips = false
-		for chip, _ in pairs(ply._miningChipsOwned or {}) do
-			has_chips = true
-
-			if not Ores.Automation.ChipsRouted[ply][chip] then -- checks if the chip is on a router and powered and an e2
-				all_chips_ok = false
-				break
-			end
-		end
-
-		if not has_chips then return end
-
 		timer.Simple(0, function()
 			if not IsValid(ply) then return end
+			if not Ores.Automation.ChipsRouted[ply] then return end
+
+			local chips = {}
+			local e2s = ents.FindByClass("gmod_wire_expression2")
+			for _, e2 in ipairs(e2s) do
+				if e2:GetPlayer() ~= ply then continue end
+
+				table.insert(chips, e2)
+			end
+
+			local sfs = ents.FindByClass("starfall_processor")
+			for _, sf in ipairs(sfs) do
+				if sf.owner ~= ply then continue end
+
+				table.insert(chips, sf)
+			end
+
+			local all_chips_ok = true
+			local has_chips = false
+			for _, chip in ipairs(chips) do
+				has_chips = true
+
+				if not Ores.Automation.ChipsRouted[ply][chip] then -- checks if the chip is on a router and powered and an e2
+					all_chips_ok = false
+					break
+				end
+			end
+
+			if not has_chips then return end
 
 			if ply._miningBlocked and all_chips_ok then
 				ply._miningBlocked = nil
@@ -209,36 +223,38 @@ if SERVER then
 		local chips = self:GetChips()
 		for _, chip in pairs(chips) do
 			Ores.Automation.ChipsRouted[owner] = Ores.Automation.ChipsRouted[owner] or {}
-			Ores.Automation.ChipsRouted[owner][chip] = enabled
 
 			local chipClass = chip:GetClass()
-
 			if enabled then
 				if chipClass == "starfall_processor" then
-					if not chip.instance then
+					if Ores.Automation.ChipsRouted[owner][chip] ~= true then
 						chip:Compile()
 						BroadcastLua(([[local c = Entity(%d) if IsValid(c) then c:Compile() end]]):format(chip:EntIndex()))
+						should_check = true
 					end
 				elseif chipClass == "gmod_wire_expression2" then
-					if chip.error then
+					if Ores.Automation.ChipsRouted[owner][chip] ~= true then
 						chip:Reset()
 						should_check = true
 					end
 				end
 			else
 				if chipClass == "starfall_processor" then
-					if chip.instance then
+					if Ores.Automation.ChipsRouted[owner][chip] ~= false then
 						chip:Destroy()
 						chip:Error({ message = "Unsufficient Bandwidth", traceback = "" })
 						BroadcastLua(([[local c = Entity(%d) if IsValid(c) then c:Destroy() c:Error({message="Unsufficient Bandwidth",traceback=""}) end]]):format(chip:EntIndex()))
+						should_check = true
 					end
 				elseif chipClass == "gmod_wire_expression2" then
-					if chip.error ~= true then
+					if Ores.Automation.ChipsRouted[owner][chip] ~= false then
 						chip:Error("Unsufficient Bandwidth", "Unsufficient Bandwidth")
 						should_check = true
 					end
 				end
 			end
+
+			Ores.Automation.ChipsRouted[owner][chip] = enabled
 		end
 
 		if should_check then
