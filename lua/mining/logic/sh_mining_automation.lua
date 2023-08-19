@@ -452,8 +452,9 @@ if SERVER then
 
 		if ent.CPPIGetOwner and poweredEnt.CPPIGetOwner then
 			local p1, p2 = ent:CPPIGetOwner(), poweredEnt:CPPIGetOwner()
-			if IsValid(p1) and IsValid(p2) and p1 ~= p2 and not p1:AreFriends(p2) then
-				return
+			if IsValid(p1) and IsValid(p2) and p1 ~= p2 then
+				local areFriends = p1.AreFriends and p1:AreFriends(p2) or false
+				if not areFriends then return end
 			end
 		end
 
