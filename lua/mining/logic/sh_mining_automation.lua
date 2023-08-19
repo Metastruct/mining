@@ -574,11 +574,22 @@ if SERVER then
 
 	CreateConVar("sbox_maxmining_automation", "40", FCVAR_ARCHIVE, "Maximum amount of mining automation entities a player can have", 0, 100)
 
-	hook.Add("PlayerSpawnedSENT", "mining_automation", function(ply, ent)
-		if Ores.Automation.EntityClasses[ent:GetClass()] then
-			ply:AddCount("mining_automation", ent)
-			return true
-		end
+	hook.Add("OnEntityCreated", "mining_automation", function(ent)
+		if not Ores.Automation.EntityClasses[ent:GetClass()]  then return end
+		if not ent.CPPIGetOwner then return end
+
+		timer.Simple(0, function()
+			if not IsValid(ent) then return end
+
+			local ply = ent:CPPIGetOwner()
+			if not IsValid(ply) then return end
+
+			if ply:CheckLimit("mining_automation") then
+				ply:AddCount("mining_automation", ent)
+			else
+				SafeRemoveEntity(ent)
+			end
+		end)
 	end)
 
 	hook.Add("PlayerSpawnSENT", "mining_automation", function(ply, className)

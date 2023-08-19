@@ -165,11 +165,22 @@ if SERVER then
 
 	CreateConVar("sbox_maxmining_drill", "12", FCVAR_ARCHIVE, "Maximum amount of mining drills entities a player can have", 0, 100)
 
-	hook.Add("PlayerSpawnedSENT", "mining_drill", function(ply, ent)
-		if ent:GetClass() == "mining_drill" then
-			ply:AddCount("mining_drill", ent)
-			return true
-		end
+	hook.Add("OnEntityCreated", "mining_drill", function(ent)
+		if ent:GetClass() ~= "mining_drill" then return end
+		if not ent.CPPIGetOwner then return end
+
+		timer.Simple(0, function()
+			if not IsValid(ent) then return end
+
+			local ply = ent:CPPIGetOwner()
+			if not IsValid(ply) then return end
+
+			if ply:CheckLimit("mining_drill") then
+				ply:AddCount("mining_drill", ent)
+			else
+				SafeRemoveEntity(ent)
+			end
+		end)
 	end)
 
 	hook.Add("PlayerSpawnSENT", "mining_drill", function(ply, className)
