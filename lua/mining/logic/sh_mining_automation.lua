@@ -450,6 +450,13 @@ if SERVER then
 		if time < (poweredEnt.NextEnergyEntity or 0) then return end
 		if ent.MiningInvalidPower then return end
 
+		if ent.CPPIGetOwner and poweredEnt.CPPIGetOwner then
+			local p1, p2 = ent:CPPIGetOwner(), poweredEnt:CPPIGetOwner()
+			if IsValid(p1) and IsValid(p2) and p1 ~= p2 and not p1:AreFriends(p2) then
+				return
+			end
+		end
+
 		local energyAmount = energyAccesors.Get(ent)
 		local curEnergy = poweredEnt:GetNW2Int(energyAccesors.Type, 0)
 		local energyToAdd = math.min(poweredEnt:GetNW2Int("Max" .. energyAccesors.Type, 100) - curEnergy, energyAmount)
