@@ -329,7 +329,7 @@ if CLIENT then
 		surface.SetFont("DermaDefault")
 		local tw, th = surface.GetTextSize(text)
 		surface.SetTextPos(x - tw / 2, y - th / 2)
-		surface.DrawText(perc)
+		surface.DrawText(text)
 	end
 
 	function ENT:OnDrawEntityInfo()
