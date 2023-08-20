@@ -325,7 +325,7 @@ if CLIENT then
 		surface.DrawOutlinedRect(x - GU / 2, y - GU / 2, GU, GU, 2)
 
 		surface.SetTextColor(255, 255, 255, 255)
-		local text = self:GetNWInt("Bandwidth", 0) .. "u"
+		local text = self:GetNW2Int("Bandwidth", 0) .. "u"
 		surface.SetFont("DermaDefault")
 		local tw, th = surface.GetTextSize(text)
 		surface.SetTextPos(x - tw / 2, y - th / 2)
