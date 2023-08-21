@@ -583,7 +583,9 @@ if SERVER then
 	CreateConVar("sbox_maxmining_automation", "40", FCVAR_ARCHIVE, "Maximum amount of mining automation entities a player can have", 0, 100)
 
 	hook.Add("OnEntityCreated", "mining_automation", function(ent)
-		if not Ores.Automation.EntityClasses[ent:GetClass()]  then return end
+		local className = ent:GetClass()
+		if className == "mining_drill" then return end
+		if not Ores.Automation.EntityClasses[className]  then return end
 		if not ent.CPPIGetOwner then return end
 
 		timer.Simple(0, function()
