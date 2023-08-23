@@ -16,8 +16,6 @@ ms.Ores.__R[666] = {
 if SERVER then
 	hook.Add("EntityTakeDamage", "blood_ore", function(target, dmg)
 		if not IsValid(target) then return end
-		if not target.IsInZone then return end
-
 
 		local atck = dmg:GetAttacker()
 		if not IsValid(atck) then return end
