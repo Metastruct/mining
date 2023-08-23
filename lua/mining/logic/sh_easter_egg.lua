@@ -26,7 +26,7 @@ if SERVER then
 		if inflictor:GetClass() ~= "mining_pickaxe" then return end
 
 
-		if not target:IsPlayer() and not target:IsNPC() then return end
+		if not target:IsPlayer() then return end
 
 		if not target.NextBloodOre then
 			target.NextBloodOre = 0
