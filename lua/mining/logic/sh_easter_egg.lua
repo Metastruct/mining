@@ -45,6 +45,8 @@ if SERVER then
 			blood:Spawn()
 			blood:SetCollisionGroup(COLLISION_GROUP_WEAPON)
 			blood:SetSize(math.random(0.1, 0.33))
+			blood:SetMaterial("models/flesh")
+			blood:EmitSound(")physics/flesh/flesh_squishy_impact_hard" .. math.random(1, 4) .. ".wav")
 
 			local phys = blood:GetPhysicsObject()
 			if IsValid(phys) then
