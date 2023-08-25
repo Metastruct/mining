@@ -83,87 +83,63 @@ if SERVER then
 end
 
 if CLIENT then
-	local Tag2 = Tag .. FrameNumber()
-	local textToDisplay = "B̴̮̉ḻ̷͑o̸̬̓o̷̧͂d̵̙̆.̷̰͑.̷̓ͅ.̴͈̍ ̴͚͘f̴͔͘o̶̤̽r̸̡͘ ̴͉̎t̸͙̿ḧ̴̙́e̶̜͂ ̸̠͛b̶̝̈l̶̼̆o̷͖͊ö̸͇́ď̷̲ ̴͙̉g̶̩̍o̶̫̓d̷̻̋.̵̯̊.̴̩͋.̶̖͆"
-
-	surface.CreateFont("BIGFONT", {
-		font = "Tahoma",
-		size = "150"
-	})
-
-	TEXTUREFLAGS_POINTSAMPLE = 0x00000001
-	TEXTUREFLAGS_TRILINEAR = 0x00000002
-	TEXTUREFLAGS_CLAMPS = 0x00000004
-	TEXTUREFLAGS_CLAMPT = 0x00000008
-	TEXTUREFLAGS_ANISOTROPIC = 0x00000010
-	TEXTUREFLAGS_HINT_DXT5 = 0x00000020
-	TEXTUREFLAGS_NOCOMPRESS = 0x00000040
-	TEXTUREFLAGS_NORMAL = 0x00000080
-	TEXTUREFLAGS_NOMIP = 0x00000100
-	TEXTUREFLAGS_NOLOD = 0x00000200
-	TEXTUREFLAGS_MINMIP = 0x00000400
-	TEXTUREFLAGS_PROCEDURAL = 0x00000800
-	TEXTUREFLAGS_ONEBITALPHA = 0x00001000
-	TEXTUREFLAGS_EIGHTBITALPHA = 0x00002000
-	TEXTUREFLAGS_ENVMAP = 0x00004000
-	TEXTUREFLAGS_RENDERTARGET = 0x00008000
-	TEXTUREFLAGS_DEPTHRENDERTARGET = 0x00010000
-	TEXTUREFLAGS_NODEBUGOVERRIDE = 0x00020000
-	TEXTUREFLAGS_SINGLECOPY = 0x00040000
-	TEXTUREFLAGS_ONEOVERMIPLEVELINALPHA = 0x00080000
-	TEXTUREFLAGS_PREMULTCOLORBYONEOVERMIPLEVEL = 0x00100000
-	TEXTUREFLAGS_NORMALTODUDV = 0x00200000
-	TEXTUREFLAGS_ALPHATESTMIPGENERATION = 0x00400000
-	TEXTUREFLAGS_NODEPTHBUFFER = 0x00800000
-	TEXTUREFLAGS_NICEFILTERED = 0x01000000
-	TEXTUREFLAGS_CLAMPU = 0x02000000
-	local iTexFlags = bit.bor(TEXTUREFLAGS_CLAMPS, TEXTUREFLAGS_CLAMPT)
-	local sz = ScrW()
-	local rt = GetRenderTargetEx(Tag2, sz, sz, RT_SIZE_NO_CHANGE, MATERIAL_RT_DEPTH_NONE, iTexFlags, 0, IMAGE_FORMAT_RGBA8888)
-
-	local mat = CreateMaterial(Tag2, "UnlitGeneric", {
-		["$vertexalpha"] = "1",
-		["$vertexcolor"] = "1"
-	})
-
-	mat:SetTexture("$basetexture", rt)
-	local DrawText = surface.DrawText
-	local SetTextPos = surface.SetTextPos
-	local PopModelMatrix = cam.PopModelMatrix
-	local PushModelMatrix = cam.PushModelMatrix
-	local surface = surface
-	local matrix = Matrix()
-	local matrixAngle = Angle(0, 0, 0)
-	local matrixScale = Vector(0, 0, 0)
-	local matrixTranslation = Vector(0, 0, 0)
-
-	local function TextRotated(text, x, y, xScale, yScale, angle)
-		matrixAngle.y = angle
-		matrix:SetAngles(matrixAngle)
-		matrixTranslation.x = x
-		matrixTranslation.y = y
-		matrix:SetTranslation(matrixTranslation)
-		matrixScale.x = xScale
-		matrixScale.y = yScale
-		matrix:SetScale(matrixScale)
-		SetTextPos(0, 0)
-		PushModelMatrix(matrix)
-		DrawText(text)
-		PopModelMatrix()
-	end
-
-	local snd = "http://g1cf.metastruct.net/m3assets/322589__stereo-surgeon__timpani.ogg"
-	local function prepare_sound(cb)
-		sound.PlayURL(snd, "noplay", function(station)
-			if IsValid(station) then
-				station:Play()
-			end
-
-			cb()
-		end)
-	end
-
 	local function doSpook()
+		local Tag2 = Tag .. FrameNumber()
+		local textToDisplay = "B̴̮̉ḻ̷͑o̸̬̓o̷̧͂d̵̙̆.̷̰͑.̷̓ͅ.̴͈̍ ̴͚͘f̴͔͘o̶̤̽r̸̡͘ ̴͉̎t̸͙̿ḧ̴̙́e̶̜͂ ̸̠͛b̶̝̈l̶̼̆o̷͖͊ö̸͇́ď̷̲ ̴͙̉g̶̩̍o̶̫̓d̷̻̋.̵̯̊.̴̩͋.̶̖͆"
+
+		surface.CreateFont("BIGFONT", {
+			font = "Tahoma",
+			size = "150"
+		})
+
+		local TEXTUREFLAGS_CLAMPS = 0x00000004
+		local TEXTUREFLAGS_CLAMPT = 0x00000008
+		local iTexFlags = bit.bor(TEXTUREFLAGS_CLAMPS, TEXTUREFLAGS_CLAMPT)
+		local sz = ScrW()
+		local rt = GetRenderTargetEx(Tag2, sz, sz, RT_SIZE_NO_CHANGE, MATERIAL_RT_DEPTH_NONE, iTexFlags, 0, IMAGE_FORMAT_RGBA8888)
+
+		local mat = CreateMaterial(Tag2, "UnlitGeneric", {
+			["$vertexalpha"] = "1",
+			["$vertexcolor"] = "1"
+		})
+
+		mat:SetTexture("$basetexture", rt)
+		local DrawText = surface.DrawText
+		local SetTextPos = surface.SetTextPos
+		local PopModelMatrix = cam.PopModelMatrix
+		local PushModelMatrix = cam.PushModelMatrix
+		local surface = surface
+		local matrix = Matrix()
+		local matrixAngle = Angle(0, 0, 0)
+		local matrixScale = Vector(0, 0, 0)
+		local matrixTranslation = Vector(0, 0, 0)
+
+		local function TextRotated(text, x, y, xScale, yScale, angle)
+			matrixAngle.y = angle
+			matrix:SetAngles(matrixAngle)
+			matrixTranslation.x = x
+			matrixTranslation.y = y
+			matrix:SetTranslation(matrixTranslation)
+			matrixScale.x = xScale
+			matrixScale.y = yScale
+			matrix:SetScale(matrixScale)
+			SetTextPos(0, 0)
+			PushModelMatrix(matrix)
+			DrawText(text)
+			PopModelMatrix()
+		end
+
+		local snd = "http://g1cf.metastruct.net/m3assets/322589__stereo-surgeon__timpani.ogg"
+		local function prepare_sound(cb)
+			sound.PlayURL(snd, "noplay", function(station)
+				if IsValid(station) then
+					station:Play()
+				end
+
+				cb()
+			end)
+		end
+
 		prepare_sound(function()
 			local startt = RealTime()
 
