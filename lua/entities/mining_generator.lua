@@ -94,7 +94,7 @@ if SERVER then
 			if not Ores.Automation.IsEnergyPoweredEntity(ent, "Energy") then continue end
 			if self.Linked[ent] then continue end
 			if IsValid(ent.mining_generator_linked) then continue end
-			if ent:GetClas() == self:GetClass() then continue end
+			if ent:GetClass() == self:GetClass() then continue end
 
 			local entOwner = ent.CPPIGetOwner and ent:CPPIGetOwner()
 			local owner = self.CPPIGetOwner and self:CPPIGetOwner()
