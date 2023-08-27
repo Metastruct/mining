@@ -577,6 +577,13 @@ if SERVER then
 		end
 	end
 
+	function Ores.Automation.IsEnergyPoweredEntity(ent, energyType)
+		if not IsValid(ent) then return false end
+
+		local timerName = ("mining_automation_power_[%s]_entity_[%d]"):format(energyType, ent:EntIndex())
+		return timer.Exists(timerName)
+	end
+
 	hook.Add("PlayerUse", "mining_automation_use_fn_replication", function(ply, ent)
 		local parent = ent:GetParent()
 		if IsValid(parent) and Ores.Automation.EnergyEntities[ent:GetClass()] then
