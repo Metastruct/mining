@@ -91,25 +91,33 @@ if SERVER then
 		local added = false
 
 		for _, ent in ipairs(ents.FindInSphere(self:WorldSpaceCenter(), 2000)) do
-			if Ores.Automation.IsEnergyPoweredEntity(ent, "Energy") and not self.Linked[ent] and not IsValid(ent.mining_generator_linked) and ent ~= self then
-				local rope = constraint.CreateKeyframeRope(self:WorldSpaceCenter(), 1, "cable/cable2", self, self, vecZero, 0, ent, vecZero, 0, {})
-				rope:SetColor(argoniteColor)
+			if not Ores.Automation.IsEnergyPoweredEntity(ent, "Energy") then continue end
+			if not self.Linked[ent] then continue end
+			if IsValid(ent.mining_generator_linked) then continue end
+			if ent:GetClas() == self:GetClass() then continue end
 
-				local canConsumeEnergy = ent.CanConsumeEnergy or function() return true end
-				function ent:CanConsumeEnergy(...)
-					if IsValid(self.mining_generator_linked) then return false end
+			local entOwner = ent.CPPIGetOwner and ent:CPPIGetOwner()
+			local owner = self.CPPIGetOwner and self:CPPIGetOwner()
 
-					return canConsumeEnergy(self, ...)
-				end
+			if entOwner ~= owner then continue end
 
-				local maxEnergy = ent:GetNW2Int("MaxEnergy", Ores.Automation.BatteryCapacity)
-				ent:SetNW2Int("Energy", maxEnergy * perc)
+			local rope = constraint.CreateKeyframeRope(self:WorldSpaceCenter(), 1, "cable/cable2", self, self, vecZero, 0, ent, vecZero, 0, {})
+			rope:SetColor(argoniteColor)
 
-				ent.mining_generator_linked = self
-				self.Linked[ent] = true
-				self.EnergySettings.ConsumptionAmount = self.EnergySettings.ConsumptionAmount + 1
-				added = true
+			local canConsumeEnergy = ent.CanConsumeEnergy or function() return true end
+			function ent:CanConsumeEnergy(...)
+				if IsValid(self.mining_generator_linked) then return false end
+
+				return canConsumeEnergy(self, ...)
 			end
+
+			local maxEnergy = ent:GetNW2Int("MaxEnergy", Ores.Automation.BatteryCapacity)
+			ent:SetNW2Int("Energy", maxEnergy * perc)
+
+			ent.mining_generator_linked = self
+			self.Linked[ent] = true
+			self.EnergySettings.ConsumptionAmount = self.EnergySettings.ConsumptionAmount + 1
+			added = true
 		end
 
 		if added then
