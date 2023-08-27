@@ -19,6 +19,7 @@ Ores.Automation = {
 		mining_coin_minter = true,
 		mining_oil_extractor = true,
 		mining_chip_router = true,
+		mining_generator = true,
 	},
 	BaseOreProductionRate = 10, -- 1 per 10 seconds
 	EnergyMaterial = Material("models/props_combine/coredx70"),
@@ -48,6 +49,7 @@ Ores.Automation = {
 		mining_coin_minter = true,
 		mining_oil_extractor = true,
 		mining_chip_router = true,
+		mining_generator = true,
 	},
 	GraphUnit = 40,
 	GraphHeightMargin = 75,
