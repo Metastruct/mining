@@ -568,6 +568,10 @@ if SERVER then
 					if _G.WireLib then
 						_G.WireLib.TriggerOutput(ent, energyData.Type, newEnergyValue)
 					end
+
+					if isfunction(ent.ConsumedEnergy) then
+						ent:ConsumedEnergy(energyData.Type, curEnergy, newEnergyValue, energyData.ConsumptionAmount or 1)
+					end
 				end
 			end)
 		end
