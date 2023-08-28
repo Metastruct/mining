@@ -90,7 +90,7 @@ if SERVER then
 		local perc = self:GetNW2Int("Energy", 0) / self:GetNW2Int("MaxEnergy", Ores.Automation.BatteryCapacity * 6)
 		local added = false
 
-		for _, ent in ipairs(ents.FindInSphere(self:WorldSpaceCenter(), 2000)) do
+		for _, ent in ipairs(ents.FindInSphere(self:WorldSpaceCenter(), 500)) do
 			if not Ores.Automation.IsEnergyPoweredEntity(ent, "Energy") then continue end
 			if self.Linked[ent] then continue end
 			if IsValid(ent.mining_generator_linked) then continue end

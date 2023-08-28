@@ -78,6 +78,10 @@ if SERVER then
 
 		self:SetNWInt("MintedCoins", 0)
 		self:EmitSound(")physics/surfaces/underwater_impact_bullet3.wav", 75, 70)
+
+		if _G.WireLib then
+			_G.WireLib.TriggerOutput(self, "Amount", 0)
+		end
 	end
 
 	function ENT:SpawnFunction(ply, tr, className)
