@@ -108,10 +108,10 @@ if SERVER then
 			rope:SetColor(argoniteColor)
 
 			local canConsumeEnergy = ent.CanConsumeEnergy or function() return true end
-			function ent:CanConsumeEnergy(...)
-				if IsValid(self.mining_generator_linked) then return false end
+			function ent:CanConsumeEnergy(energyType, ...)
+				if energyType == "Energy" and IsValid(self.mining_generator_linked) then return false end
 
-				return canConsumeEnergy(self, ...)
+				return canConsumeEnergy(self, energyType, ...)
 			end
 
 			ent.mining_generator_linked = self
@@ -145,6 +145,10 @@ if SERVER then
 			if IsValid(linkedEnt) then
 				local maxEnergy = linkedEnt:GetNW2Int("MaxEnergy", Ores.Automation.BatteryCapacity)
 				linkedEnt:SetNW2Int("Energy", maxEnergy * perc)
+
+				if _G.WireLib then
+					_G.WireLib.TriggerOutput(linkedEnt, "Energy", maxEnergy * perc)
+				end
 			end
 		end
 	end
