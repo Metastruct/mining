@@ -61,12 +61,7 @@ if SERVER then
 		if port == "Active" then
 			local active = tobool(state)
 			self:SetNWBool("IsPowered", active)
-
-			if not active then
-				self:RefreshPowerGrid(0)
-			else
-				self:RefreshPowerGrid(self:GetNW2Int("Energy", 0))
-			end
+			self:RefreshPowerGrid(self:GetNW2Int("Energy", 0))
 		end
 	end
 
@@ -145,7 +140,7 @@ if SERVER then
 	end
 
 	function ENT:RefreshPowerGrid(value)
-		local perc = newAmount / self:GetNW2Int("MaxEnergy", Ores.Automation.BatteryCapacity * 6)
+		local perc = self:GetNWBool("IsPowered", true) and (newAmount / self:GetNW2Int("MaxEnergy", Ores.Automation.BatteryCapacity * 6)) or 0
 		for linkedEnt, _ in pairs(self.Linked) do
 			if IsValid(linkedEnt) then
 				local maxEnergy = linkedEnt:GetNW2Int("MaxEnergy", Ores.Automation.BatteryCapacity)
