@@ -46,7 +46,7 @@ if SERVER then
 			Type = "Energy",
 			MaxValue = Ores.Automation.BatteryCapacity * 10,
 			ConsumptionRate = 10,
-			ConsumptionAmount = 1,
+			ConsumptionAmount = 0,
 		}
 
 		Ores.Automation.PrepareForDuplication(self)
@@ -116,7 +116,6 @@ if SERVER then
 
 			ent.mining_generator_linked = self
 			self.Linked[ent] = true
-			self.EnergySettings.ConsumptionAmount = self.EnergySettings.ConsumptionAmount + 1
 			added = true
 		end
 
@@ -141,6 +140,7 @@ if SERVER then
 
 	function ENT:RefreshPowerGrid(value)
 		local perc = self:GetNWBool("IsPowered", true) and (value / self:GetNW2Int("MaxEnergy", Ores.Automation.BatteryCapacity * 6)) or 0
+		local i = 0
 		for linkedEnt, _ in pairs(self.Linked) do
 			if IsValid(linkedEnt) then
 				local maxEnergy = linkedEnt:GetNW2Int("MaxEnergy", Ores.Automation.BatteryCapacity)
@@ -149,8 +149,12 @@ if SERVER then
 				if _G.WireLib then
 					_G.WireLib.TriggerOutput(linkedEnt, "Energy", maxEnergy * perc)
 				end
+
+				i = i + 1
 			end
 		end
+
+		self.EnergySettings.ConsumptionAmount = math.ceil(math.max(0, i / 3))
 	end
 
 	function ENT:Think()
@@ -175,7 +179,7 @@ if SERVER then
 		if not IsValid(generator) then return end
 
 		generator.Linked[ent] = nil
-		generator.EnergySettings.ConsumptionAmount = math.max(1, generator.EnergySettings.ConsumptionAmount - 1)
+		generator:RefreshPowerGrid(generator:GetNW2Int("Energy", 0))
 	end)
 end
 
