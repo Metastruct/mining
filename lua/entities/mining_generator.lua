@@ -58,7 +58,16 @@ if SERVER then
 	end
 
 	function ENT:TriggerInput(port, state)
-		if port == "Active" then self:SetNWBool("IsPowered", tobool(state)) end
+		if port == "Active" then
+			local active = tobool(state)
+			self:SetNWBool("IsPowered", active)
+
+			if not active then
+				self:RefreshPowerGrid(0)
+			else
+				self:RefreshPowerGrid(self:GetNW2Int("Energy", 0))
+			end
+		end
 	end
 
 	function ENT:CheckSoundLoop(time)
@@ -87,7 +96,6 @@ if SERVER then
 		local argoniteRarity = Ores.Automation.GetOreRarityByName("Argonite")
 		local argoniteColor = Ores.__R[argoniteRarity].PhysicalColor
 		local vecZero = Vector(0, 0, 0)
-		local perc = self:GetNW2Int("Energy", 0) / self:GetNW2Int("MaxEnergy", Ores.Automation.BatteryCapacity * 6)
 		local added = false
 
 		for _, ent in ipairs(ents.FindInSphere(self:WorldSpaceCenter(), 500)) do
@@ -111,9 +119,6 @@ if SERVER then
 				return canConsumeEnergy(self, ...)
 			end
 
-			local maxEnergy = ent:GetNW2Int("MaxEnergy", Ores.Automation.BatteryCapacity)
-			ent:SetNW2Int("Energy", maxEnergy * perc)
-
 			ent.mining_generator_linked = self
 			self.Linked[ent] = true
 			self.EnergySettings.ConsumptionAmount = self.EnergySettings.ConsumptionAmount + 1
@@ -121,6 +126,7 @@ if SERVER then
 		end
 
 		if added then
+			self:RefreshPowerGrid(self:GetNW2Int("Energy", 0))
 			self:EmitSound("ambient/energy/weld2.wav")
 		end
 
@@ -135,7 +141,10 @@ if SERVER then
 
 	function ENT:ConsumedEnergy(energyType, oldAmount, newAmount, amountChanged)
 		if energyType ~= "Energy" then return end
+		self:RefreshPowerGrid(newAmount)
+	end
 
+	function ENT:RefreshPowerGrid(value)
 		local perc = newAmount / self:GetNW2Int("MaxEnergy", Ores.Automation.BatteryCapacity * 6)
 		for linkedEnt, _ in pairs(self.Linked) do
 			if IsValid(linkedEnt) then
@@ -157,12 +166,7 @@ if SERVER then
 			self:StopLoopingSound(self.SndLoop)
 		end
 
-		for linkedEnt, _ in pairs(self.Linked) do
-			if IsValid(linkedEnt) then
-				linkedEnt.mining_generator_linked = nil
-				linkedEnt:SetNW2Int("Energy", 0)
-			end
-		end
+		self:RefreshPowerGrid(0)
 	end
 
 	hook.Add("EntityRemoved", "mining_generator", function(ent)
