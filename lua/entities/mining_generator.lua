@@ -114,6 +114,13 @@ if SERVER then
 				return canConsumeEnergy(self, energyType, ...)
 			end
 
+			local canReceiveEnergy = ent.CanReceiveEnergy or function() return true end
+			function ent:CanReceiveEnergy(energyType, ...)
+				if energyType == "Energy" and IsValid(self.mining_generator_linked) then return false end
+
+				return canReceiveEnergy(self, energyType, ...)
+			end
+
 			ent.mining_generator_linked = self
 			self.Linked[ent] = true
 			added = true
