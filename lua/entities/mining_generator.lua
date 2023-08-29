@@ -140,7 +140,7 @@ if SERVER then
 	end
 
 	function ENT:RefreshPowerGrid(value)
-		local perc = self:GetNWBool("IsPowered", true) and (newAmount / self:GetNW2Int("MaxEnergy", Ores.Automation.BatteryCapacity * 6)) or 0
+		local perc = self:GetNWBool("IsPowered", true) and (value / self:GetNW2Int("MaxEnergy", Ores.Automation.BatteryCapacity * 6)) or 0
 		for linkedEnt, _ in pairs(self.Linked) do
 			if IsValid(linkedEnt) then
 				local maxEnergy = linkedEnt:GetNW2Int("MaxEnergy", Ores.Automation.BatteryCapacity)
