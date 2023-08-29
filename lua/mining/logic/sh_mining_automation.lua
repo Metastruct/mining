@@ -452,13 +452,13 @@ if SERVER then
 		if time < (poweredEnt.NextEnergyEntity or 0) then return end
 		if ent.MiningInvalidPower then return end
 
-		local canConsumeEnergy = true
-		if isfunction(poweredEnt.CanConsumeEnergy) then
-			local ret = poweredEnt:CanConsumeEnergy(energyAccesors.Type)
-			if ret ~= nil then canConsumeEnergy = ret end
+		local canReceiveEnergy = true
+		if isfunction(poweredEnt.CanReceiveEnergy) then
+			local ret = poweredEnt:CanReceiveEnergy(energyAccesors.Type)
+			if ret ~= nil then canReceiveEnergy = ret end
 		end
 
-		if not canConsumeEnergy then return end
+		if not canReceiveEnergy then return end
 
 		if ent.CPPIGetOwner and poweredEnt.CPPIGetOwner then
 			local p1, p2 = ent:CPPIGetOwner(), poweredEnt:CPPIGetOwner()
