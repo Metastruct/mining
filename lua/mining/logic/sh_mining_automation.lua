@@ -23,18 +23,7 @@ Ores.Automation = Ores.Automation or {
 	},
 	BaseOreProductionRate = 10, -- 1 per 10 seconds
 	EnergyMaterial = Material("models/props_combine/coredx70"),
-	EnergyEntities = {
-		mining_argonite_battery = {
-			Get = function(ent) return ent:GetNWInt("ArgoniteCount", 0) end,
-			Set = function(ent, value) ent:SetNWInt("ArgoniteCount", value) end,
-			Type = "Energy",
-		},
-		mining_fuel_tank = {
-			Get = function(ent) return ent:GetNWInt("CoalCount", 0) end,
-			Set = function(ent, value) ent:SetNWInt("CoalCount", value) end,
-			Type = "Fuel"
-		}
-	},
+	EnergyEntities = {},
 	NonStorableOres = { "Argonite", "Detonite" },
 	EntityClasses = {
 		mining_ore_conveyor = true,
