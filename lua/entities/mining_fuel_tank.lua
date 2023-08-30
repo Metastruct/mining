@@ -30,6 +30,12 @@ if SERVER then
 		self:SetUseType(SIMPLE_USE)
 
 		Ores.Automation.PrepareForDuplication(self)
+		Ores.Automation.RegisterEnergyEntityClass(
+			"Fuel",
+			self:GetClass(),
+			function(ent) return ent:GetNWInt("CoalCount", 0) end,
+			function(ent, value) ent:SetNWInt("CoalCount", value) end
+		)
 
 		timer.Simple(0, function()
 			if not IsValid(self) then return end
@@ -76,13 +82,6 @@ if SERVER then
 	function ENT:UpdateTransmitState()
 		return TRANSMIT_ALWAYS
 	end
-
-	Ores.Automation.RegisterEnergyEntityClass(
-		"Fuel",
-		"mining_fuel_tank",
-		function(ent) return ent:GetNWInt("CoalCount", 0) end,
-		function(ent, value) ent:SetNWInt("CoalCount", value) end
-	)
 end
 
 if CLIENT then

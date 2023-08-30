@@ -43,6 +43,12 @@ if SERVER then
 		self.Frame:SetTransmitWithParent(true)
 
 		Ores.Automation.PrepareForDuplication(self)
+		Ores.Automation.RegisterEnergyEntityClass(
+			"Energy",
+			self:GetClass(),
+			function(ent) return ent:GetNWInt("ArgoniteCount", 0) end,
+			function(ent, value) ent:SetNWInt("ArgoniteCount", value) end
+		)
 
 		timer.Simple(0, function()
 			if not IsValid(self) then return end
@@ -89,13 +95,6 @@ if SERVER then
 	function ENT:UpdateTransmitState()
 		return TRANSMIT_ALWAYS
 	end
-
-	Ores.Automation.RegisterEnergyEntityClass(
-		"Energy",
-		"mining_argonite_battery",
-		function(ent) return ent:GetNWInt("ArgoniteCount", 0) end,
-		function(ent, value) ent:SetNWInt("ArgoniteCount", value) end
-	)
 end
 
 if CLIENT then
