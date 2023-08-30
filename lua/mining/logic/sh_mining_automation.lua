@@ -435,6 +435,7 @@ if SERVER then
 		if not energyAccesors then return end
 
 		-- can't put fuel inside energy, etc...
+		if not istable(poweredEnt.AcceptedPowerTypes) then return end
 		if not poweredEnt.AcceptedPowerTypes[energyAccesors.Type] then return end
 
 		local time = CurTime()
