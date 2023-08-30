@@ -4,7 +4,7 @@ Ores = Ores or {}
 local IsValid = _G.IsValid
 local isstring = _G.isstring
 
-Ores.Automation = {
+Ores.Automation = Ores.Automation or {
 	BatteryCapacity = 150,
 	BombCapacity = 5,
 	BombDetonationTime = 4,
@@ -515,6 +515,14 @@ if SERVER then
 		return brush
 	end
 
+	function Ores.Automation.RegisterEnergyEntityClass(energyType, className, get, set)
+		Ores.Automation.EnergyEntities[className] = {
+			Type = energyType,
+			Get = get,
+			Set = set,
+		}
+	end
+
 	function Ores.Automation.RegisterEnergyPoweredEntity(ent, energyDataSettings, extraOutputs)
 		if _G.WireLib then
 			local wireOutputs = {}
@@ -606,8 +614,22 @@ if SERVER then
 	hook.Add("OnEntityCreated", "mining_automation", function(ent)
 		local className = ent:GetClass()
 		if className == "mining_drill" then return end
-		if not Ores.Automation.EntityClasses[className]  then return end
+		if not Ores.Automation.EntityClasses[className] then return end
 		if not ent.CPPIGetOwner then return end
+
+		-- if an energy entity collides with something that can receive it, force the transfer to happen
+		if Ores.Automation.EnergyEntities[className] then
+			local physicsCollide = ent.PhysicsCollide
+			function ent:PhysicsCollide(data, ...)
+				if IsValid(data.HitEntity) then
+					gainEnergy(data.HitEntity, self)
+
+					if self.MiningInvalidPower then return end -- means we have been removed, dont go further
+				end
+
+				return physicsCollide(self, data, ...)
+			end
+		end
 
 		timer.Simple(0, function()
 			if not IsValid(ent) then return end

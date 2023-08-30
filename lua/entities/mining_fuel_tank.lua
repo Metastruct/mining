@@ -76,6 +76,13 @@ if SERVER then
 	function ENT:UpdateTransmitState()
 		return TRANSMIT_ALWAYS
 	end
+
+	Ores.Automation.RegisterEnergyEntityClass(
+		"Fuel",
+		"mining_fuel_tank",
+		function(ent) return ent:GetNWInt("CoalCount", 0) end,
+		function(ent, value) ent:SetNWInt("CoalCount", value) end
+	)
 end
 
 if CLIENT then
