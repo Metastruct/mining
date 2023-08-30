@@ -89,6 +89,13 @@ if SERVER then
 	function ENT:UpdateTransmitState()
 		return TRANSMIT_ALWAYS
 	end
+
+	Ores.Automation.RegisterEnergyEntityClass(
+		"Energy",
+		"mining_argonite_battery",
+		function(ent) return ent:GetNWInt("ArgoniteCount", 0) end,
+		function(ent, value) ent:SetNWInt("ArgoniteCount", value) end
+	)
 end
 
 if CLIENT then

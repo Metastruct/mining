@@ -192,6 +192,13 @@ if SERVER then
 		SafeRemoveEntity(ent)
 	end
 
+	-- fallback in case trigger stops working
+	function ENT:PhysicsCollide(data)
+		if not IsValid(data.HitEntity) then return end
+
+		self:Touch(data.HitEntity)
+	end
+
 	function ENT:AllowPassThrough(allow)
 		local phys = self:GetPhysicsObject()
 		if IsValid(phys) then

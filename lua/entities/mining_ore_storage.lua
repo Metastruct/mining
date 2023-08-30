@@ -65,8 +65,11 @@ if SERVER then
 		SafeRemoveEntity(ent)
 	end
 
+	-- fallback in case trigger stops working
 	function ENT:PhysicsCollide(data)
-		self:StartTouch(data.HitEntity)
+		if not IsValid(data.HitEntity) then return end
+
+		self:Touch(data.HitEntity)
 	end
 
 	function ENT:Use(activator)

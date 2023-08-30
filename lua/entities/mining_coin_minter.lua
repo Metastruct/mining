@@ -67,6 +67,13 @@ if SERVER then
 		ent.MiningMinterCollected = true
 	end
 
+	-- fallback in case trigger stops working
+	function ENT:PhysicsCollide(data)
+		if not IsValid(data.HitEntity) then return end
+
+		self:Touch(data.HitEntity)
+	end
+
 	function ENT:Use(activator)
 		if not activator:IsPlayer() then return end
 		if self.CPPIGetOwner and self:CPPIGetOwner() ~= activator then return end
