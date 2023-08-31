@@ -49,6 +49,7 @@ if SERVER then
 		self.NextSoundCheck = 0
 		self.NextTraceCheck = 0
 		self:SetNWBool("IsPowered", true)
+		self:SetNWInt("NextOil", CurTime() + Ores.Automation.OilExtractionRate)
 
 		self.Frame = ents.Create("prop_physics")
 		self.Frame:SetModel("models/props_phx/construct/metal_wire1x1x2.mdl")
