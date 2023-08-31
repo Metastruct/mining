@@ -19,7 +19,41 @@ local function can_work(self)
 	return true
 end
 
+local BASE_KICKSTART_PRICE = 75000
+
 if SERVER then
+	util.AddNetworkString("mining_kickstart_generator")
+
+	local function take_player_ore(ply, amount)
+		Ores.Print(ply, ("kickstarted a generator using %d pts"):format(amount))
+
+		local loadingSound = "ambient/levels/canals/headcrab_canister_ambient5.wav"
+		ply:EmitSound(loadingSound, 45, 120, 0.6)
+
+		Ores.GetSavedPlayerDataAsync(ply, function(data)
+		local points = math.floor(math.max(0, data._points - amount))
+
+		Ores.SetSavedPlayerData(ply, "points", points)
+		ply:SetNWInt(Ores._nwPoints, points)
+
+		ply:StopSound(loadingSound)
+		ply:EmitSound(")physics/surfaces/underwater_impact_bullet3.wav", 75, 70)
+	end)
+
+	end
+
+	net.Receive("mining_kickstart_generator", function(_, ply)
+		local generator = net.ReadEntity()
+		if not IsValid(generator) then return end
+
+		local requiredPoints = math.floor(BASE_KICKSTART_PRICE * math.max(0, Ores.GetPlayerMultiplier(ply) - 2))
+		local pointBalance = ply:GetNWInt(Ores._nwPoints, 0)
+		if requiredPoints > pointBalance then return end
+
+		take_player_ore(ply, requiredPoints)
+		generator:SetNW2Int("Energy", generator:GetNW2Int("MaxEnergy", Ores.Automation.BatteryCapacity * 10))
+	end)
+
 	ENT.NextSoundCheck = 0
 	ENT.NextLinkCheck = 0
 
@@ -273,15 +307,53 @@ if CLIENT then
 
 	function ENT:OnDrawEntityInfo()
 		if not self.MiningFrameInfo then
-			self.MiningFrameInfo = {
+			local data = {
 				{ Type = "Label", Text = "GENERATOR", Border = true },
 				{ Type = "Data", Label = "ENERGY", Value = self:GetNW2Int("Energy", 0), MaxValue = self:GetNW2Int("MaxEnergy", Ores.Automation.BatteryCapacity * 3) },
 				{ Type = "State", Value = can_work(self) }
 			}
+
+			self.MiningFrameInfo = data
 		end
 
 		self.MiningFrameInfo[2].Value = self:GetNW2Int("Energy", 0)
 		self.MiningFrameInfo[3].Value = can_work(self)
+
+		if self.CPPIGetOwner and self:CPPIGetOwner() == LocalPlayer() then
+			self.MiningFrameInfo[4] = { Type = "Action", Binding = "+use", Text = "KICKSTART" }
+		end
+
 		return self.MiningFrameInfo
 	end
+
+	hook.Add("PlayerBindPress", "mining_generator_kickstart", function(ply, bind, pressed, code)
+		if bind == "+use" and pressed then
+			local tr = ply:GetEyeTrace()
+			if IsValid(tr.Entity) and tr.Entity:GetClass() == "mining_generator" and tr.Entity:WorldSpaceCenter():Distance(EyePos()) <= 300 then
+				local requiredPoints = math.floor(BASE_KICKSTART_PRICE * math.max(0, Ores.GetPlayerMultiplier(ply) - 2))
+				local pointBalance = ply:GetNWInt(Ores._nwPoints, 0)
+				if requiredPoints > pointBalance then
+					chat.AddText(Color(230, 130, 65), " ♦ [Ores] ", color_white, ("You do not have enough points to kickstart this generator (required: %s pts | balance: %s pts)"):format(
+						string.Comma(requiredPoints),
+						string.Comma(pointBalance)
+					))
+					return
+				end
+
+				Derma_Query(
+					("Kickstarting the generator will cost you %s pts (current balance: %s pts)"):format(
+						string.Comma(requiredPoints),
+						string.Comma(pointBalance)
+					),
+					"Kickstart Generator",
+					"Kickstart", function()
+						net.Start("mining_kickstart_generator")
+						net.WriteEntity(tr.Entity)
+						net.SendToServer()
+					end,
+					"Cancel", function() end
+				)
+			end
+		end
+	end)
 end
