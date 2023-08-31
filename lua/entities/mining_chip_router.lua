@@ -87,6 +87,8 @@ if SERVER then
 
 		local detoniteRarity = Ores.Automation.GetOreRarityByName("Detonite")
 		local detoniteAmount = Ores.GetPlayerOre(ent, detoniteRarity)
+		if detoniteAmount < 1 then return end
+
 		local toGive = math.min(self.MaxBandwidth, detoniteAmount)
 
 		self:AddDetonite(toGive)
