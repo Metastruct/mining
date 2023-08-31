@@ -46,7 +46,7 @@ if SERVER then
 		local generator = net.ReadEntity()
 		if not IsValid(generator) then return end
 
-		local requiredPoints = math.floor(BASE_KICKSTART_PRICE * math.max(0, Ores.GetPlayerMultiplier(ply) - 2))
+		local requiredPoints = math.floor(BASE_KICKSTART_PRICE * math.max(1, Ores.GetPlayerMultiplier(ply) - 2))
 		local pointBalance = ply:GetNWInt(Ores._nwPoints, 0)
 		if requiredPoints > pointBalance then return end
 
@@ -330,7 +330,7 @@ if CLIENT then
 		if bind == "+use" and pressed then
 			local tr = ply:GetEyeTrace()
 			if IsValid(tr.Entity) and tr.Entity:GetClass() == "mining_generator" and tr.Entity:WorldSpaceCenter():Distance(EyePos()) <= 300 then
-				local requiredPoints = math.floor(BASE_KICKSTART_PRICE * math.max(0, Ores.GetPlayerMultiplier(ply) - 2))
+				local requiredPoints = math.floor(BASE_KICKSTART_PRICE * math.max(1, Ores.GetPlayerMultiplier(ply) - 2))
 				local pointBalance = ply:GetNWInt(Ores._nwPoints, 0)
 				if requiredPoints > pointBalance then
 					chat.AddText(Color(230, 130, 65), " ♦ [Ores] ", color_white, ("You do not have enough points to kickstart this generator (required: %s pts | balance: %s pts)"):format(
