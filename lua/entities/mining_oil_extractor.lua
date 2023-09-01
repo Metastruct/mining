@@ -36,6 +36,9 @@ end
 
 if SERVER then
 	ENT.NextSoundCheck = 0
+	ENT.NextTraceCheck = 0
+	ENT.ExtractedOil = 0
+	ENT.NextOil = 0
 
 	function ENT:Initialize()
 		self:SetModel("models/props_wasteland/coolingtank02.mdl")
@@ -48,8 +51,9 @@ if SERVER then
 		self:Activate()
 		self.NextSoundCheck = 0
 		self.NextTraceCheck = 0
+		self.ExtractedOil = 0
+		self.NextOil = 0
 		self:SetNWBool("IsPowered", true)
-		self:SetNWInt("NextOil", CurTime() + Ores.Automation.OilExtractionRate)
 
 		self.Frame = ents.Create("prop_physics")
 		self.Frame:SetModel("models/props_phx/construct/metal_wire1x1x2.mdl")
@@ -146,35 +150,43 @@ if SERVER then
 	end
 
 	function ENT:ExtractOil(time)
-		if not can_work(self, CurTime()) then return end
-
-		if _G.WireLib then
-			local curOil = math.Round((1 - math.max(0, self:GetNWInt("NextOil", 0) - CurTime()) / Ores.Automation.OilExtractionRate) * 100)
-			_G.WireLib.TriggerOutput(self, "Oil", curOil)
-		end
-
-		if time < self:GetNWInt("NextOil", 0) then return end
+		if time < self.NextOil then return end
 		if not can_work(self, time) then return end
 
-		local fuelTank = ents.Create("mining_fuel_tank")
-		fuelTank:SetPos(self:GetPos() + self:GetRight() * 50 + self:GetUp() * -45)
-		fuelTank:SetNWInt("CoalCount", 150)
-		fuelTank:Spawn()
-		fuelTank:PhysWake()
+		self.NextOil = CurTime() + 1
+		self.ExtractedOil = self.ExtractedOil + 1
 
-		if _G.WireLib then
-			_G.WireLib.TriggerOutput(fuelTank, "Amount", 150)
+		if self.ExtractedOil >= Ores.Automation.OilExtractionRate then
+			self.ExtractedOil = 0
+			self:SetNWInt("ExtractedOil", self.ExtractedOil)
+
+			local fuelTank = ents.Create("mining_fuel_tank")
+			fuelTank:SetPos(self:GetPos() + self:GetRight() * 50 + self:GetUp() * -45)
+			fuelTank:SetNWInt("CoalCount", 150)
+			fuelTank:Spawn()
+			fuelTank:PhysWake()
+
+			if _G.WireLib then
+				_G.WireLib.TriggerOutput(fuelTank, "Amount", 150)
+			end
+
+			SafeRemoveEntityDelayed(fuelTank, Ores.Automation.OilExtractionRate)
+
+			timer.Simple(0, function()
+				if IsValid(self) and IsValid(fuelTank) then
+					Ores.Automation.ReplicateOwnership(fuelTank, self, true)
+				end
+			end)
 		end
 
-		SafeRemoveEntityDelayed(fuelTank, Ores.Automation.OilExtractionRate)
+		if self.ExtractedOil % 5 == 0 then -- update every 5 seconds because SetNW is slow
+			self:SetNWInt("ExtractedOil", self.ExtractedOil)
+		end
 
-		timer.Simple(0, function()
-			if IsValid(self) and IsValid(fuelTank) then
-				Ores.Automation.ReplicateOwnership(fuelTank, self, true)
-			end
-		end)
-
-		self:SetNWInt("NextOil", time + Ores.Automation.OilExtractionRate)
+		if _G.WireLib then
+			local curOil = (self.ExtractedOil / Ores.Automation.OilExtractionRate) * 100
+			_G.WireLib.TriggerOutput(self, "Oil", curOil)
+		end
 	end
 
 	function ENT:Think()
@@ -290,13 +302,11 @@ if CLIENT then
 	end
 
 	function ENT:OnDrawEntityInfo()
-		local oilValue = self:GetNWBool("IsPowered", true) and math.max(0, self:GetNWInt("NextOil", 0) - CurTime()) or 0
-
 		if not self.MiningFrameInfo then
 			self.MiningFrameInfo = {
 				{ Type = "Label", Text = "EXTRACTOR", Border = true },
 				{ Type = "Data", Label = "ENERGY", Value = self:GetNW2Int("Energy", 0), MaxValue = self:GetNW2Int("MaxEnergy", Ores.Automation.BatteryCapacity * 3), Border = true },
-				{ Type = "Data", Label = "OIL", Value = oilValue, MaxValue = Ores.Automation.OilExtractionRate },
+				{ Type = "Data", Label = "OIL", Value = self:GetNWInt("ExtractedOil", 0), MaxValue = Ores.Automation.OilExtractionRate },
 				{ Type = "State", Value = can_work(self, CurTime()) },
 			}
 		end
