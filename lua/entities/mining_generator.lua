@@ -128,6 +128,7 @@ if SERVER then
 		local added = false
 
 		for _, ent in ipairs(ents.FindInSphere(self:WorldSpaceCenter(), 500)) do
+			if not Ores.Automation.EntityClasses[ent:GetClass()] then return end
 			if not Ores.Automation.IsEnergyPoweredEntity(ent, "Energy") then continue end
 			if self.Linked[ent] then continue end
 			if IsValid(ent.mining_generator_linked) then continue end
