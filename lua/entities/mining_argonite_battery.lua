@@ -98,14 +98,17 @@ if SERVER then
 end
 
 if CLIENT then
+	local scale = Vector(0.9, 0.9, 0.9)
+	local mat = Matrix()
+	mat:Scale(scale)
+
 	function ENT:Initialize()
-		local scale = Vector(0.9, 0.9, 0.9)
-		local mat = Matrix()
-		mat:Scale(scale)
 		self:EnableMatrix("RenderMultiply", mat)
 	end
 
 	function ENT:Draw()
+		self:EnableMatrix("RenderMultiply", mat)
+
 		local argoniteRarity = Ores.Automation.GetOreRarityByName("Argonite")
 		local color = Ores.__R[argoniteRarity].PhysicalColor
 
