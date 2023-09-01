@@ -312,7 +312,7 @@ if CLIENT then
 		end
 
 		self.MiningFrameInfo[2].Value = self:GetNW2Int("Energy", 0)
-		self.MiningFrameInfo[3].Value = Ores.Automation.OilExtractionRate - oilValue
+		self.MiningFrameInfo[3].Value = self:GetNWInt("ExtractedOil", 0)
 		self.MiningFrameInfo[4].Value = can_work(self, CurTime())
 		return self.MiningFrameInfo
 	end
