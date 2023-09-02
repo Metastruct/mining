@@ -172,7 +172,7 @@ if SERVER then
 
 			net.Start(Tag .. "_npc")
 			net.WriteInt(BLOOD_GOD_NPC:EntIndex(), 32)
-			net.Send(ply)
+			net.Broadcast(ply)
 
 			ply.BloodGodDone = true
 		end
