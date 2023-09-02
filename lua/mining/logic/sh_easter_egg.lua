@@ -64,6 +64,8 @@ if SERVER then
 			hook.Run("SoulGottenBack", ply)
 		end
 
+		ms.Ores.TakePlayerOre(ply, 666, item.price)
+
 		local ent = ents.Create("prop_physics")
 		ent:SetModel(item.model)
 		ent:SetPos(ply:EyePos() + ply:GetAimVector() * 100)
@@ -1753,6 +1755,19 @@ if CLIENT then
 			pac.SetupENT(npc)
 			npc:AttachPACPart(DEMON_OUTFIT)
 		end
+
+		local mat = Material("models/debug/debugwhite")
+		function npc:RenderOverride()
+			render.SetLightingMode(2)
+			render.SetColorModulation(0.0001, 0.0001, 0.0001)
+			render.MaterialOverride(mat)
+			self:DrawModel()
+			render.MaterialOverride()
+			render.SetColorModulation(0, 0, 0)
+			render.SetLightingMode(0)
+		end
+
+		function npc:Draw() self:DrawModel() end
 
 		npc.mining_blood_ore = true
 		return true
