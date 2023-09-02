@@ -16,51 +16,9 @@ end
 
 local function createOre(pos, owner, rarity, magicFindChance, foolsDay)
 	local oreRarity = getOreRarity(rarity, magicFindChance)
-	local foolsTime = foolsDay and math.random() <= 0.2
-	local ore = ents.Create(foolsTime and "mining_ore_fools" or "mining_ore")
-	ore:SetRarity(oreRarity)
-	ore:AllowGracePeriod(owner, 20)
-	ore:SetPos(pos)
-	ore:SetAngles(AngleRand())
+	--local foolsTime = foolsDay and math.random() <= 0.2
 
-	if foolsTime then
-		ore:SetTarget(owner)
-		ore:SetAggro(true)
-	end
-
-	ore:Spawn()
-	local ophys = ore:GetPhysicsObject()
-
-	if ophys:IsValid() then
-		local vec = VectorRand() * math.random(64, 128)
-		vec.z = math.abs(vec.z)
-		ophys:AddVelocity(vec)
-		ophys:EnableCollisions(false)
-		ophys:EnableGravity(false)
-	end
-
-	if not foolsTime then
-		function ore:Think()
-			if not IsValid(owner) or not owner:IsPlayer() then
-				SafeRemoveEntity(self)
-
-				return
-			end
-
-			local curPos = self:GetPos()
-			local targetPos = owner:WorldSpaceCenter()
-			local phys = self:GetPhysicsObject()
-
-			if IsValid(phys) then
-				phys:SetVelocity((targetPos - curPos):GetNormalized() * 1000)
-			end
-
-			if curPos:DistToSqr(targetPos) <= 10000 then
-				SafeRemoveEntity(self)
-				ms.Ores.GivePlayerOre(owner, oreRarity, 1)
-			end
-		end
-	end
+	ms.Ores.GivePlayerOre(owner, oreRarity, 1)
 
 	if rarity ~= oreRarity then
 		-- Sound for Magic Find
@@ -247,8 +205,8 @@ function ENT:OnTakeDamage(dmg)
 	for i = 1, 1 + bonusAmount do
 		if i > 1 then
 			timer.Simple(i * 0.175, function()
-				local ore = createOre(dmgPos, attacker, rarity, magicFindChance, foolsDay)
-				ore:EmitSound(")garrysmod/save_load4.wav", 70, 152 + (i * 12))
+				--[[local ore =]] createOre(dmgPos, attacker, rarity, magicFindChance, foolsDay)
+				--ore:EmitSound(")garrysmod/save_load4.wav", 70, 152 + (i * 12))
 			end)
 		else
 			createOre(dmgPos, attacker, rarity, magicFindChance, foolsDay)
