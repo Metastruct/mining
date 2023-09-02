@@ -60,6 +60,10 @@ if SERVER then
 			return
 		end
 
+		if itemId == "soul" then
+			hook.Run("SoulGottenBack", ply)
+		end
+
 		local ent = ents.Create("prop_physics")
 		ent:SetModel(item.model)
 		ent:SetPos(ply:EyePos() + ply:GetAimVector() * 100)
