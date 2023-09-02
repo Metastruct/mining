@@ -22,7 +22,7 @@ local function createOre(pos, owner, rarity, magicFindChance, foolsDay)
 
 	if rarity ~= oreRarity then
 		-- Sound for Magic Find
-		ore:EmitSound(")ambient/levels/citadel/portal_beam_shoot1.wav", 68, math.random(185, 195), 0.75)
+		owner:EmitSound(")ambient/levels/citadel/portal_beam_shoot1.wav", 68, math.random(185, 195), 0.75)
 	end
 
 	return ore
