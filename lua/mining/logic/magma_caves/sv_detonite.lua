@@ -138,6 +138,7 @@ local function spawnDetonite(tr)
 		drop:UseTriggerBounds(true,6)
 		drop:Spawn()
 		drop:PhysWake()
+		drop:SetAllowTouch(true)
 
 		function drop:PhysicsCollide(data)
 			if IsValid(data.Entity) and data.Entity:IsPlayer() then
