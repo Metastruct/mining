@@ -67,6 +67,20 @@ if SERVER then
 			if not IsValid(self) then return end
 			Ores.Automation.ReplicateOwnership(self, self)
 			self.SndLoop = self:StartLoopingSound("ambient/spacebase/spacebase_drill.wav")
+
+			-- for bad boys putting them inside each others
+			local bound = self:GetForward() * 50 + self:GetRight() * 7 + self:GetUp() * 7
+			local entsInBox = ents.FindInBox(self:GetPos() + bound, self:GetPos() -bound)
+			for _, e in ipairs(entsInBox) do
+				if e:GetClass() == self:GetClass() and e ~= self then
+					local owner = self.CPPIGetOwner and self:CPPIGetOwner()
+					if IsValid(owner) then
+						Ores.SendChatMessage(owner, "Stacking drills inside each others can harm physics, please don't do that.")
+					end
+
+					SafeRemoveEntity(self)
+				end
+			end
 		end)
 
 		Ores.Automation.PrepareForDuplication(self)
