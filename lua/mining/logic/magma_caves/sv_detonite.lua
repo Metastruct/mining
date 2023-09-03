@@ -151,6 +151,13 @@ local function spawnDetonite(tr)
 			end
 		end
 
+		function drop:Use(ent)
+			if not IsValid(ent) then return end
+			if not ent:IsPlayer() then return end
+
+			self:Consume(ent)
+		end
+
 		SafeRemoveEntityDelayed(drop, 8)
 	end)
 end
