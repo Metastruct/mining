@@ -24,24 +24,6 @@ local BASE_KICKSTART_PRICE = 75000
 if SERVER then
 	util.AddNetworkString("mining_kickstart_generator")
 
-	local function take_player_ore(ply, amount)
-		Ores.Print(ply, ("kickstarted a generator using %d pts"):format(amount))
-
-		local loadingSound = "ambient/levels/canals/headcrab_canister_ambient5.wav"
-		ply:EmitSound(loadingSound, 45, 120, 0.6)
-
-		Ores.GetSavedPlayerDataAsync(ply, function(data)
-		local points = math.floor(math.max(0, data._points - amount))
-
-		Ores.SetSavedPlayerData(ply, "points", points)
-		ply:SetNWInt(Ores._nwPoints, points)
-
-		ply:StopSound(loadingSound)
-		ply:EmitSound(")physics/surfaces/underwater_impact_bullet3.wav", 75, 70)
-	end)
-
-	end
-
 	net.Receive("mining_kickstart_generator", function(_, ply)
 		local generator = net.ReadEntity()
 		if not IsValid(generator) then return end
@@ -50,7 +32,9 @@ if SERVER then
 		local pointBalance = ply:GetNWInt(Ores._nwPoints, 0)
 		if requiredPoints > pointBalance then return end
 
-		take_player_ore(ply, requiredPoints)
+		Ores.Print(ply, ("kickstarted a generator using %d pts"):format(amount))
+		Ores.TakePlayerPoints(ply, amount)
+
 		generator:SetNW2Int("Energy", generator:GetNW2Int("MaxEnergy", Ores.Automation.BatteryCapacity * 10))
 	end)
 

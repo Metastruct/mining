@@ -34,7 +34,25 @@ local function can_work(self, time)
 	return false
 end
 
+local BASE_KICKSTART_PRICE = 12500
+
 if SERVER then
+	util.AddNetworkString("mining_kickstart_extractor")
+
+	net.Receive("mining_kickstart_extractor", function(_, ply)
+		local extractor = net.ReadEntity()
+		if not IsValid(extractor) then return end
+
+		local requiredPoints = math.floor(BASE_KICKSTART_PRICE * math.max(1, Ores.GetPlayerMultiplier(ply) - 2))
+		local pointBalance = ply:GetNWInt(Ores._nwPoints, 0)
+		if requiredPoints > pointBalance then return end
+
+		Ores.Print(ply, ("kickstarted a extractor using %d pts"):format(amount))
+		Ores.TakePlayerPoints(ply, amount)
+
+		extractor:ProduceBarrel()
+	end)
+
 	ENT.NextSoundCheck = 0
 	ENT.NextTraceCheck = 0
 	ENT.ExtractedOil = 0
@@ -149,6 +167,29 @@ if SERVER then
 		return true
 	end
 
+	function ENT:ProduceBarrel()
+		self.ExtractedOil = 0
+		self:SetNWInt("ExtractedOil", self.ExtractedOil)
+
+		local fuelTank = ents.Create("mining_fuel_tank")
+		fuelTank:SetPos(self:GetPos() + self:GetRight() * 50 + self:GetUp() * -45)
+		fuelTank:SetNWInt("CoalCount", 150)
+		fuelTank:Spawn()
+		fuelTank:PhysWake()
+
+		if _G.WireLib then
+			_G.WireLib.TriggerOutput(fuelTank, "Amount", 150)
+		end
+
+		SafeRemoveEntityDelayed(fuelTank, Ores.Automation.OilExtractionRate)
+
+		timer.Simple(0, function()
+			if IsValid(self) and IsValid(fuelTank) then
+				Ores.Automation.ReplicateOwnership(fuelTank, self, true)
+			end
+		end)
+	end
+
 	function ENT:ExtractOil(time)
 		if time < self.NextOil then return end
 		if not can_work(self, time) then return end
@@ -157,26 +198,7 @@ if SERVER then
 		self.ExtractedOil = self.ExtractedOil + 1
 
 		if self.ExtractedOil >= Ores.Automation.OilExtractionRate then
-			self.ExtractedOil = 0
-			self:SetNWInt("ExtractedOil", self.ExtractedOil)
-
-			local fuelTank = ents.Create("mining_fuel_tank")
-			fuelTank:SetPos(self:GetPos() + self:GetRight() * 50 + self:GetUp() * -45)
-			fuelTank:SetNWInt("CoalCount", 150)
-			fuelTank:Spawn()
-			fuelTank:PhysWake()
-
-			if _G.WireLib then
-				_G.WireLib.TriggerOutput(fuelTank, "Amount", 150)
-			end
-
-			SafeRemoveEntityDelayed(fuelTank, Ores.Automation.OilExtractionRate)
-
-			timer.Simple(0, function()
-				if IsValid(self) and IsValid(fuelTank) then
-					Ores.Automation.ReplicateOwnership(fuelTank, self, true)
-				end
-			end)
+			self:ProduceBarrel()
 		end
 
 		if self.ExtractedOil % 5 == 0 then -- update every 5 seconds because SetNW is slow
@@ -316,4 +338,35 @@ if CLIENT then
 		self.MiningFrameInfo[4].Value = can_work(self, CurTime())
 		return self.MiningFrameInfo
 	end
+
+	hook.Add("PlayerBindPress", "mining_oil_extractor_kickstart", function(ply, bind, pressed, code)
+		if bind == "+use" and pressed then
+			local tr = ply:GetEyeTrace()
+			if IsValid(tr.Entity) and tr.Entity:GetClass() == "mining_oil_extractor" and tr.Entity:WorldSpaceCenter():Distance(EyePos()) <= 300 then
+				local requiredPoints = math.floor(BASE_KICKSTART_PRICE * math.max(1, Ores.GetPlayerMultiplier(ply) - 2))
+				local pointBalance = ply:GetNWInt(Ores._nwPoints, 0)
+				if requiredPoints > pointBalance then
+					chat.AddText(Color(230, 130, 65), " ♦ [Ores] ", color_white, ("You do not have enough points to kickstart this extractor (required: %s pts | balance: %s pts)"):format(
+						string.Comma(requiredPoints),
+						string.Comma(pointBalance)
+					))
+					return
+				end
+
+				Derma_Query(
+					("Kickstarting the extractor will cost you %s pts (current balance: %s pts)"):format(
+						string.Comma(requiredPoints),
+						string.Comma(pointBalance)
+					),
+					"Kickstart Extractor",
+					"Kickstart", function()
+						net.Start("mining_kickstart_extractor")
+						net.WriteEntity(tr.Entity)
+						net.SendToServer()
+					end,
+					"Cancel", function() end
+				)
+			end
+		end
+	end)
 end

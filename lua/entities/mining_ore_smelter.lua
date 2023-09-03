@@ -163,14 +163,14 @@ if SERVER then
 	end
 
 	function ENT:Touch(ent)
-		if ent.MiningSmelterCollected then return end
+		if ent.InvalidOre then return end
 		if ent:GetClass() ~= "mining_ore" then return end
 
 		if self.CPPIGetOwner and ent.GraceOwner ~= self:CPPIGetOwner() then return end -- lets not have people highjack each others
 
 		local rarity = ent:GetRarity()
 		if Ores.Automation.GetOreRarityByName("Coal") == rarity then
-			ent.MiningSmelterCollected = true
+			ent.InvalidOre = true
 			SafeRemoveEntity(ent)
 			return
 		end
@@ -188,7 +188,7 @@ if SERVER then
 			self:UpdateNetworkOreData()
 		end
 
-		ent.MiningSmelterCollected = true
+		ent.InvalidOre = true
 		SafeRemoveEntity(ent)
 	end
 
