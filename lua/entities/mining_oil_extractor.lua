@@ -336,6 +336,11 @@ if CLIENT then
 		self.MiningFrameInfo[2].Value = self:GetNW2Int("Energy", 0)
 		self.MiningFrameInfo[3].Value = self:GetNWInt("ExtractedOil", 0)
 		self.MiningFrameInfo[4].Value = can_work(self, CurTime())
+
+		if self.CPPIGetOwner and self:CPPIGetOwner() == LocalPlayer() then
+			self.MiningFrameInfo[5] = { Type = "Action", Binding = "+use", Text = "KICKSTART" }
+		end
+
 		return self.MiningFrameInfo
 	end
 
