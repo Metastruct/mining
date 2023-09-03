@@ -134,12 +134,15 @@ local function spawnDetonite(tr)
 		local drop = ents.Create("mining_ore")
 		drop:SetRarity(DETONITE_RARITY)
 		drop:SetPos(rock:GetPos() - Vector(math.random(-maxs.x, maxs.x), math.random(-maxs.y, maxs.y), maxs.z + 25))
+		drop:SetTrigger(true)
+		drop:UseTriggerBounds(true,6)
 		drop:Spawn()
 		drop:PhysWake()
 
 		function drop:PhysicsCollide(data)
 			if IsValid(data.Entity) and data.Entity:IsPlayer() then
 				self:Consume(data.Entity)
+				return
 			end
 
 			if data.OurOldVelocity:Length2D() > 300 then
@@ -151,8 +154,7 @@ local function spawnDetonite(tr)
 			end
 		end
 
-		function drop:Use(ent)
-			if not IsValid(ent) then return end
+		function drop:Touch(ent)
 			if not ent:IsPlayer() then return end
 
 			self:Consume(ent)
