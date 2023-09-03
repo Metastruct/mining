@@ -47,8 +47,8 @@ if SERVER then
 		local pointBalance = ply:GetNWInt(Ores._nwPoints, 0)
 		if requiredPoints > pointBalance then return end
 
-		Ores.Print(ply, ("kickstarted a extractor using %d pts"):format(amount))
-		Ores.TakePlayerPoints(ply, amount)
+		Ores.Print(ply, ("kickstarted a extractor using %d pts"):format(requiredPoints))
+		Ores.TakePlayerPoints(ply, requiredPoints)
 
 		extractor:ProduceBarrel()
 	end)
