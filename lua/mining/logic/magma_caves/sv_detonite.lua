@@ -138,6 +138,10 @@ local function spawnDetonite(tr)
 		drop:PhysWake()
 
 		function drop:PhysicsCollide(data)
+			if IsValid(data.Entity) and data.Entity:IsPlayer() then
+				self:Consume(data.Entity)
+			end
+
 			if data.OurOldVelocity:Length2D() > 300 then
 				if self:WaterLevel() == 0 then
 					explode(self)
