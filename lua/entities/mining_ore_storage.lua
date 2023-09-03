@@ -47,7 +47,7 @@ if SERVER then
 	end
 
 	function ENT:Touch(ent)
-		if ent.MiningContainerCollected then return end
+		if ent.InvalidOre then return end
 
 		local className = ent:GetClass()
 		if className ~= "mining_ore_ingot" and className ~= "mining_ore" then return end
@@ -61,7 +61,7 @@ if SERVER then
 			self:UpdateNetworkOreData()
 		end
 
-		ent.MiningContainerCollected = true
+		ent.InvalidOre = true
 		SafeRemoveEntity(ent)
 	end
 

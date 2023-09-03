@@ -37,7 +37,7 @@ if SERVER then
 	end
 
 	function ENT:Touch(ent)
-		if ent.MiningMinterCollected then return end
+		if ent.InvalidOre then return end
 
 		local className = ent:GetClass()
 		if className ~= "mining_ore_ingot" and className ~= "mining_ore" then return end
@@ -64,7 +64,7 @@ if SERVER then
 		end
 
 		SafeRemoveEntity(ent)
-		ent.MiningMinterCollected = true
+		ent.InvalidOre = true
 	end
 
 	-- fallback in case trigger stops working
