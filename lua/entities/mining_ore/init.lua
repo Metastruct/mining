@@ -33,7 +33,7 @@ function ENT:Initialize()
 	self:PhysicsInit(SOLID_VPHYSICS)
 	self:SetSolid(SOLID_VPHYSICS)
 	self:SetMoveType(MOVETYPE_VPHYSICS)
-	self:SetCollisionGroup(COLLISION_GROUP_WEAPON)
+	self:SetCollisionGroup(COLLISION_GROUP_INTERACTIVE_DEBRIS)
 	--self:SetTrigger(true)
 	--self:UseTriggerBounds(true,6)
 	self.ms_notouch = true
