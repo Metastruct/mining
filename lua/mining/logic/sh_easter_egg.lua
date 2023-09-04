@@ -155,14 +155,20 @@ if SERVER then
 		local count = ms.Ores.GetPlayerOre(ply, 666)
 		if count >= 66 then
 			if not IsValid(BLOOD_GOD_NPC) then
-				local pos = ply:GetPos() + ply:GetForward() * 200
+				local pos = ply:GetPos() + ply:GetForward() * 200 + Vector(0, 0, 50)
 				if util.IsInWorld(pos) then
 					BLOOD_GOD_NPC = ents.Create("lua_npc")
 					BLOOD_GOD_NPC:SetMaterial("models/debug/debugwhite")
 					BLOOD_GOD_NPC:SetColor(Color(0, 0, 0, 255))
 					BLOOD_GOD_NPC:SetPos(pos)
 					BLOOD_GOD_NPC:Spawn()
+					BLOOD_GOD_NPC:DropToFloor()
+
 					BLOOD_GOD_NPC.role = "bloodgod"
+
+					if ply.LookAt then
+						ply:LookAt(BLOOD_GOD_NPC, 3)
+					end
 				end
 			end
 
