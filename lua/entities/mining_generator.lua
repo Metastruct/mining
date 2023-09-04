@@ -19,7 +19,7 @@ local function can_work(self)
 	return true
 end
 
-local BASE_KICKSTART_PRICE = 75000
+local BASE_KICKSTART_PRICE = 350000
 
 if SERVER then
 	util.AddNetworkString("mining_kickstart_generator")
