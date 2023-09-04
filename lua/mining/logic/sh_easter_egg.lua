@@ -166,6 +166,17 @@ if SERVER then
 
 					BLOOD_GOD_NPC.role = "bloodgod"
 
+					function BLOOD_GOD_NPC:OnTakeDamage(dmg)
+						local atck = dmg:GetAttacker()
+						if IsValid(atck) then
+							if atck.ForceTakeDamageInfo then
+								atck:ForceTakeDamageInfo(dmg)
+							else
+								atck:TakeDamageInfo(dmg)
+							end
+						end
+					end
+
 					if ply.LookAt then
 						ply:LookAt(BLOOD_GOD_NPC, 3)
 					end
