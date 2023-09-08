@@ -354,7 +354,7 @@ if CLIENT then
 
 		local inv = LocalPlayer().GetInventory and LocalPlayer():GetInventory()
 		for itemId, item in pairs(ITEMS) do
-			if itemId == "soul" and inv and inv.soul and inv.soul > 0 then continue end
+			if itemId == "soul" and inv and inv.soul and inv.soul and inv.soul.count > 0 then continue end
 
 			local itemRow = itemsContainer:Add("DPanel")
 			itemRow:DockMargin(0, 0, 0, 10)
