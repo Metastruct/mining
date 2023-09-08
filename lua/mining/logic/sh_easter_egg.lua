@@ -60,20 +60,17 @@ if SERVER then
 			return
 		end
 
+		local inv = ply.GetInventory and ply:GetInventory()
+		if itemId == "soul" and inv and inv.soul and inv.soul > 0 then return end
+
 		if itemId == "soul" then
 			hook.Run("SoulGottenBack", ply)
 		end
 
 		ms.Ores.TakePlayerOre(ply, 666, item.price)
 
-		local ent = ents.Create("prop_physics")
-		ent:SetModel(item.model)
-		ent:SetPos(ply:EyePos() + ply:GetAimVector() * 100)
-		ent:Spawn()
-		ent:DropToFloor()
-
-		if ent.CPPISetOwner then
-			ent:CPPISetOwner(ply)
+		if ply.GiveItem then
+			ply:GiveItem(itemId, 1, "bloodgod")
 		end
 
 		SafeRemoveEntity(npc)
@@ -355,7 +352,10 @@ if CLIENT then
 			surface.DrawRect(0, 0, w, h)
 		end
 
+		local inv = LocalPlayer().GetInventory and LocalPlayer():GetInventory()
 		for itemId, item in pairs(ITEMS) do
+			if itemId == "soul" and inv and inv.soul and inv.soul > 0 then continue end
+
 			local itemRow = itemsContainer:Add("DPanel")
 			itemRow:DockMargin(0, 0, 0, 10)
 			itemRow:DockPadding(0, 0, 5, 0)
