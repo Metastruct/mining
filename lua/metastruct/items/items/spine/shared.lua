@@ -1,7 +1,7 @@
 msitems.StartItem("spine")
 
 ITEM.State = "entity"
-ITEM.WorldModel = "models/Gibs/HGIBS.mdl"
+ITEM.WorldModel = "models/Gibs/HGIBS_spine.mdl"
 ITEM.EquipSound = "ui/item_helmet_pickup.wav"
 
 ITEM.Inventory = {
