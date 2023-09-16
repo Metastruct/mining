@@ -51,6 +51,8 @@ if SERVER then
 		local npc = net.ReadEntity()
 
 		if not ITEMS[itemId] then return end
+		if not IsValid(npc) then return end
+		if npc:GetClass() ~= "lua_npc" then return end
 
 		local item = ITEMS[itemId]
 		local curBlood = ms.Ores.GetPlayerOre(ply, 666)
