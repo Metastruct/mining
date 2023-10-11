@@ -625,7 +625,10 @@ if SERVER then
 			if not IsValid(ent) then return end
 
 			local ply = ent:CPPIGetOwner()
-			if not IsValid(ply) then return end
+			if not IsValid(ply) then
+				SafeRemoveEntity(ent)
+				return
+			end
 
 			if ply:CheckLimit("mining_automation") then
 				ply:AddCount("mining_automation", ent)
