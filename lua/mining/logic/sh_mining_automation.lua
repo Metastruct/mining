@@ -621,7 +621,7 @@ if SERVER then
 			end
 		end
 
-		timer.Simple(0, function()
+		timer.Simple(1, function()
 			if not IsValid(ent) then return end
 
 			local ply = ent:CPPIGetOwner()
