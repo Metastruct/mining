@@ -114,9 +114,7 @@ if SERVER then
 			target.NextBloodOre = 0
 		end
 
-		if target:IsPlayer() and (target:GetInfoNum("cl_dmg_mode", 1) == 1 or target:HasGodMode() or (target.IsInZone and not target:IsInZone("cave"))) then
-			return
-		end
+		if target:IsPlayer() and (target:GetInfoNum("cl_dmg_mode", 1) == 1 or target:HasGodMode()) then return end
 
 		if target.NextBloodOre < CurTime() then
 			local blood = ents.Create("mining_rock")
