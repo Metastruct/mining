@@ -144,12 +144,13 @@ if SERVER then
 		end
 	end)
 
+	local nextBloodGod = 0
 	local BLOOD_GOD_NPC
 	hook.Add("PlayerReceivedOre", Tag, function(ply, _, rarity)
 		if rarity ~= 666 then return end
 
 		local count = ms.Ores.GetPlayerOre(ply, 666)
-		if count % 66 == 0 and not IsValid(BLOOD_GOD_NPC) then
+		if count >= 66 and nextBloodGod >= CurTime() and not IsValid(BLOOD_GOD_NPC) then
 			local pos = ply:GetPos() + ply:GetForward() * 200 + Vector(0, 0, 50)
 			if util.IsInWorld(pos) then
 				BLOOD_GOD_NPC = ents.Create("lua_npc")
@@ -179,6 +180,8 @@ if SERVER then
 		end
 
 		if not IsValid(BLOOD_GOD_NPC) then return end
+
+		nextBloodGod = CurTime() + (60 * 60) -- in an hour
 
 		for _, rock in ipairs(ents.FindByClass("mining_rock")) do
 			rock:SetRarity(666)
