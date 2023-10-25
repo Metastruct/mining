@@ -1571,7 +1571,8 @@ if CLIENT then
 
 	local curState = false
 	hook.Add("Think", Tag .. "_flesh_world_state", function()
-		local newState = LocalPlayer().IsInZone and LocalPlayer():IsInZone("cave") and IsValid(Entity(NPC_INDEX))
+		local npc = Entity(NPC_INDEX)
+		local newState = LocalPlayer().IsInZone and LocalPlayer():IsInZone("cave") and IsValid(npc) and npc.IsBloodGod
 		if newState ~= curState then
 			if newState then
 				start_flesh_world()
@@ -1593,6 +1594,7 @@ if CLIENT then
 		if not success then
 			timer.Create(Tag .. "_npc", 1, 0, function()
 				if apply_pac() then
+					Entity(NPC_INDEX).IsBloodGod = true
 					timer.Remove(Tag .. "_npc")
 				end
 			end)
