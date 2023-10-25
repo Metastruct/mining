@@ -1566,6 +1566,8 @@ if CLIENT then
 			else
 				stop_flesh_world()
 			end
+
+			curState = newState
 		end
 	end)
 
