@@ -46,6 +46,14 @@ if SERVER then
 	util.AddNetworkString(Tag)
 	util.AddNetworkString(Tag .. "_npc")
 
+	local function remove_blood_rocks()
+		for _, rock in ipairs(ents.FindByClass("mining_rock")) do
+			if rock:GetRarity() == 666 then
+				SafeRemoveEntity(rock)
+			end
+		end
+	end
+
 	net.Receive(Tag, function(_, ply)
 		local itemId = net.ReadString()
 		local npc = net.ReadEntity()
@@ -59,6 +67,7 @@ if SERVER then
 		if item.price > curBlood then
 			ply:Kill()
 			SafeRemoveEntity(npc)
+			remove_blood_rocks()
 			return
 		end
 
@@ -76,6 +85,7 @@ if SERVER then
 		end
 
 		SafeRemoveEntity(npc)
+		remove_blood_rocks()
 	end)
 
 	local maxDist = 300 * 300
@@ -106,7 +116,6 @@ if SERVER then
 		local inflictor = dmg:GetInflictor()
 		if not IsValid(inflictor) then return end
 		if inflictor:GetClass() ~= "mining_pickaxe" then return end
-
 
 		if not target:IsPlayer() then return end
 
