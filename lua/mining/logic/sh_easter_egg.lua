@@ -1588,6 +1588,7 @@ if CLIENT then
 		local entIndex = net.ReadInt(32)
 		NPC_INDEX = entIndex
 
+		Entity(NPC_INDEX).IsBloodGod = true
 		doSpook()
 
 		local success = apply_pac()
