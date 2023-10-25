@@ -146,11 +146,10 @@ if SERVER then
 
 	local BLOOD_GOD_NPC
 	hook.Add("PlayerReceivedOre", Tag, function(ply, _, rarity)
-		if ply.BloodGodDone then return end
 		if rarity ~= 666 then return end
 
 		local count = ms.Ores.GetPlayerOre(ply, 666)
-		if count >= 66 then
+		if count % 66 == 0 then
 			if not IsValid(BLOOD_GOD_NPC) then
 				local pos = ply:GetPos() + ply:GetForward() * 200 + Vector(0, 0, 50)
 				if util.IsInWorld(pos) then
@@ -182,13 +181,27 @@ if SERVER then
 
 			if not IsValid(BLOOD_GOD_NPC) then return end
 
-			ms.Ores.SendChatMessage(ply, "An otherwordly creature appeared... Best be careful.")
+			for _, rock in ipairs(ents.FindByClass("mining_rock")) do
+				rock:SetRarity(666)
+			end
+
+			ms.Ores.SendChatMessage(player.GetAll(), "An otherwordly creature appeared... Best be careful.")
 
 			net.Start(Tag .. "_npc")
 			net.WriteInt(BLOOD_GOD_NPC:EntIndex(), 32)
 			net.Broadcast(ply)
+		end
+	end)
 
-			ply.BloodGodDone = true
+	hook.Add("OnEntityCreated", Tag, function(ent)
+		if not IsValid(BLOOD_GOD_NPC) then return end
+
+		if ent:GetClass() == "mining_rock" then
+			timer.Simple(0, function()
+				if not IsValid(ent) then return end
+
+				ent:SetRarity(666)
+			end)
 		end
 	end)
 end
@@ -211,20 +224,8 @@ if CLIENT then
 		["$pp_colour_mulb"] = 0
 	}
 
-	surface.CreateFont(Tag .. "_big", {
-		font = "Arial",
-		extended = true,
-		size = 100,
-	})
-
-	surface.CreateFont(Tag, {
-		font = "Roboto",
-		extended = true,
-		size = 30,
-	})
-
-	local function trigger_menu(npc)
-		local atmosStation
+	local atmosStation
+	local function start_flesh_world()
 		sound.PlayFile(atmosSound, "noplay", function(station, err_code, err_str)
 			if IsValid(station) then
 				station:EnableLooping(true)
@@ -261,7 +262,33 @@ if CLIENT then
 
 			return true
 		end)
+	end
 
+	local function stop_flesh_world()
+		hook.Remove("RenderScene", Tag)
+		hook.Remove("RenderScreenspaceEffects", Tag)
+		hook.Remove("PlayerFootstep", Tag)
+		hook.Remove("Think", Tag)
+		hook.Remove("HUDPaint", Tag)
+
+		if IsValid(atmosStation) then
+			atmosStation:Stop()
+		end
+	end
+
+	surface.CreateFont(Tag .. "_big", {
+		font = "Arial",
+		extended = true,
+		size = 100,
+	})
+
+	surface.CreateFont(Tag, {
+		font = "Roboto",
+		extended = true,
+		size = 30,
+	})
+
+	local function trigger_menu(npc)
 		local hoveringSoulBtn = false
 		local bloodTexts = {}
 		local nextBloodText = 0
@@ -461,16 +488,6 @@ if CLIENT then
 
 		local function exitMenu()
 			hoveringSoulBtn = false
-			hook.Remove("RenderScene", Tag)
-			hook.Remove("RenderScreenspaceEffects", Tag)
-			hook.Remove("PlayerFootstep", Tag)
-			hook.Remove("Think", Tag)
-			hook.Remove("HUDPaint", Tag)
-
-			if IsValid(atmosStation) then
-				atmosStation:Stop()
-			end
-
 			surface.PlaySound("ambient/atmosphere/cave_hit2.wav")
 		end
 
@@ -1539,6 +1556,18 @@ if CLIENT then
 			end)
 		end)
 	end
+
+	local curState = false
+	hook.Add("Think", Tag .. "_flesh_world_state", function()
+		local newState = LocalPlayer().IsInZone and LocalPlayer():IsInZone("cave") and IsValid(Entity(NPC_INDEX))
+		if newState ~= curState then
+			if newState then
+				start_flesh_world()
+			else
+				stop_flesh_world()
+			end
+		end
+	end)
 
 	net.Receive(Tag .. "_npc", function()
 		local entIndex = net.ReadInt(32)
