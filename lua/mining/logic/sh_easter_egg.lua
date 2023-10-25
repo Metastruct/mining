@@ -159,7 +159,7 @@ if SERVER then
 		if rarity ~= 666 then return end
 
 		local count = ms.Ores.GetPlayerOre(ply, 666)
-		if count >= 66 and nextBloodGod >= CurTime() and not IsValid(BLOOD_GOD_NPC) then
+		if count >= 66 and CurTime() >= nextBloodGod and not IsValid(BLOOD_GOD_NPC) then
 			local pos = ply:GetPos() + ply:GetForward() * 200 + Vector(0, 0, 50)
 			if util.IsInWorld(pos) then
 				BLOOD_GOD_NPC = ents.Create("lua_npc")
