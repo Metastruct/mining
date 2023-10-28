@@ -300,7 +300,10 @@ if CLIENT then
 		size = 30,
 	})
 
+	local menu_toggled = false
 	local function trigger_menu(npc)
+		menu_toggled = true
+
 		local hoveringSoulBtn = false
 		local bloodTexts = {}
 		local nextBloodText = 0
@@ -505,6 +508,7 @@ if CLIENT then
 
 		function frame:OnRemove()
 			exitMenu()
+			menu_toggled = false
 		end
 	end
 
@@ -1572,7 +1576,7 @@ if CLIENT then
 	local curState = false
 	hook.Add("Think", Tag .. "_flesh_world_state", function()
 		local npc = Entity(NPC_INDEX)
-		local newState = LocalPlayer().IsInZone and LocalPlayer():IsInZone("cave") and IsValid(npc) and npc.IsBloodGod
+		local newState = menu_toggled or (LocalPlayer().IsInZone and LocalPlayer():IsInZone("cave") and IsValid(npc) and npc.IsBloodGod)
 		if newState ~= curState then
 			if newState then
 				start_flesh_world()
