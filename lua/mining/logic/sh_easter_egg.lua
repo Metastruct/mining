@@ -189,9 +189,9 @@ if SERVER then
 				end
 
 				timer.Simple(60 * 5, function()
-					if not IsValid(npc) then return end
+					if not IsValid(BLOOD_GOD_NPC) then return end
 
-					SafeRemoveEntity(npc)
+					SafeRemoveEntity(BLOOD_GOD_NPC)
 					remove_blood_rocks()
 				end)
 			end
