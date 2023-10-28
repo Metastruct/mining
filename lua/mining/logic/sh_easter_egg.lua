@@ -187,6 +187,13 @@ if SERVER then
 				if ply.LookAt then
 					ply:LookAt(BLOOD_GOD_NPC, 3)
 				end
+
+				timer.Simple(60 * 5, function()
+					if not IsValid(npc) then return end
+
+					SafeRemoveEntity(npc)
+					remove_blood_rocks()
+				end)
 			end
 		end
 
