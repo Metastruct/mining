@@ -77,6 +77,7 @@ if SERVER then
 		end
 	end
 
+	local LAST_EXPLOSION = 0
 	function ENT:AddArgonite(amount,initator)
 		if self:GetNWBool("ArgoniteOverload") then return end
 		self.initators = self.initators or {}
@@ -116,6 +117,11 @@ if SERVER then
 					self.LeakingSound:FadeOut(1)
 				end
 			end)
+
+			-- dont explode in such a short time, only empty the container
+			if CurTime() - LAST_EXPLOSION < 60 * 60 * 2 then return end
+
+			LAST_EXPLOSION = CurTime()
 
 			if ms and IsValid(ms.core_effect) then
 				if ms.core_effect:GetDTBool(3) then
