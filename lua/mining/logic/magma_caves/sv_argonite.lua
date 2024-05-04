@@ -136,12 +136,16 @@ timer.Create("mining_argonite_ore_dmg", 1, 0, function()
 		end
 
 		if count > 0 and ply:Alive() then
-			if isnumber(ply.LastToxicHealth) and ply.LastToxicHealth ~= ply:Health() then
-				ply:SetHealth(ply.LastToxicHealth)
+			if ply:GetMaxHealth() > 100 then
+				ply:SetMaxHealth(100)
 			end
 
 			if ply:Health() > ply:GetMaxHealth() then
 				ply:SetHealth(ply:GetMaxHealth())
+			end
+
+			if isnumber(ply.LastToxicHealth) and ply.LastToxicHealth < ply:Health() then
+				ply:SetHealth(ply.LastToxicHealth)
 			end
 
 			local dmg = math.min(25, math.ceil(count / 2))
