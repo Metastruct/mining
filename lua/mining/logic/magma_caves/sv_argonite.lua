@@ -136,7 +136,7 @@ timer.Create("mining_argonite_ore_dmg", 1, 0, function()
 		end
 
 		if count > 0 and ply:Alive() then
-			if isnumber(ply.LastToxicHealth) and ply.LastToxicHealth < ply:Health() then
+			if isnumber(ply.LastToxicHealth) and ply.LastToxicHealth ~= ply:Health() then
 				ply:SetHealth(ply.LastToxicHealth)
 			end
 
