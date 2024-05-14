@@ -22,6 +22,7 @@ if SERVER then
 		self:SetTrigger(true)
 		self:PhysWake()
 		self:SetNWInt("MintedCoins", 0)
+		self:SetUseType(SIMPLE_USE)
 
 		Ores.Automation.PrepareForDuplication(self)
 
@@ -77,6 +78,15 @@ if SERVER then
 	function ENT:Use(activator)
 		if not activator:IsPlayer() then return end
 		if self.CPPIGetOwner and self:CPPIGetOwner() ~= activator then return end
+
+		if self._nextuse and self._nextuse > CurTime() then
+			local time_left = tostring(math.floor(self._nextuse - CurTime())) .. "s"
+			activator:ChatPrint("The minter is cooling down! Please wait" .. time_left)
+
+			return
+		end
+
+		self._nextuse = CurTime() + 60 * 5
 
 		local curCoins = self:GetNWInt("MintedCoins", 0)
 		if activator.GiveCoins and curCoins > 0 then
