@@ -81,7 +81,7 @@ if SERVER then
 
 		if self._nextuse and self._nextuse > CurTime() then
 			local time_left = tostring(math.floor(self._nextuse - CurTime())) .. "s"
-			activator:ChatPrint("The minter is cooling down! Please wait" .. time_left)
+			activator:ChatPrint("The minter is cooling down! Please wait " .. time_left)
 
 			return
 		end
