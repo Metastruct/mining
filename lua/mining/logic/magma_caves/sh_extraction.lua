@@ -405,6 +405,7 @@ if SERVER then
 	-- we have to do that because its not loaded with the other stats
 	hook.Add("PlayerInitialSpawn", "mining_toxic_resistance", function(ply)
 		ms.Ores.GetSavedPlayerDataAsync(ply, function(data)
+			if not IsValid(ply) then return end
 			ply:SetNWInt("ms.Ores.ToxicResistance", data.ToxicResistance)
 		end, { "ToxicResistance" })
 	end)
