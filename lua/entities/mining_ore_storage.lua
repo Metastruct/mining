@@ -57,7 +57,7 @@ if SERVER then
 			local oreData = Ores.__R[rarity]
 			if oreData then
 				table.insert(wireCounts, amount)
-				table.insert(wireNames, oreData[rarity].Name or "Unknown")
+				table.insert(wireNames, oreData.Name or "Unknown")
 			end
 		end
 
