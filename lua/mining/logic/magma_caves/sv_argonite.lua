@@ -164,7 +164,7 @@ timer.Create("mining_argonite_ore_dmg", 1, 0, function()
 				ply:SetDrunkFactor(dmg * 10)
 			end
 
-			if ply:Health() > 0 and preHealth == ply:Health() then
+			if ply:Health() ~= 0 and preHealth == ply:Health() then
 				ply:SetHealth(preHealth - count)
 
 				if ply:Health() <= 0 then
