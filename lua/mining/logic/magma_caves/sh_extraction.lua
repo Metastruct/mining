@@ -318,9 +318,44 @@ if SERVER then
 
 	ms.Ores.PlayerExtractionCounts = ms.Ores.PlayerExtractionCounts or {}
 
+	local bad_ents = {}
+	hook.Add("OnEntityCreated", "mining_extraction_npc_ac", function(ent)
+		if not ent.CPPIGetOwner then return end
+
+		local class = ent:GetClass()
+		if class:match("^gmod%_wire%_") or class == "starfall_processor" then
+			timer.Simple(0, function()
+				if not IsValid(ent) then return end
+
+				local owner = ent:CPPIGetOwner()
+				if not IsValid(owner) then return end
+
+				bad_ents[owner] = bad_ents[owner] or 0
+				bad_ents[owner] = bad_ents[owner] + 1
+			end)
+		end
+	end)
+
+	hook.Add("EntityRemoved", "mining_extraction_npc_ac", function(ent)
+		if not ent.CPPIGetOwner then return end
+
+		local owner = ent:CPPIGetOwner()
+		if not IsValid(owner) then return end
+		if not bad_ents[owner] then return end
+
+		local class = ent:GetClass()
+		if class:match("^gmod%_wire%_") or class == "starfall_processor" then
+			bad_ents[owner] = math.max(0, bad_ents[owner] - 1)
+		end
+	end)
+
 	local MAX_NPC_DIST = 300 * 300
 	hook.Add("KeyPress", "mining_extraction_npc", function(ply, key)
 		if key ~= IN_USE then return end
+		if bad_ents[ply] and bad_ents[ply] > 0 then
+			ply:ChatPrint("You cannot exchange your ores with the extractor while you have sensitive equipment around! (wiremod & starfall)")
+			return
+		end
 
 		local npc = ply:GetEyeTrace().Entity
 		if not npc:IsValid() then return end
