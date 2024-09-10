@@ -242,14 +242,14 @@ if SERVER then
 				end
 			else
 				if chipClass == "starfall_processor" then
-					if Ores.Automation.ChipsRouted[owner][chip] ~= false then
+					if Ores.Automation.ChipsRouted[owner][chip] ~= false or istable(chip.error) then
 						chip:Destroy()
 						chip:Error({ message = "Unsufficient Bandwidth", traceback = "" })
 						BroadcastLua(([[local c = Entity(%d) if IsValid(c) then c:Destroy() c:Error({message="Unsufficient Bandwidth",traceback=""}) end]]):format(chip:EntIndex()))
 						should_check = true
 					end
 				elseif chipClass == "gmod_wire_expression2" then
-					if Ores.Automation.ChipsRouted[owner][chip] ~= false then
+					if Ores.Automation.ChipsRouted[owner][chip] ~= false or chip.error ~= true then
 						chip:Error("Unsufficient Bandwidth", "Unsufficient Bandwidth")
 						should_check = true
 					end
