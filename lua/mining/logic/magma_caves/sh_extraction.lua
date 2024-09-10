@@ -352,15 +352,16 @@ if SERVER then
 	local MAX_NPC_DIST = 300 * 300
 	hook.Add("KeyPress", "mining_extraction_npc", function(ply, key)
 		if key ~= IN_USE then return end
-		if bad_ents[ply] and bad_ents[ply] > 0 then
-			ply:ChatPrint("You cannot exchange your ores with the extractor while you have sensitive equipment around! (wiremod & starfall)")
-			return
-		end
 
 		local npc = ply:GetEyeTrace().Entity
 		if not npc:IsValid() then return end
 
 		if npc.role == "extractor" and npc:GetPos():DistToSqr(ply:GetPos()) <= MAX_NPC_DIST then
+			if bad_ents[ply] and bad_ents[ply] > 0 then
+				ply:ChatPrint("You cannot exchange your ores with the extractor while you have sensitive equipment around! (wiremod & starfall)")
+				return
+			end
+
 			net.Start(NET_TAG)
 			net.WriteString("OpenMenu")
 			net.WriteEntity(npc)
