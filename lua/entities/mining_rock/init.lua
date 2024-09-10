@@ -118,34 +118,41 @@ function ENT:OnTakeDamage(dmg)
 	local attacker = dmg:GetAttacker()
 	if not (attacker:IsValid() and attacker:IsPlayer()) then return end
 	if attacker._miningBlocked or (attacker._miningCooldown and attacker._miningCooldown > now) then return end
-	if attacker.IsAFK and attacker:IsAFK() then return end
-	if attacker:GetShootPos():DistToSqr(dmg:GetDamagePosition()) > 40000 then return end
-	local isPickaxe = false
+
+	local inflictor = dmg:GetInflictor()
 	local wep = attacker:GetActiveWeapon()
-	if not wep:IsValid() then return end
+	local isPickaxe = false
 
-	if wep:GetClass() == "weapon_crowbar" then
-		-- Allowed, crowbar penalty
-		dmg:SetDamage(math.floor(dmg:GetDamage() * 0.6))
+	if inflictor == attacker or inflictor == wep then
+		if attacker.IsAFK and attacker:IsAFK() then return end
+		if attacker:GetShootPos():DistToSqr(dmg:GetDamagePosition()) > 40000 then return end
+		if not wep:IsValid() then return end
 
-		if ms.Ores.SendChatMessage and (not attacker._miningCrowbarMsgNext or now > attacker._miningCrowbarMsgNext) then
-			ms.Ores.SendChatMessage(attacker, 0, "Psst! You should use the Mining Pickaxe to get the most out of mining! Look in the Weapons tab!")
-			attacker._miningCrowbarMsgNext = now + 120
+		if wep:GetClass() == "weapon_crowbar" then
+			-- Allowed, crowbar penalty
+			dmg:SetDamage(math.floor(dmg:GetDamage() * 0.6))
+
+			if ms.Ores.SendChatMessage and (not attacker._miningCrowbarMsgNext or now > attacker._miningCrowbarMsgNext) then
+				ms.Ores.SendChatMessage(attacker, 0, "Psst! You should use the Mining Pickaxe to get the most out of mining! Look in the Weapons tab!")
+				attacker._miningCrowbarMsgNext = now + 120
+			end
+		elseif wep:GetClass() == "mining_pickaxe" then
+			-- Allowed
+			isPickaxe = true
+		else
+			return
 		end
-	elseif wep:GetClass() == "mining_pickaxe" then
-		-- Allowed
+
+		if attacker:GetMoveType() == MOVETYPE_NOCLIP then
+			self:EmitSound("player/suit_denydevice.wav", 70)
+
+			return
+		end
+	elseif inflictor:GetClass() == "mining_argonite_drone" then
 		isPickaxe = true
 	else
-		return
-	end
-
-	-- Inflictor is either yourself (inflictor w/ crowbar = yourself) or the weapon
-	local inflictor = dmg:GetInflictor()
-	if inflictor ~= attacker and inflictor ~= wep then return end
-
-	if attacker:GetMoveType() == MOVETYPE_NOCLIP then
-		self:EmitSound("player/suit_denydevice.wav", 70)
-
+		-- Inflictor is either yourself (inflictor w/ crowbar = yourself) or the weapon
+		-- or drone
 		return
 	end
 
