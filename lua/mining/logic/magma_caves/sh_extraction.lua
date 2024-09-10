@@ -332,6 +332,8 @@ if SERVER then
 
 				bad_ents[owner] = bad_ents[owner] or 0
 				bad_ents[owner] = bad_ents[owner] + 1
+
+				timer.Remove(("mining_extraction_npc_ac_[%d]"):format(owner:EntIndex()))
 			end)
 		end
 	end)
@@ -346,6 +348,11 @@ if SERVER then
 		local class = ent:GetClass()
 		if class:match("^gmod%_wire%_") or class == "starfall_processor" then
 			bad_ents[owner] = math.max(0, bad_ents[owner] - 1)
+			if bad_ents[owner] == 0 then
+				timer.Create(("mining_extraction_npc_ac_[%d]"):format(owner:EntIndex()), 60, 1, function()
+					bad_ents[owner] = nil
+				end)
+			end
 		end
 	end)
 
@@ -357,7 +364,7 @@ if SERVER then
 		if not npc:IsValid() then return end
 
 		if npc.role == "extractor" and npc:GetPos():DistToSqr(ply:GetPos()) <= MAX_NPC_DIST then
-			if bad_ents[ply] and bad_ents[ply] > 0 then
+			if bad_ents[ply] then
 				ply:ChatPrint("You cannot exchange your ores with the extractor while you have sensitive equipment around! (wiremod & starfall)")
 				return
 			end
