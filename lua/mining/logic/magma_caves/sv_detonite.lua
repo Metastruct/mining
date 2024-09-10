@@ -135,7 +135,8 @@ local function spawnDetonite(tr)
 		drop:SetRarity(DETONITE_RARITY)
 		drop:SetPos(rock:GetPos() - Vector(math.random(-maxs.x, maxs.x), math.random(-maxs.y, maxs.y), maxs.z + 25))
 		drop:SetTrigger(true)
-		drop:UseTriggerBounds(true,6)
+		drop:UseTriggerBounds(true, 6)
+		drop:SetUseType(SIMPLE_USE)
 		drop:Spawn()
 		drop:PhysWake()
 		drop:SetAllowTouch(true)
@@ -153,6 +154,12 @@ local function spawnDetonite(tr)
 
 				SafeRemoveEntity(self)
 			end
+		end
+
+		function drop:Use(ent)
+			if not ent:IsPlayer() then return end
+
+			self:Consume(ent)
 		end
 
 		function drop:Touch(ent)
