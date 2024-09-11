@@ -194,6 +194,37 @@ if SERVER then
 			SafeRemoveEntity(drone)
 		end
 	end
+
+	CreateConVar("sbox_maxmining_argonite_drone_controller", "1", FCVAR_ARCHIVE, "Maximum amount of argonite drone controller entities a player can have", 0, 100)
+
+	hook.Add("OnEntityCreated", "mining_argonite_drone_controller", function(ent)
+		if ent:GetClass() ~= "mining_argonite_drone_controller" then return end
+		if not ent.CPPIGetOwner then return end
+
+		timer.Simple(0, function()
+			if not IsValid(ent) then return end
+
+			local ply = ent:CPPIGetOwner()
+			if not IsValid(ply) then
+				SafeRemoveEntity(ent)
+				return
+			end
+
+			if ply:CheckLimit("mining_argonite_drone_controller") then
+				ply:AddCount("mining_argonite_drone_controller", ent)
+			else
+				SafeRemoveEntity(ent)
+			end
+		end)
+	end)
+
+	hook.Add("PlayerSpawnSENT", "mining_argonite_drone_controller", function(ply, className)
+		if not className then return end
+
+		if className == "mining_argonite_drone_controller" and not ply:CheckLimit("mining_argonite_drone_controller") then
+			return false
+		end
+	end)
 end
 
 if CLIENT then
