@@ -20,6 +20,7 @@ Ores.Automation = Ores.Automation or {
 		mining_oil_extractor = true,
 		mining_chip_router = true,
 		mining_generator = true,
+		mining_argonite_drone_controller = true,
 	},
 	BaseOreProductionRate = 10, -- 1 per 10 seconds
 	EnergyMaterial = Material("models/props_combine/coredx70"),
@@ -39,6 +40,7 @@ Ores.Automation = Ores.Automation or {
 		mining_oil_extractor = true,
 		mining_chip_router = true,
 		mining_generator = true,
+		mining_argonite_drone_controller = true,
 	},
 	GraphUnit = 40,
 	GraphHeightMargin = 75,
