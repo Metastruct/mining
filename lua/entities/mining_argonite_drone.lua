@@ -72,7 +72,7 @@ if SERVER then
 		self:SetSolid(SOLID_VPHYSICS)
 		self:SetModel("models/maxofs2d/hover_rings.mdl")
 		self:SetNotSolid(true)
-
+		self:SetColor(RED_COLOR)
 		self:PhysicsInit(SOLID_VPHYSICS)
 		self:PhysWake()
 
