@@ -174,26 +174,27 @@ if SERVER then
 		self:SetTarget(new_rock)
 	end
 
+	local ANG_ZERO = Angle(0, 0, 0)
 	function ENT:PhysicsSimulate(phys, delta)
 		phys:Wake()
 
 		local pos
 		local target = self:GetTarget()
-		local tr = self:TraceToGround()
 		if IsValid(target) then
 			pos = target:WorldSpaceCenter() + self.HeightOffset
 		else
+			local tr = self:TraceToGround()
 			pos = tr.HitPos + self.HeightOffset
 
 			if self.NextTargetCheck < CurTime() then
 				self:SetTarget(self:GetClosestRock())
-				self.NextTargetCheck = CurTime() + 1
+				self.NextTargetCheck = CurTime() + 2
 			end
 		end
 
 		self.ShadowParams.secondstoarrive = 4
 		self.ShadowParams.pos = pos
-		self.ShadowParams.angle = Angle(0, 0, 0)
+		self.ShadowParams.angle = ANG_ZERO
 		self.ShadowParams.maxangular = 5000
 		self.ShadowParams.maxangulardamp = 10000
 		self.ShadowParams.maxspeed = 1000000
@@ -249,6 +250,7 @@ if SERVER then
 		if success then
 			if not self.LaserSound then
 				self.LaserSound = CreateSound(self, "ambient/energy/force_field_loop1.wav")
+				self.LaserSound:Stop()
 				self.LaserSound:Play()
 			elseif not self.LaserSound:IsPlaying() then
 				self.LaserSound:Stop()
