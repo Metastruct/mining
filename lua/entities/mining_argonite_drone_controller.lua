@@ -81,7 +81,7 @@ if SERVER then
 		self.EnergySettings = {
 			Type = "Detonite",
 			MaxValue = MAX_DETONITE,
-			ConsumptionRate = 10, -- once every 10 seconds,
+			ConsumptionRate = 3, -- once every 10 seconds,
 			NoBrush = true,
 		}
 
