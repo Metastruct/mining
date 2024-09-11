@@ -10,19 +10,39 @@ ENT.Author = "Earu"
 ENT.Category = "Mining"
 ENT.RenderGroup = RENDERGROUP_OPAQUE
 ENT.Spawnable = false
+ENT.AdminOnly = true
 ENT.ClassName = "mining_argonite_drone"
-ENT.LaserDistance = 300 * 300
-ENT.Nodes = {
-	Vector(5871.525390625, -245.04811096191, -15307.4765625),
-	Vector(5695.3134765625, 763.93371582031, -15302.787109375),
-	Vector(5685.3090820312, 1952.9719238281, -15309.538085938),
-	Vector(6140.3984375, 2447.4885253906, -15296.720703125),
-	Vector(6696.1630859375, 2549.5446777344, -15315.948242188),
-	Vector(5026.3447265625, 2495.0036621094, -15299.805664062),
-	Vector(3348.6557617188, 1879.5523681641, -15310.637695312),
-	Vector(3402.2387695312, -94.821678161621, -15315.1328125),
-	Vector(4747.6547851562, -589.49505615234, -15316.27734375),
-	Vector(5262.8051757812, -572.69165039062, -15287.276367188)
+ENT.LaserDistance = 150 * 150
+ENT.HeightOffset = Vector(0, 0, 50)
+
+local NODES = {
+	Vector(7290.3662109375, -394.54165649414, -15312.8359375),
+	Vector(6858.1372070312, -374.09796142578, -15304.220703125),
+	Vector(6451.595703125, -300.64538574219, -15303.966796875),
+	Vector(6133.2563476562, -204.45785522461, -15306.864257812),
+	Vector(5854.9643554688, -96.933898925781, -15309.14453125),
+	Vector(5782.0483398438, 299.78552246094, -15303.693359375),
+	Vector(5713.9702148438, 758.13116455078, -15303.631835938),
+	Vector(5715.3579101562, 1104.60546875, -15304.112304688),
+	Vector(5714.8017578125, 1722.1441650391, -15309.151367188),
+	Vector(5349.484375, 2195.7849121094, -15304.33984375),
+	Vector(4863.5874023438, 2510.130859375, -15307.955078125),
+	Vector(4459.8598632812, 2271.1901855469, -15316.14453125),
+	Vector(3976.6962890625, 2022.6401367188, -15316.016601562),
+	Vector(3387.6232910156, 1859.7194824219, -15311.369140625),
+	Vector(3365.2770996094, 1382.443359375, -15304.256835938),
+	Vector(3330.1713867188, 992.31695556641, -15304.190429688),
+	Vector(3366.5329589844, 361.68695068359, -15304.235351562),
+	Vector(3438.1975097656, -121.42636871338, -15315.672851562),
+	Vector(3678.9865722656, -735.61853027344, -15334.471679688),
+	Vector(4043.5646972656, -639.06231689453, -15331.96875),
+	Vector(4617.5756835938, -633.54693603516, -15331.122070312),
+	Vector(4878.7543945312, -610.96575927734, -15308.881835938),
+	Vector(5234.1884765625, -517.06597900391, -15303.989257812),
+	Vector(5528.2338867188, -395.98141479492, -15303.629882812),
+	Vector(5833.2241210938, -220.76287841797, -15310.05078125),
+	Vector (6074.9877929688, 2380.0256347656, -15303.126953125),
+	Vector (6726.7534179688, 2552.9794921875, -15315.967773438),
 }
 
 function ENT:TraceToGround()
@@ -30,14 +50,23 @@ function ENT:TraceToGround()
 	return util.TraceLine({
 		start = pos,
 		endpos = pos + Vector(0, 0, -2e6),
-		mask = MASK_SOLID_BRUSHONLY,
+		mask = bit.bor(MASK_SOLID_BRUSHONLY, MASK_WATER),
 	})
 end
 
 function ENT:HasTarget() return IsValid(self:GetNWEntity("Target")) end
 function ENT:GetTarget() return self:GetNWEntity("Target") end
 
-local RED_COLOR = Color(255, 0, 0)
+function ENT:InTargetRange()
+	local target = self:GetTarget()
+	if IsValid(target) and self:WorldSpaceCenter():DistToSqr(target:WorldSpaceCenter()) < self.LaserDistance then
+		return true
+	end
+
+	return false
+end
+
+local RED_COLOR = Color(255, 0, 0, 255)
 if SERVER then
 	function ENT:Initialize()
 		self:SetSolid(SOLID_VPHYSICS)
@@ -51,98 +80,40 @@ if SERVER then
 		self.ShadowParams = {}
 		self.NextTargetCheck = 0
 
-		util.SpriteTrail(self, 0, RED_COLOR, false, 15, 1, 1, 1 / (15 + 1) * 0.5, "trails/laser")
+		timer.Simple(0, function()
+			if not IsValid(self) then return end
+			util.SpriteTrail(self, 0, RED_COLOR, false, 15, 1, 1, 1 / (15 + 1) * 0.5, "trails/laser.vmt")
+		end)
 	end
 
-	local function distance(a, b)
-		return (a - b):Length()  -- Euclidean distance between 3D vectors
-	end
-
-	local function a_star_pathfinding(startPos, endPos, nodes)
-		-- Set up the open and closed lists
-		local openList = {}
-		local closedList = {}
-
-		-- Add the start position to the open list
-		table.insert(openList, {
-			pos = startPos,
-			g = 0,
-			h = distance(startPos, endPos),
-			f = 0,
-			parent = nil
-		})
-
-		while #openList > 0 do
-			-- Sort openList based on 'f' value (g + h)
-			table.sort(openList, function(a, b) return a.f < b.f end)
-			-- Take the node with the lowest 'f' value (best candidate for the path)
-			local currentNode = table.remove(openList, 1)
-
-			-- If the current node is the end node, build the path by tracing back through the parents
-			-- Tolerance for reaching the end point (adjust as necessary)
-			if distance(currentNode.pos, endPos) < 600 then
-				local path = {}
-
-				while currentNode do
-					table.insert(path, 1, currentNode.pos) -- Insert at the start to reverse the path
-					currentNode = currentNode.parent
-				end
-				-- Return the built path
-
-				table.insert(path, endPos)
-				return path
-			end
-
-			-- Add current node to the closed list
-			table.insert(closedList, currentNode)
-
-			-- Loop through all nodes (neighbors)
-			for _, neighborPos in ipairs(nodes) do
-				-- Skip if the neighbor is already in the closed list
-				local inClosedList = false
-
-				for _, closedNode in ipairs(closedList) do
-					if closedNode.pos == neighborPos then
-						inClosedList = true
-						break
-					end
-				end
-
-				if inClosedList then
-					goto skip
-				end
-
-				-- Calculate g, h, and f values for the neighbor
-				local g = currentNode.g + distance(currentNode.pos, neighborPos)
-				local h = distance(neighborPos, endPos)
-				local f = g + h
-
-				-- Check if the neighbor is already in the open list with a lower f value
-				local inOpenList = false
-				for _, openNode in ipairs(openList) do
-					if openNode.pos == neighborPos and openNode.f <= f then
-						inOpenList = true
-						break
-					end
-				end
-
-				-- If the neighbor is not in the open list or has a better f value, add/update it
-				if not inOpenList then
-					table.insert(openList, {
-						pos = neighborPos,
-						g = g,
-						h = h,
-						f = f,
-						parent = currentNode
-					})
-				end
-
-				::skip::
+	function ENT:FindClosestNode(pos)
+		local min_dist = 2e9
+		local min_node = pos
+		for _, node in ipairs(NODES) do
+			local sqrt_dist = node:DistToSqr(pos)
+			if sqrt_dist < min_dist then
+				min_dist = sqrt_dist
+				min_node = node
 			end
 		end
-		-- If no path is found, return an empty table
 
-		return {}
+		return min_node
+	end
+
+	function ENT:CanReach(ent)
+		local tr = util.TraceLine({
+			start = self:WorldSpaceCenter(),
+			endpos = ent:WorldSpaceCenter(),
+			filter = self,
+			mask = MASK_SOLID_BRUSHONLY,
+		})
+
+		return tr.Fraction > 0.75
+	end
+
+	function ENT:Teleport(pos)
+		self:SetPos(pos)
+		self:EmitSound("npc/waste_scanner/grenade_fire.wav")
 	end
 
 	function ENT:SetTarget(target)
@@ -159,8 +130,9 @@ if SERVER then
 		target.ArgoniteDrone = self
 		self:SetNWEntity("Target", target)
 
-		self.Path = a_star_pathfinding(self:WorldSpaceCenter(), target:WorldSpaceCenter(), self.Nodes)
-		self.PathIndex = 1
+		if not self:CanReach(target) then
+			self:Teleport(self:FindClosestNode(target:WorldSpaceCenter()) + self.HeightOffset)
+		end
 	end
 
 	function ENT:SetRarity(rarity)
@@ -170,7 +142,7 @@ if SERVER then
 	function ENT:GetClosestRock()
 		local target = NULL
 		local mindist = 2e6
-		local argonite_rarity = self.RarityOverride or ms.Ores.Automation.GetOreRarityByName("copper")
+		local argonite_rarity = self.RarityOverride or ms.Ores.Automation.GetOreRarityByName("argonite")
 		for _, ent in ipairs(ents.FindByClass("mining_rock")) do
 			if ent:GetRarity() ~= argonite_rarity then continue end
 			if IsValid(ent.ArgoniteDrone) then continue end
@@ -187,7 +159,7 @@ if SERVER then
 
 	function ENT:MoveOn(exception)
 		local rocks = {}
-		local argonite_rarity = self.RarityOverride or ms.Ores.Automation.GetOreRarityByName("copper")
+		local argonite_rarity = self.RarityOverride or ms.Ores.Automation.GetOreRarityByName("argonite")
 		for _, ent in ipairs(ents.FindByClass("mining_rock")) do
 			if ent:GetRarity() ~= argonite_rarity then continue end
 			if IsValid(ent.ArgoniteDrone) then continue end
@@ -202,19 +174,16 @@ if SERVER then
 		self:SetTarget(new_rock)
 	end
 
-	function ENT:PhysicsSimulate(phys,delta)
+	function ENT:PhysicsSimulate(phys, delta)
 		phys:Wake()
 
-		local pos = Vector(0, 0, 0)
-		if self:HasTarget() and #self.Path > 0 then
-			pos = self.Path[self.PathIndex] + Vector(0, 0, 50)
-
-			if pos:Distance(self:GetPos()) < 100 then
-				self.PathIndex = math.min(#self.Path, self.PathIndex + 1)
-			end
+		local pos
+		local target = self:GetTarget()
+		local tr = self:TraceToGround()
+		if IsValid(target) then
+			pos = target:WorldSpaceCenter() + self.HeightOffset
 		else
-			local tr = self:TraceToGround()
-			pos = tr.HitPos + Vector(0, 0, 50)
+			pos = tr.HitPos + self.HeightOffset
 
 			if self.NextTargetCheck < CurTime() then
 				self:SetTarget(self:GetClosestRock())
@@ -222,7 +191,7 @@ if SERVER then
 			end
 		end
 
-		self.ShadowParams.secondstoarrive = 1
+		self.ShadowParams.secondstoarrive = 4
 		self.ShadowParams.pos = pos
 		self.ShadowParams.angle = Angle(0, 0, 0)
 		self.ShadowParams.maxangular = 5000
@@ -230,7 +199,7 @@ if SERVER then
 		self.ShadowParams.maxspeed = 1000000
 		self.ShadowParams.maxspeeddamp = 10000
 		self.ShadowParams.dampfactor = 0.8
-		self.ShadowParams.teleportdistance = 2000
+		self.ShadowParams.teleportdistance = 0
 		self.ShadowParams.deltatime = delta
 
 		phys:ComputeShadowControl(self.ShadowParams)
@@ -256,12 +225,18 @@ if SERVER then
 			end)
 		end
 
-		if self:WorldSpaceCenter():DistToSqr(target:WorldSpaceCenter()) < self.LaserDistance then
+		if self:InTargetRange() then
 			local dmg = DamageInfo()
 			dmg:SetAttacker(owner)
 			dmg:SetInflictor(self)
-			dmg:SetDamage(20)
+			dmg:SetDamage(40)
 			dmg:SetDamageType(DMG_ENERGYBEAM)
+
+			local effect_data = EffectData()
+			effect_data:SetOrigin(target:WorldSpaceCenter())
+			effect_data:SetNormal(Vector(0, 0, 1))
+			effect_data:SetScale(4)
+			util.Effect("GunshipImpact", effect_data)
 
 			target:TakeDamageInfo(dmg)
 
@@ -305,9 +280,15 @@ if CLIENT then
 		self:DrawModel()
 
 		local target = self:GetTarget()
-		if IsValid(target) and self:WorldSpaceCenter():DistToSqr(target:WorldSpaceCenter()) < self.LaserDistance then
+		if self:InTargetRange() then
 			render.SetMaterial(BEAM_MAT)
 			render.DrawBeam(self:WorldSpaceCenter(), target:WorldSpaceCenter(), 5, 1, 1, RED_COLOR)
+		end
+
+		if MTA and self.CPPIGetOwner and self:CPPIGetOwner() == LocalPlayer() then
+			cam.Start2D()
+			MTA.HighlightPosition(self:WorldSpaceCenter(), ("Drone [%d]"):format(self:EntIndex()), RED_COLOR, false)
+			cam.End2D()
 		end
 	end
 end
