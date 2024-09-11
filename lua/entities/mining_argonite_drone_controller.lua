@@ -19,16 +19,16 @@ local function can_work(self)
 	return false
 end
 
-local MAX_DETONITE = 100
+local MAX_DETONITE = 300
 function ENT:GetDroneCount()
 	if not can_work(self) then return 0 end
 
-	local amount = self:GetNW2Int("Detonite", 0)
-	if amount < 33 then
+	local amount = self:GetNW2Int("Detonite", 0) / MAX_DETONITE
+	if amount < 0.33 then
 		return 1
-	elseif amount >= 33 and amount < 66 then
+	elseif amount >= 0.33 and amount < 0.66 then
 		return 2
-	else
+	elseif amount >= 0.66 then
 		return 3
 	end
 end
@@ -81,7 +81,8 @@ if SERVER then
 		self.EnergySettings = {
 			Type = "Detonite",
 			MaxValue = MAX_DETONITE,
-			ConsumptionRate = 3, -- once every 10 seconds,
+			ConsumptionRate = 10, -- once every 10 seconds,
+			ConsumptionAmount = 0,
 			NoBrush = true,
 		}
 
