@@ -224,7 +224,8 @@ if CLIENT then
 				{ Type = "Label", Text = "CONTROLLER", Border = true },
 				{ Type = "Data", Label = "DETONITE", Value = self:GetNW2Int("Detonite", 0), MaxValue = self:GetNW2Int("MaxDetonite", MAX_DETONITE) },
 				{ Type = "Data", Label = "DRONES", Value = self:GetDroneCount() },
-				{ Type = "State", Value = can_work(self) }
+				{ Type = "State", Value = can_work(self) },
+				{ Type = "Action", Binding = "+use", Text = "FILL" }
 			}
 		end
 
