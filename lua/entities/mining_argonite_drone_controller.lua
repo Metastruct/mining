@@ -82,7 +82,6 @@ if SERVER then
 			Type = "Detonite",
 			MaxValue = MAX_DETONITE,
 			ConsumptionRate = 10, -- once every 10 seconds,
-			ConsumptionAmount = 0,
 			NoBrush = true,
 		}
 
