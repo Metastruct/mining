@@ -25,10 +25,12 @@ function ENT:GetDroneCount()
 
 	local amount = self:GetNW2Int("Detonite", 0) / MAX_DETONITE
 	if amount < 0.33 then
-		return 1
+		return 0
 	elseif amount >= 0.33 and amount < 0.66 then
+		return 1
+	elseif amount >= 0.66 and amount < 1 then
 		return 2
-	elseif amount >= 0.66 then
+	elseif amount == 1 then
 		return 3
 	end
 end
