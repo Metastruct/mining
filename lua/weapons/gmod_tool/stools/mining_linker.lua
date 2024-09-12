@@ -33,6 +33,8 @@ if CLIENT then
 		if interface_count == 0 then return false end
 
 		local cur_index = (self.CurrentIndex % table.Count(interfaces)) + 1
+		table.sort(interfaces, function(a, b) return a.Name < b.Name end) -- match hud
+
 		local interface_data = interfaces[cur_index]
 		if not interface_data then return false end
 
@@ -96,6 +98,7 @@ if CLIENT then
 		if outputs_count == 0 then return false end
 
 		local cur_index = (self.CurrentIndex % table.Count(outputs)) + 1
+		table.sort(outputs, function(a, b) return a.Name < b.Name end)
 
 		local output_data = outputs[cur_index]
 		if not output_data then return false end
