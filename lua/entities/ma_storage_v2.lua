@@ -25,6 +25,8 @@ if SERVER then
 
 		_G.MA_Orchestrator.RegisterInput(self, "ores", "ORE", "Ores", "Standard ore input.")
 		_G.MA_Orchestrator.RegisterInput(self, "ingots", "INGOT", "Ingots", "Standard ingot input.")
+
+		Ores.Automation.PrepareForDuplication(self)
 	end
 
 	function ENT:MA_OnOutputReady(output_data, input_data)

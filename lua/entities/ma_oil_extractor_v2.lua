@@ -83,11 +83,13 @@ if SERVER then
 			if not IsValid(self) then return end
 
 			self:Activate()
-			self.SndLoop = self:StartLoopingSound("ambient/machines/transformer_loop.wav")
+			Ores.Automation.ReplicateOwnership(self, self)
 		end)
 
 		_G.MA_Orchestrator.RegisterInput(self, "power", "ENERGY", "Energy", "Standard energyy input. More energy equals more ores!")
 		_G.MA_Orchestrator.RegisterOutput(self, "oil", "OIL", "Oil", "Standard oil output.")
+
+		Ores.Automation.PrepareForDuplication(self)
 	end
 
 	function ENT:MA_OnLink(output_data, input_data)

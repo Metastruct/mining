@@ -308,32 +308,6 @@ if CLIENT then
 		self:DrawModel()
 	end
 
-	local CHIP_MATERIAL = Material("beer/wiremod/gate_e2")
-	function ENT:OnGraphDraw(x, y)
-		local detoniteRarity = Ores.GetOreRarityByName("Detonite")
-		local detoniteColor = Ores.__R[detoniteRarity].HudColor
-		local GU = Ores.Automation.GraphUnit
-
-		if not CHIP_MATERIAL:IsError() then
-			surface.SetDrawColor(255, 255, 255, 255)
-			surface.SetMaterial(CHIP_MATERIAL)
-			surface.DrawTexturedRect(x - GU / 2, y - GU / 2, GU, GU)
-		else
-			surface.SetDrawColor(28, 28, 28, 255)
-			surface.DrawRect(x - GU / 2, y - GU / 2, GU, GU)
-		end
-
-		surface.SetDrawColor(detoniteColor)
-		surface.DrawOutlinedRect(x - GU / 2, y - GU / 2, GU, GU, 2)
-
-		surface.SetTextColor(255, 255, 255, 255)
-		local text = self:GetNW2Int("Bandwidth", 0) .. "u"
-		surface.SetFont("DermaDefault")
-		local tw, th = surface.GetTextSize(text)
-		surface.SetTextPos(x - tw / 2, y - th / 2)
-		surface.DrawText(text)
-	end
-
 	function ENT:OnDrawEntityInfo()
 		if not self.MiningFrameInfo then
 			self.MiningFrameInfo = {

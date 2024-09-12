@@ -25,6 +25,12 @@ if SERVER then
 
 		_G.MA_Orchestrator.RegisterInput(self, "ores", "ORE", "Ores", "Standard ore input.")
 		_G.MA_Orchestrator.RegisterInput(self, "ingots", "INGOT", "Ingots", "Standard ingot input.")
+
+		Ores.Automation.PrepareForDuplication(self)
+
+		if _G.WireLib then
+			_G.WireLib.CreateOutputs(self, {"Amount (Outputs the current amount of coins minted) [NORMAL]" })
+		end
 	end
 
 	function ENT:MA_OnOutputReady(output_data, input_data)
@@ -51,6 +57,10 @@ if SERVER then
 			local cur_coins = self:GetNWInt("MintedCoins", 0)
 			local new_amount = cur_coins + math.ceil(earnings)
 			self:SetNWInt("MintedCoins", new_amount)
+
+			if _G.WireLib then
+				_G.WireLib.TriggerOutput(self, "Amount", new_amount)
+			end
 		end
 	end
 
@@ -74,6 +84,10 @@ if SERVER then
 
 		self:SetNWInt("MintedCoins", 0)
 		self:EmitSound(")physics/surfaces/underwater_impact_bullet3.wav", 75, 70)
+
+		if _G.WireLib then
+			_G.WireLib.TriggerOutput(self, "Amount", 0)
+		end
 	end
 
 	function ENT:SpawnFunction(ply, tr, class_name)

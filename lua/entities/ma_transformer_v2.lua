@@ -138,6 +138,13 @@ if SERVER then
 		end)
 
 		_G.MA_Orchestrator.RegisterOutput(self, "battery", "BATTERY", "Battery", "Outputs batteries created with the argonite stored by the transformer.")
+
+		Ores.Automation.PrepareForDuplication(self)
+		timer.Simple(0, function()
+			if not IsValid(self) then return end
+
+			Ores.Automation.ReplicateOwnership(self, self)
+		end)
 	end
 
 	function ENT:AddArgonite(amount)

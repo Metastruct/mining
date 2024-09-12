@@ -97,6 +97,8 @@ if SERVER then
 			local cur_fuel = self:GetNW2Int("Fuel", 0)
 			self:SetNW2Int("Fuel", math.max(0, cur_fuel - 1))
 		end)
+
+		Ores.Automation.PrepareForDuplication(self)
 	end
 
 	function ENT:MA_OnLink(output_data, input_data)
@@ -132,16 +134,14 @@ if SERVER then
 			if not self:CanWork() then return end
 
 			local rarity = table.remove(output_data.Ent.OreQueue, 1)
-			local new_value = (self.Ores[rarity] or 0) + 1
-			self.Ores[rarity] = new_value
-			if new_value >= Ores.Automation.IngotSize then
+			self.Ores[rarity] = (self.Ores[rarity] or 0) + 1
+			if self.Ores[rarity] >= Ores.Automation.IngotSize then
 				self:ProduceRefinedOre(rarity)
 				self.Ores[rarity] = nil
 			end
 
 			self:UpdateNetworkOreData()
 		elseif input_data.Id == "oil" then
-			print("called oil")
 			local cur_fuel = self:GetNW2Int("Fuel", 0)
 			self:SetNW2Int("Fuel", math.min(Ores.Automation.BatteryCapacity, cur_fuel + Ores.Automation.BatteryCapacity))
 		elseif input_data.Id == "power" then

@@ -12,7 +12,7 @@ ENT.RenderGroup = RENDERGROUP_OPAQUE
 ENT.Spawnable = true
 ENT.ClassName = "ma_merger_v2"
 
-local MAX_DRILLS = 12
+local INPUT_AMOUNT = 6
 
 if SERVER then
 	function ENT:Initialize()
@@ -25,7 +25,7 @@ if SERVER then
 		self.OreQueue = {}
 
 		_G.MA_Orchestrator.RegisterOutput(self, "ores", "ORE", "Ores", "Merged ores output.")
-		for i = 1, MAX_DRILLS do
+		for i = 1, INPUT_AMOUNT do
 			_G.MA_Orchestrator.RegisterInput(self, "ores_" .. i, "ORE", "Ores " .. i, "Standard ore input.")
 		end
 
@@ -41,6 +41,8 @@ if SERVER then
 				_G.MA_Orchestrator.SendOutputReadySignal(output_data)
 			end
 		end)
+
+		Ores.Automation.PrepareForDuplication(self)
 	end
 
 	function ENT:MA_OnOutputReady(output_data, input_data)
@@ -58,7 +60,7 @@ if SERVER then
 		end
 
 		-- get rid of the extra
-		while #self.OreQueue > 50 * MAX_DRILLS do
+		while #self.OreQueue > 50 * INPUT_AMOUNT do
 			table.remove(self.OreQueue, #self.OreQueue)
 		end
 	end
@@ -67,7 +69,7 @@ end
 if CLIENT then
 	function ENT:Initialize()
 		_G.MA_Orchestrator.RegisterOutput(self, "ores", "ORE", "Ores", "Merged ores output.")
-		for i = 1, MAX_DRILLS do
+		for i = 1, INPUT_AMOUNT do
 			_G.MA_Orchestrator.RegisterInput(self, "ores_" .. i, "ORE", "Ores " .. i, "Standard ore input.")
 		end
 	end
