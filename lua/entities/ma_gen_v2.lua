@@ -31,12 +31,12 @@ if SERVER then
 		local generator = net.ReadEntity()
 		if not IsValid(generator) then return end
 
-		local requiredPoints = math.floor(BASE_KICKSTART_PRICE * math.max(1, Ores.GetPlayerMultiplier(ply) - 2))
-		local pointBalance = ply:GetNWInt(Ores._nwPoints, 0)
-		if requiredPoints > pointBalance then return end
+		local required_points = math.floor(BASE_KICKSTART_PRICE * math.max(1, Ores.GetPlayerMultiplier(ply) - 2))
+		local point_balance = ply:GetNWInt(Ores._nwPoints, 0)
+		if required_points > point_balance then return end
 
-		Ores.Print(ply, ("kickstarted a generator using %d pts"):format(requiredPoints))
-		Ores.TakePlayerPoints(ply, requiredPoints)
+		Ores.Print(ply, ("kickstarted a generator using %d pts"):format(required_points))
+		Ores.TakePlayerPoints(ply, required_points)
 
 		generator:SetNW2Int("Energy", 100)
 	end)
@@ -134,9 +134,9 @@ if CLIENT then
 		wheel:Spawn()
 		wheel:SetParent(self)
 
-		local argoniteRarity = Ores.GetOreRarityByName("Argonite")
+		local argonite_rarity = Ores.GetOreRarityByName("Argonite")
 		wheel.RenderOverride = function()
-			local color = Ores.__R[argoniteRarity].PhysicalColor
+			local color = Ores.__R[argonite_rarity].PhysicalColor
 			render.SetColorModulation(color.r / 100, color.g / 100, color.b / 100)
 			render.MaterialOverride(Ores.Automation.EnergyMaterial)
 			wheel:DrawModel()
@@ -186,11 +186,11 @@ if CLIENT then
 		if bind == "+use" and pressed then
 			local tr = ply:GetEyeTrace()
 			if IsValid(tr.Entity) and tr.Entity:GetClass() == "ma_gen_v2" and tr.Entity:WorldSpaceCenter():Distance(EyePos()) <= 300 then
-				local requiredPoints = math.floor(BASE_KICKSTART_PRICE * math.max(1, Ores.GetPlayerMultiplier(ply) - 2))
-				local pointBalance = ply:GetNWInt(Ores._nwPoints, 0)
-				if requiredPoints > pointBalance then
+				local required_points = math.floor(BASE_KICKSTART_PRICE * math.max(1, Ores.GetPlayerMultiplier(ply) - 2))
+				local point_balance = ply:GetNWInt(Ores._nwPoints, 0)
+				if required_points > point_balance then
 					chat.AddText(Color(230, 130, 65), " ♦ [Ores] ", color_white, ("You do not have enough points to kickstart this generator (required: %s pts | balance: %s pts)"):format(
-						string.Comma(requiredPoints),
+						string.Comma(required_points),
 						string.Comma(pointBalance)
 					))
 					return
@@ -198,8 +198,8 @@ if CLIENT then
 
 				Derma_Query(
 					("Kickstarting the generator will cost you %s pts (current balance: %s pts)"):format(
-						string.Comma(requiredPoints),
-						string.Comma(pointBalance)
+						string.Comma(required_points),
+						string.Comma(point_balance)
 					),
 					"Kickstart Generator",
 					"Kickstart", function()

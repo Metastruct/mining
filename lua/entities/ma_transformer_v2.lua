@@ -14,7 +14,7 @@ ENT.ClassName = "ma_transformer_v2"
 
 if SERVER then
 	local teslas = {}
-	local function doZapEffect(pos, ent)
+	local function do_zap_effect(pos, ent)
 		if #teslas > 4 then
 			for k, v in pairs(teslas) do
 				if not IsValid(v) then table.remove(teslas, k) continue end
@@ -120,15 +120,15 @@ if SERVER then
 		self.Core:SetColor(Color(0, 0, 0, 255))
 		self.Core:Activate()
 
-		local timerName = ("ma_transformer_v2_[%d]"):format(self:EntIndex())
-		timer.Create(timerName, 1, 0, function()
+		local timer_name = ("ma_transformer_v2_[%d]"):format(self:EntIndex())
+		timer.Create(timer_name, 1, 0, function()
 			if not IsValid(self) then
-				timer.Remove(timerName)
+				timer.Remove(timer_name)
 				return
 			end
 
 			if self:GetNWBool("IsPowered", true) then
-				doZapEffect(self:WorldSpaceCenter(), IsValid(self.Core) and self.Core or self)
+				do_zap_effect(self:WorldSpaceCenter(), IsValid(self.Core) and self.Core or self)
 			end
 
 			if self.BatteriesToProduce > 0 then
@@ -143,29 +143,29 @@ if SERVER then
 	function ENT:AddArgonite(amount)
 		if amount < 1 then return end
 
-		local curAmount = self:GetNWInt("ArgoniteCount", 0)
-		local newAmount = curAmount + amount
-		if newAmount >= Ores.Automation.BatteryCapacity then
-			local batteriesToProduce = math.floor(newAmount / Ores.Automation.BatteryCapacity)
-			local remaining = newAmount % Ores.Automation.BatteryCapacity
+		local cur_amount = self:GetNWInt("ArgoniteCount", 0)
+		local new_amount = cur_amount + amount
+		if new_amount >= Ores.Automation.BatteryCapacity then
+			local batteries_to_produce = math.floor(new_amount / Ores.Automation.BatteryCapacity)
+			local remaining = new_amount % Ores.Automation.BatteryCapacity
 
 			self:SetNWInt("ArgoniteCount", remaining)
-			self.BatteriesToProduce = self.BatteriesToProduce + batteriesToProduce
+			self.BatteriesToProduce = self.BatteriesToProduce + batteries_to_produce
 
 			if _G.WireLib then
 				_G.WireLib.TriggerOutput(self, "Amount", remaining)
 			end
 		else
-			self:SetNWInt("ArgoniteCount", newAmount)
+			self:SetNWInt("ArgoniteCount", new_amount)
 
 			if _G.WireLib then
-				_G.WireLib.TriggerOutput(self, "Amount", newAmount)
+				_G.WireLib.TriggerOutput(self, "Amount", new_amount)
 			end
 		end
 	end
 
-	local transformerIndex = 1
-	local function check_transformer_to_use(ply, baseTransformer)
+	local transformer_index = 1
+	local function check_transformer_to_use(ply, base_transformer)
 		local transformers = {}
 		for _, t in ipairs(ents.FindByClass("ma_transformer_v2")) do
 			if t:CPPIGetOwner() ~= ply then continue end
@@ -176,13 +176,13 @@ if SERVER then
 
 		table.sort(transformers, function(a, b) return a:GetCreationTime() > b:GetCreationTime() end)
 
-		local transformer = transformers[transformerIndex % (#transformers + 1)]
+		local transformer = transformers[transformer_index % (#transformers + 1)]
 		if not transformer then
-			transformerIndex = 1
-			return transformers[transformerIndex] == baseTransformer
+			transformer_index = 1
+			return transformers[transformer_index] == base_transformer
 		end
 
-		return baseTransformer == transformer
+		return base_transformer == transformer
 	end
 
 	function ENT:Think()
@@ -192,15 +192,15 @@ if SERVER then
 		local owner = self:CPPIGetOwner()
 		if not IsValid(owner) then return end
 
-		local argoniteRarity = Ores.GetOreRarityByName("Argonite")
-		local amount = math.min(Ores.Automation.BatteryCapacity, ms.Ores.GetPlayerOre(owner, argoniteRarity))
+		local argonite_rarity = Ores.GetOreRarityByName("Argonite")
+		local amount = math.min(Ores.Automation.BatteryCapacity, ms.Ores.GetPlayerOre(owner, argonite_rarity))
 		if amount < 1 then return end
 
 		if check_transformer_to_use(owner, self) then
 			self:AddArgonite(amount)
-			ms.Ores.TakePlayerOre(owner, argoniteRarity, amount)
+			ms.Ores.TakePlayerOre(owner, argonite_rarity, amount)
 
-			transformerIndex = transformerIndex + 1
+			transformer_index = transformer_index + 1
 		end
 	end
 

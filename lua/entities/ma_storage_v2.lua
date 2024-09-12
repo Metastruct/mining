@@ -46,16 +46,8 @@ if SERVER then
 
 	function ENT:UpdateNetworkOreData()
 		local t = {}
-		local wireCounts = {}
-		local wireNames = {}
 		for rarity, amount in pairs(self.Ores) do
 			table.insert(t, ("%s=%s"):format(rarity, amount))
-
-			local oreData = Ores.__R[rarity]
-			if oreData then
-				table.insert(wireCounts, amount)
-				table.insert(wireNames, oreData.Name or "Unknown")
-			end
 		end
 
 		self:SetNWString("OreData", table.concat(t, ";"))
@@ -89,18 +81,18 @@ if CLIENT then
 	end
 
 	function ENT:OnDrawEntityInfo()
-		local globalOreData = self:GetNWString("OreData", ""):Trim()
-		if #globalOreData < 1 then return end
+		local global_ore_data = self:GetNWString("OreData", ""):Trim()
+		if #global_ore_data < 1 then return end
 
 		local data = {
 			{ Type = "Label", Text = "STORAGE", Border = true },
 		}
 
-		for i, dataChunk in ipairs(globalOreData:Split(";")) do
-			local rarityData = dataChunk:Split("=")
-			local oreData = Ores.__R[tonumber(rarityData[1])]
+		for i, data_chunk in ipairs(global_ore_data:Split(";")) do
+			local rarity_data = data_chunk:Split("=")
+			local ore_data = Ores.__R[tonumber(rarity_data[1])]
 
-			table.insert(data, { Type = "Data", Label = oreData.Name:upper(), Value = rarityData[2], LabelColor = oreData.HudColor, ValueColor = oreData.HudColor })
+			table.insert(data, { Type = "Data", Label = ore_data.Name:upper(), Value = rarity_data[2], LabelColor = ore_data.HudColor, ValueColor = ore_data.HudColor })
 		end
 
 		if self.CPPIGetOwner and self:CPPIGetOwner() == LocalPlayer() then
