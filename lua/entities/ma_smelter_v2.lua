@@ -122,7 +122,7 @@ if SERVER then
 	end
 
 	function ENT:MA_OnOutputReady(output_data, input_data)
-		if input_data.Id ~= "oil" or input_data.Id ~= "ores" then return end
+		if input_data.Id ~= "oil" and input_data.Id ~= "ores" then return end
 
 		_G.MA_Orchestrator.Execute(output_data, input_data)
 	end
