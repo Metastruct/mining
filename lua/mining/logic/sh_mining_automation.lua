@@ -9,37 +9,19 @@ Ores.Automation = Ores.Automation or {
 	BombCapacity = 5,
 	BombDetonationTime = 4,
 	TextDrawingDistance = 150,
-	IgnoredClasses = {
-		player = true,
-		mining_ore_conveyor = true,
-		mining_ore_storage = true,
-		mining_drill = true,
-		mining_conveyor_splitter = true,
-		mining_ore_smelter = true,
-		mining_coin_minter = true,
-		mining_oil_extractor = true,
-		mining_chip_router = true,
-		mining_generator = true,
-		mining_argonite_drone_controller = true,
-	},
 	BaseOreProductionRate = 10, -- 1 per 10 seconds
 	EnergyMaterial = Material("models/props_combine/coredx70"),
-	EnergyEntities = {},
-	NonStorableOres = { "Argonite", "Detonite" },
 	EntityClasses = {
-		mining_ore_conveyor = true,
-		mining_ore_storage = true,
-		mining_drill = true,
-		mining_conveyor_splitter = true,
-		mining_argonite_battery = true,
-		mining_fuel_tank = true,
-		mining_argonite_transformer = true,
+		ma_storage_v2 = true,
+		ma_drill_v2 = true,
+		ma_transformer_v2 = true,
+		ma_smelter_v2 = true,
+		ma_minter_v2 = true,
+		ma_oil_extractor_v2 = true,
+		ma_gen_v2 = true,
+
 		mining_detonite_bomb = true,
-		mining_ore_smelter = true,
-		mining_coin_minter = true,
-		mining_oil_extractor = true,
 		mining_chip_router = true,
-		mining_generator = true,
 		mining_argonite_drone_controller = true,
 	},
 	GraphUnit = 40,
@@ -55,22 +37,6 @@ Ores.Automation = Ores.Automation or {
 
 if Ores.Automation.EnergyMaterial:IsError() then
 	Ores.Automation.EnergyMaterial = Material("effects/tvscreen_noise001a")
-end
-
-local cache = {}
-function Ores.Automation.GetOreRarityByName(name)
-	name = name:lower()
-
-	if cache[name] then return cache[name] end
-
-	for rarity, rarityData in pairs(Ores.__R) do
-		if rarityData.Name:lower() == name then
-			cache[name] = rarity
-			return rarity
-		end
-	end
-
-	return -1
 end
 
 if CLIENT then
@@ -245,12 +211,10 @@ if CLIENT then
 			if compare_ent_owner(ent, ply) then
 				table.insert(graphEntities, ent)
 
-				if not Ores.Automation.EnergyEntities[entClass] then
-					local pos = ent:WorldSpaceCenter()
-					graphMinX, graphMinY, graphMinZ = math.min(graphMinX, pos.x), math.min(graphMinY, pos.y), math.min(graphMinZ, pos.z)
-					graphMaxX, graphMaxY, graphMaxZ = math.max(graphMaxX, pos.y), math.max(graphMaxY, pos.y), math.max(graphMaxZ, pos.z)
-					hasAutomationEntities = true
-				end
+				local pos = ent:WorldSpaceCenter()
+				graphMinX, graphMinY, graphMinZ = math.min(graphMinX, pos.x), math.min(graphMinY, pos.y), math.min(graphMinZ, pos.z)
+				graphMaxX, graphMaxY, graphMaxZ = math.max(graphMaxX, pos.y), math.max(graphMaxY, pos.y), math.max(graphMaxZ, pos.z)
+				hasAutomationEntities = true
 			end
 		end
 
@@ -431,175 +395,6 @@ if SERVER then
 		end
 	end
 
-	local function gainEnergy(poweredEnt, ent)
-		local className = ent:GetClass()
-		local energyAccesors = Ores.Automation.EnergyEntities[className]
-		if not energyAccesors then return end
-
-		-- can't put fuel inside energy, etc...
-		if not istable(poweredEnt.AcceptedPowerTypes) then return end
-		if not poweredEnt.AcceptedPowerTypes[energyAccesors.Type] then return end
-
-		local time = CurTime()
-		if time < (poweredEnt.NextEnergyEntity or 0) then return end
-		if ent.MiningInvalidPower then return end
-
-		local canReceiveEnergy = true
-		if isfunction(poweredEnt.CanReceiveEnergy) then
-			local ret = poweredEnt:CanReceiveEnergy(energyAccesors.Type)
-			if ret ~= nil then canReceiveEnergy = ret end
-		end
-
-		if not canReceiveEnergy then return end
-
-		if ent.CPPIGetOwner and poweredEnt.CPPIGetOwner then
-			local p1, p2 = ent:CPPIGetOwner(), poweredEnt:CPPIGetOwner()
-			if IsValid(p1) and IsValid(p2) and p1 ~= p2 then
-				local areFriends = p1.AreFriends and p1:AreFriends(p2) or false
-				if not areFriends then return end
-			end
-		end
-
-		local energyAmount = energyAccesors.Get(ent)
-		local curEnergy = poweredEnt:GetNW2Int(energyAccesors.Type, 0)
-		local energyToAdd = math.min(poweredEnt:GetNW2Int("Max" .. energyAccesors.Type, 100) - curEnergy, energyAmount)
-		local newAmount = math.min(poweredEnt:GetNW2Int("Max" .. energyAccesors.Type, 100), curEnergy + energyToAdd)
-
-		poweredEnt:SetNW2Int(energyAccesors.Type, newAmount)
-		energyAccesors.Set(ent, math.max(0, energyAmount - energyToAdd))
-
-		if _G.WireLib then
-			_G.WireLib.TriggerOutput(poweredEnt, energyAccesors.Type, newAmount)
-		end
-
-		if energyAmount - energyToAdd < 1 then
-			SafeRemoveEntity(ent)
-			ent.MiningInvalidPower = true
-		else
-			ent:PhysWake()
-		end
-
-		poweredEnt:EmitSound(")ambient/machines/thumper_top.wav", 75, 70)
-		poweredEnt.NextEnergyEntity = time + 2
-	end
-
-	local BRUSH_BOUNDS = Vector(100, 100, 100)
-	local function makeBrushForPoweredEntity(ent)
-		local brush = ents.Create("base_brush")
-		brush:SetPos(ent:WorldSpaceCenter())
-		brush:SetParent(ent)
-		brush:SetTrigger(true)
-		brush:SetSolid(SOLID_BBOX)
-		brush:SetNotSolid(true)
-		brush:SetCollisionBounds(-BRUSH_BOUNDS, BRUSH_BOUNDS)
-
-		function brush:Touch(touchedEnt)
-			gainEnergy(ent, touchedEnt)
-		end
-
-		function brush:OnRemove()
-			timer.Simple(1, function()
-				if not IsValid(ent) then return end
-				makeBrushForPoweredEntity(ent)
-			end)
-		end
-
-		return brush
-	end
-
-	function Ores.Automation.RegisterEnergyEntityClass(energyType, className, get, set)
-		Ores.Automation.EnergyEntities[className] = {
-			Type = energyType,
-			Get = get,
-			Set = set,
-		}
-	end
-
-	function Ores.Automation.RegisterEnergyPoweredEntity(ent, energyDataSettings, extraOutputs)
-		if _G.WireLib then
-			local wireOutputs = {}
-			for _, energyData in pairs(energyDataSettings) do
-				table.insert(wireOutputs, ("%s (Outputs the current %s level) [NORMAL]"):format(energyData.Type, energyData.Type:lower())) -- current level
-				table.insert(wireOutputs, ("Max%s (Outputs the max level of %s) [NORMAL]"):format(energyData.Type, energyData.Type:lower())) -- max level
-			end
-
-			if istable(extraOutputs) then
-				for _, output in pairs(extraOutputs) do
-					table.insert(wireOutputs, output.Identifier)
-				end
-			end
-
-			_G.WireLib.CreateOutputs(ent, wireOutputs)
-
-			if istable(extraOutputs) then
-				for _, output in pairs(extraOutputs) do
-					local outputName = output.Identifier:Split(" ")[0]
-					_G.WireLib.TriggerOutput(ent, outputName, output.StartValue)
-				end
-			end
-		end
-
-		for _, energyData in pairs(energyDataSettings) do
-			ent:SetNW2Int(energyData.Type, energyData.StartValue or 0)
-			ent:SetNW2Int("Max" .. energyData.Type, energyData.MaxValue)
-
-			ent.AcceptedPowerTypes = ent.AcceptedPowerTypes or {}
-			ent.AcceptedPowerTypes[energyData.Type] = true
-
-			if _G.WireLib then
-				_G.WireLib.TriggerOutput(ent, energyData.Type, energyData.StartValue)
-				_G.WireLib.TriggerOutput(ent, "Max" .. energyData.Type, energyData.MaxValue)
-			end
-
-			local brush
-			if not energyData.NoBrush then
-			 	brush = makeBrushForPoweredEntity(ent)
-			end
-
-			local timerName = ("mining_automation_power_[%s]_entity_[%d]"):format(energyData.Type, ent:EntIndex())
-			timer.Create(timerName, energyData.ConsumptionRate, 0, function()
-				if not IsValid(ent) then
-					timer.Remove(timerName)
-					SafeRemoveEntity(brush)
-					return
-				end
-
-				local canConsumeEnergy = true
-				if isfunction(ent.CanConsumeEnergy) then
-					local ret = ent:CanConsumeEnergy(energyData.Type)
-					if ret ~= nil then canConsumeEnergy = ret end
-				end
-
-				if canConsumeEnergy then
-					local curEnergy = ent:GetNW2Int(energyData.Type, 0)
-					local newEnergyValue = math.max(0, curEnergy - (energyData.ConsumptionAmount or 1))
-					ent:SetNW2Int(energyData.Type, newEnergyValue)
-
-					if _G.WireLib then
-						_G.WireLib.TriggerOutput(ent, energyData.Type, newEnergyValue)
-					end
-
-					if isfunction(ent.ConsumedEnergy) then
-						ent:ConsumedEnergy(energyData.Type, curEnergy, newEnergyValue, energyData.ConsumptionAmount or 1)
-					end
-				end
-			end)
-		end
-	end
-
-	function Ores.Automation.IsEnergyPoweredEntity(ent, energyType)
-		if not IsValid(ent) then return false end
-
-		local timerName = ("mining_automation_power_[%s]_entity_[%d]"):format(energyType, ent:EntIndex())
-		return timer.Exists(timerName)
-	end
-
-	hook.Add("PlayerUse", "mining_automation_use_fn_replication", function(ply, ent)
-		local parent = ent:GetParent()
-		if IsValid(parent) and Ores.Automation.EnergyEntities[ent:GetClass()] then
-			parent:Use(ply, ply)
-		end
-	end)
 
 	CreateConVar("sbox_maxmining_automation", "40", FCVAR_ARCHIVE, "Maximum amount of mining automation entities a player can have", 0, 100)
 
@@ -608,20 +403,6 @@ if SERVER then
 		if className == "mining_drill" then return end
 		if not Ores.Automation.EntityClasses[className] then return end
 		if not ent.CPPIGetOwner then return end
-
-		-- if an energy entity collides with something that can receive it, force the transfer to happen
-		if Ores.Automation.EnergyEntities[className] then
-			local physicsCollide = ent.PhysicsCollide
-			function ent:PhysicsCollide(data, ...)
-				if IsValid(data.HitEntity) then
-					gainEnergy(data.HitEntity, self)
-
-					if self.MiningInvalidPower then return end -- means we have been removed, dont go further
-				end
-
-				return physicsCollide(self, data, ...)
-			end
-		end
 
 		timer.Simple(1, function()
 			if not IsValid(ent) then return end

@@ -54,9 +54,8 @@ if SERVER then
 		self.Frame:Spawn()
 		self.Frame.PhysgunDisabled = true
 		self.Frame:SetParent(self)
-		self.Frame:SetTrigger(true)
 
-		_G.MA_Orchestrator.RegisterInput(self, "power", "ENERGY", "Energy", "Standard energyy input. More energy equals more ores!")
+		_G.MA_Orchestrator.RegisterInput(self, "power", "ENERGY", "Energy", "Standard energy input. More energy equals more ores!")
 		_G.MA_Orchestrator.RegisterOutput(self, "ores", "ORE", "Ores", "Standard ore output.")
 	end
 
@@ -149,7 +148,7 @@ if SERVER then
 			effiencyRateIncrease = effiencyRateIncrease + 2
 		end
 
-		self.NextDrilledOre = time + (10 - effiencyRateIncrease)
+		self.NextDrilledOre = time + (Ores.Automation.BaseOreProductionRate - effiencyRateIncrease)
 	end
 
 	function ENT:Think()
@@ -174,7 +173,7 @@ if CLIENT then
 		saw:Spawn()
 		saw:SetParent(self)
 
-		local argoniteRarity = Ores.Automation.GetOreRarityByName("Argonite")
+		local argoniteRarity = Ores.GetOreRarityByName("Argonite")
 		saw.RenderOverride = function()
 			local color = Ores.__R[argoniteRarity].PhysicalColor
 			render.SetColorModulation(color.r / 100, color.g / 100, color.b / 100)

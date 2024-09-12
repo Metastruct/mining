@@ -131,9 +131,7 @@ if SERVER then
 			local drone = ents.Create("mining_argonite_drone")
 			drone:Spawn()
 			drone:Teleport(self:WorldSpaceCenter() + drone.HeightOffset)
-			if self.CPPIGetOwner and IsValid(self:CPPIGetOwner()) then
-				drone:CPPISetOwner(self:CPPIGetOwner())
-			end
+			Ores.Automation.ReplicateOwnership(drone, self)
 
 			local old_OnRemove = drone.OnRemove
 			local hive = self
@@ -173,7 +171,7 @@ if SERVER then
 		if not ent:IsPlayer() then return end
 		if self.CPPIGetOwner and self:CPPIGetOwner() ~= ent then return end
 
-		local detoniteRarity = Ores.Automation.GetOreRarityByName("Detonite")
+		local detoniteRarity = Ores.GetOreRarityByName("Detonite")
 		local detoniteAmount = Ores.GetPlayerOre(ent, detoniteRarity)
 		if detoniteAmount < 1 then return end
 
@@ -229,7 +227,7 @@ end
 
 if CLIENT then
 	function ENT:OnGraphDraw(x, y)
-		local argoniteRarity = Ores.Automation.GetOreRarityByName("Detonite")
+		local argoniteRarity = Ores.GetOreRarityByName("Detonite")
 		local argoniteColor = Ores.__R[argoniteRarity].HudColor
 		local GU = Ores.Automation.GraphUnit
 
