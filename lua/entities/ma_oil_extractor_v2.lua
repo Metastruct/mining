@@ -5,7 +5,7 @@ Ores = Ores or {}
 
 ENT.Type = "anim"
 ENT.Base = "base_anim"
-ENT.PrintName = "Oil Extractor"
+ENT.PrintName = "Oil Extractor V2"
 ENT.Author = "Earu"
 ENT.Category = "Mining V2"
 ENT.RenderGroup = RENDERGROUP_OPAQUE

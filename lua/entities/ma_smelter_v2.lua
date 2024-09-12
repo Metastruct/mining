@@ -5,7 +5,7 @@ Ores = Ores or {}
 
 ENT.Type = "anim"
 ENT.Base = "base_anim"
-ENT.PrintName = "Ore Smelter"
+ENT.PrintName = "Ore Smelter V2"
 ENT.Author = "Earu"
 ENT.Category = "Mining V2"
 ENT.RenderGroup = RENDERGROUP_OPAQUE
@@ -13,7 +13,7 @@ ENT.Spawnable = true
 ENT.ClassName = "ma_smelter_v2"
 
 function ENT:CanWork()
-	return self:GetNW2Int("Energy", 0) > 0 and self:GetNW2Int("Fuel", 0) > 0 and self:GetNWBool("IsPowered", false)
+	return self:GetNW2Int("Fuel", 0) > 0 and self:GetNWBool("IsPowered", false)
 end
 
 if SERVER then
@@ -86,6 +86,76 @@ if SERVER then
 		_G.MA_Orchestrator.RegisterInput(self, "power", "ENERGY", "Energy", "Standard energy input.")
 		_G.MA_Orchestrator.RegisterInput(self, "oil", "OIL", "Oil", "Standard oil input.")
 		_G.MA_Orchestrator.RegisterOutput(self, "ingots", "INGOT", "Ingots", "Standard ingot output.")
+
+		local timer_name = ("ma_smelter_v2_[%d]_fuel"):format(self:EntIndex())
+		timer.Create(timer_name, 5, 0, function()
+			if not IsValid(self) then
+				timer.Remove(timer_name)
+				return
+			end
+
+			local cur_fuel = self:GetNW2Int("Fuel", 0)
+			self:SetNW2Int("Fuel", math.max(0, cur_fuel - 1))
+		end)
+	end
+
+	function ENT:MA_OnLink(output_data, input_data)
+		if input_data.Id ~= "power" then return end
+
+		local power_src_ent = output_data.Ent
+		if not IsValid(power_src_ent) then return end
+
+		local timer_name = ("ma_smelter_v2_[%d]"):format(self:EntIndex())
+		timer.Create(timer_name, 1, 0, function()
+			if not IsValid(self) then
+				timer.Remove(timer_name)
+				return
+			end
+
+			local got_power = _G.MA_Orchestrator.Execute(output_data, input_data)
+			self:SetNWBool("IsPowered", got_power or false)
+		end)
+
+		-- also executes as soon as its linked
+		local got_power = _G.MA_Orchestrator.Execute(output_data, input_data)
+		self:SetNWBool("IsPowered", got_power or false)
+	end
+
+	function ENT:MA_OnOutputReady(output_data, input_data)
+		if input_data.Id ~= "oil" or input_data.Id ~= "ores" then return end
+
+		_G.MA_Orchestrator.Execute(output_data, input_data)
+	end
+
+	function ENT:MA_Execute(output_data, input_data)
+		if input_data.Id == "ores" then
+			if not self:CanWork() then return end
+
+			local rarity = table.remove(output_data.Ent.OreQueue, 1)
+			local new_value = (self.Ores[rarity] or 0) + 1
+			self.Ores[rarity] = new_value
+			if new_value >= Ores.Automation.IngotSize then
+				self:ProduceRefinedOre(rarity)
+				self.Ores[rarity] = nil
+			end
+
+			self:UpdateNetworkOreData()
+		elseif input_data.Id == "oil" then
+			print("called oil")
+			local cur_fuel = self:GetNW2Int("Fuel", 0)
+			self:SetNW2Int("Fuel", math.min(Ores.Automation.BatteryCapacity, cur_fuel + Ores.Automation.BatteryCapacity))
+		elseif input_data.Id == "power" then
+			return (isfunction(output_data.Ent.GetEnergyLevel) and output_data.Ent:GetEnergyLevel() or 1) > 0
+		end
+	end
+
+	function ENT:MA_OnUnlink(output_data, input_data)
+		if input_data.Id ~= "power" then return end
+
+		local timer_name = ("ma_smelter_v2_[%d]"):format(self:EntIndex())
+		timer.Remove(timer_name)
+
+		self:SetNWBool("IsPowered", false)
 	end
 
 	function ENT:UpdateNetworkOreData()
@@ -107,30 +177,6 @@ if SERVER then
 
 		local output_data = _G.MA_Orchestrator.GetOutputData(self, "ingots")
 		_G.MA_Orchestrator.SendOutputReadySignal(output_data)
-	end
-
-	function ENT:MA_OnOutputReady(output_data, input_data)
-		if input_data.Id ~= "oil" or input_data.Id ~= "ores" then return end
-
-		_G.MA_Orchestrator.Execute(output_data, input_data)
-	end
-
-	function ENT:MA_Execute(output_data, input_data)
-		if input_data.Id == "ores" then
-			if not self:CanWork() then return end
-
-			local rarity = table.remove(output_data.Ent.OreQueue, 1)
-			local newValue = (self.Ores[rarity] or 0) + 1
-			self.Ores[rarity] = newValue
-			if newValue >= Ores.Automation.IngotSize then
-				self:ProduceRefinedOre(rarity)
-				self.Ores[rarity] = nil
-			end
-
-			self:UpdateNetworkOreData()
-		elseif input_data.Id == "oil" then
-
-		end
 	end
 
 	function ENT:CheckSoundLoop(time)
@@ -166,12 +212,12 @@ if SERVER then
 		end
 	end
 
-	function ENT:SpawnFunction(ply, tr, className)
+	function ENT:SpawnFunction(ply, tr, class_name)
 		if not tr.Hit then return end
 
-		local spawnPos = tr.HitPos + tr.HitNormal * 30
-		local ent = ents.Create(className)
-		ent:SetPos(spawnPos)
+		local spawn_pos = tr.HitPos + tr.HitNormal * 30
+		local ent = ents.Create(class_name)
+		ent:SetPos(spawn_pos)
 		ent:Activate()
 		ent:Spawn()
 
@@ -192,9 +238,9 @@ if CLIENT then
 		wheel:Spawn()
 		wheel:SetParent(self)
 
-		local argoniteRarity = Ores.GetOreRarityByName("Argonite")
+		local argonite_rarity = Ores.GetOreRarityByName("Argonite")
 		wheel.RenderOverride = function()
-			local color = Ores.__R[argoniteRarity].PhysicalColor
+			local color = Ores.__R[argonite_rarity].PhysicalColor
 			render.SetColorModulation(color.r / 100, color.g / 100, color.b / 100)
 			render.MaterialOverride(Ores.Automation.EnergyMaterial)
 			wheel:DrawModel()
@@ -221,15 +267,15 @@ if CLIENT then
 	function ENT:Draw()
 		--self:DrawModel()
 
-		local hasEnergy = self:CanWork()
-		if hasEnergy then
+		local has_energy = self:CanWork()
+		if has_energy then
 			local offset = -10
 			for i = 1, 2 do
-				local effectData = EffectData()
-				effectData:SetAngles((-self:GetRight()):Angle())
-				effectData:SetScale(2)
-				effectData:SetOrigin(self:GetPos() + self:GetRight() * -6 + self:GetUp() * math.sin(CurTime()) * offset + self:GetForward() * math.cos(CurTime()) * offset)
-				util.Effect("MuzzleEffect", effectData, true, true)
+				local effect_data = EffectData()
+				effect_data:SetAngles((-self:GetRight()):Angle())
+				effect_data:SetScale(2)
+				effect_data:SetOrigin(self:GetPos() + self:GetRight() * -6 + self:GetUp() * math.sin(CurTime()) * offset + self:GetForward() * math.cos(CurTime()) * offset)
+				util.Effect("MuzzleEffect", effect_data, true, true)
 
 				offset = offset + 22
 			end
