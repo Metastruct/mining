@@ -207,7 +207,6 @@ if SERVER then
 	function ENT:CreateBattery()
 		local output_data = _G.MA_Orchestrator.GetOutputData(self, "battery")
 		_G.MA_Orchestrator.SendOutputReadySignal(output_data)
-		PrintTable(output_data)
 
 		self:EmitSound(")npc/scanner/scanner_siren1.wav", 100)
 	end
