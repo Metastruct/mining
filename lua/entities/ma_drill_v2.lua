@@ -9,7 +9,7 @@ ENT.PrintName = "Drill V2"
 ENT.Author = "Earu"
 ENT.Category = "Mining V2"
 ENT.RenderGroup = RENDERGROUP_OPAQUE
-ENT.Spawnable = false
+ENT.Spawnable = true
 ENT.ClassName = "ma_drill_v2"
 ENT.NextTraceCheck = 0
 
