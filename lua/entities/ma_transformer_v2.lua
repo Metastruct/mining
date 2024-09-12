@@ -5,12 +5,12 @@ Ores = Ores or {}
 
 ENT.Type = "anim"
 ENT.Base = "base_anim"
-ENT.PrintName = "Argonite Transformer"
+ENT.PrintName = "Argonite Transformer V2"
 ENT.Author = "Earu"
-ENT.Category = "Mining"
+ENT.Category = "Mining V2"
 ENT.RenderGroup = RENDERGROUP_OPAQUE
 ENT.Spawnable = true
-ENT.ClassName = "mining_argonite_transformer"
+ENT.ClassName = "ma_transformer_v2"
 
 if SERVER then
 	local teslas = {}
@@ -110,20 +110,6 @@ if SERVER then
 		self.Frame:SetParent(self)
 		self.Frame:SetTrigger(true)
 
-		self.Out = ents.Create("prop_physics")
-		self.Out:SetModel("models/props_phx/construct/metal_wire1x1.mdl")
-		self.Out:SetMaterial("phoenix_storms/stripes")
-		self.Out:SetPos(self:WorldSpaceCenter() + self:GetForward() * 30)
-
-		local ang = self:GetAngles()
-		ang:RotateAroundAxis(self:GetRight(), 90)
-
-		self.Out:SetAngles(ang)
-		self.Out:Spawn()
-		self.Out:SetParent(self)
-		self.Out:SetNotSolid(true)
-		self.Out:SetTrigger(true)
-
 		self.Core = ents.Create("prop_physics")
 		self.Core:SetModel("models/hunter/misc/sphere025x025.mdl")
 		self.Core:SetModelScale(0.25)
@@ -136,7 +122,7 @@ if SERVER then
 		self.Core:Activate()
 		self.Core:SetTrigger(true)
 
-		local timerName = ("mining_argonite_transformer_[%d]"):format(self:EntIndex())
+		local timerName = ("ma_transformer_v2_[%d]"):format(self:EntIndex())
 		timer.Create(timerName, 1, 0, function()
 			if not IsValid(self) then
 				timer.Remove(timerName)
@@ -153,33 +139,7 @@ if SERVER then
 			end
 		end)
 
-		if _G.WireLib then
-			self.Inputs = _G.WireLib.CreateInputs(self, {"Active (If this is non-zero, activate the transformer)"})
-
-			_G.WireLib.CreateOutputs(self, {
-				"Amount (Outputs the current amount of argonite filled in) [NORMAL]",
-				"MaxCapacity (Outputs the maximum argonite capacity) [NORMAL]"
-			})
-
-			_G.WireLib.TriggerOutput(self, "Amount", 0)
-			_G.WireLib.TriggerOutput(self, "MaxCapacity", Ores.Automation.BatteryCapacity)
-		end
-
-		Ores.Automation.PrepareForDuplication(self)
-		timer.Simple(0, function()
-			if not IsValid(self) then return end
-
-			Ores.Automation.ReplicateOwnership(self, self)
-		end)
-	end
-
-	function ENT:TriggerInput(port, state)
-		if not _G.WireLib then return end
-		if not isnumber(state) then return end
-
-		if port == "Active" then
-			self:SetNWBool("IsPowered", tobool(state))
-		end
+		_G.MA_Orchestrator.RegisterOutput(self, "battery", "BATTERY", "Battery", "Outputs batteries created with the argonite stored by the transformer.")
 	end
 
 	function ENT:AddArgonite(amount)
@@ -209,7 +169,7 @@ if SERVER then
 	local transformerIndex = 1
 	local function check_transformer_to_use(ply, baseTransformer)
 		local transformers = {}
-		for _, t in ipairs(ents.FindByClass("mining_argonite_transformer")) do
+		for _, t in ipairs(ents.FindByClass("ma_transformer_v2")) do
 			if t:CPPIGetOwner() ~= ply then continue end
 			if not t:GetNWBool("IsPowered", true) then continue end
 
@@ -247,61 +207,20 @@ if SERVER then
 	end
 
 	function ENT:CreateBattery()
-		local battery = ents.Create("mining_argonite_battery")
-		battery:SetPos(self:WorldSpaceCenter() + self:GetForward() * 50)
-		battery:SetNWInt("ArgoniteCount", Ores.Automation.BatteryCapacity)
-		battery:Spawn()
-
-		if _G.WireLib then
-			_G.WireLib.TriggerOutput(battery, "Amount", Ores.Automation.BatteryCapacity)
-		end
-
-		timer.Simple(0, function()
-			if IsValid(self) and IsValid(battery) then
-				Ores.Automation.ReplicateOwnership(battery, self, true)
-			end
-		end)
+		local output_data = _G.MA_Orchestrator.GetOutputData(self, "battery")
+		_G.MA_Orchestrator.SendOutputReadySignal(output_data)
+		PrintTable(output_data)
 
 		self:EmitSound(")npc/scanner/scanner_siren1.wav", 100)
 	end
 end
 
 if CLIENT then
+	function ENT:Initialize()
+		_G.MA_Orchestrator.RegisterOutput(self, "battery", "BATTERY", "Battery", "Outputs batteries created with the argonite stored by the transformer.")
+	end
+
 	function ENT:Draw()
 		self:DrawModel()
-	end
-
-	function ENT:OnGraphDraw(x, y)
-		local argoniteRarity = Ores.Automation.GetOreRarityByName("Argonite")
-		local argoniteColor = Ores.__R[argoniteRarity].HudColor
-		local GU = Ores.Automation.GraphUnit
-
-		surface.SetDrawColor(argoniteColor)
-		surface.SetMaterial(Ores.Automation.EnergyMaterial)
-		surface.DrawTexturedRect(x - GU / 2, y - GU / 2, GU, GU)
-
-		surface.SetDrawColor(argoniteColor)
-		surface.DrawOutlinedRect(x - GU / 2, y - GU / 2, GU, GU, 2)
-
-		surface.SetTextColor(argoniteColor)
-		local perc = (math.Round((self:GetNWInt("ArgoniteCount", 0) / Ores.Automation.BatteryCapacity) * 100)) .. "%"
-		surface.SetFont("DermaDefault")
-		local tw, th = surface.GetTextSize(perc)
-		surface.SetTextPos(x - tw / 2, y - th / 2)
-		surface.DrawText(perc)
-	end
-
-	function ENT:OnDrawEntityInfo()
-		if not self.MiningFrameInfo then
-			self.MiningFrameInfo = {
-				{ Type = "Label", Text = "TRANSFORMER", Border = true },
-				{ Type = "Data", Label = "BATTERY", Value = self:GetNWInt("ArgoniteCount", 0), MaxValue = ms.Ores.Automation.BatteryCapacity },
-				{ Type = "State", Value = self:GetNWBool("IsPowered", true) }
-			}
-		end
-
-		self.MiningFrameInfo[2].Value = self:GetNWInt("ArgoniteCount", 0)
-		self.MiningFrameInfo[3].Value = self:GetNWBool("IsPowered", true)
-		return self.MiningFrameInfo
 	end
 end
