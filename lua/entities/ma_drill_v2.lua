@@ -14,6 +14,7 @@ ENT.ClassName = "ma_drill_v2"
 ENT.NextTraceCheck = 0
 
 local function can_work(self, time)
+	if not self:GetNWBool("Wiremod_Active", true) then return false end
 	if not self:GetNWBool("IsPowered", false) then return false end
 	if time < self.NextTraceCheck then return self.TraceCheckResult end
 
@@ -57,6 +58,18 @@ if SERVER then
 
 		_G.MA_Orchestrator.RegisterInput(self, "power", "ENERGY", "Energy", "Standard energy input. More energy equals more ores!")
 		_G.MA_Orchestrator.RegisterOutput(self, "ores", "ORE", "Ores", "Standard ore output.")
+
+		timer.Simple(0, function()
+			if not IsValid(self) then return end
+
+			Ores.Automation.ReplicateOwnership(self, self)
+		end)
+
+		Ores.Automation.PrepareForDuplication(self)
+
+		if _G.WireLib then
+			self.Inputs = _G.WireLib.CreateInputs(self, {"Active (If this is non-zero, activate the drill)"})
+		end
 	end
 
 	function ENT:MA_OnLink(output_data, input_data)
@@ -98,6 +111,10 @@ if SERVER then
 		timer.Remove(timer_name)
 
 		self:SetNWBool("IsPowered", false)
+	end
+
+	function ENT:TriggerInput(port, state)
+		if port == "Active" then self:SetNWBool("Wiremod_Active", tobool(state)) end
 	end
 
 	function ENT:CheckSoundLoop(time)
@@ -162,6 +179,37 @@ if SERVER then
 			self:StopLoopingSound(self.SndLoop)
 		end
 	end
+
+	CreateConVar("sbox_maxma_drill_v2", "12", FCVAR_ARCHIVE, "Maximum amount of mining drills entities a player can have", 0, 100)
+
+	hook.Add("OnEntityCreated", "ma_drill_v2", function(ent)
+		if ent:GetClass() ~= "ma_drill_v2" then return end
+		if not ent.CPPIGetOwner then return end
+
+		timer.Simple(0, function()
+			if not IsValid(ent) then return end
+
+			local ply = ent:CPPIGetOwner()
+			if not IsValid(ply) then
+				SafeRemoveEntity(ent)
+				return
+			end
+
+			if ply:CheckLimit("ma_drill_v2") then
+				ply:AddCount("ma_drill_v2", ent)
+			else
+				SafeRemoveEntity(ent)
+			end
+		end)
+	end)
+
+	hook.Add("PlayerSpawnSENT", "ma_drill_v2", function(ply, className)
+		if not className then return end
+
+		if className == "ma_drill_v2" and not ply:CheckLimit("ma_drill_v2") then
+			return false
+		end
+	end)
 end
 
 if CLIENT then

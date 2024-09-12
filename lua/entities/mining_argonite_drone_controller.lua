@@ -226,29 +226,6 @@ if SERVER then
 end
 
 if CLIENT then
-	function ENT:OnGraphDraw(x, y)
-		local argoniteRarity = Ores.GetOreRarityByName("Detonite")
-		local argoniteColor = Ores.__R[argoniteRarity].HudColor
-		local GU = Ores.Automation.GraphUnit
-
-		surface.SetDrawColor(argoniteColor)
-		surface.DrawRect(x - GU / 2, y - GU / 2, GU, GU)
-
-		surface.SetDrawColor(125, 125, 125, 255)
-		surface.DrawOutlinedRect(x - GU / 2, y - GU / 2, GU, GU, 2)
-
-		surface.SetTextColor(255, 255, 255, 255)
-		local perc = (math.Round((self:GetNW2Int("Detonite", 0) / self:GetNW2Int("MaxDetonite", MAX_DETONITE)) * 100)) .. "%"
-		surface.SetFont("DermaDefault")
-		local tw, th = surface.GetTextSize(perc)
-		surface.SetTextPos(x - tw / 2, y - th / 2)
-		surface.DrawText(perc)
-
-		local state = can_work(self, CurTime())
-		surface.SetDrawColor(state and 0 or 255, state and 255 or 0, 0, 255)
-		surface.DrawOutlinedRect(x - GU / 2 + 2, y - GU / 2 + 2, GU - 4, 2)
-	end
-
 	function ENT:OnDrawEntityInfo()
 		if not self.MiningFrameInfo then
 			self.MiningFrameInfo = {

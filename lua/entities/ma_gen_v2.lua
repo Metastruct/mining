@@ -13,6 +13,7 @@ ENT.Spawnable = true
 ENT.ClassName = "ma_gen_v2"
 
 local function can_work(self)
+	if not self:GetNWBool("Wiremod_Active", true) then return false end
 	if not self:GetNWBool("IsPowered", true) then return false end
 	if self:GetEnergyLevel() == 0 then return false end
 
@@ -58,7 +59,7 @@ if SERVER then
 		timer.Simple(0, function()
 			if not IsValid(self) then return end
 
-			self.SndLoop = self:StartLoopingSound("ambient/steam_drum.wav")
+			Ores.Automation.ReplicateOwnership(self, self)
 		end)
 
 		_G.MA_Orchestrator.RegisterInput(self, "battery", "BATTERY", "Battery", "Argonite batteries are given to the generator so that it may store and distribute power!")
@@ -74,6 +75,12 @@ if SERVER then
 			local cur_energy = self:GetNW2Float("Energy", 0)
 			self:SetNW2Float("Energy", math.max(0, cur_energy - 0.05))
 		end)
+
+		Ores.Automation.PrepareForDuplication(self)
+
+		if _G.WireLib then
+			self.Inputs = _G.WireLib.CreateInputs(self, {"Active (If this is non-zero, activate the drill)"})
+		end
 	end
 
 	function ENT:MA_OnOutputReady(output_data, input_data)
@@ -87,6 +94,12 @@ if SERVER then
 
 		local cur_energy = self:GetNW2Float("Energy", 0)
 		self:SetNW2Float("Energy", math.min(100, cur_energy + 10))
+	end
+
+	function ENT:TriggerInput(port, state)
+		if port == "Active" then
+			self:SetNWBool("Wiremod_Active", tobool(state))
+		end
 	end
 
 	function ENT:CheckSoundLoop(time)
