@@ -295,6 +295,7 @@ end)
 hook.Add("PlayerDestroyedMiningRock", "mining_collapse", function(ply, rock)
 	if not rock.MiningIncident then return end
 	if not rock.OriginalRock then return end
+	if ply.IsInZone and not ply:IsInZone("cave") then return end
 
 	Ores.MineCollapse(ply:EyePos(), COLLAPSE_DURATION, nil, ply)
 end)
