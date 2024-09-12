@@ -37,20 +37,20 @@ if SERVER then
 		if input_data.Id ~= "ores" and input_data.Id ~= "ingots" then return end
 
 		-- use the player multiplier if its higher than the ingot worth
-		local ingotWorth = Ores.Automation.IngotWorth
+		local ingot_worth = Ores.Automation.IngotWorth
 		if self.CPPIGetOwner and IsValid(self:CPPIGetOwner()) then
-			ingotWorth = math.max(ingotWorth, Ores.GetPlayerMultiplier(self:CPPIGetOwner()) * 1.5)
+			ingot_worth = math.max(ingot_worth, Ores.GetPlayerMultiplier(self:CPPIGetOwner()) * 1.5)
 		end
 
-		local classWorth = input_data.Id == "ingots" and ingotWorth or 1
-		local classSize = input_data.Id == "ingots" and Ores.Automation.IngotSize or 1
+		local class_worth = input_data.Id == "ingots" and ingot_worth or 1
+		local class_size = input_data.Id == "ingots" and Ores.Automation.IngotSize or 1
 		local rarity = input_data.Id == "ingots" and table.remove(output_data.Ent.OreQueue, 1) or table.remove(output_data.Ent.IngotQueue, 1)
-		local oreData = Ores.__R[rarity]
-		if oreData then
-			local earnings = oreData.Worth * classSize * classWorth
-			local curCoins = self:GetNWInt("MintedCoins", 0)
-			local newAmount = curCoins + math.ceil(earnings)
-			self:SetNWInt("MintedCoins", newAmount)
+		local ore_data = Ores.__R[rarity]
+		if ore_data then
+			local earnings = ore_data.Worth * class_size * class_worth
+			local cur_coins = self:GetNWInt("MintedCoins", 0)
+			local new_amount = cur_coins + math.ceil(earnings)
+			self:SetNWInt("MintedCoins", new_amount)
 		end
 	end
 
@@ -67,21 +67,21 @@ if SERVER then
 
 		self._nextuse = CurTime() + 60 * 5
 
-		local curCoins = self:GetNWInt("MintedCoins", 0)
-		if activator.GiveCoins and curCoins > 0 then
-			activator:GiveCoins(curCoins, "mining automation => minter")
+		local cur_coins = self:GetNWInt("MintedCoins", 0)
+		if activator.GiveCoins and cur_coins > 0 then
+			activator:GiveCoins(cur_coins, "mining automation => minter")
 		end
 
 		self:SetNWInt("MintedCoins", 0)
 		self:EmitSound(")physics/surfaces/underwater_impact_bullet3.wav", 75, 70)
 	end
 
-	function ENT:SpawnFunction(ply, tr, className)
+	function ENT:SpawnFunction(ply, tr, class_name)
 		if not tr.Hit then return end
 
-		local spawnPos = tr.HitPos + tr.HitNormal * 50
-		local ent = ents.Create(className)
-		ent:SetPos(spawnPos)
+		local spawn_pos = tr.HitPos + tr.HitNormal * 50
+		local ent = ents.Create(class_name)
+		ent:SetPos(spawn_pos)
 		ent:Activate()
 		ent:Spawn()
 

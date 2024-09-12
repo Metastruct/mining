@@ -124,8 +124,8 @@ if SERVER then
 		if time < self.NextDrilledOre then return end
 		if not can_work(self, time) then return end
 
-		local oreRarity = Ores.SelectRarityFromSpawntable()
-		table.insert(self.OreQueue, 1, oreRarity)
+		local ore_rarity = Ores.SelectRarityFromSpawntable()
+		table.insert(self.OreQueue, 1, ore_rarity)
 
 		-- keep an internal storage of the last 50 ores
 		if #self.OreQueue > 50 then
@@ -139,16 +139,16 @@ if SERVER then
 		-- at less than 33% -> 10s,
 		-- less than 66% -> 8s
 		-- less than 100% -> 6s
-		local effiencyRateIncrease = 0
+		local effiency_rate_increase = 0
 		if self.EnergyLevel > 33 then
-			effiencyRateIncrease = effiencyRateIncrease + 2
+			effiency_rate_increase = effiency_rate_increase + 2
 		end
 
 		if self.EnergyLevel > 66 then
-			effiencyRateIncrease = effiencyRateIncrease + 2
+			effiency_rate_increase = effiency_rate_increase + 2
 		end
 
-		self.NextDrilledOre = time + (Ores.Automation.BaseOreProductionRate - effiencyRateIncrease)
+		self.NextDrilledOre = time + (Ores.Automation.BaseOreProductionRate - effiency_rate_increase)
 	end
 
 	function ENT:Think()
@@ -173,9 +173,9 @@ if CLIENT then
 		saw:Spawn()
 		saw:SetParent(self)
 
-		local argoniteRarity = Ores.GetOreRarityByName("Argonite")
+		local argonite_rarity = Ores.GetOreRarityByName("Argonite")
 		saw.RenderOverride = function()
-			local color = Ores.__R[argoniteRarity].PhysicalColor
+			local color = Ores.__R[argonite_rarity].PhysicalColor
 			render.SetColorModulation(color.r / 100, color.g / 100, color.b / 100)
 			render.MaterialOverride(Ores.Automation.EnergyMaterial)
 			saw:DrawModel()
@@ -209,10 +209,10 @@ if CLIENT then
 		if can_work(self, time) then
 			ang:RotateAroundAxis(self:GetRight(), time * 400 % 360)
 
-			local effectData = EffectData()
-			effectData:SetScale(1.5)
-			effectData:SetOrigin(self:GetPos() + self:GetForward() * -40)
-			util.Effect(EFFECT_NAME, effectData)
+			local effect_data = EffectData()
+			effect_data:SetScale(1.5)
+			effect_data:SetOrigin(self:GetPos() + self:GetForward() * -40)
+			util.Effect(EFFECT_NAME, effect_data)
 		end
 
 		for k, saw in ipairs(self.Saws) do
