@@ -85,7 +85,7 @@ if SERVER then
 		if not ent:IsPlayer() then return end
 		if self.CPPIGetOwner and self:CPPIGetOwner() ~= ent then return end
 
-		local detoniteRarity = Ores.Automation.GetOreRarityByName("Detonite")
+		local detoniteRarity = Ores.GetOreRarityByName("Detonite")
 		local detoniteAmount = Ores.GetPlayerOre(ent, detoniteRarity)
 		if detoniteAmount < 1 then return end
 
@@ -285,7 +285,7 @@ if SERVER then
 		if ent:GetClass() ~= "mining_ore" then return end
 
 		timer.Simple(0, function()
-			local detoniteRarity = Ores.Automation.GetOreRarityByName("Detonite")
+			local detoniteRarity = Ores.GetOreRarityByName("Detonite")
 			local rarity = ent:GetRarity()
 
 			if rarity ~= detoniteRarity then return end
@@ -310,7 +310,7 @@ if CLIENT then
 
 	local CHIP_MATERIAL = Material("beer/wiremod/gate_e2")
 	function ENT:OnGraphDraw(x, y)
-		local detoniteRarity = Ores.Automation.GetOreRarityByName("Detonite")
+		local detoniteRarity = Ores.GetOreRarityByName("Detonite")
 		local detoniteColor = Ores.__R[detoniteRarity].HudColor
 		local GU = Ores.Automation.GraphUnit
 

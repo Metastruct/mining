@@ -23,7 +23,24 @@ function ENT:GetEnergyLevel()
 	return self:GetNW2Float("Energy", 0)
 end
 
+local BASE_KICKSTART_PRICE = 350000
 if SERVER then
+	util.AddNetworkString("mining_kickstart_generator")
+
+	net.Receive("mining_kickstart_generator", function(_, ply)
+		local generator = net.ReadEntity()
+		if not IsValid(generator) then return end
+
+		local requiredPoints = math.floor(BASE_KICKSTART_PRICE * math.max(1, Ores.GetPlayerMultiplier(ply) - 2))
+		local pointBalance = ply:GetNWInt(Ores._nwPoints, 0)
+		if requiredPoints > pointBalance then return end
+
+		Ores.Print(ply, ("kickstarted a generator using %d pts"):format(requiredPoints))
+		Ores.TakePlayerPoints(ply, requiredPoints)
+
+		generator:SetNW2Int("Energy", 100)
+	end)
+
 	ENT.NextSoundCheck = 0
 	ENT.NextLinkCheck = 0
 
@@ -117,7 +134,7 @@ if CLIENT then
 		wheel:Spawn()
 		wheel:SetParent(self)
 
-		local argoniteRarity = Ores.Automation.GetOreRarityByName("Argonite")
+		local argoniteRarity = Ores.GetOreRarityByName("Argonite")
 		wheel.RenderOverride = function()
 			local color = Ores.__R[argoniteRarity].PhysicalColor
 			render.SetColorModulation(color.r / 100, color.g / 100, color.b / 100)
@@ -164,4 +181,35 @@ if CLIENT then
 	function ENT:OnRemove()
 		SafeRemoveEntity(self.Wheel)
 	end
+
+	hook.Add("PlayerBindPress", "mining_generator_kickstart", function(ply, bind, pressed, code)
+		if bind == "+use" and pressed then
+			local tr = ply:GetEyeTrace()
+			if IsValid(tr.Entity) and tr.Entity:GetClass() == "ma_gen_v2" and tr.Entity:WorldSpaceCenter():Distance(EyePos()) <= 300 then
+				local requiredPoints = math.floor(BASE_KICKSTART_PRICE * math.max(1, Ores.GetPlayerMultiplier(ply) - 2))
+				local pointBalance = ply:GetNWInt(Ores._nwPoints, 0)
+				if requiredPoints > pointBalance then
+					chat.AddText(Color(230, 130, 65), " ♦ [Ores] ", color_white, ("You do not have enough points to kickstart this generator (required: %s pts | balance: %s pts)"):format(
+						string.Comma(requiredPoints),
+						string.Comma(pointBalance)
+					))
+					return
+				end
+
+				Derma_Query(
+					("Kickstarting the generator will cost you %s pts (current balance: %s pts)"):format(
+						string.Comma(requiredPoints),
+						string.Comma(pointBalance)
+					),
+					"Kickstart Generator",
+					"Kickstart", function()
+						net.Start("mining_kickstart_generator")
+						net.WriteEntity(tr.Entity)
+						net.SendToServer()
+					end,
+					"Cancel", function() end
+				)
+			end
+		end
+	end)
 end

@@ -172,3 +172,19 @@ function Ores.GetPlayerMultiplier(self)
 
 	return math.Clamp(SERVER and Ores.WorthMultiplier or (Ores.SpecialDay and Ores.SpecialDay.WorthMultiplier or 1), 1, 5) + self:GetNWFloat(Ores._nwMult, 0)
 end
+
+local cache = {}
+function Ores.GetOreRarityByName(name)
+	name = name:lower()
+
+	if cache[name] then return cache[name] end
+
+	for rarity, rarityData in pairs(Ores.__R) do
+		if rarityData.Name:lower() == name then
+			cache[name] = rarity
+			return rarity
+		end
+	end
+
+	return -1
+end

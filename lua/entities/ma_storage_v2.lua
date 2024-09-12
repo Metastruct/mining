@@ -20,8 +20,6 @@ if SERVER then
 		self:PhysicsInit(SOLID_VPHYSICS)
 		self:SetSolid(SOLID_VPHYSICS)
 		self:SetUseType(SIMPLE_USE)
-		self:SetTrigger(true)
-		self:UseTriggerBounds(true, 16)
 		self:PhysWake()
 		self.Ores = {}
 
@@ -38,12 +36,12 @@ if SERVER then
 	function ENT:MA_Execute(output_data, input_data)
 		if input_data.Id ~= "ores" and input_data.Id ~= "ingots" then return end
 
-		local rarity = table.remove(output_data.Ent.OreQueue, 1)
+		local rarity = input_data.Id == "ingots" and table.remove(output_data.Ent.IngotQueue, 1) or table.remove(output_data.Ent.OreQueue, 1)
 		if not self.Ores[rarity] then
 			self.Ores[rarity] = 0
 		end
 
-		self.Ores[rarity] = self.Ores[rarity] + (input_data.Id == "ingots" and 5 or 1)
+		self.Ores[rarity] = self.Ores[rarity] + (input_data.Id == "ingots" and Ores.Automation.IngotSize or 1)
 	end
 
 	function ENT:UpdateNetworkOreData()

@@ -55,7 +55,7 @@ if SERVER then
 		local curAmount = self:GetNWInt("DetoniteAmount", 0)
 		if curAmount >= Ores.Automation.BombCapacity then return end
 
-		if ent:GetClass() == "mining_ore" and ent:GetRarity() == Ores.Automation.GetOreRarityByName("Detonite") then
+		if ent:GetClass() == "mining_ore" and ent:GetRarity() == Ores.GetOreRarityByName("Detonite") then
 			if ent.MiningBombRemoved then return end
 
 			ent:Remove()
@@ -126,7 +126,7 @@ if SERVER then
 
 		local curAmount = self:GetNWInt("DetoniteAmount", 0)
 		if curAmount < Ores.Automation.BombCapacity then
-			local detoniteRarity = Ores.Automation.GetOreRarityByName("Detonite")
+			local detoniteRarity = Ores.GetOreRarityByName("Detonite")
 			local plyAmount = Ores.GetPlayerOre(activator, detoniteRarity)
 			if plyAmount > 0 then
 				local amountToAdd = math.min(Ores.Automation.BombCapacity - curAmount, plyAmount)

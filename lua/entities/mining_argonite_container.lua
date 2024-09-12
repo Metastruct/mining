@@ -171,7 +171,7 @@ if CLIENT then
 			self.LiquidEntTop:SetModelScale(0.8)
 		end
 
-		local color = Ores.__R[Ores.Automation.GetOreRarityByName("Argonite")].PhysicalColor
+		local color = Ores.__R[Ores.GetOreRarityByName("Argonite")].PhysicalColor
 
 		render.SetColorModulation(color.r / 100, color.g / 100, color.b / 100)
 		render.MaterialOverride(Ores.Automation.EnergyMaterial)
@@ -197,7 +197,7 @@ if CLIENT then
 	end
 
 	function ENT:OnDrawEntityInfo()
-		local color = Ores.__R[Ores.Automation.GetOreRarityByName("Argonite")].PhysicalColor
+		local color = Ores.__R[Ores.GetOreRarityByName("Argonite")].PhysicalColor
 		local pos = self:WorldSpaceCenter():ToScreen()
 		local text = ("%d%%"):format((self:GetNWInt("ArgoniteCount", 0) / CONTAINER_CAPACITY) * 100)
 

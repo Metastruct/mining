@@ -142,7 +142,7 @@ if SERVER then
 	function ENT:GetClosestRock()
 		local target = NULL
 		local mindist = 2e6
-		local argonite_rarity = self.RarityOverride or ms.Ores.Automation.GetOreRarityByName("argonite")
+		local argonite_rarity = self.RarityOverride or ms.Ores.GetOreRarityByName("argonite")
 		for _, ent in ipairs(ents.FindByClass("mining_rock")) do
 			if ent:GetRarity() ~= argonite_rarity then continue end
 			if IsValid(ent.ArgoniteDrone) then continue end
@@ -159,7 +159,7 @@ if SERVER then
 
 	function ENT:MoveOn(exception)
 		local rocks = {}
-		local argonite_rarity = self.RarityOverride or ms.Ores.Automation.GetOreRarityByName("argonite")
+		local argonite_rarity = self.RarityOverride or ms.Ores.GetOreRarityByName("argonite")
 		for _, ent in ipairs(ents.FindByClass("mining_rock")) do
 			if ent:GetRarity() ~= argonite_rarity then continue end
 			if IsValid(ent.ArgoniteDrone) then continue end

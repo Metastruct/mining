@@ -88,7 +88,7 @@ if SERVER then
 	end
 
 	function ENT:Initialize()
-		local color = Ores.__R[Ores.Automation.GetOreRarityByName("Argonite")].PhysicalColor
+		local color = Ores.__R[Ores.GetOreRarityByName("Argonite")].PhysicalColor
 
 		self:SetModel("models/props_phx/construct/metal_tube.mdl")
 		self:SetMaterial("effects/tvscreen_noise002a")
@@ -108,7 +108,6 @@ if SERVER then
 		self.Frame:Spawn()
 		self.Frame.PhysgunDisabled = true
 		self.Frame:SetParent(self)
-		self.Frame:SetTrigger(true)
 
 		self.Core = ents.Create("prop_physics")
 		self.Core:SetModel("models/hunter/misc/sphere025x025.mdl")
@@ -120,7 +119,6 @@ if SERVER then
 		self.Core:SetParent(self)
 		self.Core:SetColor(Color(0, 0, 0, 255))
 		self.Core:Activate()
-		self.Core:SetTrigger(true)
 
 		local timerName = ("ma_transformer_v2_[%d]"):format(self:EntIndex())
 		timer.Create(timerName, 1, 0, function()
@@ -194,7 +192,7 @@ if SERVER then
 		local owner = self:CPPIGetOwner()
 		if not IsValid(owner) then return end
 
-		local argoniteRarity = Ores.Automation.GetOreRarityByName("Argonite")
+		local argoniteRarity = Ores.GetOreRarityByName("Argonite")
 		local amount = math.min(Ores.Automation.BatteryCapacity, ms.Ores.GetPlayerOre(owner, argoniteRarity))
 		if amount < 1 then return end
 
