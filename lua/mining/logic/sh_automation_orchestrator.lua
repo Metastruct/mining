@@ -475,6 +475,8 @@ if CLIENT then
 					surface.SetTextColor(200, 75, 75, 255)
 				elseif orchestrator.IsInputLinked(interface_data) then
 					surface.SetTextColor(116, 189, 116)
+				else
+					surface.SetTextColor(255, 255, 255, 255)
 				end
 			else
 				surface.SetTextColor(255, 255, 255, 255)
