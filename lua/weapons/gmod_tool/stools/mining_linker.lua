@@ -19,7 +19,7 @@ end
 
 if CLIENT then
 	function TOOL:LeftClick(tr)
-		if IsFirstTimePredicted() then return end
+		if not IsFirstTimePredicted() then return end
 		if not IsValid(tr.Entity) then return false end
 
 		local ent = tr.Entity
@@ -55,7 +55,7 @@ if CLIENT then
 	end
 
 	function TOOL:RightClick(tr)
-		if IsFirstTimePredicted() then return end
+		if not IsFirstTimePredicted() then return end
 		if not IsValid(tr.Entity) then return false end
 
 		local ent = tr.Entity
@@ -75,7 +75,7 @@ if CLIENT then
 	end
 
 	function TOOL:Reload(tr)
-		if IsFirstTimePredicted() then return end
+		if not IsFirstTimePredicted() then return end
 
 		if self.SelectedOutput then
 			self.SelectedOutput = nil
