@@ -325,6 +325,8 @@ if CLIENT then
 					CableEntIndex = cable_ent_index
 				}
 			end
+		elseif msg_type == NET_TYPE_FULL_SYNC then
+
 		end
 	end)
 
