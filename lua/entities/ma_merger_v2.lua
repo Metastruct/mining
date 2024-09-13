@@ -58,6 +58,11 @@ if SERVER then
 		-- combines queues
 		local rarity = table.remove(output_data.Ent.OreQueue, 1)
 		table.insert(self.OreQueue, 1, rarity)
+
+		-- keep an internal storage of the last 50 ores
+		if #self.OreQueue > 50 then
+			table.remove(self.OreQueue, #self.OreQueue)
+		end
 	end
 end
 
