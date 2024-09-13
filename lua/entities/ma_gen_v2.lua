@@ -75,9 +75,10 @@ if SERVER then
 			end
 
 			local output_data = _G.MA_Orchestrator.GetOutput(self, "power")
-			local additional_energy_drain = table.Count(output_data.Links) * 0.1
+			local additional_energy_drain = table.Count(output_data.Links) * 0.25
+			local drain = 0.5 + additional_energy_drain
 			local cur_energy = self:GetNW2Float("Energy", 0)
-			local new_energy = math.max(0, cur_energy - 0.5 - additional_energy_drain)
+			local new_energy = math.max(0, cur_energy - drain)
 			self:SetNW2Float("Energy", new_energy)
 			_G.WireLib.TriggerOutput(self, "Energy", new_energy)
 		end)
