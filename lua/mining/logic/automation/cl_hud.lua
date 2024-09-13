@@ -86,7 +86,7 @@ local function drawEntityInfoFrame(ent, data)
 			local tw, th = surface.GetTextSize(text)
 
 			if tw > total_width then
-				total_width = tw + Ores.Automation.HudPadding * 4
+				total_width = tw + Ores.Automation.HudPadding * 2 + 15
 			end
 
 			surface.SetTextColor(Ores.Automation.HudActionColor)
@@ -119,7 +119,7 @@ local function drawEntityInfoFrame(ent, data)
 			surface.DrawText(text)
 
 			if tw > total_width then
-				total_width = tw + Ores.Automation.HudPadding * 4
+				total_width = tw + Ores.Automation.HudPadding * 2 + 15
 			end
 
 			offset =  offset + th + Ores.Automation.HudPadding
@@ -138,7 +138,7 @@ local function drawEntityInfoFrame(ent, data)
 
 			local tw, th = surface.GetTextSize(line_data.Text)
 			if tw > total_width then
-				total_width = tw + Ores.Automation.HudPadding * 4
+				total_width = tw + Ores.Automation.HudPadding * 2 + 15
 			end
 			offset = offset + th + Ores.Automation.HudPadding
 		end
