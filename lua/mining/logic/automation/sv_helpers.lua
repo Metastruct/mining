@@ -34,12 +34,7 @@ function Ores.Automation.ReplicateOwnership(ent, parent, add_to_undo)
 end
 
 duplicator.RegisterEntityModifier("MA_Interfaces", function(_, ent, data)
-	if not istable(data.inputs) then return end
-
-	print(ent)
-	for _, input_data in pairs(data.inputs) do
-		PrintTable(input_data)
-	end
+	ent.MA_DupedLinks = data
 end)
 
 function Ores.Automation.PrepareForDuplication(ent)
@@ -47,12 +42,33 @@ function Ores.Automation.PrepareForDuplication(ent)
 		local inputs = _G.MA_Orchestrator.GetInputs(self)
 		if #inputs == 0 then return end
 
-		duplicator.StoreEntityModifier(self, "MA_Interfaces", {
-			inputs = inputs
-		})
+		local data = {}
+		for _, input_data in ipairs(inputs) do
+			if not _G.MA_Orchestrator.IsInputLinked(input_data) then continue end
+			data[input_data.Id] = { OutputEntIndex = input_data.Link.Ent:EntIndex(), OutputId = input_data.Link.Id }
+		end
+
+		duplicator.StoreEntityModifier(self, "MA_Interfaces", data)
 	end
 
 	function ent:PostEntityPaste(_, _, created_entities)
+		if istable(self.MA_DupedLinks) then
+			for input_id, link_data in pairs(self.MA_DupedLinks) do
+				local input_data = _G.MA_Orchestrator.GetInputData(self, input_id)
+				if not input_data then continue end
+
+				local output_ent = created_entities[link_data.OutputEntIndex]
+				if not IsValid(output_ent) then continue end
+
+				local output_data = _G.MA_Orchestrator.GetOutputData(output_ent, link_data.OutputId)
+				if not output_data then continue end
+
+				_G.MA_Orchestrator.Link(output_data, input_data)
+			end
+
+			self.MA_DupedLinks = nil
+		end
+
 		for _, e in pairs(created_entities) do
 			if not IsValid(e) then continue end
 			if not e.GetParent then continue end
