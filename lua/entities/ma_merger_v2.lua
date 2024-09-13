@@ -53,16 +53,11 @@ if SERVER then
 
 	function ENT:MA_Execute(output_data, input_data)
 		if not input_data.Id:match("^ores_") then return end
+		if not istable(output_data.Ent.OreQueue) then return end
 
 		-- combines queues
-		for _, rarity in ipairs(output_data.Ent.OreQueue) do
-			table.insert(self.OreQueue, 1, rarity)
-		end
-
-		-- get rid of the extra
-		while #self.OreQueue > 50 * INPUT_AMOUNT do
-			table.remove(self.OreQueue, #self.OreQueue)
-		end
+		local rarity = table.remove(output_data.Ent.OreQueue, 1)
+		table.insert(self.OreQueue, 1, rarity)
 	end
 end
 
