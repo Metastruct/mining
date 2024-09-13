@@ -61,7 +61,7 @@ if SERVER then
 			end
 
 			local bandwidth = self:GetNW2Int("Bandwidth", 0)
-			local new_bandwidth = bandwidth - self:GetNW2Int("Bandwidth", 0)
+			local new_bandwidth = bandwidth - self:GetNWInt("BandwidthUsage", 0)
 			self:SetNW2Int("Bandwidth", new_bandwidth)
 
 			if _G.WireLib then
@@ -101,10 +101,10 @@ if SERVER then
 		local detonite_amount = Ores.GetPlayerOre(ent, detonite_rarity)
 		if detonite_amount < 1 then return end
 
-		local toGive = math.min(self.MaxBandwidth, detonite_amount)
+		local to_give = math.min(self.MaxBandwidth, detonite_amount)
 
-		self:AddDetonite(toGive)
-		Ores.TakePlayerOre(ent, detonite_rarity, toGive)
+		self:AddDetonite(to_give)
+		Ores.TakePlayerOre(ent, detonite_rarity, to_give)
 	end
 
 	function ENT:Think()
