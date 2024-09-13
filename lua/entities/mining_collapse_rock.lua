@@ -67,7 +67,7 @@ if SERVER then
 					local rock
 					if math.random() <= 0.25 then
 						rock = ents.Create("mining_rock")
-						rock:SetRarity(ms.Ores.Automation.GetOreRarityByName("Coal"))
+						rock:SetRarity(ms.Ores.GetOreRarityByName("Coal"))
 						rock:SetSize(math.random() > 0.33 and 1 or 2)
 					else
 						rock = ents.Create("mining_collapse_rock")

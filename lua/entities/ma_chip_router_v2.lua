@@ -13,26 +13,37 @@ ENT.Author = "Earu"
 ENT.Category = "Mining"
 ENT.RenderGroup = RENDERGROUP_OPAQUE
 ENT.Spawnable = true
-ENT.ClassName = "mining_chip_router"
+ENT.ClassName = "ma_chip_router_v2"
 ENT.MaxBandwidth = 999
+ENT.IconOverride = "entities/ma_chip_router_v2.png"
 
 if SERVER then
+	resource.AddFile("materials/entities/ma_chip_router_v2.png")
+
 	function ENT:Initialize()
 		self:SetModel("models/props_phx/construct/metal_plate1.mdl")
 		self:SetMoveType(MOVETYPE_VPHYSICS)
 		self:PhysicsInit(SOLID_VPHYSICS)
 		self:SetSolid(SOLID_VPHYSICS)
 		self:PhysWake()
-		self:SetNWBool("IsPowered", true)
+		self:SetNWBool("Wiremod_Active", true)
 		self:SetUseType(SIMPLE_USE)
 		self.NextStateUpdate = 0
+		self.ConsumptionAmount = 0
 
 		self:SetSubMaterial(0, "phoenix_storms/stripes")
 		self:SetSubMaterial(1, "phoenix_storms/stripes")
 		self:SetSubMaterial(2, "models/xqm/lightlinesred")
 
 		if _G.WireLib then
-			self.Inputs = _G.WireLib.CreateInputs(self, {"Active (If this is non-zero, activate the router)"})
+			_G.WireLib.CreateInputs(self, {"Active (If this is non-zero, activate the router)"})
+			_G.WireLib.CreateOutputs(self, {
+				"Usage (Outputs the current bandwidth usage) [NORMAL]",
+				"Bandwidth (Outputs the current bandwidth level) [NORMAL]",
+				"MaxBandwidth (Outputs the max level of bandwidth) [NORMAL]",
+			})
+
+			_G.WireLib.TriggerOutput(self, "MaxBandwidth", self.MaxBandwidth)
 		end
 
 		Ores.Automation.PrepareForDuplication(self)
@@ -42,20 +53,21 @@ if SERVER then
 			Ores.Automation.ReplicateOwnership(self, self)
 		end)
 
-		self.EnergySettings = {
-			Type = "Bandwidth",
-			MaxValue = 999,
-			ConsumptionRate = 10, -- once every 10 seconds,
-			ConsumptionAmount = 0,
-			NoBrush = true,
-		}
+		local timer_name = ("ma_chip_router_v2_[%d]"):format(self:EntIndex())
+		timer.Create(timer_name, 10, 0, function()
+			if not IsValid(self) then
+				timer.Remove(timer_name)
+				return
+			end
 
-		Ores.Automation.RegisterEnergyPoweredEntity(self, { self.EnergySettings }, {
-			{
-				Identifier = "Usage (Outputs the current bandwidth usage) [NORMAL]",
-				StartValue = 0,
-			}
-		})
+			local bandwidth = self:GetNW2Int("Bandwidth", 0)
+			local new_bandwidth = bandwidth - self:GetNWInt("BandwidthUsage", 0)
+			self:SetNW2Int("Bandwidth", new_bandwidth)
+
+			if _G.WireLib then
+				_G.WireLib.TriggerOutput(self, "Bandwidth", new_bandwidth)
+			end
+		end)
 	end
 
 	function ENT:TriggerInput(port, state)
@@ -63,7 +75,7 @@ if SERVER then
 		if not isnumber(state) then return end
 
 		if port == "Active" then
-			self:SetNWBool("IsPowered", tobool(state))
+			self:SetNWBool("Wiremod_Active", tobool(state))
 			self:SetChipState(tobool(state))
 		end
 	end
@@ -71,13 +83,13 @@ if SERVER then
 	function ENT:AddDetonite(amount)
 		if amount < 1 then return end
 
-		local curAmount = self:GetNW2Int("Bandwidth", 0)
-		local newAmount = math.min(self.MaxBandwidth, curAmount + amount)
+		local cur_amount = self:GetNW2Int("Bandwidth", 0)
+		local new_amount = math.min(self.MaxBandwidth, cur_amount + amount)
 
-		self:SetNW2Int("Bandwidth", newAmount)
+		self:SetNW2Int("Bandwidth", new_amount)
 
 		if _G.WireLib then
-			_G.WireLib.TriggerOutput(self, "Bandwidth", newAmount)
+			_G.WireLib.TriggerOutput(self, "Bandwidth", new_amount)
 		end
 	end
 
@@ -85,19 +97,19 @@ if SERVER then
 		if not ent:IsPlayer() then return end
 		if self.CPPIGetOwner and self:CPPIGetOwner() ~= ent then return end
 
-		local detoniteRarity = Ores.Automation.GetOreRarityByName("Detonite")
-		local detoniteAmount = Ores.GetPlayerOre(ent, detoniteRarity)
-		if detoniteAmount < 1 then return end
+		local detonite_rarity = Ores.GetOreRarityByName("Detonite")
+		local detonite_amount = Ores.GetPlayerOre(ent, detonite_rarity)
+		if detonite_amount < 1 then return end
 
-		local toGive = math.min(self.MaxBandwidth, detoniteAmount)
+		local to_give = math.min(self.MaxBandwidth, detonite_amount)
 
-		self:AddDetonite(toGive)
-		Ores.TakePlayerOre(ent, detoniteRarity, toGive)
+		self:AddDetonite(to_give)
+		Ores.TakePlayerOre(ent, detonite_rarity, to_give)
 	end
 
 	function ENT:Think()
 		if not self.CPPIGetOwner then return end
-		if not self:GetNWBool("IsPowered", true) then return end
+		if not self:GetNWBool("Wiremod_Active", true) then return end
 
 		local owner = self:CPPIGetOwner()
 		if not IsValid(owner) then return end
@@ -105,24 +117,24 @@ if SERVER then
 		if CurTime() >= self.NextStateUpdate then
 			self.NextStateUpdate = CurTime() + 2
 
-			local totalOps = 0
-			local chipCount = 0
+			local total_ops = 0
+			local chip_count = 0
 			for _, chip in pairs(self:GetChips()) do
-				local chipClass = chip:GetClass()
-				if chipClass == "gmod_wire_expression2" then
+				local chip_class = chip:GetClass()
+				if chip_class == "gmod_wire_expression2" then
 					local ops = chip.OverlayData.prfbench
-					totalOps = totalOps + ops
-				elseif chipClass == "starfall_processor" then
+					total_ops = total_ops + ops
+				elseif chip_class == "starfall_processor" then
 					if chip.instance then
 						local ops = (chip.instance.cpu_average / chip.instance.cpuQuota) * 1000
-						totalOps = totalOps + ops
+						total_ops = total_ops + ops
 					end
 				end
 
-				chipCount = chipCount + 1
+				chip_count = chip_count + 1
 			end
 
-			if chipCount < 1 then
+			if chip_count < 1 then
 				self:SetNWInt("BandwidthUsage", 0)
 
 				if _G.WireLib then
@@ -132,25 +144,17 @@ if SERVER then
 				return
 			end
 
-			local requiredBandwidth = math.max(math.ceil(chipCount / 2), math.ceil(totalOps / 100 / 2))
-			self.EnergySettings.ConsumptionAmount = requiredBandwidth
+			local required_bandwidth = math.max(math.ceil(chip_count / 2), math.ceil(total_ops / 100 / 2))
+			self.ConsumptionAmount = required_bandwidth
 
-			self:SetNWInt("BandwidthUsage", requiredBandwidth)
+			self:SetNWInt("BandwidthUsage", required_bandwidth)
 
 			if _G.WireLib then
-				_G.WireLib.TriggerOutput(self, "Usage", requiredBandwidth)
+				_G.WireLib.TriggerOutput(self, "Usage", required_bandwidth)
 			end
 
-			self:SetChipState(requiredBandwidth <= self:GetNW2Int("Bandwidth", 0))
+			self:SetChipState(required_bandwidth <= self:GetNW2Int("Bandwidth", 0))
 		end
-	end
-
-	function ENT:CanConsumeEnergy(energyType)
-		if self:GetNWInt("BandwidthUsage", 0) < 1 then
-			return false
-		end
-
-		return self:GetNW2Int("Bandwidth", 0) >= self:GetNWInt("BandwidthUsage", 0)
 	end
 
 	function ENT:GetChips()
@@ -285,7 +289,7 @@ if SERVER then
 		if ent:GetClass() ~= "mining_ore" then return end
 
 		timer.Simple(0, function()
-			local detoniteRarity = Ores.Automation.GetOreRarityByName("Detonite")
+			local detoniteRarity = Ores.GetOreRarityByName("Detonite")
 			local rarity = ent:GetRarity()
 
 			if rarity ~= detoniteRarity then return end
@@ -308,46 +312,20 @@ if CLIENT then
 		self:DrawModel()
 	end
 
-	local CHIP_MATERIAL = Material("beer/wiremod/gate_e2")
-	function ENT:OnGraphDraw(x, y)
-		local detoniteRarity = Ores.Automation.GetOreRarityByName("Detonite")
-		local detoniteColor = Ores.__R[detoniteRarity].HudColor
-		local GU = Ores.Automation.GraphUnit
-
-		if not CHIP_MATERIAL:IsError() then
-			surface.SetDrawColor(255, 255, 255, 255)
-			surface.SetMaterial(CHIP_MATERIAL)
-			surface.DrawTexturedRect(x - GU / 2, y - GU / 2, GU, GU)
-		else
-			surface.SetDrawColor(28, 28, 28, 255)
-			surface.DrawRect(x - GU / 2, y - GU / 2, GU, GU)
-		end
-
-		surface.SetDrawColor(detoniteColor)
-		surface.DrawOutlinedRect(x - GU / 2, y - GU / 2, GU, GU, 2)
-
-		surface.SetTextColor(255, 255, 255, 255)
-		local text = self:GetNW2Int("Bandwidth", 0) .. "u"
-		surface.SetFont("DermaDefault")
-		local tw, th = surface.GetTextSize(text)
-		surface.SetTextPos(x - tw / 2, y - th / 2)
-		surface.DrawText(text)
-	end
-
 	function ENT:OnDrawEntityInfo()
 		if not self.MiningFrameInfo then
 			self.MiningFrameInfo = {
-				{ Type = "Label", Text = "CHIP ROUTER", Border = true },
-				{ Type = "Data", Label = "USAGE", Value = self:GetNWInt("BandwidthUsage", 0) },
-				{ Type = "Data", Label = "BANDWIDTH", Value = self:GetNW2Int("Bandwidth", 0) },
-				{ Type = "State", Value = self:GetNWBool("IsPowered", true) },
+				{ Type = "Label", Text = self.PrintName:upper(), Border = true },
+				{ Type = "Data", Label = "Usage", Value = self:GetNWInt("BandwidthUsage", 0) },
+				{ Type = "Data", Label = "Bandwidth", Value = self:GetNW2Int("Bandwidth", 0) },
+				{ Type = "State", Value = self:GetNWBool("Wiremod_Active", true) },
 				{ Type = "Action", Binding = "+use", Text = "FILL" }
 			}
 		end
 
 		self.MiningFrameInfo[2].Value = self:GetNWInt("BandwidthUsage", 0)
 		self.MiningFrameInfo[3].Value = self:GetNW2Int("Bandwidth", 0)
-		self.MiningFrameInfo[4].Value = self:GetNWBool("IsPowered", true)
+		self.MiningFrameInfo[4].Value = self:GetNWBool("Wiremod_Active", true)
 
 		return self.MiningFrameInfo
 	end
