@@ -40,8 +40,8 @@ if SERVER then
 
 	function ENT:MA_Execute(output_data, input_data)
 		if input_data.Id ~= "ores" and input_data.Id ~= "ingots" then return end
-		if input_data.Id == "ores" and not  istable(output_data.Ent.OreQueue) then return end
-		if input_data.Id == "ingots" and not  istable(output_data.Ent.IngotQueue) then return end
+		if input_data.Id == "ores" and not istable(output_data.Ent.OreQueue) then return end
+		if input_data.Id == "ingots" and not istable(output_data.Ent.IngotQueue) then return end
 
 		local rarity = input_data.Id == "ingots" and table.remove(output_data.Ent.IngotQueue, 1) or table.remove(output_data.Ent.OreQueue, 1)
 		if not self.Ores[rarity] then
