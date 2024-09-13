@@ -9,7 +9,7 @@ ENT.RenderGroup = RENDERGROUP_OPAQUE
 ENT.Author = "Earu"
 ENT.Spawnable = true
 ENT.Category = "Mining V2"
-ENT.PrintName = "Coin Minter"
+ENT.PrintName = "Coin Minter V2"
 ENT.ClassName = "mining_coin_minter"
 
 if SERVER then
