@@ -137,7 +137,7 @@ CreateConVar("sbox_maxmining_automation", "40", FCVAR_ARCHIVE, "Maximum amount o
 
 hook.Add("OnEntityCreated", "mining_automation", function(ent)
 	local class_name = ent:GetClass()
-	if class_name == "mining_drill" then return end
+	if class_name == "ma_drill_v2" then return end
 	if not Ores.Automation.EntityClasses[class_name] then return end
 	if not ent.CPPIGetOwner then return end
 
