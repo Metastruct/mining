@@ -8,8 +8,8 @@ ENT.Base = "base_anim"
 ENT.RenderGroup = RENDERGROUP_OPAQUE
 ENT.Author = "Earu"
 ENT.Spawnable = true
-ENT.Category = "Mining V2"
-ENT.PrintName = "Coin Minter V2"
+ENT.Category = "Mining"
+ENT.PrintName = "Coin Minter"
 ENT.ClassName = "mining_coin_minter"
 ENT.IconOverride = "entities/ma_minter_v2.png"
 

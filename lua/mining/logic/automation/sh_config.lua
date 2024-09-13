@@ -18,9 +18,9 @@ Ores.Automation = Ores.Automation or {
 		ma_minter_v2 = true,
 		ma_oil_extractor_v2 = true,
 		ma_gen_v2 = true,
+		ma_chip_router_v2 = true,
 
 		mining_detonite_bomb = true,
-		mining_chip_router = true,
 		mining_argonite_drone_controller = true,
 	},
 	GraphUnit = 40,
