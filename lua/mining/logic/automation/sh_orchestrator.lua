@@ -471,7 +471,7 @@ if CLIENT then
 		local base_x, base_y = ScrW() / 2 - max_width / 2, ScrH() / 2 - max_height / 2
 		blur_rect(base_x - 10, base_y - 10, max_width + 20, max_height + 20, 10, 2)
 
-		surface.SetDrawColor(0, 0, 0, 100)
+		surface.SetDrawColor(0, 0, 0, 220)
 		surface.DrawRect(base_x - 10, base_y - 10, max_width + 20, max_height + 20)
 
 		surface.SetFont("ma_hud_title")

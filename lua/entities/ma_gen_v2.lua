@@ -200,8 +200,8 @@ if CLIENT then
 	function ENT:OnDrawEntityInfo()
 		if not self.MiningFrameInfo then
 			local data = {
-				{ Type = "Label", Text = "GENERATOR", Border = true },
-				{ Type = "Data", Label = "ENERGY", Value = self:GetEnergyLevel(), MaxValue = 100 },
+				{ Type = "Label", Text = self.PrintName:upper(), Border = true },
+				{ Type = "Data", Label = "Energy", Value = self:GetEnergyLevel(), MaxValue = 100 },
 				{ Type = "State", Value = can_work(self) }
 			}
 

@@ -93,14 +93,14 @@ if CLIENT then
 		if #globalOreData < 1 then return end
 
 		local data = {
-			{ Type = "Label", Text = "STORAGE", Border = true },
+			{ Type = "Label", Text = self.PrintName:upper(), Border = true },
 		}
 
 		for i, dataChunk in ipairs(globalOreData:Split(";")) do
 			local rarityData = dataChunk:Split("=")
 			local oreData = Ores.__R[tonumber(rarityData[1])]
 
-			table.insert(data, { Type = "Data", Label = oreData.Name:upper(), Value = rarityData[2], LabelColor = oreData.HudColor, ValueColor = oreData.HudColor })
+			table.insert(data, { Type = "Data", Label = oreData.Name, Value = rarityData[2], LabelColor = oreData.HudColor, ValueColor = oreData.HudColor })
 		end
 
 		if self.CPPIGetOwner and self:CPPIGetOwner() == LocalPlayer() then

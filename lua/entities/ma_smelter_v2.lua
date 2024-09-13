@@ -307,8 +307,8 @@ if CLIENT then
 	function ENT:OnDrawEntityInfo()
 		local data = {
 			{ Type = "State", Value = self:CanWork() },
-			{ Type = "Label", Text = "SMELTER", Border = true },
-			{ Type = "Data", Label = "FUEL", Value = self:GetNW2Int("Fuel", 0), MaxValue = self:GetNW2Int("MaxFuel", Ores.Automation.BatteryCapacity) },
+			{ Type = "Label", Text = self.PrintName:upper(), Border = true },
+			{ Type = "Data", Label = "Fuel", Value = self:GetNW2Int("Fuel", 0), MaxValue = self:GetNW2Int("MaxFuel", Ores.Automation.BatteryCapacity) },
 		}
 
 		local globalOreData = self:GetNWString("OreData", ""):Trim()
