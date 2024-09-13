@@ -5,15 +5,17 @@ Ores = Ores or {}
 
 ENT.Type = "anim"
 ENT.Base = "base_anim"
-ENT.PrintName = "Argonite Drone Controller"
+ENT.PrintName = "Drone Controller"
 ENT.Author = "Earu"
 ENT.Category = "Mining"
 ENT.RenderGroup = RENDERGROUP_OPAQUE
 ENT.Spawnable = true
-ENT.ClassName = "mining_argonite_drone_controller"
+ENT.AdminOnly = true
+ENT.ClassName = "ma_drone_controller_v2"
+ENT.IconOverride = "entities/ma_drone_controller_v2.png"
 
 local function can_work(self)
-	if not self:GetNWBool("IsPowered", true) then return false end
+	if not self:GetNWBool("Wiremod_Active", true) then return false end
 	if self:GetNW2Int("Detonite", 0) > 0 then return true end
 
 	return false
@@ -36,6 +38,8 @@ function ENT:GetDroneCount()
 end
 
 if SERVER then
+	resource.AddFile("materials/entities/ma_drone_controller_v2.png")
+
 	function ENT:Initialize()
 		self:SetModel("models/hunter/blocks/cube075x075x075.mdl")
 		self:SetMaterial("models/props_lab/projector_noise")
@@ -45,7 +49,6 @@ if SERVER then
 		self:PhysicsInit(SOLID_VPHYSICS)
 		self:SetSolid(SOLID_VPHYSICS)
 		self:PhysWake()
-		self:SetNWBool("IsPowered", true)
 		self:SetUseType(SIMPLE_USE)
 		self.Drones = {}
 
@@ -70,7 +73,7 @@ if SERVER then
 		self.Frame:SetTransmitWithParent(true)
 
 		if _G.WireLib then
-			self.Inputs = _G.WireLib.CreateInputs(self, {"Active (If this is non-zero, activate the router)"})
+			_G.WireLib.CreateInputs(self, {"Active (If this is non-zero, activate the router)"})
 		end
 
 		Ores.Automation.PrepareForDuplication(self)
@@ -79,21 +82,6 @@ if SERVER then
 
 			Ores.Automation.ReplicateOwnership(self, self)
 		end)
-
-		self.EnergySettings = {
-			Type = "Detonite",
-			MaxValue = MAX_DETONITE,
-			ConsumptionRate = 10, -- once every 10 seconds,
-			ConsumptionAmount = 0,
-			NoBrush = true,
-		}
-
-		Ores.Automation.RegisterEnergyPoweredEntity(self, { self.EnergySettings }, {
-			{
-				Identifier = "DroneCount (Outputs the current bandwidth usage) [NORMAL]",
-				StartValue = 0,
-			},
-		})
 
 		local timer_name = ("mining_argonite_drone_hive_[%d]"):format(self:EntIndex())
 		timer.Create(timer_name, 1, 0, function()
@@ -104,16 +92,6 @@ if SERVER then
 
 			self:UpdateDrones()
 		end)
-	end
-
-	function ENT:TriggerInput(port, state)
-		if not _G.WireLib then return end
-		if not isnumber(state) then return end
-
-		if port == "Active" then
-			self:SetNWBool("IsPowered", tobool(state))
-			self:UpdateDrones()
-		end
 	end
 
 	function ENT:UpdateDrones()
@@ -131,9 +109,7 @@ if SERVER then
 			local drone = ents.Create("mining_argonite_drone")
 			drone:Spawn()
 			drone:Teleport(self:WorldSpaceCenter() + drone.HeightOffset)
-			if self.CPPIGetOwner and IsValid(self:CPPIGetOwner()) then
-				drone:CPPISetOwner(self:CPPIGetOwner())
-			end
+			Ores.Automation.ReplicateOwnership(drone, self)
 
 			local old_OnRemove = drone.OnRemove
 			local hive = self
@@ -173,7 +149,7 @@ if SERVER then
 		if not ent:IsPlayer() then return end
 		if self.CPPIGetOwner and self:CPPIGetOwner() ~= ent then return end
 
-		local detoniteRarity = Ores.Automation.GetOreRarityByName("Detonite")
+		local detoniteRarity = Ores.GetOreRarityByName("Detonite")
 		local detoniteAmount = Ores.GetPlayerOre(ent, detoniteRarity)
 		if detoniteAmount < 1 then return end
 
@@ -183,22 +159,22 @@ if SERVER then
 		Ores.TakePlayerOre(ent, detoniteRarity, toGive)
 	end
 
-	function ENT:CanConsumeEnergy()
-		if not can_work(self) then return false end
-
-		return true
-	end
-
 	function ENT:OnRemove()
 		for _, drone in pairs(self.Drones) do
 			SafeRemoveEntity(drone)
 		end
 	end
 
-	CreateConVar("sbox_maxmining_argonite_drone_controller", "1", FCVAR_ARCHIVE, "Maximum amount of argonite drone controller entities a player can have", 0, 100)
+	function ENT:TriggerInput(port, state)
+		if port == "Active" then
+			self:SetNWBool("Wiremod_Active", tobool(state))
+		end
+	end
 
-	hook.Add("OnEntityCreated", "mining_argonite_drone_controller", function(ent)
-		if ent:GetClass() ~= "mining_argonite_drone_controller" then return end
+	CreateConVar("sbox_maxma_drone_controller_v2", "1", FCVAR_ARCHIVE, "Maximum amount of drone controller entities a player can have", 0, 100)
+
+	hook.Add("OnEntityCreated", "ma_drone_controller_v2", function(ent)
+		if ent:GetClass() ~= "ma_drone_controller_v2" then return end
 		if not ent.CPPIGetOwner then return end
 
 		timer.Simple(0, function()
@@ -210,53 +186,30 @@ if SERVER then
 				return
 			end
 
-			if ply:CheckLimit("mining_argonite_drone_controller") then
-				ply:AddCount("mining_argonite_drone_controller", ent)
+			if ply:CheckLimit("ma_drone_controller_v2") then
+				ply:AddCount("ma_drone_controller_v2", ent)
 			else
 				SafeRemoveEntity(ent)
 			end
 		end)
 	end)
 
-	hook.Add("PlayerSpawnSENT", "mining_argonite_drone_controller", function(ply, className)
+	hook.Add("PlayerSpawnSENT", "ma_drone_controller_v2", function(ply, className)
 		if not className then return end
 
-		if className == "mining_argonite_drone_controller" and not ply:CheckLimit("mining_argonite_drone_controller") then
+		if className == "ma_drone_controller_v2" and not ply:CheckLimit("ma_drone_controller_v2") then
 			return false
 		end
 	end)
 end
 
 if CLIENT then
-	function ENT:OnGraphDraw(x, y)
-		local argoniteRarity = Ores.Automation.GetOreRarityByName("Detonite")
-		local argoniteColor = Ores.__R[argoniteRarity].HudColor
-		local GU = Ores.Automation.GraphUnit
-
-		surface.SetDrawColor(argoniteColor)
-		surface.DrawRect(x - GU / 2, y - GU / 2, GU, GU)
-
-		surface.SetDrawColor(125, 125, 125, 255)
-		surface.DrawOutlinedRect(x - GU / 2, y - GU / 2, GU, GU, 2)
-
-		surface.SetTextColor(255, 255, 255, 255)
-		local perc = (math.Round((self:GetNW2Int("Detonite", 0) / self:GetNW2Int("MaxDetonite", MAX_DETONITE)) * 100)) .. "%"
-		surface.SetFont("DermaDefault")
-		local tw, th = surface.GetTextSize(perc)
-		surface.SetTextPos(x - tw / 2, y - th / 2)
-		surface.DrawText(perc)
-
-		local state = can_work(self, CurTime())
-		surface.SetDrawColor(state and 0 or 255, state and 255 or 0, 0, 255)
-		surface.DrawOutlinedRect(x - GU / 2 + 2, y - GU / 2 + 2, GU - 4, 2)
-	end
-
 	function ENT:OnDrawEntityInfo()
 		if not self.MiningFrameInfo then
 			self.MiningFrameInfo = {
-				{ Type = "Label", Text = "CONTROLLER", Border = true },
-				{ Type = "Data", Label = "DETONITE", Value = self:GetNW2Int("Detonite", 0), MaxValue = self:GetNW2Int("MaxDetonite", MAX_DETONITE) },
-				{ Type = "Data", Label = "DRONES", Value = self:GetDroneCount() },
+				{ Type = "Label", Text = self.PrintName:upper(), Border = true },
+				{ Type = "Data", Label = "Detonite", Value = self:GetNW2Int("Detonite", 0), MaxValue = self:GetNW2Int("MaxDetonite", MAX_DETONITE) },
+				{ Type = "Data", Label = "Drones", Value = self:GetDroneCount() },
 				{ Type = "State", Value = can_work(self) },
 				{ Type = "Action", Binding = "+use", Text = "FILL" }
 			}

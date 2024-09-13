@@ -10,9 +10,12 @@ ENT.Author = "Earu"
 ENT.Category = "Mining"
 ENT.RenderGroup = RENDERGROUP_OPAQUE
 ENT.Spawnable = true
-ENT.ClassName = "mining_detonite_bomb"
+ENT.ClassName = "ma_bomb_v2"
+ENT.IconOverride = "entities/ma_bomb_v2.png"
 
 if SERVER then
+	resource.AddFile("materials/entities/ma_bomb_v2.png")
+
 	function ENT:Initialize()
 		self:SetModel("models/maxofs2d/hover_classic.mdl")
 		self:SetMoveType(MOVETYPE_VPHYSICS)
@@ -55,7 +58,7 @@ if SERVER then
 		local curAmount = self:GetNWInt("DetoniteAmount", 0)
 		if curAmount >= Ores.Automation.BombCapacity then return end
 
-		if ent:GetClass() == "mining_ore" and ent:GetRarity() == Ores.Automation.GetOreRarityByName("Detonite") then
+		if ent:GetClass() == "mining_ore" and ent:GetRarity() == Ores.GetOreRarityByName("Detonite") then
 			if ent.MiningBombRemoved then return end
 
 			ent:Remove()
@@ -126,7 +129,7 @@ if SERVER then
 
 		local curAmount = self:GetNWInt("DetoniteAmount", 0)
 		if curAmount < Ores.Automation.BombCapacity then
-			local detoniteRarity = Ores.Automation.GetOreRarityByName("Detonite")
+			local detoniteRarity = Ores.GetOreRarityByName("Detonite")
 			local plyAmount = Ores.GetPlayerOre(activator, detoniteRarity)
 			if plyAmount > 0 then
 				local amountToAdd = math.min(Ores.Automation.BombCapacity - curAmount, plyAmount)
@@ -161,8 +164,8 @@ if CLIENT then
 		local owned = self.CPPIGetOwner and self:CPPIGetOwner() == LocalPlayer()
 
 		local data = {
-			{ Type = "Label", Text = "BOMB", Border = true },
-			{ Type = "Data", Label = "CHARGES", Value = ("%d/%d"):format(self:GetNWInt("DetoniteAmount", 0), Ores.Automation.BombCapacity) },
+			{ Type = "Label", Text = self.PrintName:upper(), Border = true },
+			{ Type = "Data", Label = "Charges", Value = ("%d/%d"):format(self:GetNWInt("DetoniteAmount", 0), Ores.Automation.BombCapacity) },
 		}
 
 		if self:GetNWBool("Detonating", false) then

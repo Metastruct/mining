@@ -10,45 +10,41 @@ ENT.Author = "Earu"
 ENT.Category = "Mining"
 ENT.RenderGroup = RENDERGROUP_OPAQUE
 ENT.Spawnable = true
-ENT.ClassName = "mining_oil_extractor"
+ENT.ClassName = "ma_oil_extractor_v2"
 ENT.NextTraceCheck = 0
+ENT.IconOverride = "entities/ma_oil_extractor_v2.png"
 
 local function can_work(self, time)
-	if not self:GetNWBool("IsPowered", true) then return false end
+	if not self:GetNWBool("Wiremod_Active", true) then return false end
+	if not self:GetNWBool("IsPowered", false) then return false end
 	if time < self.NextTraceCheck then return self.TraceCheckResult end
 
-	if self:GetNW2Int("Energy", 0) > 0 then
-		local tr = util.TraceLine({
-			start = self:GetPos() + self:GetUp() * -75,
-			endpos = self:GetPos() + self:GetUp() * -100,
-			mask = MASK_SOLID_BRUSHONLY,
-		})
-
-		self.NextTraceCheck = time + 1.5
-		self.TraceCheckResult = tr.Hit
-		return tr.Hit
-	end
+	local tr = util.TraceLine({
+		start = self:GetPos() + self:GetUp() * -75,
+		endpos = self:GetPos() + self:GetUp() * -100,
+		mask = MASK_SOLID_BRUSHONLY,
+	})
 
 	self.NextTraceCheck = time + 1.5
-	self.TraceCheckResult = false
-	return false
+	self.TraceCheckResult = tr.Hit
+	return tr.Hit
 end
 
 local BASE_KICKSTART_PRICE = 12500
-
 if SERVER then
+	resource.AddFile("materials/entities/ma_oil_extractor_v2.png")
 	util.AddNetworkString("mining_kickstart_extractor")
 
 	net.Receive("mining_kickstart_extractor", function(_, ply)
 		local extractor = net.ReadEntity()
 		if not IsValid(extractor) then return end
 
-		local requiredPoints = math.floor(BASE_KICKSTART_PRICE * math.max(1, Ores.GetPlayerMultiplier(ply) - 2))
-		local pointBalance = ply:GetNWInt(Ores._nwPoints, 0)
-		if requiredPoints > pointBalance then return end
+		local required_points = math.floor(BASE_KICKSTART_PRICE * math.max(1, Ores.GetPlayerMultiplier(ply) - 2))
+		local point_balance = ply:GetNWInt(Ores._nwPoints, 0)
+		if required_points > point_balance then return end
 
-		Ores.Print(ply, ("kickstarted a extractor using %d pts"):format(requiredPoints))
-		Ores.TakePlayerPoints(ply, requiredPoints)
+		Ores.Print(ply, ("kickstarted a extractor using %d pts"):format(required_points))
+		Ores.TakePlayerPoints(ply, required_points)
 
 		extractor:ProduceBarrel()
 	end)
@@ -71,7 +67,7 @@ if SERVER then
 		self.NextTraceCheck = 0
 		self.ExtractedOil = 0
 		self.NextOil = 0
-		self:SetNWBool("IsPowered", true)
+		self:SetNWBool("IsPowered", false)
 
 		self.Frame = ents.Create("prop_physics")
 		self.Frame:SetModel("models/props_phx/construct/metal_wire1x1x2.mdl")
@@ -85,60 +81,65 @@ if SERVER then
 		self.Frame:Spawn()
 		self.Frame.PhysgunDisabled = true
 		self.Frame:SetParent(self)
-		self.Frame:SetTrigger(true)
-
-		self.Out = ents.Create("prop_physics")
-		self.Out:SetModel("models/props_phx/construct/metal_wire1x1.mdl")
-		self.Out:SetMaterial("phoenix_storms/stripes")
-		self.Out:SetPos(self:GetPos() + self:GetRight() * 24 + self:GetUp() * -35)
-
-		ang = self:GetAngles()
-		--ang:RotateAroundAxis(self:GetRight(), 90)
-		ang:RotateAroundAxis(self:GetForward(), 90)
-
-		self.Out:SetAngles(ang)
-		self.Out:Spawn()
-		self.Out:SetParent(self)
-		self.Out:SetNotSolid(true)
 
 		timer.Simple(0, function()
 			if not IsValid(self) then return end
 
 			self:Activate()
 			Ores.Automation.ReplicateOwnership(self, self)
-			self.SndLoop = self:StartLoopingSound("ambient/machines/transformer_loop.wav")
 		end)
 
-		if _G.WireLib then
-			_G.WireLib.CreateInputs(self, {
-				"Active",
-			}, {
-				"Whether the extractor is active or not",
-			})
-		end
+		_G.MA_Orchestrator.RegisterInput(self, "power", "ENERGY", "Energy", "Standard energyy input. More energy equals more ores!")
+		_G.MA_Orchestrator.RegisterOutput(self, "oil", "OIL", "Oil", "Standard oil output.")
 
 		Ores.Automation.PrepareForDuplication(self)
-		Ores.Automation.RegisterEnergyPoweredEntity(self, {
-			{
-				Type = "Energy",
-				MaxValue = Ores.Automation.BatteryCapacity * 3,
-				ConsumptionRate = 5, -- 1 unit every 5 seconds
-			}
-		}, {
-			{
-				Identifier = "Oil (Outputs the current amount of extracted oil) [NORMAL]",
-				StartValue = 0,
-			}
-		})
+
+		if _G.WireLib then
+			_G.WireLib.CreateInputs(self, {"Active (If this is non-zero, activate the drill)"})
+			_G.WireLib.CreateOutputs(self, {"Oil (Outputs the current amount of extracted oil) [NORMAL]"})
+
+			_G.WireLib.TriggerOutput(self, "Oil", 0)
+		end
 	end
 
-	function ENT:TriggerInput(port, state)
-		if not _G.WireLib then return end
-		if not isnumber(state) then return end
+	function ENT:MA_OnLink(output_data, input_data)
+		if input_data.Id ~= "power" then return end
 
-		if port == "Active" then
-			self:SetNWBool("IsPowered", tobool(state))
-		end
+		local power_src_ent = output_data.Ent
+		if not IsValid(power_src_ent) then return end
+
+		local timer_name = ("ma_oil_extractor_v2_[%d]"):format(self:EntIndex())
+		timer.Create(timer_name, 1, 0, function()
+			if not IsValid(self) then
+				timer.Remove(timer_name)
+				return
+			end
+
+			local got_power = _G.MA_Orchestrator.Execute(output_data, input_data)
+			self:SetNWBool("IsPowered", got_power or false)
+		end)
+
+		-- also executes as soon as its linked
+		local got_power = _G.MA_Orchestrator.Execute(output_data, input_data)
+		self:SetNWBool("IsPowered", got_power or false)
+	end
+
+	-- we just return true here, if we receive true when the orchestrator executes the link
+	-- then that means everything was approved by both entities output and input
+	function ENT:MA_Execute(output_data, input_data)
+		if input_data.Id ~= "power" then return end
+
+		return (isfunction(output_data.Ent.GetEnergyLevel) and output_data.Ent:GetEnergyLevel() or 1) > 0
+	end
+
+	-- this unpowers the drill if the energy input is unlinked
+	function ENT:MA_OnUnlink(output_data, input_data)
+		if input_data.Id ~= "power" then return end
+
+		local timer_name = ("ma_oil_extractor_v2_[%d]"):format(self:EntIndex())
+		timer.Remove(timer_name)
+
+		self:SetNWBool("IsPowered", false)
 	end
 
 	function ENT:CheckSoundLoop(time)
@@ -161,33 +162,16 @@ if SERVER then
 		self.NextSoundCheck = time + 5
 	end
 
-	function ENT:CanConsumeEnergy()
-		if not can_work(self, CurTime()) then return false end
-
-		return true
-	end
-
 	function ENT:ProduceBarrel()
 		self.ExtractedOil = 0
 		self:SetNWInt("ExtractedOil", self.ExtractedOil)
 
-		local fuelTank = ents.Create("mining_fuel_tank")
-		fuelTank:SetPos(self:GetPos() + self:GetRight() * 50 + self:GetUp() * -45)
-		fuelTank:SetNWInt("CoalCount", 150)
-		fuelTank:Spawn()
-		fuelTank:PhysWake()
-
 		if _G.WireLib then
-			_G.WireLib.TriggerOutput(fuelTank, "Amount", 150)
+			_G.WireLib.TriggerOutput(self, "Oil", self.ExtractedOil)
 		end
 
-		SafeRemoveEntityDelayed(fuelTank, Ores.Automation.OilExtractionRate)
-
-		timer.Simple(0, function()
-			if IsValid(self) and IsValid(fuelTank) then
-				Ores.Automation.ReplicateOwnership(fuelTank, self, true)
-			end
-		end)
+		local output_data = _G.MA_Orchestrator.GetOutputData(self, "oil")
+		_G.MA_Orchestrator.SendOutputReadySignal(output_data)
 	end
 
 	function ENT:ExtractOil(time)
@@ -203,11 +187,10 @@ if SERVER then
 
 		if self.ExtractedOil % 5 == 0 then -- update every 5 seconds because SetNW is slow
 			self:SetNWInt("ExtractedOil", self.ExtractedOil)
-		end
 
-		if _G.WireLib then
-			local curOil = (self.ExtractedOil / Ores.Automation.OilExtractionRate) * 100
-			_G.WireLib.TriggerOutput(self, "Oil", curOil)
+			if _G.WireLib then
+				_G.WireLib.TriggerOutput(self, "Oil", self.ExtractedOil)
+			end
 		end
 	end
 
@@ -223,12 +206,12 @@ if SERVER then
 		end
 	end
 
-	function ENT:SpawnFunction(ply, tr, className)
+	function ENT:SpawnFunction(ply, tr, class_name)
 		if not tr.Hit then return end
 
-		local spawnPos = tr.HitPos + tr.HitNormal * 100
-		local ent = ents.Create(className)
-		ent:SetPos(spawnPos)
+		local spawn_pos = tr.HitPos + tr.HitNormal * 100
+		local ent = ents.Create(class_name)
+		ent:SetPos(spawn_pos)
 		ent:Activate()
 		ent:Spawn()
 
@@ -249,9 +232,9 @@ if CLIENT then
 		wheel:Spawn()
 		wheel:SetParent(self)
 
-		local argoniteRarity = Ores.Automation.GetOreRarityByName("Argonite")
+		local argonite_rarity = Ores.GetOreRarityByName("Argonite")
 		wheel.RenderOverride = function()
-			local color = Ores.__R[argoniteRarity].PhysicalColor
+			local color = Ores.__R[argonite_rarity].PhysicalColor
 			render.SetColorModulation(color.r / 100, color.g / 100, color.b / 100)
 			render.MaterialOverride(Ores.Automation.EnergyMaterial)
 			wheel:DrawModel()
@@ -263,6 +246,9 @@ if CLIENT then
 	end
 
 	function ENT:Initialize()
+		_G.MA_Orchestrator.RegisterInput(self, "power", "ENERGY", "Energy", "Standard energyy input. More energy equals more ores!")
+		_G.MA_Orchestrator.RegisterOutput(self, "oil", "OIL", "Oil", "Standard oil output.")
+
 		self.NextTraceCheck = 0
 		self.Wheel = addWheelEntity(self, self:GetUp() * -75)
 	end
@@ -272,19 +258,19 @@ if CLIENT then
 		self:DrawModel()
 
 		local time = CurTime()
-		local hasEnergy = can_work(self, time)
-		if hasEnergy then
-			local effectData = EffectData()
-			effectData:SetScale(1.5)
-			effectData:SetOrigin(self:GetPos() + self:GetUp() * -75)
-			util.Effect(EFFECT_NAME, effectData)
+		local has_energy = can_work(self, time)
+		if has_energy then
+			local effect_data = EffectData()
+			effect_data:SetScale(1.5)
+			effect_data:SetOrigin(self:GetPos() + self:GetUp() * -75)
+			util.Effect(EFFECT_NAME, effect_data)
 		end
 
 		if IsValid(self.Wheel) then
 			local ang = self:GetAngles()
 			ang:RotateAroundAxis(self:GetForward(), 90)
 
-			if hasEnergy then
+			if has_energy then
 				self.Wheel:SetPos(self:GetPos() + self:GetUp() * (-70 + math.abs(math.sin(CurTime() * -1)) * 10))
 				ang:RotateAroundAxis(self:GetUp(), CurTime() * 300 % 360)
 			else
@@ -300,68 +286,46 @@ if CLIENT then
 		SafeRemoveEntity(self.Wheel)
 	end
 
-	local OIL_MAT = Material("models/shadertest/shader4")
-	function ENT:OnGraphDraw(x, y)
-		local GU = Ores.Automation.GraphUnit
-
-		surface.SetDrawColor(255, 255, 255, 255)
-		surface.SetMaterial(OIL_MAT)
-		surface.DrawTexturedRect(x - GU / 2, y - GU / 2, GU, GU)
-
-		surface.SetDrawColor(125, 125, 125, 255)
-		surface.DrawOutlinedRect(x - GU / 2, y - GU / 2, GU, GU, 2)
-
-		surface.SetTextColor(255, 255, 255, 255)
-		local perc = (math.Round((self:GetNW2Int("Energy", 0) / self:GetNW2Int("MaxEnergy", Ores.Automation.BatteryCapacity * 3)) * 100)) .. "%"
-		surface.SetFont("DermaDefault")
-		local tw, th = surface.GetTextSize(perc)
-		surface.SetTextPos(x - tw / 2, y - th / 2)
-		surface.DrawText(perc)
-
-		local state = can_work(self, CurTime())
-		surface.SetDrawColor(state and 0 or 255, state and 255 or 0, 0, 255)
-		surface.DrawOutlinedRect(x - GU / 2 + 2, y - GU / 2 + 2, GU - 4, 2)
-	end
-
 	function ENT:OnDrawEntityInfo()
 		if not self.MiningFrameInfo then
 			self.MiningFrameInfo = {
-				{ Type = "Label", Text = "EXTRACTOR", Border = true },
-				{ Type = "Data", Label = "ENERGY", Value = self:GetNW2Int("Energy", 0), MaxValue = self:GetNW2Int("MaxEnergy", Ores.Automation.BatteryCapacity * 3), Border = true },
-				{ Type = "Data", Label = "OIL", Value = self:GetNWInt("ExtractedOil", 0), MaxValue = Ores.Automation.OilExtractionRate },
+				{ Type = "Label", Text = self.PrintName:upper(), Border = true },
+				{ Type = "Data", Label = "Oil", Value = self:GetNWInt("ExtractedOil", 0), MaxValue = Ores.Automation.OilExtractionRate },
 				{ Type = "State", Value = can_work(self, CurTime()) },
 			}
 		end
 
-		self.MiningFrameInfo[2].Value = self:GetNW2Int("Energy", 0)
-		self.MiningFrameInfo[3].Value = self:GetNWInt("ExtractedOil", 0)
-		self.MiningFrameInfo[4].Value = can_work(self, CurTime())
+		self.MiningFrameInfo[2].Value = self:GetNWInt("ExtractedOil", 0)
+		self.MiningFrameInfo[3].Value = can_work(self, CurTime())
 
 		if self.CPPIGetOwner and self:CPPIGetOwner() == LocalPlayer() then
-			self.MiningFrameInfo[5] = { Type = "Action", Binding = "+use", Text = "KICKSTART" }
+			self.MiningFrameInfo[4] = { Type = "Action", Binding = "+use", Text = "KICKSTART" }
 		end
 
 		return self.MiningFrameInfo
 	end
 
 	hook.Add("PlayerBindPress", "mining_oil_extractor_kickstart", function(ply, bind, pressed, code)
+		local wep = ply:GetActiveWeapon()
+		if IsValid(wep) and wep:GetClass() == "weapon_physgun" then return end
+
 		if bind == "+use" and pressed then
 			local tr = ply:GetEyeTrace()
-			if IsValid(tr.Entity) and tr.Entity:GetClass() == "mining_oil_extractor" and tr.Entity:WorldSpaceCenter():Distance(EyePos()) <= 300 then
-				local requiredPoints = math.floor(BASE_KICKSTART_PRICE * math.max(1, Ores.GetPlayerMultiplier(ply) - 2))
-				local pointBalance = ply:GetNWInt(Ores._nwPoints, 0)
-				if requiredPoints > pointBalance then
+			if IsValid(tr.Entity) and tr.Entity:GetClass() == "ma_oil_extractor_v2" and tr.Entity:WorldSpaceCenter():Distance(EyePos()) <= 300 then
+				local required_points = math.floor(BASE_KICKSTART_PRICE * math.max(1, Ores.GetPlayerMultiplier(ply) - 2))
+				local point_balance = ply:GetNWInt(Ores._nwPoints, 0)
+				if required_points > point_balance then
 					chat.AddText(Color(230, 130, 65), " ♦ [Ores] ", color_white, ("You do not have enough points to kickstart this extractor (required: %s pts | balance: %s pts)"):format(
-						string.Comma(requiredPoints),
-						string.Comma(pointBalance)
+						string.Comma(required_points),
+						string.Comma(point_balance)
 					))
 					return
 				end
 
 				Derma_Query(
 					("Kickstarting the extractor will cost you %s pts (current balance: %s pts)"):format(
-						string.Comma(requiredPoints),
-						string.Comma(pointBalance)
+						string.Comma(required_points),
+						string.Comma(point_balance)
 					),
 					"Kickstart Extractor",
 					"Kickstart", function()
