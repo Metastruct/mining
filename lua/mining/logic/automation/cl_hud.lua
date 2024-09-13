@@ -16,10 +16,10 @@ surface.CreateFont("mining_automation_hud2", {
 })
 
 function Ores.Automation.ShouldDrawText(ent)
-	local localPlayer = LocalPlayer()
+	local ply = LocalPlayer()
 
-	if localPlayer:EyePos():DistToSqr(ent:WorldSpaceCenter()) <= Ores.Automation.TextDrawingDistance * Ores.Automation.TextDrawingDistance then return true end
-	if localPlayer:GetEyeTrace().Entity == ent then return true end
+	if ply:EyePos():DistToSqr(ent:WorldSpaceCenter()) <= Ores.Automation.TextDrawingDistance * Ores.Automation.TextDrawingDistance then return true end
+	if ply:GetEyeTrace().Entity == ent then return true end
 
 	return false
 end
@@ -44,7 +44,7 @@ local MINING_INFO_HUD = CreateClientConVar("mining_automation_hud_frames", "1", 
 
 local ENTITY_INFO_EXTRAS = { mining_argonite_container = true }
 local FONT_HEIGHT = 30
-local FRAME_WIDTH = 250
+local FRAME_WIDTH = 100
 local FRAME_HEIGHT = 100
 local COLOR_WHITE = Color(255, 255, 255, 255)
 local FRAME_PADDING = 5
@@ -54,98 +54,112 @@ local MTX_SCALE = Vector(1, 1, 1)
 local function drawEntityInfoFrame(ent, data)
 	if not MINING_INFO_HUD:GetBool() then return end
 
-	local totalHeight = ent.MiningInfoFrameHeight or (FRAME_HEIGHT + (#data * (FONT_HEIGHT + Ores.Automation.HudPadding)))
+	local total_height = ent.MiningInfoFrameHeight or (FRAME_HEIGHT + (#data * (FONT_HEIGHT + Ores.Automation.HudPadding)))
+	local total_width = ent.MiningInfoFrameWidth or FRAME_WIDTH
 	local pos = ent:WorldSpaceCenter():ToScreen()
 	if not pos.visible then return end
 
-	local x, y = pos.x - FRAME_WIDTH / 2, pos.y - totalHeight / 2
+	local x, y = pos.x - total_width / 2, pos.y - total_height / 2
 
 	MTX_TRANSLATION.x = x
 	MTX_TRANSLATION.y = y
 
 	local mtx = Matrix()
+	local scale = math.max(0.6, ScrW() / 2560)
 	mtx:Translate(MTX_TRANSLATION)
-	mtx:Scale(MTX_SCALE * math.max(0.6, ScrW() / 2560))
+	mtx:Scale(MTX_SCALE * scale)
 	mtx:Translate(-MTX_TRANSLATION)
 
 	cam.PushModelMatrix(mtx, true)
 
-	blur_rect(x, y, FRAME_WIDTH, totalHeight, 10, 2)
+	blur_rect(x, y, total_width * scale, total_height * scale, 10, 2)
 	surface.SetDrawColor(0, 0, 0, 220)
-	surface.DrawRect(x, y, FRAME_WIDTH, totalHeight)
+	surface.DrawRect(x, y, total_width, total_height)
 
 	local offset = Ores.Automation.HudPadding + FRAME_PADDING
-	for _, lineData in ipairs(data) do
-		if lineData.Type == "Action" then
+	for _, line_data in ipairs(data) do
+		if line_data.Type == "Action" then
 			surface.SetFont("mining_automation_hud")
 
-			local key = (input.LookupBinding(lineData.Binding, true) or "?"):upper()
-			local text = ("[ %s ] %s"):format(key, lineData.Text)
+			local key = (input.LookupBinding(line_data.Binding, true) or "?"):upper()
+			local text = ("[ %s ] %s"):format(key, line_data.Text)
 			local tw, th = surface.GetTextSize(text)
 
+			if tw > total_width then
+				total_width = tw + Ores.Automation.HudPadding * 4
+			end
+
 			surface.SetTextColor(Ores.Automation.HudActionColor)
-			surface.SetTextPos(x + FRAME_WIDTH - (tw + Ores.Automation.HudPadding * 2), y + offset)
+			surface.SetTextPos(x + total_width - (tw + Ores.Automation.HudPadding * 2), y + offset)
 			surface.DrawText(text)
 
 			offset =  offset + th + Ores.Automation.HudPadding
-		elseif lineData.Type == "Data" then
+		elseif line_data.Type == "Data" then
 			surface.SetFont("mining_automation_hud2")
 
-			surface.SetTextColor(lineData.LabelColor or COLOR_WHITE)
+			surface.SetTextColor(line_data.LabelColor or COLOR_WHITE)
 			surface.SetTextPos(x + Ores.Automation.HudPadding + FRAME_PADDING, y + offset)
-			surface.DrawText(lineData.Label)
+			surface.DrawText(line_data.Label)
 
-			local text = tostring(lineData.Value)
-			if lineData.MaxValue then
-				local perc = math.Round((lineData.Value / lineData.MaxValue) * 100)
+			local text = tostring(line_data.Value)
+			if line_data.MaxValue then
+				local perc = math.Round((line_data.Value / line_data.MaxValue) * 100)
 				local r = 255
 				local g = 255 / 100 * perc
 				local b = 255 / 100 * perc
 
 				surface.SetTextColor(r, g, b, 255)
 				text = tostring(perc)
-			elseif lineData.ValueColor then
-				surface.SetTextColor(lineData.ValueColor)
+			elseif line_data.ValueColor then
+				surface.SetTextColor(line_data.ValueColor)
 			end
 
 			local tw, th = surface.GetTextSize(text)
-			surface.SetTextPos(x + FRAME_WIDTH - (tw + Ores.Automation.HudPadding * 2), y + offset)
+			surface.SetTextPos(x + total_width - (tw + Ores.Automation.HudPadding * 2), y + offset)
 			surface.DrawText(text)
 
+			if tw > total_width then
+				total_width = tw + Ores.Automation.HudPadding * 4
+			end
+
 			offset =  offset + th + Ores.Automation.HudPadding
-		elseif lineData.Type == "State" then
-			local state = tobool(lineData.Value) or false
+		elseif line_data.Type == "State" then
+			local state = tobool(line_data.Value) or false
 			surface.SetDrawColor(state and 0 or 255, state and 255 or 0, 0, 255)
-			surface.DrawRect(x + FRAME_WIDTH - 25, y + 15, 15, 15)
+			surface.DrawRect(x + total_width - 25, y + 15, 15, 15)
 		else
-			if not isstring(lineData.Text) then continue end
+			if not isstring(line_data.Text) then continue end
 
 			surface.SetFont("mining_automation_hud")
 
-			surface.SetTextColor(lineData.Color or COLOR_WHITE)
+			surface.SetTextColor(line_data.Color or COLOR_WHITE)
 			surface.SetTextPos(x + Ores.Automation.HudPadding + FRAME_PADDING, y + offset)
-			surface.DrawText(lineData.Text)
+			surface.DrawText(line_data.Text)
 
-			local _, th = surface.GetTextSize(lineData.Text)
+			local tw, th = surface.GetTextSize(line_data.Text)
+			if tw > total_width then
+				total_width = tw + Ores.Automation.HudPadding * 4
+			end
 			offset = offset + th + Ores.Automation.HudPadding
 		end
 
-		if lineData.Border == true then
+		if line_data.Border == true then
 			surface.SetDrawColor(Ores.Automation.HudSepColor)
-			surface.DrawRect(x + Ores.Automation.HudPadding, y + offset, FRAME_WIDTH - Ores.Automation.HudPadding * 2, 2)
+			surface.DrawRect(x + Ores.Automation.HudPadding, y + offset, total_width - Ores.Automation.HudPadding * 2, 2)
 			offset = offset + Ores.Automation.HudPadding
 		end
 	end
 
 	-- more accurate height
 	ent.MiningInfoFrameHeight = offset + Ores.Automation.HudPadding + FRAME_PADDING
+	ent.MiningInfoFrameWidth = total_width
 
 	cam.PopModelMatrix()
 end
 
 local function try_draw_ent(ent)
-	local entClass = ent:GetClass()
-	if not Ores.Automation.EntityClasses[entClass] and not ENTITY_INFO_EXTRAS[entClass] then return end
+	local class_name = ent:GetClass()
+	if not Ores.Automation.EntityClasses[class_name] and not ENTITY_INFO_EXTRAS[class_name] then return end
 	if not Ores.Automation.ShouldDrawText(ent) then return end
 	if not isfunction(ent.OnDrawEntityInfo) then return end
 

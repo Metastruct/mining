@@ -296,6 +296,9 @@ if CLIENT then
 	end
 
 	hook.Add("PlayerBindPress", "mining_oil_extractor_kickstart", function(ply, bind, pressed, code)
+		local wep = ply:GetActiveWeapon()
+		if IsValid(wep) and wep:GetClass() == "weapon_physgun" then return end
+
 		if bind == "+use" and pressed then
 			local tr = ply:GetEyeTrace()
 			if IsValid(tr.Entity) and tr.Entity:GetClass() == "ma_oil_extractor_v2" and tr.Entity:WorldSpaceCenter():Distance(EyePos()) <= 300 then
