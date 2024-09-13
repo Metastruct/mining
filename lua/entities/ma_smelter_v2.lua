@@ -318,7 +318,7 @@ if CLIENT then
 			local rarityData = dataChunk:Split("=")
 			local oreData = Ores.__R[tonumber(rarityData[1])]
 
-			table.insert(data, { Type = "Data", Label = oreData.Name:upper()[1] .. ". INGOT", Value = ("%s/%d"):format(rarityData[2], Ores.Automation.IngotSize), LabelColor = oreData.HudColor, ValueColor = oreData.HudColor })
+			table.insert(data, { Type = "Data", Label = oreData.Name .. " Ingot", Value = ("%s/%d"):format(rarityData[2], Ores.Automation.IngotSize), LabelColor = oreData.HudColor, ValueColor = oreData.HudColor })
 		end
 
 		return data
