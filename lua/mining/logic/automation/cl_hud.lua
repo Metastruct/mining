@@ -45,7 +45,7 @@ local MINING_INFO_HUD = CreateClientConVar("mining_automation_hud_frames", "1", 
 
 local ENTITY_INFO_EXTRAS = { mining_argonite_container = true }
 local FONT_HEIGHT = 25 * scale
-local FRAME_WIDTH = 100
+local FRAME_WIDTH = 200
 local FRAME_HEIGHT = 100
 local COLOR_WHITE = Color(255, 255, 255, 255)
 local FRAME_PADDING = 5
@@ -72,8 +72,8 @@ local function drawEntityInfoFrame(ent, data)
 			local text = ("[ %s ] %s"):format(key, line_data.Text)
 			local tw, th = surface.GetTextSize(text)
 
-			if tw > total_width then
-				total_width = tw + Ores.Automation.HudPadding * 2 + 15
+			if tw + 100 > total_width then
+				total_width = tw + Ores.Automation.HudPadding * 2 + 100
 			end
 
 			surface.SetTextColor(Ores.Automation.HudActionColor)
@@ -105,8 +105,8 @@ local function drawEntityInfoFrame(ent, data)
 			surface.SetTextPos(x + total_width - (tw + Ores.Automation.HudPadding * 2), y + offset)
 			surface.DrawText(text)
 
-			if tw > total_width then
-				total_width = tw + Ores.Automation.HudPadding * 2 + 15
+			if tw + 100 > total_width then
+				total_width = tw + Ores.Automation.HudPadding * 2 + 100
 			end
 
 			offset =  offset + th + Ores.Automation.HudPadding
@@ -124,8 +124,8 @@ local function drawEntityInfoFrame(ent, data)
 			surface.DrawText(line_data.Text)
 
 			local tw, th = surface.GetTextSize(line_data.Text)
-			if tw > total_width then
-				total_width = tw + Ores.Automation.HudPadding * 2 + 15
+			if tw + 100 > total_width then
+				total_width = tw + Ores.Automation.HudPadding * 2 + 100
 			end
 			offset = offset + th + Ores.Automation.HudPadding
 		end
