@@ -14,7 +14,7 @@ ENT.ClassName = "ma_drone_controller_v2"
 ENT.IconOverride = "entities/ma_drone_controller_v2.png"
 
 local function can_work(self)
-	if not self:GetNWBool("IsPowered", true) then return false end
+	if not self:GetNWBool("Wiremod_Active", true) then return false end
 	if self:GetNW2Int("Detonite", 0) > 0 then return true end
 
 	return false
@@ -48,7 +48,6 @@ if SERVER then
 		self:PhysicsInit(SOLID_VPHYSICS)
 		self:SetSolid(SOLID_VPHYSICS)
 		self:PhysWake()
-		self:SetNWBool("IsPowered", true)
 		self:SetUseType(SIMPLE_USE)
 		self.Drones = {}
 
@@ -73,7 +72,7 @@ if SERVER then
 		self.Frame:SetTransmitWithParent(true)
 
 		if _G.WireLib then
-			self.Inputs = _G.WireLib.CreateInputs(self, {"Active (If this is non-zero, activate the router)"})
+			_G.WireLib.CreateInputs(self, {"Active (If this is non-zero, activate the router)"})
 		end
 
 		Ores.Automation.PrepareForDuplication(self)
@@ -162,6 +161,12 @@ if SERVER then
 	function ENT:OnRemove()
 		for _, drone in pairs(self.Drones) do
 			SafeRemoveEntity(drone)
+		end
+	end
+
+	function ENT:TriggerInput(port, state)
+		if port == "Active" then
+			self:SetNWBool("Wiremod_Active", tobool(state))
 		end
 	end
 

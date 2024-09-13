@@ -101,7 +101,7 @@ if SERVER then
 		self:PhysWake()
 		self:SetColor(color)
 		self.BatteriesToProduce = 0
-		self:SetNWBool("IsPowered", true)
+		self:SetNWBool("Wiremod_Active", true)
 
 		self.Frame = ents.Create("prop_physics")
 		self.Frame:SetModel("models/props_phx/construct/metal_wire1x1x1.mdl")
@@ -130,7 +130,7 @@ if SERVER then
 				return
 			end
 
-			if self:GetNWBool("IsPowered", true) then
+			if self:GetNWBool("Wiremod_Active", true) then
 				do_zap_effect(self:WorldSpaceCenter(), IsValid(self.Core) and self.Core or self)
 			end
 
@@ -148,6 +148,18 @@ if SERVER then
 
 			Ores.Automation.ReplicateOwnership(self, self)
 		end)
+
+		if _G.WireLib then
+			_G.WireLib.CreateInputs(self, {"Active (If this is non-zero, activate the transformer)"})
+
+			_G.WireLib.CreateOutputs(self, {
+				"Amount (Outputs the current amount of argonite filled in) [NORMAL]",
+				"MaxCapacity (Outputs the maximum argonite capacity) [NORMAL]"
+			})
+
+			_G.WireLib.TriggerOutput(self, "Amount", 0)
+			_G.WireLib.TriggerOutput(self, "MaxCapacity", Ores.Automation.BatteryCapacity)
+		end
 	end
 
 	function ENT:AddArgonite(amount)
@@ -179,7 +191,7 @@ if SERVER then
 		local transformers = {}
 		for _, t in ipairs(ents.FindByClass("ma_transformer_v2")) do
 			if t:CPPIGetOwner() ~= ply then continue end
-			if not t:GetNWBool("IsPowered", true) then continue end
+			if not t:GetNWBool("Wiremod_Active", true) then continue end
 
 			table.insert(transformers, t)
 		end
@@ -197,7 +209,7 @@ if SERVER then
 
 	function ENT:Think()
 		if not self.CPPIGetOwner then return end
-		if not self:GetNWBool("IsPowered", true) then return end
+		if not self:GetNWBool("Wiremod_Active", true) then return end
 
 		local owner = self:CPPIGetOwner()
 		if not IsValid(owner) then return end
@@ -220,6 +232,12 @@ if SERVER then
 
 		self:EmitSound(")npc/scanner/scanner_siren1.wav", 100)
 	end
+
+	function ENT:TriggerInput(port, state)
+		if port == "Active" then
+			self:SetNWBool("Wiremod_Active", tobool(state))
+		end
+	end
 end
 
 if CLIENT then
@@ -236,12 +254,12 @@ if CLIENT then
 			self.MiningFrameInfo = {
 				{ Type = "Label", Text = self.PrintName:upper(), Border = true },
 				{ Type = "Data", Label = "Battery", Value = self:GetNWInt("ArgoniteCount", 0), MaxValue = ms.Ores.Automation.BatteryCapacity },
-				{ Type = "State", Value = self:GetNWBool("IsPowered", true) }
+				{ Type = "State", Value = self:GetNWBool("Wiremod_Active", true) }
 			}
 		end
 
 		self.MiningFrameInfo[2].Value = self:GetNWInt("ArgoniteCount", 0)
-		self.MiningFrameInfo[3].Value = self:GetNWBool("IsPowered", true)
+		self.MiningFrameInfo[3].Value = self:GetNWBool("Wiremod_Active", true)
 		return self.MiningFrameInfo
 	end
 end

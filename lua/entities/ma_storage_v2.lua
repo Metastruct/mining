@@ -30,6 +30,16 @@ if SERVER then
 		_G.MA_Orchestrator.RegisterInput(self, "ingots", "INGOT", "Ingots", "Standard ingot input.")
 
 		Ores.Automation.PrepareForDuplication(self)
+
+		if _G.WireLib then
+			_G.WireLib.CreateOutputs(self, {
+				"OreCounts (Outputs an array of the counts of each ore stored in the storage) [ARRAY]",
+				"OreNames (Outputs an array of the names of each ore stored in the storage) [ARRAY]"
+			})
+
+			_G.WireLib.TriggerOutput(self, "OreCounts", {})
+			_G.WireLib.TriggerOutput(self, "OreNames", {})
+		end
 	end
 
 	function ENT:MA_OnOutputReady(output_data, input_data)
@@ -54,8 +64,21 @@ if SERVER then
 
 	function ENT:UpdateNetworkOreData()
 		local t = {}
+		local wireCounts = {}
+		local wireNames = {}
 		for rarity, amount in pairs(self.Ores) do
 			table.insert(t, ("%s=%s"):format(rarity, amount))
+
+			local oreData = Ores.__R[rarity]
+			if oreData then
+				table.insert(wireCounts, amount)
+				table.insert(wireNames, oreData.Name or "Unknown")
+			end
+		end
+
+		if _G.WireLib then
+			_G.WireLib.TriggerOutput(self, "OreCounts", wireCounts)
+			_G.WireLib.TriggerOutput(self, "OreNames", wireNames)
 		end
 
 		self:SetNWString("OreData", table.concat(t, ";"))
