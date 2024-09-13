@@ -18,6 +18,11 @@ function TOOL:Reload()
 end
 
 if CLIENT then
+	language.Add("tool.mining_linker.desc", "Link mining entities together")
+	language.Add("tool.mining_linker.0", "Select an output or apply a link")
+	language.Add("tool.mining_linker.1", "Change selection")
+	language.Add("tool.mining_linker.2", "Unlink an output or release current selection")
+
 	function TOOL:LeftClick(tr)
 		if not IsFirstTimePredicted() then return end
 		if not IsValid(tr.Entity) then return false end
