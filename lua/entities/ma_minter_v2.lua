@@ -44,8 +44,8 @@ if SERVER then
 
 	function ENT:MA_Execute(output_data, input_data)
 		if input_data.Id ~= "ores" and input_data.Id ~= "ingots" then return end
-		if input_data.Id == "ores" and not  istable(output_data.Ent.OreQueue) then return end
-		if input_data.Id == "ingots" and not  istable(output_data.Ent.IngotQueue) then return end
+		if input_data.Id == "ores" and not istable(output_data.Ent.OreQueue) then return end
+		if input_data.Id == "ingots" and not istable(output_data.Ent.IngotQueue) then return end
 
 		-- use the player multiplier if its higher than the ingot worth
 		local ingot_worth = Ores.Automation.IngotWorth
@@ -55,7 +55,7 @@ if SERVER then
 
 		local class_worth = input_data.Id == "ingots" and ingot_worth or 1
 		local class_size = input_data.Id == "ingots" and Ores.Automation.IngotSize or 1
-		local rarity = input_data.Id == "ingots" and table.remove(output_data.Ent.OreQueue, 1) or table.remove(output_data.Ent.IngotQueue, 1)
+		local rarity = input_data.Id == "ingots" and table.remove(output_data.Ent.IngotQueue, 1) or table.remove(output_data.Ent.OreQueue, 1)
 		local ore_data = Ores.__R[rarity]
 		if ore_data then
 			local earnings = ore_data.Worth * class_size * class_worth
