@@ -49,6 +49,10 @@ if CLIENT then
 			return false
 		end
 
+		if ent ~= self.LastEntity then
+			self.CurrentIndex = 0
+		end
+
 		local interfaces = self.SelectedOutput and _G.MA_Orchestrator.GetInputs(ent) or _G.MA_Orchestrator.GetOutputs(ent)
 		local interface_count = table.Count(interfaces)
 		if interface_count == 0 then return false end
@@ -87,6 +91,10 @@ if CLIENT then
 			return false
 		end
 
+		if ent ~= self.LastEntity then
+			self.CurrentIndex = 0
+		end
+
 		local interfaces = self.SelectedOutput and _G.MA_Orchestrator.GetInputs(ent) or _G.MA_Orchestrator.GetOutputs(ent)
 		local interface_count = table.Count(interfaces)
 		if interface_count == 0 then return false end
@@ -112,6 +120,10 @@ if CLIENT then
 		if ent.CPPIGetOwner and ent:CPPIGetOwner() ~= LocalPlayer() then
 			surface.PlaySound("buttons/button8.wav")
 			return false
+		end
+
+		if ent ~= self.LastEntity then
+			self.CurrentIndex = 0
 		end
 
 		local outputs = _G.MA_Orchestrator.GetOutputs(ent)
