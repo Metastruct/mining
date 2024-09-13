@@ -75,7 +75,7 @@ if SERVER then
 			end
 
 			local output_data = _G.MA_Orchestrator.GetOutputData(self, "power")
-			local additional_energy_drain = table.Count(output_data.Links) * 0.25
+			local additional_energy_drain = table.Count(output_data.Links) * 0.05
 			local drain = 0.5 + additional_energy_drain
 			local cur_energy = self:GetNW2Float("Energy", 0)
 			local new_energy = math.max(0, cur_energy - drain)
