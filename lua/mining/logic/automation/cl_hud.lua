@@ -155,7 +155,7 @@ local function try_draw_ent(ent)
 end
 
 hook.Add("HUDPaint", "mining_automation_entity_info", function()
-	local mining_ents = table.Add(ents.FindByClass("mining_*"), ents.FindByClass("ma_*"))
+	local mining_ents = ents.FindByClass("ma_*")
 	table.sort(mining_ents, function(e1, e2)
 		local eye_pos = LocalPlayer():EyePos()
 		return e1:WorldSpaceCenter():DistToSqr(eye_pos) > e2:WorldSpaceCenter():DistToSqr(eye_pos)
