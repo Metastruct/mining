@@ -41,6 +41,8 @@ if SERVER then
 
 	function ENT:MA_Execute(output_data, input_data)
 		if input_data.Id ~= "ores" and input_data.Id ~= "ingots" then return end
+		if input_data.Id == "ores" and not  istable(output_data.Ent.OreQueue) then return end
+		if input_data.Id == "ingots" and not  istable(output_data.Ent.IngotQueue) then return end
 
 		-- use the player multiplier if its higher than the ingot worth
 		local ingot_worth = Ores.Automation.IngotWorth
