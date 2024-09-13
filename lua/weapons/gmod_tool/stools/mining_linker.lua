@@ -1,7 +1,7 @@
 TOOL.Mode = "mining_linker"
 TOOL.Name = "Mining Linker"
 TOOL.Category = "Mining"
-TOOL.CurrentIndex = 0
+TOOL.CurrentIndex = 1
 TOOL.Command = nil
 TOOL.ConfigName = ""
 TOOL.Information = {
@@ -49,18 +49,17 @@ if CLIENT then
 			return false
 		end
 
-		if ent ~= self.LastEntity then
-			self.CurrentIndex = 0
-		end
-
 		local interfaces = self.SelectedOutput and _G.MA_Orchestrator.GetInputs(ent) or _G.MA_Orchestrator.GetOutputs(ent)
 		local interface_count = table.Count(interfaces)
 		if interface_count == 0 then return false end
 
-		local cur_index = (self.CurrentIndex % table.Count(interfaces)) + 1
 		table.sort(interfaces, function(a, b) return a.Name < b.Name end) -- match hud
 
-		local interface_data = interfaces[cur_index]
+		if self.LastEntity ~= ent then
+			self.CurrentIndex = 1
+		end
+
+		local interface_data = interfaces[self.CurrentIndex]
 		if not interface_data then return false end
 
 		if not self.SelectedOutput then
@@ -91,15 +90,21 @@ if CLIENT then
 			return false
 		end
 
-		if ent ~= self.LastEntity then
-			self.CurrentIndex = 0
-		end
-
 		local interfaces = self.SelectedOutput and _G.MA_Orchestrator.GetInputs(ent) or _G.MA_Orchestrator.GetOutputs(ent)
 		local interface_count = table.Count(interfaces)
 		if interface_count == 0 then return false end
 
+		if self.LastEntity ~= ent then
+			self.CurrentIndex = 1
+		end
+
 		self.CurrentIndex = self.CurrentIndex + 1
+		self.LastEntity = ent
+
+		if self.CurrentIndex > #interfaces then
+			self.CurrentIndex = 1
+		end
+
 		surface.PlaySound("ui/buttonrollover.wav")
 
 		return true
@@ -122,18 +127,17 @@ if CLIENT then
 			return false
 		end
 
-		if ent ~= self.LastEntity then
-			self.CurrentIndex = 0
-		end
-
 		local outputs = _G.MA_Orchestrator.GetOutputs(ent)
 		local outputs_count = table.Count(outputs)
 		if outputs_count == 0 then return false end
 
-		local cur_index = (self.CurrentIndex % table.Count(outputs)) + 1
 		table.sort(outputs, function(a, b) return a.Name < b.Name end)
 
-		local output_data = outputs[cur_index]
+		if self.LastEntity ~= ent then
+			self.CurrentIndex = 1
+		end
+
+		local output_data = outputs[self.CurrentIndex]
 		if not output_data then return false end
 
 		_G.MA_Orchestrator.Unlink(true, output_data)
