@@ -288,7 +288,7 @@ if CLIENT then
 		if not self.MiningFrameInfo then
 			self.MiningFrameInfo = {
 				{ Type = "Label", Text = "DRILL", Border = true },
-				{ Type = "Data", Label = "ENERGY", Value = self:GetNW2Int("Energy", 0), MaxValue = 100 },
+				{ Type = "Data", Label = "EFFICIENCY", Value = self:GetNW2Int("Energy", 0), MaxValue = 100 },
 				{ Type = "State", Value = can_work(self, CurTime()) }
 			}
 		end
