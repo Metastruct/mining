@@ -19,7 +19,7 @@ function ENT:CanWork()
 end
 
 if SERVER then
-	resource.AddFile("materials/entities/ma_oil_extractor_v2.png")
+	resource.AddFile("materials/entities/ma_smelter_v2.png")
 
 	function ENT:Initialize()
 		self:SetModel("models/hunter/blocks/cube075x2x1.mdl")
