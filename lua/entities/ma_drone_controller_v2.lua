@@ -5,13 +5,13 @@ Ores = Ores or {}
 
 ENT.Type = "anim"
 ENT.Base = "base_anim"
-ENT.PrintName = "Argonite Drone Controller"
+ENT.PrintName = "Drone Controller"
 ENT.Author = "Earu"
 ENT.Category = "Mining"
 ENT.RenderGroup = RENDERGROUP_OPAQUE
 ENT.Spawnable = true
-ENT.ClassName = "mining_argonite_drone_controller"
-ENT.IconOverride = "entities/mining_argonite_drone_controller.png"
+ENT.ClassName = "ma_drone_controller_v2"
+ENT.IconOverride = "entities/ma_drone_controller_v2.png"
 
 local function can_work(self)
 	if not self:GetNWBool("IsPowered", true) then return false end
@@ -37,7 +37,7 @@ function ENT:GetDroneCount()
 end
 
 if SERVER then
-	resource.AddFile("materials/entities/mining_argonite_drone_controller.png")
+	resource.AddFile("materials/entities/ma_drone_controller_v2.png")
 
 	function ENT:Initialize()
 		self:SetModel("models/hunter/blocks/cube075x075x075.mdl")
@@ -157,12 +157,6 @@ if SERVER then
 
 		self:AddDetonite(toGive)
 		Ores.TakePlayerOre(ent, detoniteRarity, toGive)
-	end
-
-	function ENT:CanConsumeEnergy()
-		if not can_work(self) then return false end
-
-		return true
 	end
 
 	function ENT:OnRemove()

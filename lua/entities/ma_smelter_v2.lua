@@ -5,9 +5,9 @@ Ores = Ores or {}
 
 ENT.Type = "anim"
 ENT.Base = "base_anim"
-ENT.PrintName = "Ore Smelter V2"
+ENT.PrintName = "Ore Smelter"
 ENT.Author = "Earu"
-ENT.Category = "Mining V2"
+ENT.Category = "Mining"
 ENT.RenderGroup = RENDERGROUP_OPAQUE
 ENT.Spawnable = true
 ENT.ClassName = "ma_smelter_v2"

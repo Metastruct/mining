@@ -1,18 +1,19 @@
 module("ms", package.seeall)
 Ores = Ores or {}
 
+local scale = math.max(0.6, ScrW() / 2560)
 surface.CreateFont("mining_automation_hud", {
 	font = "Arial",
 	extended = true,
 	weight = 600,
-	size = 25
+	size = 25 * scale
 })
 
 surface.CreateFont("mining_automation_hud2", {
 	font = "Arial",
 	extended = true,
 	weight = 500,
-	size = 20
+	size = 20 * scale
 })
 
 function Ores.Automation.ShouldDrawText(ent)
@@ -43,14 +44,12 @@ end
 local MINING_INFO_HUD = CreateClientConVar("mining_automation_hud_frames", "1", true, true, "Display info frames for mining automation entities", 0, 1)
 
 local ENTITY_INFO_EXTRAS = { mining_argonite_container = true }
-local FONT_HEIGHT = 30
+local FONT_HEIGHT = 25 * scale
 local FRAME_WIDTH = 100
 local FRAME_HEIGHT = 100
 local COLOR_WHITE = Color(255, 255, 255, 255)
 local FRAME_PADDING = 5
 
-local MTX_TRANSLATION = Vector(0, 0)
-local MTX_SCALE = Vector(1, 1, 1)
 local function drawEntityInfoFrame(ent, data)
 	if not MINING_INFO_HUD:GetBool() then return end
 
@@ -60,18 +59,6 @@ local function drawEntityInfoFrame(ent, data)
 	if not pos.visible then return end
 
 	local x, y = pos.x - total_width / 2, pos.y - total_height / 2
-
-	MTX_TRANSLATION.x = x
-	MTX_TRANSLATION.y = y
-
-	local mtx = Matrix()
-	local scale = math.max(0.6, ScrW() / 2560)
-	mtx:Translate(MTX_TRANSLATION)
-	mtx:Scale(MTX_SCALE * scale)
-	mtx:Translate(-MTX_TRANSLATION)
-
-	cam.PushModelMatrix(mtx, true)
-
 	blur_rect(x, y, total_width * scale, total_height * scale, 10, 2)
 	surface.SetDrawColor(0, 0, 0, 220)
 	surface.DrawRect(x, y, total_width, total_height)
@@ -153,8 +140,6 @@ local function drawEntityInfoFrame(ent, data)
 	-- more accurate height
 	ent.MiningInfoFrameHeight = offset + Ores.Automation.HudPadding + FRAME_PADDING
 	ent.MiningInfoFrameWidth = total_width
-
-	cam.PopModelMatrix()
 end
 
 local function try_draw_ent(ent)

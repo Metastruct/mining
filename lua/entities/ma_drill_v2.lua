@@ -5,9 +5,9 @@ Ores = Ores or {}
 
 ENT.Type = "anim"
 ENT.Base = "base_anim"
-ENT.PrintName = "Drill V2"
+ENT.PrintName = "Drill"
 ENT.Author = "Earu"
-ENT.Category = "Mining V2"
+ENT.Category = "Mining"
 ENT.RenderGroup = RENDERGROUP_OPAQUE
 ENT.Spawnable = true
 ENT.ClassName = "ma_drill_v2"
@@ -71,7 +71,7 @@ if SERVER then
 		Ores.Automation.PrepareForDuplication(self)
 
 		if _G.WireLib then
-			self.Inputs = _G.WireLib.CreateInputs(self, {"Active (If this is non-zero, activate the drill)"})
+			_G.WireLib.CreateInputs(self, {"Active (If this is non-zero, activate the drill)"})
 		end
 	end
 

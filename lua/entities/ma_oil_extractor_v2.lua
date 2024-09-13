@@ -5,9 +5,9 @@ Ores = Ores or {}
 
 ENT.Type = "anim"
 ENT.Base = "base_anim"
-ENT.PrintName = "Oil Extractor V2"
+ENT.PrintName = "Oil Extractor"
 ENT.Author = "Earu"
-ENT.Category = "Mining V2"
+ENT.Category = "Mining"
 ENT.RenderGroup = RENDERGROUP_OPAQUE
 ENT.Spawnable = true
 ENT.ClassName = "ma_oil_extractor_v2"
@@ -15,6 +15,7 @@ ENT.NextTraceCheck = 0
 ENT.IconOverride = "entities/ma_oil_extractor_v2.png"
 
 local function can_work(self, time)
+	if not self:GetNWBool("Wiremod_Active", true) then return false end
 	if not self:GetNWBool("IsPowered", false) then return false end
 	if time < self.NextTraceCheck then return self.TraceCheckResult end
 
@@ -92,6 +93,10 @@ if SERVER then
 		_G.MA_Orchestrator.RegisterOutput(self, "oil", "OIL", "Oil", "Standard oil output.")
 
 		Ores.Automation.PrepareForDuplication(self)
+
+		if _G.WireLib then
+			_G.WireLib.CreateInputs(self, {"Active (If this is non-zero, activate the drill)"})
+		end
 	end
 
 	function ENT:MA_OnLink(output_data, input_data)
