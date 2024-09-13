@@ -4,6 +4,20 @@ TOOL.Category = "Mining"
 TOOL.CurrentIndex = 0
 TOOL.Command = nil
 TOOL.ConfigName = ""
+TOOL.Information = {
+	{
+		name = "left",
+		icon = "gui/lmb.png",
+	},
+	{
+		name = "right",
+		icon = "gui/rmb.png",
+	},
+	{
+		name = "reload",
+		icon = "gui/r.png",
+	},
+}
 
 function TOOL:LeftClick()
 	return true
@@ -18,8 +32,12 @@ function TOOL:Reload()
 end
 
 if CLIENT then
+	language.Add("tool.mining_linker.name", "Mining Linker")
 	language.Add("tool.mining_linker.desc", "Link mining entities together")
 	language.Add("tool.mining_linker.0", "Primary: Select an output or apply a link. Secondary: Change selection. Reload: Unlink an output or release current selection.")
+	language.Add("tool.mining_linker.left", "Select an output or apply a link.")
+	language.Add("tool.mining_linker.right", "Change selection.")
+	language.Add("tool.mining_linker.reload", "Unlink an output or release current selection.")
 
 	function TOOL:LeftClick(tr)
 		if not IsFirstTimePredicted() then return end
