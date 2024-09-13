@@ -230,4 +230,18 @@ if CLIENT then
 	function ENT:Draw()
 		self:DrawModel()
 	end
+
+	function ENT:OnDrawEntityInfo()
+		if not self.MiningFrameInfo then
+			self.MiningFrameInfo = {
+				{ Type = "Label", Text = "TRANSFORMER", Border = true },
+				{ Type = "Data", Label = "BATTERY", Value = self:GetNWInt("ArgoniteCount", 0), MaxValue = ms.Ores.Automation.BatteryCapacity },
+				{ Type = "State", Value = self:GetNWBool("IsPowered", true) }
+			}
+		end
+
+		self.MiningFrameInfo[2].Value = self:GetNWInt("ArgoniteCount", 0)
+		self.MiningFrameInfo[3].Value = self:GetNWBool("IsPowered", true)
+		return self.MiningFrameInfo
+	end
 end

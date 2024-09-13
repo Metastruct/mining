@@ -127,16 +127,24 @@ local function drawEntityInfoFrame(ent, data)
 	cam.PopModelMatrix()
 end
 
+local function try_draw_ent(ent)
+	local entClass = ent:GetClass()
+	if not Ores.Automation.EntityClasses[entClass] and not ENTITY_INFO_EXTRAS[entClass] then return end
+	if not Ores.Automation.ShouldDrawText(ent) then return end
+	if not isfunction(ent.OnDrawEntityInfo) then return end
+
+	local data = ent:OnDrawEntityInfo()
+	if not istable(data) then return end
+
+	drawEntityInfoFrame(ent, data)
+end
+
 hook.Add("HUDPaint", "mining_automation_entity_info", function()
 	for _, ent in ipairs(ents.FindByClass("mining_*")) do
-		local entClass = ent:GetClass()
-		if not Ores.Automation.EntityClasses[entClass] and not ENTITY_INFO_EXTRAS[entClass] then continue end
-		if not Ores.Automation.ShouldDrawText(ent) then continue end
-		if not isfunction(ent.OnDrawEntityInfo) then continue end
+		try_draw_ent(ent)
+	end
 
-		local data = ent:OnDrawEntityInfo()
-		if not istable(data) then continue end
-
-		drawEntityInfoFrame(ent, data)
+	for _, ent in ipairs(ents.FindByClass("ma_*")) do
+		try_draw_ent(ent)
 	end
 end)

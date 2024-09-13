@@ -102,8 +102,9 @@ if SERVER then
 	function ENT:MA_Execute(output_data, input_data)
 		if input_data.Id ~= "power" then return end
 
-		self.EnergyLevel = isfunction(output_data.Ent.GetEnergyLevel) and output_data.Ent:GetEnergyLevel() or 1
-		return self.EnergyLevel > 0
+		local energy_lvl = isfunction(output_data.Ent.GetEnergyLevel) and output_data.Ent:GetEnergyLevel() or 1
+		self:SetNW2Int("Energy", energy_lvl)
+		return energy_lvl > 0
 	end
 
 	-- this unpowers the drill if the energy input is unlinked
@@ -160,11 +161,11 @@ if SERVER then
 		-- less than 66% -> 8s
 		-- less than 100% -> 6s
 		local effiency_rate_increase = 0
-		if self.EnergyLevel > 33 then
+		if self:GetNW2Int("Energy", 0) > 33 then
 			effiency_rate_increase = effiency_rate_increase + 2
 		end
 
-		if self.EnergyLevel > 66 then
+		if self:GetNW2Int("Energy", 0) > 66 then
 			effiency_rate_increase = effiency_rate_increase + 2
 		end
 
@@ -281,5 +282,19 @@ if CLIENT then
 		for _, saw in ipairs(self.Saws) do
 			SafeRemoveEntity(saw)
 		end
+	end
+
+	function ENT:OnDrawEntityInfo()
+		if not self.MiningFrameInfo then
+			self.MiningFrameInfo = {
+				{ Type = "Label", Text = "DRILL", Border = true },
+				{ Type = "Data", Label = "ENERGY", Value = self:GetNW2Int("Energy", 0), MaxValue = 100 },
+				{ Type = "State", Value = can_work(self, CurTime()) }
+			}
+		end
+
+		self.MiningFrameInfo[2].Value = self:GetNW2Int("Energy", 0)
+		self.MiningFrameInfo[3].Value = can_work(self, CurTime())
+		return self.MiningFrameInfo
 	end
 end

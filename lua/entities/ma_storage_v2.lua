@@ -88,18 +88,18 @@ if CLIENT then
 	end
 
 	function ENT:OnDrawEntityInfo()
-		local global_ore_data = self:GetNWString("OreData", ""):Trim()
-		if #global_ore_data < 1 then return end
+		local globalOreData = self:GetNWString("OreData", ""):Trim()
+		if #globalOreData < 1 then return end
 
 		local data = {
 			{ Type = "Label", Text = "STORAGE", Border = true },
 		}
 
-		for i, data_chunk in ipairs(global_ore_data:Split(";")) do
-			local rarity_data = data_chunk:Split("=")
-			local ore_data = Ores.__R[tonumber(rarity_data[1])]
+		for i, dataChunk in ipairs(globalOreData:Split(";")) do
+			local rarityData = dataChunk:Split("=")
+			local oreData = Ores.__R[tonumber(rarityData[1])]
 
-			table.insert(data, { Type = "Data", Label = ore_data.Name:upper(), Value = rarity_data[2], LabelColor = ore_data.HudColor, ValueColor = ore_data.HudColor })
+			table.insert(data, { Type = "Data", Label = oreData.Name:upper(), Value = rarityData[2], LabelColor = oreData.HudColor, ValueColor = oreData.HudColor })
 		end
 
 		if self.CPPIGetOwner and self:CPPIGetOwner() == LocalPlayer() then

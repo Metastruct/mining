@@ -197,6 +197,27 @@ if CLIENT then
 		SafeRemoveEntity(self.Wheel)
 	end
 
+	function ENT:OnDrawEntityInfo()
+		if not self.MiningFrameInfo then
+			local data = {
+				{ Type = "Label", Text = "GENERATOR", Border = true },
+				{ Type = "Data", Label = "ENERGY", Value = self:GetEnergyLevel(), MaxValue = 100 },
+				{ Type = "State", Value = can_work(self) }
+			}
+
+			self.MiningFrameInfo = data
+		end
+
+		self.MiningFrameInfo[2].Value = self:GetEnergyLevel()
+		self.MiningFrameInfo[3].Value = can_work(self)
+
+		if self.CPPIGetOwner and self:CPPIGetOwner() == LocalPlayer() then
+			self.MiningFrameInfo[4] = { Type = "Action", Binding = "+use", Text = "KICKSTART" }
+		end
+
+		return self.MiningFrameInfo
+	end
+
 	hook.Add("PlayerBindPress", "mining_generator_kickstart", function(ply, bind, pressed, code)
 		if bind == "+use" and pressed then
 			local tr = ply:GetEyeTrace()

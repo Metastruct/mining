@@ -303,4 +303,24 @@ if CLIENT then
 	function ENT:OnRemove()
 		SafeRemoveEntity(self.Wheel)
 	end
+
+	function ENT:OnDrawEntityInfo()
+		local data = {
+			{ Type = "State", Value = self:CanWork() },
+			{ Type = "Label", Text = "SMELTER", Border = true },
+			{ Type = "Data", Label = "FUEL", Value = self:GetNW2Int("Fuel", 0), MaxValue = self:GetNW2Int("MaxFuel", Ores.Automation.BatteryCapacity), Border = true },
+		}
+
+		local globalOreData = self:GetNWString("OreData", ""):Trim()
+		if #globalOreData < 1 then return data end
+
+		for i, dataChunk in ipairs(globalOreData:Split(";")) do
+			local rarityData = dataChunk:Split("=")
+			local oreData = Ores.__R[tonumber(rarityData[1])]
+
+			table.insert(data, { Type = "Data", Label = oreData.Name:upper()[1] .. ". INGOT", Value = ("%s/%d"):format(rarityData[2], Ores.Automation.IngotSize), LabelColor = oreData.HudColor, ValueColor = oreData.HudColor })
+		end
+
+		return data
+	end
 end
