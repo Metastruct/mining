@@ -96,6 +96,9 @@ if SERVER then
 
 		if _G.WireLib then
 			_G.WireLib.CreateInputs(self, {"Active (If this is non-zero, activate the drill)"})
+			_G.WireLib.CreateOutputs(self, {"Oil (Outputs the current amount of extracted oil) [NORMAL]"})
+
+			_G.WireLib.TriggerOutput(self, "Oil", 0)
 		end
 	end
 
@@ -159,15 +162,13 @@ if SERVER then
 		self.NextSoundCheck = time + 5
 	end
 
-	function ENT:CanConsumeEnergy()
-		if not can_work(self, CurTime()) then return false end
-
-		return true
-	end
-
 	function ENT:ProduceBarrel()
 		self.ExtractedOil = 0
 		self:SetNWInt("ExtractedOil", self.ExtractedOil)
+
+		if _G.WireLib then
+			_G.WireLib.TriggerOutput(self, "Oil", self.ExtractedOil)
+		end
 
 		local output_data = _G.MA_Orchestrator.GetOutputData(self, "oil")
 		_G.MA_Orchestrator.SendOutputReadySignal(output_data)
@@ -186,6 +187,10 @@ if SERVER then
 
 		if self.ExtractedOil % 5 == 0 then -- update every 5 seconds because SetNW is slow
 			self:SetNWInt("ExtractedOil", self.ExtractedOil)
+
+			if _G.WireLib then
+				_G.WireLib.TriggerOutput(self, "Oil", self.ExtractedOil)
+			end
 		end
 	end
 

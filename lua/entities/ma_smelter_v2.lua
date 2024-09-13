@@ -14,6 +14,7 @@ ENT.ClassName = "ma_smelter_v2"
 ENT.IconOverride = "entities/ma_smelter_v2.png"
 
 function ENT:CanWork()
+	if not self:GetNWBool("Wiremod_Active", true) then return false end
 	return self:GetNW2Int("Fuel", 0) > 0 and self:GetNWBool("IsPowered", false)
 end
 
@@ -102,6 +103,12 @@ if SERVER then
 		end)
 
 		Ores.Automation.PrepareForDuplication(self)
+
+		if _G.WireLib then
+			_G.WireLib.CreateInputs(self, {
+				"Active (If non-zero, activate the smelter.)"
+			})
+		end
 	end
 
 	function ENT:MA_OnLink(output_data, input_data)
@@ -160,6 +167,12 @@ if SERVER then
 		timer.Remove(timer_name)
 
 		self:SetNWBool("IsPowered", false)
+	end
+
+	function ENT:TriggerInput(port, state)
+		if port == "Active" then
+			self:SetNWBool("Wiremod_Active", tobool(state))
+		end
 	end
 
 	function ENT:UpdateNetworkOreData()

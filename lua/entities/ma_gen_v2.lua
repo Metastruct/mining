@@ -74,14 +74,25 @@ if SERVER then
 				return
 			end
 
+			local output_data = _G.MA_Orchestrator.GetOutput(self, "power")
+			local additional_energy_drain = table.Count(output_data.Links) * 0.1
 			local cur_energy = self:GetNW2Float("Energy", 0)
-			self:SetNW2Float("Energy", math.max(0, cur_energy - 0.5))
+			local new_energy = math.max(0, cur_energy - 0.5 - additional_energy_drain)
+			self:SetNW2Float("Energy", new_energy)
+			_G.WireLib.TriggerOutput(self, "Energy", new_energy)
 		end)
 
 		Ores.Automation.PrepareForDuplication(self)
 
 		if _G.WireLib then
-			self.Inputs = _G.WireLib.CreateInputs(self, {"Active (If this is non-zero, activate the drill)"})
+			_G.WireLib.CreateInputs(self, {"Active (If this is non-zero, activate the drill)"})
+			_G.WireLib.CreateOutputs(self, {
+				"Energy (Outputs the current energy level) [NORMAL]",
+				"MaxEnergy (Outputs the max level of energy) [NORMAL]",
+			})
+
+			_G.WireLib.TriggerOutput(self, "Energy", 0)
+			_G.WireLib.TriggerOutput(self, "MaxEnergy", 100)
 		end
 	end
 
@@ -95,7 +106,9 @@ if SERVER then
 		if input_data.Id ~= "battery" then return end
 
 		local cur_energy = self:GetNW2Float("Energy", 0)
-		self:SetNW2Float("Energy", math.min(100, cur_energy + 10))
+		local new_energy = math.min(100, cur_energy + 10)
+		self:SetNW2Float("Energy", new_energy)
+		_G.WireLib.TriggerOutput(self, "Energy", new_energy)
 	end
 
 	function ENT:TriggerInput(port, state)

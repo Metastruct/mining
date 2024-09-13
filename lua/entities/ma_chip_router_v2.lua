@@ -26,7 +26,7 @@ if SERVER then
 		self:PhysicsInit(SOLID_VPHYSICS)
 		self:SetSolid(SOLID_VPHYSICS)
 		self:PhysWake()
-		self:SetNWBool("IsPowered", true)
+		self:SetNWBool("Wiremod_Active", true)
 		self:SetUseType(SIMPLE_USE)
 		self.NextStateUpdate = 0
 		self.ConsumptionAmount = 0
@@ -75,7 +75,7 @@ if SERVER then
 		if not isnumber(state) then return end
 
 		if port == "Active" then
-			self:SetNWBool("IsPowered", tobool(state))
+			self:SetNWBool("Wiremod_Active", tobool(state))
 			self:SetChipState(tobool(state))
 		end
 	end
@@ -109,7 +109,7 @@ if SERVER then
 
 	function ENT:Think()
 		if not self.CPPIGetOwner then return end
-		if not self:GetNWBool("IsPowered", true) then return end
+		if not self:GetNWBool("Wiremod_Active", true) then return end
 
 		local owner = self:CPPIGetOwner()
 		if not IsValid(owner) then return end
@@ -318,14 +318,14 @@ if CLIENT then
 				{ Type = "Label", Text = self.PrintName:upper(), Border = true },
 				{ Type = "Data", Label = "Usage", Value = self:GetNWInt("BandwidthUsage", 0) },
 				{ Type = "Data", Label = "Bandwidth", Value = self:GetNW2Int("Bandwidth", 0) },
-				{ Type = "State", Value = self:GetNWBool("IsPowered", true) },
+				{ Type = "State", Value = self:GetNWBool("Wiremod_Active", true) },
 				{ Type = "Action", Binding = "+use", Text = "FILL" }
 			}
 		end
 
 		self.MiningFrameInfo[2].Value = self:GetNWInt("BandwidthUsage", 0)
 		self.MiningFrameInfo[3].Value = self:GetNW2Int("Bandwidth", 0)
-		self.MiningFrameInfo[4].Value = self:GetNWBool("IsPowered", true)
+		self.MiningFrameInfo[4].Value = self:GetNWBool("Wiremod_Active", true)
 
 		return self.MiningFrameInfo
 	end

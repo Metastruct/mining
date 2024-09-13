@@ -72,6 +72,13 @@ if SERVER then
 
 		if _G.WireLib then
 			_G.WireLib.CreateInputs(self, {"Active (If this is non-zero, activate the drill)"})
+			_G.WireLib.CreateOutputs(self, {
+				"Efficiency (Outputs the current efficiency level) [NORMAL]",
+				"MaxEfficiency (Outputs the max level of efficiency) [NORMAL]",
+			})
+
+			_G.WireLib.TriggerOutput(self, "Efficiency", 0)
+			_G.WireLib.TriggerOutput(self, "MaxEfficiency", 100)
 		end
 	end
 
@@ -104,6 +111,7 @@ if SERVER then
 
 		local energy_lvl = isfunction(output_data.Ent.GetEnergyLevel) and output_data.Ent:GetEnergyLevel() or 1
 		self:SetNW2Int("Energy", energy_lvl)
+		_G.WireLib.TriggerOutput(self, "Efficiency", energy_lvl)
 		return energy_lvl > 0
 	end
 
@@ -115,6 +123,7 @@ if SERVER then
 		timer.Remove(timer_name)
 
 		self:SetNWBool("IsPowered", false)
+		_G.WireLib.TriggerOutput(self, "Efficiency", 0)
 	end
 
 	function ENT:TriggerInput(port, state)
