@@ -49,6 +49,7 @@ if SERVER then
 		end
 
 		self.Ores[rarity] = self.Ores[rarity] + (input_data.Id == "ingots" and Ores.Automation.IngotSize or 1)
+		self:UpdateNetworkOreData()
 	end
 
 	function ENT:UpdateNetworkOreData()
