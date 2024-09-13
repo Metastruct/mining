@@ -38,7 +38,7 @@ duplicator.RegisterEntityModifier("MA_Interfaces", function(_, ent, data)
 end)
 
 function Ores.Automation.PrepareForDuplication(ent)
-	function ent:OnDuplicated()
+	function ent:PreEntityCopy()
 		local inputs = _G.MA_Orchestrator.GetInputs(self)
 		if #inputs == 0 then return end
 
