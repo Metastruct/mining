@@ -11,12 +11,15 @@ ENT.Category = "Mining V2"
 ENT.RenderGroup = RENDERGROUP_OPAQUE
 ENT.Spawnable = true
 ENT.ClassName = "ma_smelter_v2"
+ENT.IconOverride = "entities/ma_smelter_v2.png"
 
 function ENT:CanWork()
 	return self:GetNW2Int("Fuel", 0) > 0 and self:GetNWBool("IsPowered", false)
 end
 
 if SERVER then
+	resource.AddFile("materials/entities/ma_oil_extractor_v2.png")
+
 	function ENT:Initialize()
 		self:SetModel("models/hunter/blocks/cube075x2x1.mdl")
 		self:SetMoveType(MOVETYPE_VPHYSICS)

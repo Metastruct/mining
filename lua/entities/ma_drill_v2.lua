@@ -11,6 +11,7 @@ ENT.Category = "Mining V2"
 ENT.RenderGroup = RENDERGROUP_OPAQUE
 ENT.Spawnable = true
 ENT.ClassName = "ma_drill_v2"
+ENT.IconOverride = "entities/ma_drill_v2.png"
 ENT.NextTraceCheck = 0
 
 local function can_work(self, time)
@@ -30,6 +31,8 @@ local function can_work(self, time)
 end
 
 if SERVER then
+	resource.AddFile("materials/entities/ma_drill_v2.png")
+
 	function ENT:Initialize()
 		self:SetModel("models/props_combine/headcrabcannister01a.mdl")
 		self:SetMoveType(MOVETYPE_VPHYSICS)

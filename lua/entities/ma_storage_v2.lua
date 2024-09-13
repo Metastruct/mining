@@ -11,8 +11,11 @@ ENT.Category = "Mining V2"
 ENT.RenderGroup = RENDERGROUP_OPAQUE
 ENT.Spawnable = true
 ENT.ClassName = "mining_ore_storage"
+ENT.IconOverride = "entities/ma_storage_v2.png"
 
 if SERVER then
+	resource.AddFile("materials/entities/ma_storage_v2.png")
+
 	function ENT:Initialize()
 		self:SetModel("models/props_wasteland/kitchen_fridge001a.mdl")
 		self:SetMaterial("phoenix_storms/OfficeWindow_1-1")

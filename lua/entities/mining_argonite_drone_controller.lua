@@ -11,6 +11,7 @@ ENT.Category = "Mining"
 ENT.RenderGroup = RENDERGROUP_OPAQUE
 ENT.Spawnable = true
 ENT.ClassName = "mining_argonite_drone_controller"
+ENT.IconOverride = "entities/mining_argonite_drone_controller.png"
 
 local function can_work(self)
 	if not self:GetNWBool("IsPowered", true) then return false end
@@ -36,6 +37,8 @@ function ENT:GetDroneCount()
 end
 
 if SERVER then
+	resource.AddFile("materials/entities/mining_argonite_drone_controller.png")
+
 	function ENT:Initialize()
 		self:SetModel("models/hunter/blocks/cube075x075x075.mdl")
 		self:SetMaterial("models/props_lab/projector_noise")

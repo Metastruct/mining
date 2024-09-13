@@ -1,6 +1,18 @@
 module("ms", package.seeall)
 Ores = Ores or {}
 
+resource.AddFile("materials/mining/automation/hud_frame.png")
+
+resource.AddFile("materials/entities/ma_merger_v2.png")
+resource.AddFile("materials/entities/ma_minter_v2.png")
+resource.AddFile("materials/entities/ma_oil_extractor_v2.png")
+resource.AddFile("materials/entities/ma_smelter_v2.png")
+resource.AddFile("materials/entities/ma_storage_v2.png")
+resource.AddFile("materials/entities/ma_transformer_v2.png")
+resource.AddFile("materials/entities/mining_argonite_drone_controller.png")
+resource.AddFile("materials/entities/mining_chip_router.png")
+resource.AddFile("materials/entities/mining_detonite_bomb.png")
+
 Ores.Automation = Ores.Automation or {
 	BatteryCapacity = 150,
 	BombCapacity = 5,

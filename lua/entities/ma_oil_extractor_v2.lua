@@ -12,6 +12,7 @@ ENT.RenderGroup = RENDERGROUP_OPAQUE
 ENT.Spawnable = true
 ENT.ClassName = "ma_oil_extractor_v2"
 ENT.NextTraceCheck = 0
+ENT.IconOverride = "entities/ma_oil_extractor_v2.png"
 
 local function can_work(self, time)
 	if not self:GetNWBool("IsPowered", false) then return false end
@@ -30,6 +31,7 @@ end
 
 local BASE_KICKSTART_PRICE = 12500
 if SERVER then
+	resource.AddFile("materials/entities/ma_oil_extractor_v2.png")
 	util.AddNetworkString("mining_kickstart_extractor")
 
 	net.Receive("mining_kickstart_extractor", function(_, ply)

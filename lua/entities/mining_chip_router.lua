@@ -15,8 +15,11 @@ ENT.RenderGroup = RENDERGROUP_OPAQUE
 ENT.Spawnable = true
 ENT.ClassName = "mining_chip_router"
 ENT.MaxBandwidth = 999
+ENT.IconOverride = "entities/mining_chip_router.png"
 
 if SERVER then
+	resource.AddFile("materials/entities/mining_chip_router.png")
+
 	function ENT:Initialize()
 		self:SetModel("models/props_phx/construct/metal_plate1.mdl")
 		self:SetMoveType(MOVETYPE_VPHYSICS)
