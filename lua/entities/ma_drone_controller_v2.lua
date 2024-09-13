@@ -10,6 +10,7 @@ ENT.Author = "Earu"
 ENT.Category = "Mining"
 ENT.RenderGroup = RENDERGROUP_OPAQUE
 ENT.Spawnable = true
+ENT.AdminOnly = true
 ENT.ClassName = "ma_drone_controller_v2"
 ENT.IconOverride = "entities/ma_drone_controller_v2.png"
 
