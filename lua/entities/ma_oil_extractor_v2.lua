@@ -276,6 +276,25 @@ if CLIENT then
 		SafeRemoveEntity(self.Wheel)
 	end
 
+	function ENT:OnDrawEntityInfo()
+		if not self.MiningFrameInfo then
+			self.MiningFrameInfo = {
+				{ Type = "Label", Text = "EXTRACTOR", Border = true },
+				{ Type = "Data", Label = "OIL", Value = self:GetNWInt("ExtractedOil", 0), MaxValue = Ores.Automation.OilExtractionRate },
+				{ Type = "State", Value = can_work(self, CurTime()) },
+			}
+		end
+
+		self.MiningFrameInfo[2].Value = self:GetNWInt("ExtractedOil", 0)
+		self.MiningFrameInfo[3].Value = can_work(self, CurTime())
+
+		if self.CPPIGetOwner and self:CPPIGetOwner() == LocalPlayer() then
+			self.MiningFrameInfo[4] = { Type = "Action", Binding = "+use", Text = "KICKSTART" }
+		end
+
+		return self.MiningFrameInfo
+	end
+
 	hook.Add("PlayerBindPress", "mining_oil_extractor_kickstart", function(ply, bind, pressed, code)
 		if bind == "+use" and pressed then
 			local tr = ply:GetEyeTrace()

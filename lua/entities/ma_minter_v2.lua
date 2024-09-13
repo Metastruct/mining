@@ -118,4 +118,26 @@ if CLIENT then
 		_G.MA_Orchestrator.RegisterInput(self, "ores", "ORE", "Ores", "Standard ore input.")
 		_G.MA_Orchestrator.RegisterInput(self, "ingots", "INGOT", "Ingots", "Standard ingot input.")
 	end
+
+	function ENT:OnDrawEntityInfo()
+		if not self.MiningFrameInfo then
+			local data = {
+				{ Type = "Label", Text = "MINTER", Border = true },
+				{ Type = "Data", Label = "COINS", Value = self:GetNWInt("MintedCoins", 0) },
+			}
+
+			if self.CPPIGetOwner and self:CPPIGetOwner() == LocalPlayer() then
+				table.insert(data, { Type = "Action", Binding = "+use", Text = "CLAIM" })
+			end
+
+			self.MiningFrameInfo = data
+		end
+
+		self.MiningFrameInfo[2].Value = self:GetNWInt("MintedCoins", 0)
+		if self.CPPIGetOwner and self:CPPIGetOwner() == LocalPlayer() and not self.MiningFrameInfo[3] then
+			table.insert(self.MiningFrameInfo, { Type = "Action", Binding = "+use", Text = "CLAIM" })
+		end
+
+		return self.MiningFrameInfo
+	end
 end
