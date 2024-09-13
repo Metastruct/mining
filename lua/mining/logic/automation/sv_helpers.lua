@@ -44,7 +44,7 @@ end)
 
 function Ores.Automation.PrepareForDuplication(ent)
 	function ent:OnDuplicated()
-		local inputs = _G.MA_Orchestrator.GetInputs()
+		local inputs = _G.MA_Orchestrator.GetInputs(self)
 		if #inputs == 0 then return end
 
 		duplicator.StoreEntityModifier(self, "MA_Interfaces", {
