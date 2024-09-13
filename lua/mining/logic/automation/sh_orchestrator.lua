@@ -517,7 +517,7 @@ if CLIENT then
 
 			surface.DrawText(interface_name)
 
-			if i == ((tool.CurrentIndex % #interfaces) + 1) then
+			if i == tool.CurrentIndex then
 				surface.SetDrawColor(255, 200, 0, 255)
 				surface.DrawOutlinedRect(base_x, text_base_y + ((font_height + margin) * i) - margin / 2, max_width, font_height + margin, 2)
 			end
