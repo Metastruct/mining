@@ -11,6 +11,7 @@ ENT.Category = "Mining V2"
 ENT.RenderGroup = RENDERGROUP_OPAQUE
 ENT.Spawnable = true
 ENT.ClassName = "ma_gen_v2"
+ENT.IconOverride = "entities/ma_gen_v2.png"
 
 local function can_work(self)
 	if not self:GetNWBool("Wiremod_Active", true) then return false end
@@ -26,6 +27,7 @@ end
 
 local BASE_KICKSTART_PRICE = 350000
 if SERVER then
+	resource.AddFile("materials/entities/ma_gen_v2.png")
 	util.AddNetworkString("mining_kickstart_generator")
 
 	net.Receive("mining_kickstart_generator", function(_, ply)

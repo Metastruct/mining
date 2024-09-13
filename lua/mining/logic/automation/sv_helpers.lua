@@ -1,8 +1,6 @@
 module("ms", package.seeall)
 Ores = Ores or {}
 
-resource.AddFile("materials/mining/automation/hud_frame.png")
-
 function Ores.Automation.ReplicateOwnership(ent, parent, add_to_undo)
 	if ent ~= parent then
 		ent:SetCreator(parent:GetCreator())

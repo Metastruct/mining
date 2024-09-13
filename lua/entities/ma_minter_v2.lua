@@ -11,8 +11,11 @@ ENT.Spawnable = true
 ENT.Category = "Mining V2"
 ENT.PrintName = "Coin Minter V2"
 ENT.ClassName = "mining_coin_minter"
+ENT.IconOverride = "entities/ma_minter_v2.png"
 
 if SERVER then
+	resource.AddFile("materials/entities/ma_minter_v2.png")
+
 	function ENT:Initialize()
 		self:SetModel("models/props_wasteland/laundry_dryer002.mdl")
 		self:SetMaterial("phoenix_storms/future_vents")

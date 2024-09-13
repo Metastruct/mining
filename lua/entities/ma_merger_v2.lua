@@ -11,10 +11,13 @@ ENT.Category = "Mining V2"
 ENT.RenderGroup = RENDERGROUP_OPAQUE
 ENT.Spawnable = true
 ENT.ClassName = "ma_merger_v2"
+ENT.IconOverride = "entities/ma_drill_v2.png"
 
 local INPUT_AMOUNT = 6
 
 if SERVER then
+	resource.AddFile("materials/entities/ma_merger_v2.png")
+
 	function ENT:Initialize()
 		self:SetModel("models/props_lab/powerbox01a.mdl")
 		self:SetMaterial("phoenix_storms/OfficeWindow_1-1")

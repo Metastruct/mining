@@ -11,8 +11,11 @@ ENT.Category = "Mining"
 ENT.RenderGroup = RENDERGROUP_OPAQUE
 ENT.Spawnable = true
 ENT.ClassName = "mining_detonite_bomb"
+ENT.IconOverride = "entities/mining_detonite_bomb.png"
 
 if SERVER then
+	resource.AddFile("materials/entities/mining_detonite_bomb.png")
+
 	function ENT:Initialize()
 		self:SetModel("models/maxofs2d/hover_classic.mdl")
 		self:SetMoveType(MOVETYPE_VPHYSICS)

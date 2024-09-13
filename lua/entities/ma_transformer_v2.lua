@@ -11,8 +11,11 @@ ENT.Category = "Mining V2"
 ENT.RenderGroup = RENDERGROUP_OPAQUE
 ENT.Spawnable = true
 ENT.ClassName = "ma_transformer_v2"
+ENT.IconOverride = "entities/ma_transformer_v2.png"
 
 if SERVER then
+	resource.AddFile("materials/entities/ma_transformer_v2.png")
+
 	local teslas = {}
 	local function do_zap_effect(pos, ent)
 		if #teslas > 4 then
