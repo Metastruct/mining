@@ -24,7 +24,7 @@ function TOOL:LeftClick()
 end
 
 function TOOL:RightClick()
-	return true
+	return false
 end
 
 function TOOL:Reload()
@@ -98,16 +98,18 @@ if CLIENT then
 			self.CurrentIndex = 1
 		end
 
-		self.CurrentIndex = self.CurrentIndex + 1
+		self.CurrentIndex = input.IsShiftDown() and (self.CurrentIndex - 1) or (self.CurrentIndex + 1)
 		self.LastEntity = ent
 
 		if self.CurrentIndex > #interfaces then
 			self.CurrentIndex = 1
+		elseif self.CurrentIndex < 1 then
+			self.CurrentIndex = #interfaces
 		end
 
 		surface.PlaySound("ui/buttonrollover.wav")
 
-		return true
+		return false
 	end
 
 	function TOOL:Reload(tr)
