@@ -11,7 +11,7 @@ ENT.Category = "Mining V2"
 ENT.RenderGroup = RENDERGROUP_OPAQUE
 ENT.Spawnable = true
 ENT.ClassName = "ma_merger_v2"
-ENT.IconOverride = "entities/ma_drill_v2.png"
+ENT.IconOverride = "entities/ma_merger_v2.png"
 
 local INPUT_AMOUNT = 6
 
