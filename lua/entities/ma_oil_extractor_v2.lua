@@ -279,8 +279,8 @@ if CLIENT then
 	function ENT:OnDrawEntityInfo()
 		if not self.MiningFrameInfo then
 			self.MiningFrameInfo = {
-				{ Type = "Label", Text = "EXTRACTOR", Border = true },
-				{ Type = "Data", Label = "OIL", Value = self:GetNWInt("ExtractedOil", 0), MaxValue = Ores.Automation.OilExtractionRate },
+				{ Type = "Label", Text = self.PrintName:upper(), Border = true },
+				{ Type = "Data", Label = "Oil", Value = self:GetNWInt("ExtractedOil", 0), MaxValue = Ores.Automation.OilExtractionRate },
 				{ Type = "State", Value = can_work(self, CurTime()) },
 			}
 		end

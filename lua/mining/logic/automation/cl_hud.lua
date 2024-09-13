@@ -2,17 +2,17 @@ module("ms", package.seeall)
 Ores = Ores or {}
 
 surface.CreateFont("mining_automation_hud", {
-	font = "Tahoma",
+	font = "Arial",
 	extended = true,
-	weight = 1000,
-	size = 30
+	weight = 600,
+	size = 25
 })
 
 surface.CreateFont("mining_automation_hud2", {
-	font = "Tahoma",
+	font = "Arial",
 	extended = true,
-	weight = 1000,
-	size = 25
+	weight = 500,
+	size = 20
 })
 
 function Ores.Automation.ShouldDrawText(ent)
@@ -22,6 +22,22 @@ function Ores.Automation.ShouldDrawText(ent)
 	if localPlayer:GetEyeTrace().Entity == ent then return true end
 
 	return false
+end
+
+local BLUR = Material("pp/blurscreen")
+local function blur_rect(x, y, w, h, layers, quality)
+	surface.SetMaterial(BLUR)
+	surface.SetDrawColor(255, 255, 255)
+
+	render.SetScissorRect(x, y, x + w, y + h, true)
+		for i = 1, layers do
+			BLUR:SetFloat("$blur", (i / layers) * quality)
+			BLUR:Recompute()
+
+			render.UpdateScreenEffectTexture()
+			surface.DrawTexturedRect(0, 0, ScrW(), ScrH())
+		end
+	render.SetScissorRect(0, 0, 0, 0, false)
 end
 
 local MINING_INFO_HUD = CreateClientConVar("mining_automation_hud_frames", "1", true, true, "Display info frames for mining automation entities", 0, 1)
@@ -54,14 +70,14 @@ local function drawEntityInfoFrame(ent, data)
 
 	cam.PushModelMatrix(mtx, true)
 
-	surface.SetMaterial(Ores.Automation.HudFrameMaterial)
-	surface.SetDrawColor(255, 255, 255, 255)
-	surface.DrawTexturedRect(x, y, FRAME_WIDTH, totalHeight)
+	blur_rect(x, y, FRAME_WIDTH, totalHeight, 10, 2)
+	surface.SetDrawColor(0, 0, 0, 220)
+	surface.DrawRect(x, y, FRAME_WIDTH, totalHeight)
 
 	local offset = Ores.Automation.HudPadding + FRAME_PADDING
 	for _, lineData in ipairs(data) do
 		if lineData.Type == "Action" then
-			surface.SetFont("mining_automation_hud2")
+			surface.SetFont("mining_automation_hud")
 
 			local key = (input.LookupBinding(lineData.Binding, true) or "?"):upper()
 			local text = ("[ %s ] %s"):format(key, lineData.Text)
@@ -73,7 +89,7 @@ local function drawEntityInfoFrame(ent, data)
 
 			offset =  offset + th + Ores.Automation.HudPadding
 		elseif lineData.Type == "Data" then
-			surface.SetFont("mining_automation_hud")
+			surface.SetFont("mining_automation_hud2")
 
 			surface.SetTextColor(lineData.LabelColor or COLOR_WHITE)
 			surface.SetTextPos(x + Ores.Automation.HudPadding + FRAME_PADDING, y + offset)
@@ -140,11 +156,13 @@ local function try_draw_ent(ent)
 end
 
 hook.Add("HUDPaint", "mining_automation_entity_info", function()
-	for _, ent in ipairs(ents.FindByClass("mining_*")) do
-		try_draw_ent(ent)
-	end
+	local mining_ents = table.Add(ents.FindByClass("mining_*"), ents.FindByClass("ma_*"))
+	table.sort(mining_ents, function(e1, e2)
+		local eye_pos = LocalPlayer():EyePos()
+		return e1:WorldSpaceCenter():DistToSqr(eye_pos) > e2:WorldSpaceCenter():DistToSqr(eye_pos)
+	end)
 
-	for _, ent in ipairs(ents.FindByClass("ma_*")) do
+	for _, ent in ipairs(mining_ents) do
 		try_draw_ent(ent)
 	end
 end)

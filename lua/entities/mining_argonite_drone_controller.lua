@@ -83,21 +83,6 @@ if SERVER then
 			Ores.Automation.ReplicateOwnership(self, self)
 		end)
 
-		self.EnergySettings = {
-			Type = "Detonite",
-			MaxValue = MAX_DETONITE,
-			ConsumptionRate = 10, -- once every 10 seconds,
-			ConsumptionAmount = 0,
-			NoBrush = true,
-		}
-
-		Ores.Automation.RegisterEnergyPoweredEntity(self, { self.EnergySettings }, {
-			{
-				Identifier = "DroneCount (Outputs the current bandwidth usage) [NORMAL]",
-				StartValue = 0,
-			},
-		})
-
 		local timer_name = ("mining_argonite_drone_hive_[%d]"):format(self:EntIndex())
 		timer.Create(timer_name, 1, 0, function()
 			if not IsValid(self) then
@@ -107,16 +92,6 @@ if SERVER then
 
 			self:UpdateDrones()
 		end)
-	end
-
-	function ENT:TriggerInput(port, state)
-		if not _G.WireLib then return end
-		if not isnumber(state) then return end
-
-		if port == "Active" then
-			self:SetNWBool("IsPowered", tobool(state))
-			self:UpdateDrones()
-		end
 	end
 
 	function ENT:UpdateDrones()
@@ -232,9 +207,9 @@ if CLIENT then
 	function ENT:OnDrawEntityInfo()
 		if not self.MiningFrameInfo then
 			self.MiningFrameInfo = {
-				{ Type = "Label", Text = "CONTROLLER", Border = true },
-				{ Type = "Data", Label = "DETONITE", Value = self:GetNW2Int("Detonite", 0), MaxValue = self:GetNW2Int("MaxDetonite", MAX_DETONITE) },
-				{ Type = "Data", Label = "DRONES", Value = self:GetDroneCount() },
+				{ Type = "Label", Text = self.PrintName:upper(), Border = true },
+				{ Type = "Data", Label = "Detonite", Value = self:GetNW2Int("Detonite", 0), MaxValue = self:GetNW2Int("MaxDetonite", MAX_DETONITE) },
+				{ Type = "Data", Label = "Drones", Value = self:GetDroneCount() },
 				{ Type = "State", Value = can_work(self) },
 				{ Type = "Action", Binding = "+use", Text = "FILL" }
 			}

@@ -122,8 +122,8 @@ if CLIENT then
 	function ENT:OnDrawEntityInfo()
 		if not self.MiningFrameInfo then
 			local data = {
-				{ Type = "Label", Text = "MINTER", Border = true },
-				{ Type = "Data", Label = "COINS", Value = self:GetNWInt("MintedCoins", 0) },
+				{ Type = "Label", Text = self.PrintName:upper(), Border = true },
+				{ Type = "Data", Label = "Coins", Value = string.Comma(self:GetNWInt("MintedCoins", 0)) },
 			}
 
 			if self.CPPIGetOwner and self:CPPIGetOwner() == LocalPlayer() then
@@ -133,7 +133,7 @@ if CLIENT then
 			self.MiningFrameInfo = data
 		end
 
-		self.MiningFrameInfo[2].Value = self:GetNWInt("MintedCoins", 0)
+		self.MiningFrameInfo[2].Value = string.Comma(self:GetNWInt("MintedCoins", 0))
 		if self.CPPIGetOwner and self:CPPIGetOwner() == LocalPlayer() and not self.MiningFrameInfo[3] then
 			table.insert(self.MiningFrameInfo, { Type = "Action", Binding = "+use", Text = "CLAIM" })
 		end

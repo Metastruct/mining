@@ -164,8 +164,8 @@ if CLIENT then
 		local owned = self.CPPIGetOwner and self:CPPIGetOwner() == LocalPlayer()
 
 		local data = {
-			{ Type = "Label", Text = "BOMB", Border = true },
-			{ Type = "Data", Label = "CHARGES", Value = ("%d/%d"):format(self:GetNWInt("DetoniteAmount", 0), Ores.Automation.BombCapacity) },
+			{ Type = "Label", Text = self.PrintName:upper(), Border = true },
+			{ Type = "Data", Label = "Charges", Value = ("%d/%d"):format(self:GetNWInt("DetoniteAmount", 0), Ores.Automation.BombCapacity) },
 		}
 
 		if self:GetNWBool("Detonating", false) then

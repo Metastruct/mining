@@ -234,8 +234,8 @@ if CLIENT then
 	function ENT:OnDrawEntityInfo()
 		if not self.MiningFrameInfo then
 			self.MiningFrameInfo = {
-				{ Type = "Label", Text = "TRANSFORMER", Border = true },
-				{ Type = "Data", Label = "BATTERY", Value = self:GetNWInt("ArgoniteCount", 0), MaxValue = ms.Ores.Automation.BatteryCapacity },
+				{ Type = "Label", Text = self.PrintName:upper(), Border = true },
+				{ Type = "Data", Label = "Battery", Value = self:GetNWInt("ArgoniteCount", 0), MaxValue = ms.Ores.Automation.BatteryCapacity },
 				{ Type = "State", Value = self:GetNWBool("IsPowered", true) }
 			}
 		end

@@ -314,9 +314,9 @@ if CLIENT then
 	function ENT:OnDrawEntityInfo()
 		if not self.MiningFrameInfo then
 			self.MiningFrameInfo = {
-				{ Type = "Label", Text = "CHIP ROUTER", Border = true },
-				{ Type = "Data", Label = "USAGE", Value = self:GetNWInt("BandwidthUsage", 0) },
-				{ Type = "Data", Label = "BANDWIDTH", Value = self:GetNW2Int("Bandwidth", 0) },
+				{ Type = "Label", Text = self.PrintName:upper(), Border = true },
+				{ Type = "Data", Label = "Usage", Value = self:GetNWInt("BandwidthUsage", 0) },
+				{ Type = "Data", Label = "Bandwidth", Value = self:GetNW2Int("Bandwidth", 0) },
 				{ Type = "State", Value = self:GetNWBool("IsPowered", true) },
 				{ Type = "Action", Binding = "+use", Text = "FILL" }
 			}
