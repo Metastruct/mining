@@ -75,7 +75,7 @@ if SERVER then
 			end
 
 			local cur_energy = self:GetNW2Float("Energy", 0)
-			self:SetNW2Float("Energy", math.max(0, cur_energy - 0.05))
+			self:SetNW2Float("Energy", math.max(0, cur_energy - 0.5))
 		end)
 
 		Ores.Automation.PrepareForDuplication(self)
