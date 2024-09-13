@@ -228,6 +228,8 @@ if SERVER then
 	end
 
 	function orchestrator.SendLinkData(ply)
+		if not IsValid(ply) then return end
+
 		local data = {}
 		for ent, _ in pairs(orchestrator.WatchedEntities) do
 			if not IsValid(ent) then
@@ -242,11 +244,11 @@ if SERVER then
 				if not orchestrator.IsInputLinked(input_data) then continue end
 
 				local link_data = {
-					InputEnt = ent:EntIndex(),
+					InputEntIndex = ent:EntIndex(),
 					InputId = input_data.Id,
-					OutputEnt = input_data.Link.Ent:EntIndex(),
+					OutputEntIndex = input_data.Link.Ent:EntIndex(),
 					OutputId = input_data.Link.Id,
-					LinkEnt = input_data.Cable:EntIndex(),
+					CableEntIndex = input_data.Cable:EntIndex(),
 				}
 
 				table.insert(data, link_data)
@@ -256,7 +258,7 @@ if SERVER then
 		net.Start(NET_MSG_NAME)
 			net.WriteInt(NET_TYPE_FULL_SYNC, 8)
 			net.WriteTable(data)
-		net.Send(ply or player.GetAll())
+		net.Send(ply)
 	end
 
 	function orchestrator.SendPartialLinkData(ply, is_unlink, output_data, input_data)
@@ -273,7 +275,12 @@ if SERVER then
 			if not is_unlink then
 				net.WriteInt(input_data.Link.Cable:EntIndex(), 32)
 			end
-		net.Send(ply or player.GetAll())
+
+		if not IsValid(ply) then
+			net.Broadcast()
+		else
+			net.Send(ply)
+		end
 	end
 
 	hook.Add("EntityRemoved", "ma_orchestrator", function(ent)
@@ -288,6 +295,11 @@ if SERVER then
 		end
 
 		orchestrator.WatchedEntities[ent] = nil
+	end)
+
+	hook.Add("PlayerFullyConnected", "ma_orchestrator", function(ply)
+		-- this is necessary if the person crashes and connects back
+		orchestrator.SendLinkData(ply)
 	end)
 end
 
@@ -326,7 +338,20 @@ if CLIENT then
 				}
 			end
 		elseif msg_type == NET_TYPE_FULL_SYNC then
+			local data = net.ReadTable()
 
+			orchestrator.LinkData = {}
+			for _, link_data in pairs(data) do
+				if not orchestrator.LinkData[link_data.InputEntIndex] then
+					orchestrator.LinkData[link_data.InputEntIndex] = {}
+				end
+
+				orchestrator.LinkData[link_data.InputEntIndex][link_data.InputId] = {
+					EntIndex = link_data.OutputEntIndex,
+					Id = link_data.OutputId,
+					CableEntIndex = link_data.CableEntIndex
+				}
+			end
 		end
 	end)
 
