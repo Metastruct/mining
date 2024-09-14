@@ -45,6 +45,7 @@ if SERVER then
 		self:SetSolid(SOLID_VPHYSICS)
 		self:PhysWake()
 		self.OreQueue = {}
+		self.NextCanWorkCheck = 0
 
 		_G.MA_Orchestrator.RegisterOutput(self, "ores", "ORE", "Ores", "Merged ores output.")
 		for i = 1, INPUT_AMOUNT do
