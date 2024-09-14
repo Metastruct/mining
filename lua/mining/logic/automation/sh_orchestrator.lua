@@ -237,8 +237,6 @@ if SERVER then
 				continue
 			end
 
-			if ent.CPPIGetOwner and ent:CPPIGetOwner() ~= ply then continue end
-
 			local inputs = orchestrator.GetInputs(ent)
 			for _, input_data in ipairs(inputs) do
 				if not orchestrator.IsInputLinked(input_data) then continue end
@@ -276,11 +274,7 @@ if SERVER then
 				net.WriteInt(input_data.Link.Cable:EntIndex(), 32)
 			end
 
-		if not IsValid(ply) then
-			net.Broadcast()
-		else
-			net.Send(ply)
-		end
+		net.Broadcast()
 	end
 
 	hook.Add("EntityRemoved", "ma_orchestrator", function(ent)
@@ -297,10 +291,7 @@ if SERVER then
 		orchestrator.WatchedEntities[ent] = nil
 	end)
 
-	hook.Add("PlayerFullyConnected", "ma_orchestrator", function(ply)
-		-- this is necessary if the person crashes and connects back
-		orchestrator.SendLinkData(ply)
-	end)
+	hook.Add("PlayerFullyConnected", "ma_orchestrator", orchestrator.SendLinkData)
 end
 
 if CLIENT then
