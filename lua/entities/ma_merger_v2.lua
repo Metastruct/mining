@@ -15,6 +15,25 @@ ENT.IconOverride = "entities/ma_merger_v2.png"
 
 local INPUT_AMOUNT = 6
 
+function ENT:CanWork(time)
+	if time < self.NextCanWorkCheck then return self.LastCanWork end
+
+	local inputs = _G.MA_Orchestrator.GetInputs(self)
+	for _, input_data in ipairs(inputs) do
+		if _G.MA_Orchestrator.IsInputLinked(input_data) then
+			self.NextCanWorkCheck = time + 1
+			self.LastCanWork = true
+
+			return true
+		end
+	end
+
+	self.NextCanWorkCheck = time + 1
+	self.LastCanWork = false
+
+	return false
+end
+
 if SERVER then
 	resource.AddFile("materials/entities/ma_merger_v2.png")
 
