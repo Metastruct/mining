@@ -15,20 +15,41 @@ ENT.IconOverride = "entities/ma_merger_v2.png"
 
 local INPUT_AMOUNT = 6
 
+-- TODO: make this less complex to check
+local function is_output_working(self, input_data, time)
+	if SERVER then
+		return IsValid(input_data.Link.Ent) and isfunction(input_data.Link.Ent.CanWork) and input_data.Link.Ent:CanWork(time)
+	else
+		local data = _G.MA_Orchestrator.LinkData[self:EntIndex()]
+		if not data then return false end
+
+		for _, link_data in pairs(data) do
+			local target_ent = Entity(link_data.EntIndex)
+			if not IsValid(target_ent) then continue end
+
+			if isfunction(target_ent.CanWork) and target_ent:CanWork(time) then
+				return true
+			end
+		end
+	end
+
+	return false
+end
+
 function ENT:CanWork(time)
 	if time < self.NextCanWorkCheck then return self.LastCanWork end
 
 	local inputs = _G.MA_Orchestrator.GetInputs(self)
 	for _, input_data in ipairs(inputs) do
-		if _G.MA_Orchestrator.IsInputLinked(input_data) then
-			self.NextCanWorkCheck = time + 1
+		if _G.MA_Orchestrator.IsInputLinked(input_data) and is_output_working(self, input_data, time) then
+			self.NextCanWorkCheck = time + 2
 			self.LastCanWork = true
 
 			return true
 		end
 	end
 
-	self.NextCanWorkCheck = time + 1
+	self.NextCanWorkCheck = time + 2
 	self.LastCanWork = false
 
 	return false
