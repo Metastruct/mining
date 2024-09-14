@@ -58,48 +58,10 @@ function Ores.SpawnRockyAntlion(pos, rarity)
 end
 
 local function createOreDrops(rarity, pos, ent, amount)
+	if not ent:IsPlayer() then return end
+
 	for _ = 1, amount do
-		local ore = ents.Create("mining_ore")
-		ore:SetRarity(rarity)
-
-		if IsValid(ent) and ent:IsPlayer() then
-			ore:AllowGracePeriod(ent, 20)
-		end
-
-		ore:SetPos(pos)
-		ore:SetAngles(AngleRand())
-		ore:Spawn()
-
-		local orePhys = ore:GetPhysicsObject()
-		if IsValid(orePhys) then
-			local vec = VectorRand() * math.random(64, 128) * 2
-			vec.z = math.abs(vec.z)
-
-			orePhys:AddVelocity(vec)
-			orePhys:EnableCollisions(false)
-			orePhys:EnableGravity(false)
-		end
-
-		function ore:Think()
-			if not IsValid(ent) or not ent:IsPlayer() then
-				SafeRemoveEntity(self)
-				return
-			end
-
-			local curPos = self:GetPos()
-			local targetPos = ent:WorldSpaceCenter()
-			local phys = self:GetPhysicsObject()
-			if IsValid(phys) then
-				phys:SetVelocity((targetPos - curPos):GetNormalized() * 1000)
-			end
-
-			if curPos:DistToSqr(targetPos) <= 10000 then
-				SafeRemoveEntity(self)
-				Ores.GivePlayerOre(ent, rarity, 1)
-			end
-		end
-
-		SafeRemoveEntityDelayed(ore, 60)
+		Ores.GivePlayerOre(ent, rarity, 1)
 	end
 end
 
