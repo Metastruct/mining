@@ -17,6 +17,10 @@ ENT.ClassName = "ma_chip_router_v2"
 ENT.MaxBandwidth = 999
 ENT.IconOverride = "entities/ma_chip_router_v2.png"
 
+function ENT:CanWork()
+	return self:GetNWBool("Wiremod_Active", true)
+end
+
 if SERVER then
 	resource.AddFile("materials/entities/ma_chip_router_v2.png")
 

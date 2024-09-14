@@ -14,7 +14,7 @@ ENT.ClassName = "ma_drill_v2"
 ENT.IconOverride = "entities/ma_drill_v2.png"
 ENT.NextTraceCheck = 0
 
-local function can_work(self, time)
+function ENT:CanWork(self, time)
 	if not self:GetNWBool("Wiremod_Active", true) then return false end
 	if not self:GetNWBool("IsPowered", false) then return false end
 	if time < self.NextTraceCheck then return self.TraceCheckResult end
@@ -133,7 +133,7 @@ if SERVER then
 	function ENT:CheckSoundLoop(time)
 		if time < self.NextSoundCheck then return end
 
-		if not can_work(self, time) then
+		if not self:CanWork(time) then
 			if self.SndLoop and self.SndLoop ~= -1 then
 				self:StopLoopingSound(self.SndLoop)
 			end
@@ -152,7 +152,7 @@ if SERVER then
 
 	function ENT:DrillOres(time)
 		if time < self.NextDrilledOre then return end
-		if not can_work(self, time) then return end
+		if not self:CanWork(time) then return end
 
 		local ore_rarity = Ores.SelectRarityFromSpawntable()
 		table.insert(self.OreQueue, 1, ore_rarity)
@@ -267,7 +267,7 @@ if CLIENT then
 		local ang = self:GetAngles()
 		ang:RotateAroundAxis(self:GetForward(), 90)
 
-		if can_work(self, time) then
+		if self:CanWork(time) then
 			ang:RotateAroundAxis(self:GetRight(), time * 400 % 360)
 
 			local effect_data = EffectData()
@@ -298,12 +298,12 @@ if CLIENT then
 			self.MiningFrameInfo = {
 				{ Type = "Label", Text = self.PrintName:upper(), Border = true },
 				{ Type = "Data", Label = "Efficiency", Value = self:GetNW2Int("Energy", 0), MaxValue = 100 },
-				{ Type = "State", Value = can_work(self, CurTime()) }
+				{ Type = "State", Value = self:CanWork(CurTime()) }
 			}
 		end
 
 		self.MiningFrameInfo[2].Value = self:GetNW2Int("Energy", 0)
-		self.MiningFrameInfo[3].Value = can_work(self, CurTime())
+		self.MiningFrameInfo[3].Value = self:CanWork(CurTime())
 		return self.MiningFrameInfo
 	end
 end

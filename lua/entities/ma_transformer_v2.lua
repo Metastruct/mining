@@ -13,6 +13,10 @@ ENT.Spawnable = true
 ENT.ClassName = "ma_transformer_v2"
 ENT.IconOverride = "entities/ma_transformer_v2.png"
 
+function ENT:CanWork()
+	return self:GetNWBool("Wiremod_Active", true)
+end
+
 if SERVER then
 	resource.AddFile("materials/entities/ma_transformer_v2.png")
 
