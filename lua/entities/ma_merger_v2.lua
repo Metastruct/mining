@@ -12,6 +12,7 @@ ENT.RenderGroup = RENDERGROUP_OPAQUE
 ENT.Spawnable = true
 ENT.ClassName = "ma_merger_v2"
 ENT.IconOverride = "entities/ma_merger_v2.png"
+ENT.NextCanWorkCheck = 0
 
 local INPUT_AMOUNT = 6
 
@@ -66,7 +67,6 @@ if SERVER then
 		self:SetSolid(SOLID_VPHYSICS)
 		self:PhysWake()
 		self.OreQueue = {}
-		self.NextCanWorkCheck = 0
 
 		_G.MA_Orchestrator.RegisterOutput(self, "ores", "ORE", "Ores", "Merged ores output.")
 		for i = 1, INPUT_AMOUNT do
