@@ -51,6 +51,7 @@ if SERVER then
 	function ENT:MA_Execute(output_data, input_data)
 		if input_data.Id == "ores" and output_data.Type == "ORE" then
 			if not istable(output_data.Ent.OreQueue) then return end
+			if #output_data.Ent.OreQueue == 0 then return end
 
 			local rarity = table.remove(output_data.Ent.OreQueue, 1)
 			if not self.Ores[rarity] then
@@ -61,6 +62,7 @@ if SERVER then
 			self:UpdateNetworkOreData()
 		elseif input_data.Id == "ingots" and output_data.Type == "INGOT" then
 			if not istable(output_data.Ent.IngotQueue) then return end
+			if #output_data.Ent.IngotQueue == 0 then return end
 
 			local rarity = table.remove(output_data.Ent.IngotQueue, 1)
 			if not self.Ores[rarity] then
