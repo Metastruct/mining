@@ -67,13 +67,7 @@ if SERVER then
 		_G.MA_Orchestrator.RegisterInput(self, "battery", "BATTERY", "Battery", "Argonite batteries are given to the generator so that it may store and distribute power!")
 		_G.MA_Orchestrator.RegisterOutput(self, "power", "ENERGY", "Energy", "Standard energy output.")
 
-		local timer_name = ("ma_gen_v2_[%d]"):format(self:EntIndex())
-		timer.Create(timer_name, 10, 0, function()
-			if not IsValid(self) then
-				timer.Remove(timer_name)
-				return
-			end
-
+		_G.MA_Orchestrator.EntityTimer("ma_gen_v2", self, 10, 0, function()
 			local output_data = _G.MA_Orchestrator.GetOutputData(self, "power")
 			local drain = table.Count(output_data.Links) * 0.005
 			local cur_energy = self:GetNW2Float("Energy", 0)

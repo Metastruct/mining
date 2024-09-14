@@ -88,13 +88,7 @@ if SERVER then
 		local power_src_ent = output_data.Ent
 		if not IsValid(power_src_ent) then return end
 
-		local timer_name = ("ma_drill_v2_[%d]"):format(self:EntIndex())
-		timer.Create(timer_name, 1, 0, function()
-			if not IsValid(self) then
-				timer.Remove(timer_name)
-				return
-			end
-
+		_G.MA_Orchestrator.EntityTimer("ma_drill_v2", self, 1, 0, function()
 			local got_power = _G.MA_Orchestrator.Execute(output_data, input_data)
 			self:SetNWBool("IsPowered", got_power or false)
 		end)
