@@ -13,7 +13,7 @@ ENT.Spawnable = true
 ENT.ClassName = "ma_gen_v2"
 ENT.IconOverride = "entities/ma_gen_v2.png"
 
-function ENT:CanWork(self)
+function ENT:CanWork()
 	if not self:GetNWBool("Wiremod_Active", true) then return false end
 	if not self:GetNWBool("IsPowered", true) then return false end
 	if self:GetEnergyLevel() == 0 then return false end
