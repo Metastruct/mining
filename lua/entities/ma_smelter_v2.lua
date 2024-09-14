@@ -131,6 +131,7 @@ if SERVER then
 		if input_data.Id == "ores" then
 			if not self:CanWork() then return end
 			if not istable(output_data.Ent.OreQueue) then return end
+			if #output_data.Ent.OreQueue == 0 then return end
 
 			local rarity = table.remove(output_data.Ent.OreQueue, 1)
 			self.Ores[rarity] = (self.Ores[rarity] or 0) + 1

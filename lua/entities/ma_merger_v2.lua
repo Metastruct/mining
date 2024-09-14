@@ -92,6 +92,7 @@ if SERVER then
 	function ENT:MA_Execute(output_data, input_data)
 		if not input_data.Id:match("^ores_") then return end
 		if not istable(output_data.Ent.OreQueue) then return end
+		if #output_data.Ent.OreQueue == 0 then return end
 
 		-- combines queues
 		local rarity = table.remove(output_data.Ent.OreQueue, 1)

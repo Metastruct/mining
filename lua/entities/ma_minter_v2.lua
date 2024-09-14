@@ -45,6 +45,7 @@ if SERVER then
 	function ENT:MA_Execute(output_data, input_data)
 		if input_data.Id == "ores" and output_data.Type == "ORE" then
 			if not istable(output_data.Ent.OreQueue) then return end
+			if #output_data.Ent.OreQueue == 0 then return end
 
 			local rarity = table.remove(output_data.Ent.OreQueue, 1)
 			local ore_data = Ores.__R[rarity]
@@ -60,6 +61,7 @@ if SERVER then
 			end
 		elseif input_data.Id == "ingots" and output_data.Type == "INGOT" then
 			if not istable(output_data.Ent.IngotQueue) then return end
+			if #output_data.Ent.IngotQueue == 0 then return end
 
 			-- use the player multiplier if its higher than the ingot worth
 			local ingot_worth = Ores.Automation.IngotWorth
