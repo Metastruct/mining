@@ -14,7 +14,7 @@ ENT.ClassName = "ma_oil_extractor_v2"
 ENT.NextTraceCheck = 0
 ENT.IconOverride = "entities/ma_oil_extractor_v2.png"
 
-function ENT:CanWork(self, time)
+function ENT:CanWork(time)
 	if not self:GetNWBool("Wiremod_Active", true) then return false end
 	if not self:GetNWBool("IsPowered", false) then return false end
 	if time < self.NextTraceCheck then return self.TraceCheckResult end
