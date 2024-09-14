@@ -263,7 +263,6 @@ if SERVER then
 					InputId = input_data.Id,
 					OutputEntIndex = input_data.Link.Ent:EntIndex(),
 					OutputId = input_data.Link.Id,
-					CableEntIndex = input_data.Cable:EntIndex(),
 				}
 
 				table.insert(data, link_data)
@@ -334,7 +333,6 @@ if CLIENT then
 					orchestrator.LinkData[input_ent_index] = nil
 				end
 			else
-				local cable_ent_index = net.ReadInt(32)
 				if not orchestrator.LinkData[input_ent_index] then
 					orchestrator.LinkData[input_ent_index] = {}
 				end
@@ -342,7 +340,6 @@ if CLIENT then
 				orchestrator.LinkData[input_ent_index][input_id] = {
 					EntIndex = output_ent_index,
 					Id = output_id,
-					CableEntIndex = cable_ent_index
 				}
 			end
 		elseif msg_type == NET_TYPE_FULL_SYNC then
@@ -357,7 +354,6 @@ if CLIENT then
 				orchestrator.LinkData[link_data.InputEntIndex][link_data.InputId] = {
 					EntIndex = link_data.OutputEntIndex,
 					Id = link_data.OutputId,
-					CableEntIndex = link_data.CableEntIndex
 				}
 			end
 		end
