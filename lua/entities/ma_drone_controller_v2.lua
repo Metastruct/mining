@@ -83,13 +83,7 @@ if SERVER then
 			Ores.Automation.ReplicateOwnership(self, self)
 		end)
 
-		local timer_name = ("mining_argonite_drone_hive_[%d]"):format(self:EntIndex())
-		timer.Create(timer_name, 1, 0, function()
-			if not IsValid(self) then
-				timer.Remove(timer_name)
-				return
-			end
-
+		_G.MA_Orchestrator.EntityTimer("mining_argonite_drone_hive", self, 1, 0, function()
 			self:UpdateDrones()
 		end)
 	end

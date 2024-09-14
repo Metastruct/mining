@@ -57,13 +57,7 @@ if SERVER then
 			Ores.Automation.ReplicateOwnership(self, self)
 		end)
 
-		local timer_name = ("ma_chip_router_v2_[%d]"):format(self:EntIndex())
-		timer.Create(timer_name, 10, 0, function()
-			if not IsValid(self) then
-				timer.Remove(timer_name)
-				return
-			end
-
+		_G.MA_Orchestrator.EntityTimer("ma_chip_router_v2", self, 10, 0, function()
 			local bandwidth = self:GetNW2Int("Bandwidth", 0)
 			local new_bandwidth = bandwidth - self:GetNWInt("BandwidthUsage", 0)
 			self:SetNW2Int("Bandwidth", new_bandwidth)

@@ -91,13 +91,7 @@ if SERVER then
 		_G.MA_Orchestrator.RegisterInput(self, "oil", "OIL", "Oil", "Standard oil input.")
 		_G.MA_Orchestrator.RegisterOutput(self, "ingots", "INGOT", "Ingots", "Standard ingot output.")
 
-		local timer_name = ("ma_smelter_v2_[%d]_fuel"):format(self:EntIndex())
-		timer.Create(timer_name, 5, 0, function()
-			if not IsValid(self) then
-				timer.Remove(timer_name)
-				return
-			end
-
+		_G.MA_Orchestrator.EntityTimer("ma_smelter_v2_fuel", self, 5, 0, function()
 			local cur_fuel = self:GetNW2Int("Fuel", 0)
 			self:SetNW2Int("Fuel", math.max(0, cur_fuel - 1))
 		end)
@@ -117,13 +111,7 @@ if SERVER then
 		local power_src_ent = output_data.Ent
 		if not IsValid(power_src_ent) then return end
 
-		local timer_name = ("ma_smelter_v2_[%d]"):format(self:EntIndex())
-		timer.Create(timer_name, 1, 0, function()
-			if not IsValid(self) then
-				timer.Remove(timer_name)
-				return
-			end
-
+		_G.MA_Orchestrator.EntityTimer("ma_smelter_v2", self, 1, 0, function()
 			local got_power = _G.MA_Orchestrator.Execute(output_data, input_data)
 			self:SetNWBool("IsPowered", got_power or false)
 		end)

@@ -74,6 +74,23 @@ function orchestrator.GetOutputData(ent, id)
 	end
 end
 
+function orchestrator.EntityTimer(name, ent, delay, occurences, callback)
+	if not IsValid(ent) then return end
+
+	local timer_name = ("%s_[%d]"):format(name, ent:EntIndex())
+	timer.Create(timer_name, delay, occurences, function()
+		if not IsValid(ent) then
+			timer.Remove(timer_name)
+			return
+		end
+
+		local succ, err = pcall(callback)
+		if not succ then
+			ErrorNoHalt(err)
+		end
+	end)
+end
+
 local NET_MSG_NAME = "net_mining_automation"
 local NET_TYPE_LINK = 1
 local NET_TYPE_UNLINK = 2

@@ -73,13 +73,7 @@ if SERVER then
 			_G.MA_Orchestrator.RegisterInput(self, "ores_" .. i, "ORE", "Ores " .. i, "Standard ore input.")
 		end
 
-		local timer_name = ("ma_merger_v2_[%d]"):format(self:EntIndex())
-		timer.Create(timer_name, 1, 0, function()
-			if not IsValid(self) then
-				timer.Remove(timer_name)
-				return
-			end
-
+		_G.MA_Orchestrator.EntityTimer("ma_merger_v2", self, 1, 0, function()
 			if #self.OreQueue > 1 then
 				local output_data = _G.MA_Orchestrator.GetOutputData(self, "ores")
 				_G.MA_Orchestrator.SendOutputReadySignal(output_data)
