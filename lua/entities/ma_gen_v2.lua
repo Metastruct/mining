@@ -13,7 +13,7 @@ ENT.Spawnable = true
 ENT.ClassName = "ma_gen_v2"
 ENT.IconOverride = "entities/ma_gen_v2.png"
 
-local function can_work(self)
+function ENT:CanWork(self)
 	if not self:GetNWBool("Wiremod_Active", true) then return false end
 	if not self:GetNWBool("IsPowered", true) then return false end
 	if self:GetEnergyLevel() == 0 then return false end
@@ -120,7 +120,7 @@ if SERVER then
 	function ENT:CheckSoundLoop(time)
 		if time < self.NextSoundCheck then return end
 
-		if not can_work(self) then
+		if not self:CanWork() then
 			if self.SndLoop and self.SndLoop ~= -1 then
 				self:StopLoopingSound(self.SndLoop)
 			end
@@ -196,7 +196,7 @@ if CLIENT then
 			local ang = self:GetAngles()
 			ang:RotateAroundAxis(self:GetRight(), 90)
 
-			if can_work(self) then
+			if self:CanWork() then
 				ang:RotateAroundAxis(self:GetForward(), CurTime() * 100 % 360)
 			end
 
@@ -215,14 +215,14 @@ if CLIENT then
 			local data = {
 				{ Type = "Label", Text = self.PrintName:upper(), Border = true },
 				{ Type = "Data", Label = "Energy", Value = self:GetEnergyLevel(), MaxValue = 100 },
-				{ Type = "State", Value = can_work(self) }
+				{ Type = "State", Value = self:CanWork() }
 			}
 
 			self.MiningFrameInfo = data
 		end
 
 		self.MiningFrameInfo[2].Value = self:GetEnergyLevel()
-		self.MiningFrameInfo[3].Value = can_work(self)
+		self.MiningFrameInfo[3].Value = self:CanWork()
 
 		if self.CPPIGetOwner and self:CPPIGetOwner() == LocalPlayer() then
 			self.MiningFrameInfo[4] = { Type = "Action", Binding = "+use", Text = "KICKSTART" }

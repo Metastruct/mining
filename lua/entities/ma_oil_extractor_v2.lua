@@ -14,7 +14,7 @@ ENT.ClassName = "ma_oil_extractor_v2"
 ENT.NextTraceCheck = 0
 ENT.IconOverride = "entities/ma_oil_extractor_v2.png"
 
-local function can_work(self, time)
+function ENT:CanWork(self, time)
 	if not self:GetNWBool("Wiremod_Active", true) then return false end
 	if not self:GetNWBool("IsPowered", false) then return false end
 	if time < self.NextTraceCheck then return self.TraceCheckResult end
@@ -145,7 +145,7 @@ if SERVER then
 	function ENT:CheckSoundLoop(time)
 		if time < self.NextSoundCheck then return end
 
-		if not can_work(self, time) then
+		if not self:CanWork(time) then
 			if self.SndLoop and self.SndLoop ~= -1 then
 				self:StopLoopingSound(self.SndLoop)
 			end
@@ -176,7 +176,7 @@ if SERVER then
 
 	function ENT:ExtractOil(time)
 		if time < self.NextOil then return end
-		if not can_work(self, time) then return end
+		if not self:CanWork(time) then return end
 
 		self.NextOil = CurTime() + 1
 		self.ExtractedOil = self.ExtractedOil + 1
@@ -258,7 +258,7 @@ if CLIENT then
 		self:DrawModel()
 
 		local time = CurTime()
-		local has_energy = can_work(self, time)
+		local has_energy = self:CanWork(time)
 		if has_energy then
 			local effect_data = EffectData()
 			effect_data:SetScale(1.5)
@@ -291,12 +291,12 @@ if CLIENT then
 			self.MiningFrameInfo = {
 				{ Type = "Label", Text = self.PrintName:upper(), Border = true },
 				{ Type = "Data", Label = "Oil", Value = self:GetNWInt("ExtractedOil", 0), MaxValue = Ores.Automation.OilExtractionRate },
-				{ Type = "State", Value = can_work(self, CurTime()) },
+				{ Type = "State", Value = self:CanWork(CurTime()) },
 			}
 		end
 
 		self.MiningFrameInfo[2].Value = self:GetNWInt("ExtractedOil", 0)
-		self.MiningFrameInfo[3].Value = can_work(self, CurTime())
+		self.MiningFrameInfo[3].Value = self:CanWork(CurTime())
 
 		if self.CPPIGetOwner and self:CPPIGetOwner() == LocalPlayer() then
 			self.MiningFrameInfo[4] = { Type = "Action", Binding = "+use", Text = "KICKSTART" }

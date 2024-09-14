@@ -14,7 +14,7 @@ ENT.AdminOnly = true
 ENT.ClassName = "ma_drone_controller_v2"
 ENT.IconOverride = "entities/ma_drone_controller_v2.png"
 
-local function can_work(self)
+function ENT:CanWork()
 	if not self:GetNWBool("Wiremod_Active", true) then return false end
 	if self:GetNW2Int("Detonite", 0) > 0 then return true end
 
@@ -23,7 +23,7 @@ end
 
 local MAX_DETONITE = 300
 function ENT:GetDroneCount()
-	if not can_work(self) then return 0 end
+	if not self:CanWork() then return 0 end
 
 	local amount = self:GetNW2Int("Detonite", 0) / MAX_DETONITE
 	if amount < 0.33 then
@@ -95,7 +95,7 @@ if SERVER then
 	end
 
 	function ENT:UpdateDrones()
-		if not can_work(self) then
+		if not self:CanWork() then
 			for _, drone in pairs(self.Drones) do
 				SafeRemoveEntity(drone)
 			end
@@ -210,14 +210,14 @@ if CLIENT then
 				{ Type = "Label", Text = self.PrintName:upper(), Border = true },
 				{ Type = "Data", Label = "Detonite", Value = self:GetNW2Int("Detonite", 0), MaxValue = self:GetNW2Int("MaxDetonite", MAX_DETONITE) },
 				{ Type = "Data", Label = "Drones", Value = self:GetDroneCount() },
-				{ Type = "State", Value = can_work(self) },
+				{ Type = "State", Value = self:CanWork() },
 				{ Type = "Action", Binding = "+use", Text = "FILL" }
 			}
 		end
 
 		self.MiningFrameInfo[2].Value = self:GetNW2Int("Detonite", 0)
 		self.MiningFrameInfo[3].Value = self:GetDroneCount()
-		self.MiningFrameInfo[4].Value = can_work(self, CurTime())
+		self.MiningFrameInfo[4].Value = self:CanWork()
 		return self.MiningFrameInfo
 	end
 end
