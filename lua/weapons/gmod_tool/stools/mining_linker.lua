@@ -55,10 +55,6 @@ if CLIENT then
 
 		table.sort(interfaces, function(a, b) return a.Name < b.Name end) -- match hud
 
-		if self.LastEntity ~= ent then
-			self.CurrentIndex = 1
-		end
-
 		local interface_data = interfaces[self.CurrentIndex]
 		if not interface_data then return false end
 
@@ -85,18 +81,9 @@ if CLIENT then
 		if not IsValid(tr.Entity) then return false end
 
 		local ent = tr.Entity
-		if ent.CPPIGetOwner and ent:CPPIGetOwner() ~= LocalPlayer() then
-			surface.PlaySound("buttons/button8.wav")
-			return false
-		end
-
 		local interfaces = self.SelectedOutput and _G.MA_Orchestrator.GetInputs(ent) or _G.MA_Orchestrator.GetOutputs(ent)
 		local interface_count = table.Count(interfaces)
 		if interface_count == 0 then return false end
-
-		if self.LastEntity ~= ent then
-			self.CurrentIndex = 1
-		end
 
 		self.CurrentIndex = input.IsShiftDown() and (self.CurrentIndex - 1) or (self.CurrentIndex + 1)
 		self.LastEntity = ent
@@ -111,6 +98,45 @@ if CLIENT then
 
 		return false
 	end
+
+	local function try_get_linker()
+		local ply = LocalPlayer()
+		local wep = ply:GetActiveWeapon()
+		if not IsValid(wep) then return end
+		if wep:GetClass() ~= "gmod_tool" then return end
+
+		local tool = wep:GetToolObject()
+		if not tool then return end
+		if tool.Mode ~= "mining_linker" then return end
+
+		return tool
+	end
+
+	hook.Add("PlayerButtonDown", "mining_linker", function(ply, btn)
+		if ply ~= LocalPlayer() then return end
+		if btn ~= MOUSE_WHEEL_DOWN and btn ~= MOUSE_WHEEL_UP then return end
+
+		local tr = ply:GetEyeTrace()
+		if not IsValid(tr.Entity) then return end
+
+		local linker = try_get_linker()
+		if not linker then return end
+
+		local interfaces = linker.SelectedOutput and _G.MA_Orchestrator.GetInputs(tr.Entity) or _G.MA_Orchestrator.GetOutputs(tr.Entity)
+		local interface_count = table.Count(interfaces)
+		if interface_count == 0 then return false end
+
+		linker.CurrentIndex = btn == MOUSE_WHEEL_UP and (linker.CurrentIndex - 1) or (linker.CurrentIndex + 1)
+		linker.LastEntity = tr.Entity
+
+		if linker.CurrentIndex > #interfaces then
+			linker.CurrentIndex = 1
+		elseif linker.CurrentIndex < 1 then
+			linker.CurrentIndex = #interfaces
+		end
+
+		surface.PlaySound("ui/buttonrollover.wav")
+	end)
 
 	function TOOL:Reload(tr)
 		if not IsFirstTimePredicted() then return end
@@ -135,10 +161,6 @@ if CLIENT then
 
 		table.sort(outputs, function(a, b) return a.Name < b.Name end)
 
-		if self.LastEntity ~= ent then
-			self.CurrentIndex = 1
-		end
-
 		local output_data = outputs[self.CurrentIndex]
 		if not output_data then return false end
 
@@ -150,5 +172,16 @@ if CLIENT then
 
 	function TOOL:GetSelectedOutput()
 		return self.SelectedOutput
+	end
+
+	function TOOL:Think()
+		local owner = self:GetOwner()
+		if not IsValid(owner) then return end
+
+		local tr = owner:GetEyeTrace()
+		if (IsValid(tr.Entity) and tr.Entity ~= self.LastEntity) or not IsValid(tr.Entity) then
+			self.CurrentIndex = 1
+			self.LastEntity = tr.Entity
+		end
 	end
 end
