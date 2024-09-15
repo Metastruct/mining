@@ -177,8 +177,14 @@ if CLIENT then
 		end
 	end
 
-	function TOOL.BuildCPanel( CPanel )
-		CPanel:AddControl( "Header", { Description = "#tool.mining_linker.desc" } )
-		CPanel:AddControl( "RopeMaterial", { Label = "#tool.mining_linker.material", ConVar = "mining_automation_wiring_mat" } )
+	function TOOL.BuildCPanel(CPanel)
+		CPanel:AddControl("Header", {
+			Description = "#tool.mining_linker.desc"
+		})
+
+		CPanel:AddControl("RopeMaterial", {
+			Label = "#tool.mining_linker.material",
+			ConVar = "mining_automation_wiring_mat"
+		})
 	end
 end
