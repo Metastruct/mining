@@ -69,7 +69,7 @@ if SERVER then
 
 		_G.MA_Orchestrator.EntityTimer("ma_gen_v2", self, 10, 0, function()
 			local output_data = _G.MA_Orchestrator.GetOutputData(self, "power")
-			local drain = table.Count(output_data.Links) * 0.005
+			local drain = table.Count(output_data.Links) * 0.01
 			local cur_energy = self:GetNW2Float("Energy", 0)
 			local new_energy = math.max(0, cur_energy - drain)
 			self:SetNW2Float("Energy", new_energy)
