@@ -132,12 +132,31 @@ function Ores.Automation.PrepareForDuplication(ent)
 	end
 end
 
+Ores.Automation.CustomLimits = Ores.Automation.CustomLimits or {}
+function Ores.Automation.RegisterCustomLimit(class_name, amount)
+	local cvar_name = ("sbox_max%s"):format(class_name)
+	if not GetConVar(cvar_name) then
+		CreateConVar(
+			cvar_name,
+			tostring(amount),
+			FCVAR_ARCHIVE,
+			("Maximum amount of %s entities a player can have"):format(class_name),
+			0,
+			100
+		)
+	end
+
+	Ores.Automation.CustomLimits[class_name] = amount
+end
+
+Ores.Automation.RegisterCustomLimit("ma_drill_v2", 12)
+Ores.Automation.RegisterCustomLimit("ma_drone_controller_v2", 1)
+Ores.Automation.RegisterCustomLimit("ma_chip_router_v2", 1)
+Ores.Automation.RegisterCustomLimit("ma_refinery", 1)
 
 CreateConVar("sbox_maxmining_automation", "40", FCVAR_ARCHIVE, "Maximum amount of mining automation entities a player can have", 0, 100)
-
 hook.Add("OnEntityCreated", "mining_automation", function(ent)
 	local class_name = ent:GetClass()
-	if class_name == "ma_drill_v2" then return end
 	if not Ores.Automation.EntityClasses[class_name] then return end
 	if not ent.CPPIGetOwner then return end
 
@@ -146,6 +165,13 @@ hook.Add("OnEntityCreated", "mining_automation", function(ent)
 
 		local ply = ent:CPPIGetOwner()
 		if not IsValid(ply) then
+			SafeRemoveEntity(ent)
+			return
+		end
+
+		if Ores.Automation.CustomLimits[class_name] and ply:CheckLimit(class_name) then
+			ply:AddCount(class_name, ent)
+		else
 			SafeRemoveEntity(ent)
 			return
 		end
@@ -161,8 +187,12 @@ end)
 hook.Add("PlayerSpawnSENT", "mining_automation", function(ply, class_name)
 	if not class_name then return end
 
-	if Ores.Automation.EntityClasses[class_name] and not ply:CheckLimit("mining_automation") then
-		return false
+	if Ores.Automation.EntityClasses[class_name] then
+		if Ores.Automation.CustomLimits[class_name] and not ply:CheckLimit(class_name) then
+			return false
+		elseif not ply:CheckLimit("mining_automation") then
+			return false
+		end
 	end
 end)
 
