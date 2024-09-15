@@ -461,8 +461,10 @@ if CLIENT then
 	end
 
 	local looked_at = {}
+	local hide_weapon_selection = false
 	hook.Add("HUDPaint", "ma_orchestrator", function()
 		looked_at[1] = nil
+		hide_weapon_selection = false
 
 		local ply = LocalPlayer()
 		local wep = ply:GetActiveWeapon()
@@ -488,6 +490,7 @@ if CLIENT then
 		table.sort(interfaces, function(a, b) return a.Name < b.Name end)
 
 		looked_at[1] = ent
+		hide_weapon_selection = true
 
 		local title_font_height = draw.GetFontHeight("ma_hud_title") + 10
 		local font_height = draw.GetFontHeight("ma_hud_text")
@@ -575,5 +578,12 @@ if CLIENT then
 	local COLOR_SELECTED = Color(255, 200, 0, 255)
 	hook.Add("PreDrawHalos", "ma_orchestrator", function()
 		halo.Add(looked_at, COLOR_SELECTED, 5, 5, 2)
+	end)
+
+	local HUD_ELEMENT_NAME = "CHudWeaponSelection"
+	hook.Add("HUDShouldDraw", "ma_orchestrator", function(name)
+		if hide_weapon_selection and name == HUD_ELEMENT_NAME then
+			return false
+		end
 	end)
 end
