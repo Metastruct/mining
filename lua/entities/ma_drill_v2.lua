@@ -186,37 +186,6 @@ if SERVER then
 			self:StopLoopingSound(self.SndLoop)
 		end
 	end
-
-	CreateConVar("sbox_maxma_drill_v2", "12", FCVAR_ARCHIVE, "Maximum amount of mining drills entities a player can have", 0, 100)
-
-	hook.Add("OnEntityCreated", "ma_drill_v2", function(ent)
-		if ent:GetClass() ~= "ma_drill_v2" then return end
-		if not ent.CPPIGetOwner then return end
-
-		timer.Simple(0, function()
-			if not IsValid(ent) then return end
-
-			local ply = ent:CPPIGetOwner()
-			if not IsValid(ply) then
-				SafeRemoveEntity(ent)
-				return
-			end
-
-			if ply:CheckLimit("ma_drill_v2") then
-				ply:AddCount("ma_drill_v2", ent)
-			else
-				SafeRemoveEntity(ent)
-			end
-		end)
-	end)
-
-	hook.Add("PlayerSpawnSENT", "ma_drill_v2", function(ply, className)
-		if not className then return end
-
-		if className == "ma_drill_v2" and not ply:CheckLimit("ma_drill_v2") then
-			return false
-		end
-	end)
 end
 
 if CLIENT then
