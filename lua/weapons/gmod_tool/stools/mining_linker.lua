@@ -108,6 +108,7 @@ if CLIENT then
 	end
 
 	hook.Add("PlayerButtonDown", "mining_linker", function(ply, btn)
+		if not IsFirstTimePredicted() then return end
 		if ply ~= LocalPlayer() then return end
 		if btn ~= MOUSE_WHEEL_DOWN and btn ~= MOUSE_WHEEL_UP then return end
 
