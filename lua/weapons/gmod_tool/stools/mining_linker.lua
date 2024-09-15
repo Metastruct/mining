@@ -38,6 +38,7 @@ if CLIENT then
 	language.Add("tool.mining_linker.left", "Select an output or apply a link.")
 	language.Add("tool.mining_linker.right", "Change selection.")
 	language.Add("tool.mining_linker.reload", "Unlink an output or release current selection.")
+	language.Add("tool.mining_linker.material", "Rope material.")
 
 	function TOOL:LeftClick(tr)
 		if not IsFirstTimePredicted() then return end
@@ -174,5 +175,10 @@ if CLIENT then
 			self.CurrentIndex = 1
 			self.LastEntity = tr.Entity
 		end
+	end
+
+	function TOOL.BuildCPanel( CPanel )
+		CPanel:AddControl( "Header", { Description = "#tool.mining_linker.desc" } )
+		CPanel:AddControl( "RopeMaterial", { Label = "#tool.mining_linker.material", ConVar = "mining_automation_wiring_mat" } )
 	end
 end
