@@ -156,11 +156,11 @@ local function spawnDetonite(tr)
 			end
 		end
 
-		function drop:Use(ent)
+		--[[function drop:Use(ent)
 			if not ent:IsPlayer() then return end
 
 			self:Consume(ent)
-		end
+		end]]
 
 		function drop:Touch(ent)
 			if not ent:IsPlayer() then return end

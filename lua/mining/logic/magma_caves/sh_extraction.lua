@@ -318,44 +318,6 @@ if SERVER then
 
 	ms.Ores.PlayerExtractionCounts = ms.Ores.PlayerExtractionCounts or {}
 
-	local bad_ents = {}
-	hook.Add("OnEntityCreated", "mining_extraction_npc_ac", function(ent)
-		if not ent.CPPIGetOwner then return end
-
-		local class = ent:GetClass()
-		if class:match("^gmod%_wire%_") or class == "starfall_processor" then
-			timer.Simple(0, function()
-				if not IsValid(ent) then return end
-
-				local owner = ent:CPPIGetOwner()
-				if not IsValid(owner) then return end
-
-				bad_ents[owner] = bad_ents[owner] or 0
-				bad_ents[owner] = bad_ents[owner] + 1
-
-				timer.Remove(("mining_extraction_npc_ac_[%d]"):format(owner:EntIndex()))
-			end)
-		end
-	end)
-
-	hook.Add("EntityRemoved", "mining_extraction_npc_ac", function(ent)
-		if not ent.CPPIGetOwner then return end
-
-		local owner = ent:CPPIGetOwner()
-		if not IsValid(owner) then return end
-		if not bad_ents[owner] then return end
-
-		local class = ent:GetClass()
-		if class:match("^gmod%_wire%_") or class == "starfall_processor" then
-			bad_ents[owner] = math.max(0, bad_ents[owner] - 1)
-			if bad_ents[owner] == 0 then
-				timer.Create(("mining_extraction_npc_ac_[%d]"):format(owner:EntIndex()), 60, 1, function()
-					bad_ents[owner] = nil
-				end)
-			end
-		end
-	end)
-
 	local MAX_NPC_DIST = 300 * 300
 	hook.Add("KeyPress", "mining_extraction_npc", function(ply, key)
 		if key ~= IN_USE then return end
@@ -364,11 +326,6 @@ if SERVER then
 		if not npc:IsValid() then return end
 
 		if npc.role == "extractor" and npc:GetPos():DistToSqr(ply:GetPos()) <= MAX_NPC_DIST then
-			if bad_ents[ply] then
-				ply:ChatPrint("You cannot exchange your ores with the extractor while you have sensitive equipment around! (wiremod & starfall)")
-				return
-			end
-
 			net.Start(NET_TAG)
 			net.WriteString("OpenMenu")
 			net.WriteEntity(npc)
