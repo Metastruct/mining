@@ -38,7 +38,7 @@ if CLIENT then
 	language.Add("tool.mining_linker.left", "Select an output or apply a link.")
 	language.Add("tool.mining_linker.right", "Change selection.")
 	language.Add("tool.mining_linker.reload", "Unlink an output or release current selection.")
-	language.Add("tool.mining_linker.material", "Rope material.")
+	language.Add("tool.mining_linker.material", "Link material.")
 
 	function TOOL:LeftClick(tr)
 		if not IsFirstTimePredicted() then return end
