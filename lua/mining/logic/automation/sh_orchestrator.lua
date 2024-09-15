@@ -200,14 +200,28 @@ if SERVER then
 		ret = call_entity_fn(output_data.Ent, "CanLink", input_data, output_data)
 		if ret == false then return end
 
-		local cable = constraint.CreateKeyframeRope(input_data.Ent:WorldSpaceCenter(), 1, "cable/cable2", input_data.Ent, input_data.Ent, VECTOR_ZERO, 0, output_data.Ent, VECTOR_ZERO, 0, {})
+		local owner = input_data.Ent.CPPIGetOwner and input_data.Ent:CPPIGetOwner()
+		local rope_mat = "cable/cable2"
+		if IsValid(owner) then
+			local ply_mat_name = owner:GetInfo("mining_automation_wiring_mat")
+			if not ply_mat_name or ply_mat_name:Trim() == "" then
+				rope_mat = nil
+			elseif not Material(ply_mat_name):IsError() then
+				rope_mat = ply_mat_name
+			end
+		end
+
+		local cable
+		if rope_mat then
+			cable = constraint.CreateKeyframeRope(input_data.Ent:WorldSpaceCenter(), 1, rope_mat, input_data.Ent, input_data.Ent, VECTOR_ZERO, 0, output_data.Ent, VECTOR_ZERO, 0, {})
+			cable:SetKeyValue("Slack", "100") -- this gives the rope a more dangling aspect
+		end
+
 		output_data.Links[input_data.Ent] = output_data.Links[input_data.Ent] or {}
 		output_data.Links[input_data.Ent][input_data.Id] = true
 		input_data.Link = { Ent = output_data.Ent, Id = output_data.Id, Cable = cable }
 
 		call_entity_fn(input_data.Ent, "OnLink", output_data, input_data)
-
-		local owner = input_data.Ent.CPPIGetOwner and input_data.Ent:CPPIGetOwner()
 		orchestrator.SendPartialLinkData(owner, false, output_data, input_data)
 	end
 
@@ -310,11 +324,6 @@ if SERVER then
 
 			net.WriteInt(input_data.Ent:EntIndex(), 32)
 			net.WriteString(input_data.Id)
-
-			if not is_unlink then
-				net.WriteInt(input_data.Link.Cable:EntIndex(), 32)
-			end
-
 		net.Broadcast()
 	end
 
@@ -336,6 +345,8 @@ if SERVER then
 end
 
 if CLIENT then
+	CreateConVar("mining_automation_wiring_mat", "cable/cable2", { FCVAR_ARCHIVE, FCVAR_USERINFO})
+
 	orchestrator.LinkData = orchestrator.LinkData or {}
 
 	net.Receive(NET_MSG_NAME, function()
