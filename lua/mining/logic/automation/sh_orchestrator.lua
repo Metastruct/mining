@@ -113,10 +113,16 @@ if SERVER then
 				local ret = hook.Run("CanMiningLink", ply, output_ent, output_id, input_ent, input_id)
 				if ret == false then return end -- if we got false, then just deny it
 
-				-- otherwise if we got nil or true, apply default behavior
-				if not (_G.prop_owner and isfunction(_G.prop_owner.CanMiningLink)) then
-					if not ret and output_ent:CPPIGetOwner() ~= ply then return end
-					if not ret and input_ent:CPPIGetOwner() ~= ply then return end
+				-- if we got true, force through
+				if ret ~= true then
+					-- disallow on two props of different owners
+					if output_ent:CPPIGetOwner() ~= input_ent:CPPIGetOwner() then return end
+
+					-- otherwise if we got nil, apply default behavior
+					if not (_G.prop_owner and isfunction(_G.prop_owner.CanMiningLink)) then
+						if not ret and output_ent:CPPIGetOwner() ~= ply then return end
+						if not ret and input_ent:CPPIGetOwner() ~= ply then return end
+					end
 				end
 			end
 
@@ -136,9 +142,12 @@ if SERVER then
 				local ret = hook.Run("CanMiningUnlink", ply, interface_ent, interface_id, is_output)
 				if ret == false then return end -- if we got false, then just deny it
 
-				-- otherwise if we got nil or true, apply default behavior
-				if not (_G.prop_owner and isfunction(_G.prop_owner.CanMiningUnlink)) then
-					if not ret and interface_ent:CPPIGetOwner() ~= ply then return end
+				-- if we got true, force through
+				if ret ~= true then
+					-- otherwise if we got nil, apply default behavior
+					if not (_G.prop_owner and isfunction(_G.prop_owner.CanMiningUnlink)) then
+						if not ret and interface_ent:CPPIGetOwner() ~= ply then return end
+					end
 				end
 			end
 
