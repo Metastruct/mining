@@ -44,11 +44,6 @@ if CLIENT then
 		if not IsValid(tr.Entity) then return false end
 
 		local ent = tr.Entity
-		if ent.CPPIGetOwner and ent:CPPIGetOwner() ~= LocalPlayer() then
-			surface.PlaySound("buttons/button8.wav")
-			return false
-		end
-
 		local interfaces = self.SelectedOutput and _G.MA_Orchestrator.GetInputs(ent) or _G.MA_Orchestrator.GetOutputs(ent)
 		local interface_count = table.Count(interfaces)
 		if interface_count == 0 then return false end
@@ -116,11 +111,11 @@ if CLIENT then
 		if ply ~= LocalPlayer() then return end
 		if btn ~= MOUSE_WHEEL_DOWN and btn ~= MOUSE_WHEEL_UP then return end
 
-		local tr = ply:GetEyeTrace()
-		if not IsValid(tr.Entity) then return end
-
 		local linker = try_get_linker()
 		if not linker then return end
+
+		local tr = ply:GetEyeTrace()
+		if not IsValid(tr.Entity) then return end
 
 		local interfaces = linker.SelectedOutput and _G.MA_Orchestrator.GetInputs(tr.Entity) or _G.MA_Orchestrator.GetOutputs(tr.Entity)
 		local interface_count = table.Count(interfaces)
@@ -150,11 +145,6 @@ if CLIENT then
 		if not IsValid(tr.Entity) then return false end
 
 		local ent = tr.Entity
-		if ent.CPPIGetOwner and ent:CPPIGetOwner() ~= LocalPlayer() then
-			surface.PlaySound("buttons/button8.wav")
-			return false
-		end
-
 		local outputs = _G.MA_Orchestrator.GetOutputs(ent)
 		local outputs_count = table.Count(outputs)
 		if outputs_count == 0 then return false end

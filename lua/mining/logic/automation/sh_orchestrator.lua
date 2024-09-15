@@ -109,8 +109,14 @@ if SERVER then
 			local input_ent = net.ReadEntity()
 			local input_id = net.ReadString()
 
-			if output_ent.CPPIGetOwner and output_ent:CPPIGetOwner() ~= ply then return end
-			if input_ent.CPPIGetOwner and input_ent:CPPIGetOwner() ~= ply then return end
+			if output_ent.CPPIGetOwner and input_ent.CPPIGetOwner then
+				local ret = hook.Run("CanMiningLink", ply, output_ent, output_id, input_ent, input_id)
+				if ret == false then return end -- if we got false, then just deny it
+
+				-- otherwise if we got nil, apply default behavior
+				if not ret and output_ent:CPPIGetOwner() ~= ply then return end
+				if not ret and input_ent:CPPIGetOwner() ~= ply then return end
+			end
 
 			local input_data = orchestrator.GetInputData(input_ent, input_id)
 			if orchestrator.IsInputLinked(input_data) then
@@ -124,7 +130,13 @@ if SERVER then
 			local interface_ent = net.ReadEntity()
 			local interface_id = net.ReadString()
 
-			if interface_ent.CPPIGetOwner and interface_ent:CPPIGetOwner() ~= ply then return end
+			if interface_ent.CPPIGetOwner then
+				local ret = hook.Run("CanMiningUnlink", ply, interface_ent, interface_id, is_output)
+				if ret == false then return end -- if we got false, then just deny it
+
+				-- otherwise if we got nil, apply default behavior
+				if not ret and interface_ent:CPPIGetOwner() ~= ply then return end
+			end
 
 			if is_output then
 				orchestrator.UnlinkOutput(orchestrator.GetOutputData(interface_ent, interface_id))
