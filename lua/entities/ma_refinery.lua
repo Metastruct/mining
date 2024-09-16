@@ -30,6 +30,7 @@ if SERVER then
 		self:SetNWBool("IsPowered", false)
 		self.OreQueue = {}
 		self.RejectCount = 0
+		self.NextSoundCheck = 0
 
 		_G.MA_Orchestrator.RegisterInput(self, "oil", "OIL", "Oil", "Standard oil input. More oil equals better chance at refined ores!")
 		_G.MA_Orchestrator.RegisterInput(self, "power", "ENERGY", "Energy", "Standard energy input. More energy equals better chance at refined ores!")
@@ -119,9 +120,55 @@ if SERVER then
 		_G.MA_Orchestrator.RemoveEntityTimer("ma_refinery_power", self)
 		self:SetNWBool("IsPowered", false)
 	end
+
+	function ENT:CheckSoundLoop(time)
+		if time < self.NextSoundCheck then return end
+
+		if not self:CanWork() then
+			if self.SndLoop and self.SndLoop ~= -1 then
+				self:StopLoopingSound(self.SndLoop)
+			end
+
+			self.SndLoop = nil
+			self.NextSoundCheck = time + 2.5
+			return
+		end
+
+		if not self.SndLoop or self.SndLoop == -1 then
+			self.SndLoop = self:StartLoopingSound("ambient/machines/machine6.wav")
+		end
+
+		self.NextSoundCheck = time + 2.5
+	end
+
+	function ENT:Think()
+		local time = CurTime()
+		self:CheckSoundLoop(time)
+	end
 end
 
 if CLIENT then
+	local WHEEL_MDL = "models/props_wasteland/wheel01.mdl"
+	local function addWheelEntity(self, offset)
+		local wheel = ClientsideModel(WHEEL_MDL)
+		wheel:SetModelScale(1.75)
+		wheel:SetPos(self:GetPos() + offset)
+		wheel:Spawn()
+		wheel:SetParent(self)
+
+		local argonite_rarity = Ores.GetOreRarityByName("Argonite")
+		wheel.RenderOverride = function()
+			local color = Ores.__R[argonite_rarity].PhysicalColor
+			render.SetColorModulation(color.r / 100, color.g / 100, color.b / 100)
+			render.MaterialOverride(Ores.Automation.EnergyMaterial)
+			wheel:DrawModel()
+			render.MaterialOverride()
+			render.SetColorModulation(1, 1, 1)
+		end
+
+		return wheel
+	end
+
 	function ENT:Initialize()
 		_G.MA_Orchestrator.RegisterInput(self, "oil", "OIL", "Oil", "Standard oil input. More oil equals better chance at refined ores!")
 		_G.MA_Orchestrator.RegisterInput(self, "power", "ENERGY", "Energy", "Standard energy input. More energy equals better chance at refined ores!")
@@ -129,10 +176,38 @@ if CLIENT then
 
 		_G.MA_Orchestrator.RegisterOutput(self, "ores", "ORE", "Ores", "Refined ores output.")
 		_G.MA_Orchestrator.RegisterOutput(self, "rejects", "DETONITE", "Rejects", "The rejects in the refinement process.")
+
+		self.Wheel = addWheelEntity(self, self:GetUp() * -30)
 	end
 
 	function ENT:Draw()
 		self:DrawModel()
+
+		local has_energy = self:CanWork()
+		if has_energy then
+			local effect_data = EffectData()
+			effect_data:SetAngles((self:GetUp()):Angle())
+			effect_data:SetScale(6)
+			effect_data:SetOrigin(self:GetPos())
+			util.Effect("MuzzleEffect", effect_data, true, true)
+		end
+
+		if IsValid(self.Wheel) then
+			local ang = self:GetAngles()
+			ang:RotateAroundAxis(self:GetForward(), 90)
+
+			if has_energy then
+				ang:RotateAroundAxis(self:GetUp(), CurTime() * 300 % 360)
+			end
+
+			self.Wheel:SetPos(self:GetPos() + self:GetUp() * -30)
+			self.Wheel:SetParent(self)
+			self.Wheel:SetAngles(ang)
+		end
+	end
+
+	function ENT:OnRemove()
+		SafeRemoveEntity(self.Wheel)
 	end
 
 	function ENT:OnDrawEntityInfo()

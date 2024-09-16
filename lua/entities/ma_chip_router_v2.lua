@@ -310,6 +310,10 @@ if SERVER then
 end
 
 if CLIENT then
+	function ENT:Initialize()
+		_G.MA_Orchestrator.RegisterInput(self, "bandwidth", "DETONITE", "Bandwidth", "Detonite input required to power the chips.")
+	end
+
 	function ENT:Draw()
 		self:DrawModel()
 	end
