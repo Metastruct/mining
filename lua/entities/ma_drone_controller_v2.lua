@@ -150,37 +150,6 @@ if SERVER then
 			self:SetNWBool("Wiremod_Active", tobool(state))
 		end
 	end
-
-	CreateConVar("sbox_maxma_drone_controller_v2", "1", FCVAR_ARCHIVE, "Maximum amount of drone controller entities a player can have", 0, 100)
-
-	hook.Add("OnEntityCreated", "ma_drone_controller_v2", function(ent)
-		if ent:GetClass() ~= "ma_drone_controller_v2" then return end
-		if not ent.CPPIGetOwner then return end
-
-		timer.Simple(0, function()
-			if not IsValid(ent) then return end
-
-			local ply = ent:CPPIGetOwner()
-			if not IsValid(ply) then
-				SafeRemoveEntity(ent)
-				return
-			end
-
-			if ply:CheckLimit("ma_drone_controller_v2") then
-				ply:AddCount("ma_drone_controller_v2", ent)
-			else
-				SafeRemoveEntity(ent)
-			end
-		end)
-	end)
-
-	hook.Add("PlayerSpawnSENT", "ma_drone_controller_v2", function(ply, className)
-		if not className then return end
-
-		if className == "ma_drone_controller_v2" and not ply:CheckLimit("ma_drone_controller_v2") then
-			return false
-		end
-	end)
 end
 
 if CLIENT then
