@@ -163,7 +163,26 @@ local function playSoundForDuration(sound_path, delay)
 	end)
 end
 
+local function isInCave(pos)
+	if not _G.ms then return false end
+	if not istable(_G.ms.TRIGGERS_REGISTERED) then return false end
+
+	for name, trigger in pairs(_G.ms.TRIGGERS_REGISTERED) do
+		if name:match("^cave") or name == "volcano" then
+			local mins, maxs = trigger:OBBMins(), trigger:OBBMaxs()
+			local trigger_pos = trigger:GetPos()
+			if pos:WithinAABox(trigger_pos + maxs, trigger_pos + mins) then
+				return true
+			end
+		end
+	end
+
+	return false
+end
+
 function Ores.MineCollapse(pos, delay, rarityData, ply)
+	if not isInCave(pos) then return end
+
 	local rocks = {}
 
 	rarityData = rarityData or DEFAULT_RARITY_DATA
