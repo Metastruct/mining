@@ -64,7 +64,7 @@ if SERVER then
 					self.OreQueue[1] = math.min(4, self.OreQueue[1] + 1)
 				elseif rejected then
 					table.remove(self.OreQueue, 1)
-					self.RejectCount = self.RejectCount + 1
+					self.RejectCount = self.RejectCount + 2
 				end
 
 				if not rejected then
