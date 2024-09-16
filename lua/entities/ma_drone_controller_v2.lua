@@ -21,18 +21,16 @@ function ENT:CanWork()
 	return false
 end
 
-local MAX_DETONITE = 300
+local MAX_DETONITE = 60
 function ENT:GetDroneCount()
 	if not self:CanWork() then return 0 end
 
 	local amount = self:GetNW2Int("Detonite", 0) / MAX_DETONITE
 	if amount < 0.33 then
-		return 0
-	elseif amount >= 0.33 and amount < 0.66 then
 		return 1
-	elseif amount >= 0.66 and amount < 1 then
+	elseif amount >= 0.33 and amount < 0.66 then
 		return 2
-	elseif amount == 1 then
+	elseif amount >= 0.66 then
 		return 3
 	end
 end
@@ -74,6 +72,17 @@ if SERVER then
 
 		if _G.WireLib then
 			_G.WireLib.CreateInputs(self, {"Active (If this is non-zero, activate the controller)"})
+			_G.WireLib.CreateOutputs(self, {
+				"DroneCount (Outputs the current drone count) [NORMAL]",
+				"MaxDroneCount (Outputs the max amount of drones at once) [NORMAL]",
+				"Detonite (Outputs the current detonite level) [NORMAL]",
+				"MaxDetonite (Outputs the max level of detonite) [NORMAL]",
+			})
+
+			_G.WireLib.TriggerOutput(self, "DroneCount", 0)
+			_G.WireLib.TriggerOutput(self, "MaxDroneCount", 3)
+			_G.WireLib.TriggerOutput(self, "Detonite", 0)
+			_G.WireLib.TriggerOutput(self, "MaxDetonite", MAX_DETONITE)
 		end
 
 		Ores.Automation.PrepareForDuplication(self)
@@ -90,14 +99,16 @@ if SERVER then
 			self:UpdateDrones()
 
 			controller_timer_tick = controller_timer_tick + 1
-			if controller_timer_tick % 5 == 0 then
+
+			local drone_count = self:GetDroneCount()
+			if controller_timer_tick % 30 == 0 then
 				local cur_detonite = self:GetNW2Int("Detonite", 0)
-				local new_detonite = math.max(0, cur_detonite - 1)
+				local new_detonite = math.max(0, cur_detonite - drone_count)
 				self:SetNW2Int("Detonite", new_detonite)
 
 				if _G.WireLib then
 					_G.WireLib.TriggerOutput(self, "Detonite", new_detonite)
-					_G.WireLib.TriggerOutput(self, "DroneCount", self:GetDroneCount())
+					_G.WireLib.TriggerOutput(self, "DroneCount", drone_count)
 				end
 			end
 		end)
