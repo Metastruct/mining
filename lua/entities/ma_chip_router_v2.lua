@@ -49,6 +49,8 @@ if SERVER then
 				"MaxBandwidth (Outputs the max level of bandwidth) [NORMAL]",
 			})
 
+			_G.WireLib.TriggerOutput(self, "Usage", 0)
+			_G.WireLib.TriggerOutput(self, "Bandwidth", 0)
 			_G.WireLib.TriggerOutput(self, "MaxBandwidth", self.MaxBandwidth)
 		end
 

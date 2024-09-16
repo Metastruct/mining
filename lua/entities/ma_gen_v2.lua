@@ -79,7 +79,7 @@ if SERVER then
 		Ores.Automation.PrepareForDuplication(self)
 
 		if _G.WireLib then
-			_G.WireLib.CreateInputs(self, {"Active (If this is non-zero, activate the drill)"})
+			_G.WireLib.CreateInputs(self, {"Active (If this is non-zero, activate the generator)"})
 			_G.WireLib.CreateOutputs(self, {
 				"Energy (Outputs the current energy level) [NORMAL]",
 				"MaxEnergy (Outputs the max level of energy) [NORMAL]",
