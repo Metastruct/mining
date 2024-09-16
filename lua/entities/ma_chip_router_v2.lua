@@ -325,7 +325,6 @@ if CLIENT then
 				{ Type = "Data", Label = "Usage", Value = self:GetNWInt("BandwidthUsage", 0) },
 				{ Type = "Data", Label = "Bandwidth", Value = self:GetNW2Int("Bandwidth", 0) },
 				{ Type = "State", Value = self:GetNWBool("Wiremod_Active", true) },
-				{ Type = "Action", Binding = "+use", Text = "FILL" }
 			}
 		end
 
