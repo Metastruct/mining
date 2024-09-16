@@ -10,7 +10,7 @@ ENT.Author = "Earu"
 ENT.Category = "Mining"
 ENT.RenderGroup = RENDERGROUP_OPAQUE
 ENT.Spawnable = true
-ENT.AdminOnly = true
+ENT.AdminOnly = false
 ENT.ClassName = "ma_drone_controller_v2"
 ENT.IconOverride = "entities/ma_drone_controller_v2.png"
 
@@ -83,9 +83,40 @@ if SERVER then
 			Ores.Automation.ReplicateOwnership(self, self)
 		end)
 
+		_G.MA_Orchestrator.RegisterInput(self, "detonite", "DETONITE", "detonite", "Detonite input required to power the drones.")
+
+		local controller_timer_tick = 0
 		_G.MA_Orchestrator.EntityTimer("mining_argonite_drone_hive", self, 1, 0, function()
 			self:UpdateDrones()
+
+			controller_timer_tick = controller_timer_tick + 1
+			if controller_timer_tick % 5 == 0 then
+				local cur_detonite = self:GetNW2Int("Detonite", 0)
+				local new_detonite = math.max(0, cur_detonite - 1)
+				self:SetNW2Int("Detonite", new_detonite)
+
+				if _G.WireLib then
+					_G.WireLib.TriggerOutput(self, "Detonite", new_detonite)
+					_G.WireLib.TriggerOutput(self, "DroneCount", self:GetDroneCount())
+				end
+			end
 		end)
+	end
+
+	function ENT:MA_OnOutputReady(output_data, input_data)
+		if input_data.Id ~= "detonite" then return end
+
+		_G.MA_Orchestrator.Execute(output_data, input_data)
+	end
+
+	function ENT:MA_Execute(output_data, input_data)
+		if input_data.Id == "detonite" then
+			if not isnumber(output_data.Ent.RejectCount) then return end
+			if output_data.Ent.RejectCount < 1 then return end
+
+			self:AddDetonite(1)
+			output_data.Ent.RejectCount = math.max(0, output_data.Ent.RejectCount - 1)
+		end
 	end
 
 	function ENT:UpdateDrones()
@@ -98,8 +129,8 @@ if SERVER then
 			return
 		end
 
-		local droneCount = self:GetDroneCount()
-		if droneCount > #self.Drones then
+		local drone_count = self:GetDroneCount()
+		if drone_count > #self.Drones then
 			local drone = ents.Create("mining_argonite_drone")
 			drone:Spawn()
 			drone:Teleport(self:WorldSpaceCenter() + drone.HeightOffset)
@@ -115,8 +146,8 @@ if SERVER then
 			end
 
 			table.insert(self.Drones, drone)
-		elseif droneCount < #self.Drones then
-			for i = droneCount, #self.Drones do
+		elseif drone_count < #self.Drones then
+			for i = drone_count, #self.Drones do
 				SafeRemoveEntity(self.Drones[i])
 				self.Drones[i] = nil
 			end
@@ -126,13 +157,13 @@ if SERVER then
 	function ENT:AddDetonite(amount)
 		if amount < 1 then return end
 
-		local curAmount = self:GetNW2Int("Detonite", 0)
-		local newAmount = math.min(MAX_DETONITE, curAmount + amount)
+		local cur_amount = self:GetNW2Int("Detonite", 0)
+		local new_amount = math.min(MAX_DETONITE, cur_amount + amount)
 
-		self:SetNW2Int("Detonite", newAmount)
+		self:SetNW2Int("Detonite", new_amount)
 
 		if _G.WireLib then
-			_G.WireLib.TriggerOutput(self, "Detonite", newAmount)
+			_G.WireLib.TriggerOutput(self, "Detonite", new_amount)
 			_G.WireLib.TriggerOutput(self, "DroneCount", self:GetDroneCount())
 		end
 
@@ -153,6 +184,10 @@ if SERVER then
 end
 
 if CLIENT then
+	function ENT:Initialize()
+		_G.MA_Orchestrator.RegisterInput(self, "detonite", "DETONITE", "detonite", "Detonite input required to power the drones.")
+	end
+
 	function ENT:OnDrawEntityInfo()
 		if not self.MiningFrameInfo then
 			self.MiningFrameInfo = {
@@ -160,7 +195,6 @@ if CLIENT then
 				{ Type = "Data", Label = "Detonite", Value = self:GetNW2Int("Detonite", 0), MaxValue = self:GetNW2Int("MaxDetonite", MAX_DETONITE) },
 				{ Type = "Data", Label = "Drones", Value = self:GetDroneCount() },
 				{ Type = "State", Value = self:CanWork() },
-				{ Type = "Action", Binding = "+use", Text = "FILL" }
 			}
 		end
 
