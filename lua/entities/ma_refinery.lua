@@ -40,15 +40,19 @@ if SERVER then
 		_G.MA_Orchestrator.RegisterOutput(self, "ores", "ORE", "Ores", "Refined ores output.")
 		_G.MA_Orchestrator.RegisterOutput(self, "rejects", "DETONITE", "Rejects", "The rejects in the refinement process.")
 
+		local refinery_timer_tick = 0
 		_G.MA_Orchestrator.EntityTimer("ma_refinery", self, 1, 0, function()
 			if not self:CanWork() then return end
 
-			local cur_fuel = self:GetNW2Int("Fuel", 0)
-			local new_fuel = math.max(0, cur_fuel - 1)
-			self:SetNW2Int("Fuel", new_fuel)
+			refinery_timer_tick = refinery_timer_tick + 1
+			if refinery_timer_tick % 5 == 0 then
+				local cur_fuel = self:GetNW2Int("Fuel", 0)
+				local new_fuel = math.max(0, cur_fuel - 1)
+				self:SetNW2Int("Fuel", new_fuel)
 
-			if _G.WireLib then
-				_G.WireLib.TriggerOutput(self, "Fuel", new_fuel)
+				if _G.WireLib then
+					_G.WireLib.TriggerOutput(self, "Fuel", new_fuel)
+				end
 			end
 
 			if #self.OreQueue > 1 then
