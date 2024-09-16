@@ -14,6 +14,7 @@ ENT.ClassName = "ma_refinery"
 ENT.IconOverride = "entities/ma_refinery.png"
 
 function ENT:CanWork()
+	if not self:GetNWBool("Wiremod_Active", true) then return false end
 	return self:GetNW2Int("Fuel", 0) > 0 and self:GetNWBool("IsPowered", false)
 end
 
@@ -42,6 +43,14 @@ if SERVER then
 		_G.MA_Orchestrator.EntityTimer("ma_refinery", self, 1, 0, function()
 			if not self:CanWork() then return end
 
+			local cur_fuel = self:GetNW2Int("Fuel", 0)
+			local new_fuel = math.max(0, cur_fuel - 1)
+			self:SetNW2Int("Fuel", new_fuel)
+
+			if _G.WireLib then
+				_G.WireLib.TriggerOutput(self, "Fuel", new_fuel)
+			end
+
 			if #self.OreQueue > 1 then
 				local efficiency = self:GetNW2Int("Energy", 0) / 100
 				local refined = math.random(0, 100) < (20 * efficiency)
@@ -67,6 +76,21 @@ if SERVER then
 		end)
 
 		Ores.Automation.PrepareForDuplication(self)
+
+		if _G.WireLib then
+			_G.WireLib.CreateInputs(self, {"Active (If this is non-zero, activate the refinery)"})
+			_G.WireLib.CreateOutputs(self, {
+				"Efficiency (Outputs the current efficiency level) [NORMAL]",
+				"MaxEfficiency (Outputs the max level of efficiency) [NORMAL]",
+				"Fuel (Outputs the current amount of fuel) [NORMAL]",
+				"MaxFuel (Outputs the maximum amount of fuel) [NORMAL]",
+			})
+
+			_G.WireLib.TriggerOutput(self, "Efficiency", 0)
+			_G.WireLib.TriggerOutput(self, "MaxEfficiency", 100)
+			_G.WireLib.TriggerOutput(self, "Fuel", 0)
+			_G.WireLib.TriggerOutput(self, "MaxFuel", Ores.Automation.BatteryCapacity)
+		end
 	end
 
 	function ENT:MA_OnLink(output_data, input_data)
@@ -107,10 +131,20 @@ if SERVER then
 		elseif input_data.Id == "oil" then
 			local replenish = math.ceil(Ores.Automation.BatteryCapacity / #output_data.Links)
 			local cur_fuel = self:GetNW2Int("Fuel", 0)
-			self:SetNW2Int("Fuel", math.min(Ores.Automation.BatteryCapacity, cur_fuel + replenish))
+			local new_fuel = math.min(Ores.Automation.BatteryCapacity, cur_fuel + replenish)
+			self:SetNW2Int("Fuel", new_fuel)
+
+			if _G.WireLib then
+				_G.WireLib.TriggerOutput(self, "Fuel", new_fuel)
+			end
 		elseif input_data.Id == "power" then
 			local energy_lvl = isfunction(output_data.Ent.GetEnergyLevel) and output_data.Ent:GetEnergyLevel() or 1
 			self:SetNW2Int("Energy", energy_lvl)
+
+			if _G.WireLib then
+				_G.WireLib.TriggerOutput(self, "Efficiency", energy_lvl)
+			end
+
 			return energy_lvl > 0
 		end
 	end
@@ -120,6 +154,11 @@ if SERVER then
 
 		_G.MA_Orchestrator.RemoveEntityTimer("ma_refinery_power", self)
 		self:SetNWBool("IsPowered", false)
+		self:SetNW2Int("Energy", 0)
+
+		if _G.WireLib then
+			_G.WireLib.TriggerOutput(self, "Efficiency", 0)
+		end
 	end
 
 	function ENT:CheckSoundLoop(time)
@@ -151,6 +190,10 @@ if SERVER then
 		if self.SndLoop and self.SndLoop ~= -1 then
 			self:StopLoopingSound(self.SndLoop)
 		end
+	end
+
+	function ENT:TriggerInput(port, state)
+		if port == "Active" then self:SetNWBool("Wiremod_Active", tobool(state)) end
 	end
 end
 

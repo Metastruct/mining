@@ -93,7 +93,12 @@ if SERVER then
 
 		_G.MA_Orchestrator.EntityTimer("ma_smelter_v2_fuel", self, 5, 0, function()
 			local cur_fuel = self:GetNW2Int("Fuel", 0)
-			self:SetNW2Int("Fuel", math.max(0, cur_fuel - 1))
+			local new_fuel = math.max(0, cur_fuel - 1)
+			self:SetNW2Int("Fuel", new_fuel)
+
+			if _G.WireLib then
+				_G.WireLib.TriggerOutput(self, "Fuel", new_fuel)
+			end
 		end)
 
 		Ores.Automation.PrepareForDuplication(self)
@@ -102,6 +107,18 @@ if SERVER then
 			_G.WireLib.CreateInputs(self, {
 				"Active (If non-zero, activate the smelter.)"
 			})
+
+			_G.WireLib.CreateOutputs(self, {
+				"Fuel (Outputs the current amount of fuel) [NORMAL]",
+				"MaxFuel (Outputs the maximum amount of fuel) [NORMAL]",
+				"OreCounts (Outputs an array of the counts of each ore stored in the storage) [ARRAY]",
+				"OreNames (Outputs an array of the names of each ore stored in the storage) [ARRAY]",
+			})
+
+			_G.WireLib.TriggerOutput(self, "Fuel", 0)
+			_G.WireLib.TriggerOutput(self, "MaxFuel", Ores.Automation.BatteryCapacity)
+			_G.WireLib.TriggerOutput(self, "OreCounts", {})
+			_G.WireLib.TriggerOutput(self, "OreNames", {})
 		end
 	end
 
@@ -144,7 +161,12 @@ if SERVER then
 		elseif input_data.Id == "oil" then
 			local replenish = math.ceil(Ores.Automation.BatteryCapacity / #output_data.Links)
 			local cur_fuel = self:GetNW2Int("Fuel", 0)
-			self:SetNW2Int("Fuel", math.min(Ores.Automation.BatteryCapacity, cur_fuel + replenish))
+			local new_fuel = math.min(Ores.Automation.BatteryCapacity, cur_fuel + replenish)
+			self:SetNW2Int("Fuel", new_fuel)
+
+			if _G.WireLib then
+				_G.WireLib.TriggerOutput(self, "Fuel", new_fuel)
+			end
 		elseif input_data.Id == "power" then
 			return (isfunction(output_data.Ent.GetEnergyLevel) and output_data.Ent:GetEnergyLevel() or 1) > 0
 		end
@@ -165,8 +187,21 @@ if SERVER then
 
 	function ENT:UpdateNetworkOreData()
 		local t = {}
+		local wire_counts = {}
+		local wire_names = {}
 		for rarity, amount in pairs(self.Ores) do
 			table.insert(t, ("%s=%s"):format(rarity, amount))
+
+			local ore_data = Ores.__R[rarity]
+			if ore_data then
+				table.insert(wire_counts, amount)
+				table.insert(wire_names, ore_data.Name or "Unknown")
+			end
+		end
+
+		if _G.WireLib then
+			_G.WireLib.TriggerOutput(self, "OreCounts", wire_counts)
+			_G.WireLib.TriggerOutput(self, "OreNames", wire_names)
 		end
 
 		self:SetNWString("OreData", table.concat(t, ";"))
@@ -310,14 +345,14 @@ if CLIENT then
 			{ Type = "Data", Label = "Fuel", Value = self:GetNW2Int("Fuel", 0), MaxValue = self:GetNW2Int("MaxFuel", Ores.Automation.BatteryCapacity) },
 		}
 
-		local globalOreData = self:GetNWString("OreData", ""):Trim()
-		if #globalOreData < 1 then return data end
+		local global_ore_data = self:GetNWString("OreData", ""):Trim()
+		if #global_ore_data < 1 then return data end
 
-		for i, dataChunk in ipairs(globalOreData:Split(";")) do
-			local rarityData = dataChunk:Split("=")
-			local oreData = Ores.__R[tonumber(rarityData[1])]
+		for i, data_chunk in ipairs(global_ore_data:Split(";")) do
+			local rarity_data = data_chunk:Split("=")
+			local ore_data = Ores.__R[tonumber(rarity_data[1])]
 
-			table.insert(data, { Type = "Data", Label = oreData.Name .. " Ingot", Value = ("%s/%d"):format(rarityData[2], Ores.Automation.IngotSize), LabelColor = oreData.HudColor, ValueColor = oreData.HudColor })
+			table.insert(data, { Type = "Data", Label = ore_data.Name .. " Ingot", Value = ("%s/%d"):format(rarity_data[2], Ores.Automation.IngotSize), LabelColor = ore_data.HudColor, ValueColor = ore_data.HudColor })
 		end
 
 		return data

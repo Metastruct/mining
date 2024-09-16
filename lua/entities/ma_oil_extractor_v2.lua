@@ -95,10 +95,14 @@ if SERVER then
 		Ores.Automation.PrepareForDuplication(self)
 
 		if _G.WireLib then
-			_G.WireLib.CreateInputs(self, {"Active (If this is non-zero, activate the drill)"})
-			_G.WireLib.CreateOutputs(self, {"Oil (Outputs the current amount of extracted oil) [NORMAL]"})
+			_G.WireLib.CreateInputs(self, {"Active (If this is non-zero, activate the oil extractor)"})
+			_G.WireLib.CreateOutputs(self, {
+				"Oil (Outputs the current amount of extracted oil) [NORMAL]",
+				"MaxOil (Outputs the maximum amount of extracted oil) [NORMAL]",
+			})
 
 			_G.WireLib.TriggerOutput(self, "Oil", 0)
+			_G.WireLib.TriggerOutput(self, "MaxOil", Ores.Automation.OilExtractionRate)
 		end
 	end
 
@@ -213,6 +217,10 @@ if SERVER then
 		end
 
 		return ent
+	end
+
+	function ENT:TriggerInput(port, state)
+		if port == "Active" then self:SetNWBool("Wiremod_Active", tobool(state)) end
 	end
 end
 

@@ -73,7 +73,7 @@ if SERVER then
 		self.Frame:SetTransmitWithParent(true)
 
 		if _G.WireLib then
-			_G.WireLib.CreateInputs(self, {"Active (If this is non-zero, activate the router)"})
+			_G.WireLib.CreateInputs(self, {"Active (If this is non-zero, activate the controller)"})
 		end
 
 		Ores.Automation.PrepareForDuplication(self)

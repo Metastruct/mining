@@ -105,7 +105,11 @@ if SERVER then
 
 		local energy_lvl = isfunction(output_data.Ent.GetEnergyLevel) and output_data.Ent:GetEnergyLevel() or 1
 		self:SetNW2Int("Energy", energy_lvl)
-		_G.WireLib.TriggerOutput(self, "Efficiency", energy_lvl)
+
+		if _G.WireLib then
+			_G.WireLib.TriggerOutput(self, "Efficiency", energy_lvl)
+		end
+
 		return energy_lvl > 0
 	end
 
@@ -116,7 +120,11 @@ if SERVER then
 		_G.MA_Orchestrator.RemoveEntityTimer("ma_drill_v2", self)
 
 		self:SetNWBool("IsPowered", false)
-		_G.WireLib.TriggerOutput(self, "Efficiency", 0)
+		self:SetNW2Int("Energy", 0)
+
+		if _G.WireLib then
+			_G.WireLib.TriggerOutput(self, "Efficiency", 0)
+		end
 	end
 
 	function ENT:TriggerInput(port, state)
