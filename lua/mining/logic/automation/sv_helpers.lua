@@ -152,7 +152,7 @@ end
 Ores.Automation.RegisterCustomLimit("ma_drill_v2", 12)
 Ores.Automation.RegisterCustomLimit("ma_drone_controller_v2", 1)
 Ores.Automation.RegisterCustomLimit("ma_chip_router_v2", 1)
-Ores.Automation.RegisterCustomLimit("ma_refinery", 1)
+Ores.Automation.RegisterCustomLimit("ma_refinery", 2)
 
 CreateConVar("sbox_maxmining_automation", "40", FCVAR_ARCHIVE, "Maximum amount of mining automation entities a player can have", 0, 100)
 hook.Add("OnEntityCreated", "mining_automation", function(ent)
