@@ -99,7 +99,7 @@ if SERVER then
 	function ENT:MA_Execute(output_data, input_data)
 		if input_data.Id ~= "battery" then return end
 
-		local replenish = math.ceil(10 / #output_data.Links)
+		local replenish = math.ceil(10 / table.Count(output_data.Links))
 		local cur_energy = self:GetNW2Float("Energy", 0)
 		local new_energy = math.min(100, cur_energy + replenish)
 		self:SetNW2Float("Energy", new_energy)

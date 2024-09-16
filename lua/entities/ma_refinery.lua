@@ -133,7 +133,7 @@ if SERVER then
 				table.remove(self.OreQueue, #self.OreQueue)
 			end
 		elseif input_data.Id == "oil" then
-			local replenish = math.ceil(Ores.Automation.BatteryCapacity / #output_data.Links)
+			local replenish = math.ceil(Ores.Automation.BatteryCapacity / table.Count(output_data.Links))
 			local cur_fuel = self:GetNW2Int("Fuel", 0)
 			local new_fuel = math.min(Ores.Automation.BatteryCapacity, cur_fuel + replenish)
 			self:SetNW2Int("Fuel", new_fuel)
