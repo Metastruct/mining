@@ -21,6 +21,7 @@ Ores.Automation = Ores.Automation or {
 		ma_chip_router_v2 = true,
 		ma_drone_controller_v2 = true,
 		ma_bomb_v2 = true,
+		ma_refinery = true,
 	},
 	GraphUnit = 40,
 	GraphHeightMargin = 75,
