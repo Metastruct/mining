@@ -11,9 +11,10 @@ ENT.Category = "Mining"
 ENT.RenderGroup = RENDERGROUP_OPAQUE
 ENT.Spawnable = true
 ENT.ClassName = "ma_graph_screen"
+ENT.IconOverride = "entities/ma_graph_screen.png"
 
 if SERVER then
-	resource.AddFile("materials/entities/ma_merger_v2.png")
+	resource.AddFile("materials/entities/ma_graph_screen.png")
 
 	function ENT:Initialize()
 		self:SetModel("models/hunter/plates/plate1x1.mdl")
