@@ -287,28 +287,6 @@ if SERVER then
 			end
 		end
 	end
-
-	-- makes it possible to collect detonite no matter what
-	hook.Add("OnEntityCreated", ENT.ClassName, function(ent)
-		if ent:GetClass() ~= "mining_ore" then return end
-
-		timer.Simple(0, function()
-			local detoniteRarity = Ores.GetOreRarityByName("Detonite")
-			local rarity = ent:GetRarity()
-
-			if rarity ~= detoniteRarity then return end
-
-			local old_touch = ent.Touch
-			function ent:Touch(e)
-				if e:IsPlayer() then
-					self:Consume(e)
-					return
-				end
-
-				old_touch(self, e)
-			end
-		end)
-	end)
 end
 
 if CLIENT then
