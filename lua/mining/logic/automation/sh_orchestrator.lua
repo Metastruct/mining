@@ -84,9 +84,9 @@ function orchestrator.EntityTimer(name, ent, delay, occurences, callback)
 			return
 		end
 
-		local succ, err = pcall(callback)
+		local succ = xpcall(callback, _G.ErrorNoHaltWithStack)
 		if not succ then
-			ErrorNoHalt(err)
+			print(timer_name, "failed!")
 		end
 	end)
 end
