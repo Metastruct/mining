@@ -1,0 +1,146 @@
+AddCSLuaFile()
+
+module("ms", package.seeall)
+Ores = Ores or {}
+
+ENT.Type = "anim"
+ENT.Base = "base_anim"
+ENT.PrintName = "Refinery"
+ENT.Author = "Earu"
+ENT.Category = "Mining"
+ENT.RenderGroup = RENDERGROUP_OPAQUE
+ENT.Spawnable = false
+ENT.ClassName = "ma_refinery"
+ENT.IconOverride = "entities/ma_refinery.png"
+
+function ENT:CanWork()
+	return self:GetNW2Int("Fuel", 0) > 0 and self:GetNWBool("IsPowered", false)
+end
+
+if SERVER then
+	resource.AddFile("materials/entities/ma_refinery.png")
+
+	function ENT:Initialize()
+		self:SetModel("models/xqm/afterburner1huge.mdl")
+		self:SetMaterial("phoenix_storms/OfficeWindow_1-1")
+		self:SetMoveType(MOVETYPE_VPHYSICS)
+		self:PhysicsInit(SOLID_VPHYSICS)
+		self:SetSolid(SOLID_VPHYSICS)
+		self:PhysWake()
+		self:SetNWBool("IsPowered", false)
+		self.OreQueue = {}
+		self.RejectCount = 0
+
+		_G.MA_Orchestrator.RegisterInput(self, "oil", "OIL", "Oil", "Standard oil input. More oil equals better chance at refined ores!")
+		_G.MA_Orchestrator.RegisterInput(self, "power", "ENERGY", "Energy", "Standard energy input. More energy equals better chance at refined ores!")
+		_G.MA_Orchestrator.RegisterInput(self, "ores", "ORE", "Ores", "Standard ores input.")
+
+		_G.MA_Orchestrator.RegisterOutput(self, "ores", "ORE", "Ores", "Refined ores output.")
+		_G.MA_Orchestrator.RegisterOutput(self, "rejects", "DETONITE", "Rejects", "The rejects in the refinement process.")
+
+		_G.MA_Orchestrator.EntityTimer("ma_refinery", self, 1, 0, function()
+			if not self:CanWork() then return end
+
+			if #self.OreQueue > 1 then
+				local efficiency = self:GetNW2Int("Energy", 0) / 100
+				local refined = math.random(0, 100) < (20 * efficiency)
+				local rejected = math.random(0, 100) < 20
+
+				if refined then
+					self.OreQueue[1] = math.min(4, self.OreQueue[1] + 1)
+				elseif rejected then
+					table.remove(self.OreQueue, 1)
+					self.RejectCount = self.RejectCount + 1
+				end
+
+				if not rejected then
+					local output_data = _G.MA_Orchestrator.GetOutputData(self, "ores")
+					_G.MA_Orchestrator.SendOutputReadySignal(output_data)
+				end
+			end
+
+			if self.RejectCount > 0 then
+				local output_data = _G.MA_Orchestrator.GetOutputData(self, "rejects")
+				_G.MA_Orchestrator.SendOutputReadySignal(output_data)
+			end
+		end)
+
+		Ores.Automation.PrepareForDuplication(self)
+	end
+
+	function ENT:MA_OnLink(output_data, input_data)
+		if input_data.Id ~= "power" then return end
+
+		local power_src_ent = output_data.Ent
+		if not IsValid(power_src_ent) then return end
+
+		_G.MA_Orchestrator.EntityTimer("ma_refinery_power", self, 1, 0, function()
+			local got_power = _G.MA_Orchestrator.Execute(output_data, input_data)
+			self:SetNWBool("IsPowered", got_power or false)
+		end)
+
+		-- also executes as soon as its linked
+		local got_power = _G.MA_Orchestrator.Execute(output_data, input_data)
+		self:SetNWBool("IsPowered", got_power or false)
+	end
+
+	function ENT:MA_OnOutputReady(output_data, input_data)
+		if input_data.Id ~= "ores" and input_data.Id ~= "oil" then return end
+
+		_G.MA_Orchestrator.Execute(output_data, input_data)
+	end
+
+	function ENT:MA_Execute(output_data, input_data)
+		if input_data.Id == "ores" then
+			if not istable(output_data.Ent.OreQueue) then return end
+			if #output_data.Ent.OreQueue == 0 then return end
+
+			-- combines queues
+			local rarity = table.remove(output_data.Ent.OreQueue, 1)
+			table.insert(self.OreQueue, 1, rarity)
+
+			-- keep an internal storage of the last 50 ores
+			if #self.OreQueue > 50 then
+				table.remove(self.OreQueue, #self.OreQueue)
+			end
+		elseif input_data.Id == "oil" then
+			local cur_fuel = self:GetNW2Int("Fuel", 0)
+			self:SetNW2Int("Fuel", math.min(Ores.Automation.BatteryCapacity, cur_fuel + Ores.Automation.BatteryCapacity))
+		elseif input_data.Id == "power" then
+			local energy_lvl = isfunction(output_data.Ent.GetEnergyLevel) and output_data.Ent:GetEnergyLevel() or 1
+			self:SetNW2Int("Energy", energy_lvl)
+			return energy_lvl > 0
+		end
+	end
+
+	function ENT:MA_OnUnlink(output_data, input_data)
+		if input_data.Id ~= "power" then return end
+
+		_G.MA_Orchestrator.RemoveEntityTimer("ma_refinery_power", self)
+		self:SetNWBool("IsPowered", false)
+	end
+end
+
+if CLIENT then
+	function ENT:Initialize()
+		_G.MA_Orchestrator.RegisterInput(self, "oil", "OIL", "Oil", "Standard oil input. More oil equals better chance at refined ores!")
+		_G.MA_Orchestrator.RegisterInput(self, "power", "ENERGY", "Energy", "Standard energy input. More energy equals better chance at refined ores!")
+		_G.MA_Orchestrator.RegisterInput(self, "ores", "ORE", "Ores", "Standard ores input.")
+
+		_G.MA_Orchestrator.RegisterOutput(self, "ores", "ORE", "Ores", "Refined ores output.")
+		_G.MA_Orchestrator.RegisterOutput(self, "rejects", "DETONITE", "Rejects", "The rejects in the refinement process.")
+	end
+
+	function ENT:Draw()
+		self:DrawModel()
+	end
+
+	function ENT:OnDrawEntityInfo()
+		return {
+			{ Type = "State", Value = self:CanWork() },
+			{ Type = "Label", Text = self.PrintName:upper(), Border = true },
+			{ Type = "Data", Label = "Fuel", Value = self:GetNW2Int("Fuel", 0), MaxValue = Ores.Automation.BatteryCapacity },
+			{ Type = "Data", Label = "Efficiency", Value = self:GetNW2Int("Energy", 0) }
+		}
+	end
+end

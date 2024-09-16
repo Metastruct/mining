@@ -139,20 +139,6 @@ if SERVER then
 		self:UpdateDrones()
 	end
 
-	function ENT:Use(ent)
-		if not ent:IsPlayer() then return end
-		if self.CPPIGetOwner and self:CPPIGetOwner() ~= ent then return end
-
-		local detoniteRarity = Ores.GetOreRarityByName("Detonite")
-		local detoniteAmount = Ores.GetPlayerOre(ent, detoniteRarity)
-		if detoniteAmount < 1 then return end
-
-		local toGive = math.min(MAX_DETONITE, detoniteAmount)
-
-		self:AddDetonite(toGive)
-		Ores.TakePlayerOre(ent, detoniteRarity, toGive)
-	end
-
 	function ENT:OnRemove()
 		for _, drone in pairs(self.Drones) do
 			SafeRemoveEntity(drone)

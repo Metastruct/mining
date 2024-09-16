@@ -39,6 +39,8 @@ if SERVER then
 		self:SetSubMaterial(1, "phoenix_storms/stripes")
 		self:SetSubMaterial(2, "models/xqm/lightlinesred")
 
+		_G.MA_Orchestrator.RegisterInput(self, "bandwidth", "DETONITE", "Bandwidth", "Detonite input required to power the chips.")
+
 		if _G.WireLib then
 			_G.WireLib.CreateInputs(self, {"Active (If this is non-zero, activate the router)"})
 			_G.WireLib.CreateOutputs(self, {
@@ -68,6 +70,22 @@ if SERVER then
 		end)
 	end
 
+	function ENT:MA_OnOutputReady(output_data, input_data)
+		if input_data.Id ~= "bandwidth" then return end
+
+		_G.MA_Orchestrator.Execute(output_data, input_data)
+	end
+
+	function ENT:MA_Execute(output_data, input_data)
+		if input_data.Id == "bandwidth" then
+			if not isnumber(output_data.Ent.RejectCount) then return end
+			if output_data.Ent.RejectCount < 1 then return end
+
+			self:AddDetonite(1)
+			output_data.Ent.RejectCount = math.max(0, output_data.Ent.RejectCount - 1)
+		end
+	end
+
 	function ENT:TriggerInput(port, state)
 		if not _G.WireLib then return end
 		if not isnumber(state) then return end
@@ -89,20 +107,6 @@ if SERVER then
 		if _G.WireLib then
 			_G.WireLib.TriggerOutput(self, "Bandwidth", new_amount)
 		end
-	end
-
-	function ENT:Use(ent)
-		if not ent:IsPlayer() then return end
-		if self.CPPIGetOwner and self:CPPIGetOwner() ~= ent then return end
-
-		local detonite_rarity = Ores.GetOreRarityByName("Detonite")
-		local detonite_amount = Ores.GetPlayerOre(ent, detonite_rarity)
-		if detonite_amount < 1 then return end
-
-		local to_give = math.min(self.MaxBandwidth, detonite_amount)
-
-		self:AddDetonite(to_give)
-		Ores.TakePlayerOre(ent, detonite_rarity, to_give)
 	end
 
 	function ENT:Think()
