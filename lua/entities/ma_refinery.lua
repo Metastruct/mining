@@ -9,7 +9,7 @@ ENT.PrintName = "Refinery"
 ENT.Author = "Earu"
 ENT.Category = "Mining"
 ENT.RenderGroup = RENDERGROUP_OPAQUE
-ENT.Spawnable = false
+ENT.Spawnable = true
 ENT.ClassName = "ma_refinery"
 ENT.IconOverride = "entities/ma_refinery.png"
 
