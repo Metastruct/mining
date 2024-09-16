@@ -169,10 +169,13 @@ hook.Add("OnEntityCreated", "mining_automation", function(ent)
 			return
 		end
 
-		if Ores.Automation.CustomLimits[class_name] and ply:CheckLimit(class_name) then
-			ply:AddCount(class_name, ent)
-		else
-			SafeRemoveEntity(ent)
+		if Ores.Automation.CustomLimits[class_name] then
+			if ply:CheckLimit(class_name) then
+				ply:AddCount(class_name, ent)
+			else
+				SafeRemoveEntity(ent)
+			end
+
 			return
 		end
 
@@ -190,7 +193,9 @@ hook.Add("PlayerSpawnSENT", "mining_automation", function(ply, class_name)
 	if Ores.Automation.EntityClasses[class_name] then
 		if Ores.Automation.CustomLimits[class_name] and not ply:CheckLimit(class_name) then
 			return false
-		elseif not ply:CheckLimit("mining_automation") then
+		end
+
+		if not ply:CheckLimit("mining_automation") then
 			return false
 		end
 	end
