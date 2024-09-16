@@ -61,7 +61,7 @@ if SERVER then
 
 		_G.MA_Orchestrator.EntityTimer("ma_chip_router_v2", self, 10, 0, function()
 			local bandwidth = self:GetNW2Int("Bandwidth", 0)
-			local new_bandwidth = bandwidth - self:GetNWInt("BandwidthUsage", 0)
+			local new_bandwidth = math.max(0, bandwidth - self:GetNWInt("BandwidthUsage", 0))
 			self:SetNW2Int("Bandwidth", new_bandwidth)
 
 			if _G.WireLib then
@@ -155,7 +155,7 @@ if SERVER then
 				_G.WireLib.TriggerOutput(self, "Usage", required_bandwidth)
 			end
 
-			self:SetChipState(required_bandwidth <= self:GetNW2Int("Bandwidth", 0))
+			self:SetChipState(required_bandwidth <= self:GetNW2Int("Bandwidth", 0) and self:GetNW2Int("Bandwidth", 0) > 0)
 		end
 	end
 
