@@ -91,6 +91,13 @@ function orchestrator.EntityTimer(name, ent, delay, occurences, callback)
 	end)
 end
 
+function orchestrator.RemoveEntityTimer(name, ent)
+	if not IsValid(ent) then return end
+
+	local timer_name = ("%s_[%d]"):format(name, ent:EntIndex())
+	timer.Remove(timer_name)
+end
+
 local NET_MSG_NAME = "net_mining_automation"
 local NET_TYPE_LINK = 1
 local NET_TYPE_UNLINK = 2

@@ -113,8 +113,7 @@ if SERVER then
 	function ENT:MA_OnUnlink(output_data, input_data)
 		if input_data.Id ~= "power" then return end
 
-		local timer_name = ("ma_drill_v2_[%d]"):format(self:EntIndex())
-		timer.Remove(timer_name)
+		_G.MA_Orchestrator.RemoveEntityTimer("ma_drill_v2", self)
 
 		self:SetNWBool("IsPowered", false)
 		_G.WireLib.TriggerOutput(self, "Efficiency", 0)
