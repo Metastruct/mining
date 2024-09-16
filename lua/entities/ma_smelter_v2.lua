@@ -209,8 +209,6 @@ if SERVER then
 	end
 
 	function ENT:OnRemove()
-		SafeRemoveEntity(self.Trigger)
-
 		if self.SndLoop and self.SndLoop ~= -1 then
 			self:StopLoopingSound(self.SndLoop)
 		end

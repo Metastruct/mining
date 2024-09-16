@@ -145,6 +145,12 @@ if SERVER then
 		local time = CurTime()
 		self:CheckSoundLoop(time)
 	end
+
+	function ENT:OnRemove()
+		if self.SndLoop and self.SndLoop ~= -1 then
+			self:StopLoopingSound(self.SndLoop)
+		end
+	end
 end
 
 if CLIENT then
