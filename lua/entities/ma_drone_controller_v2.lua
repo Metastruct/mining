@@ -22,7 +22,7 @@ function ENT:CanWork()
 end
 
 local MAX_DETONITE = 60
-local MAX_DRONES = 3
+local MAX_DRONES = 1
 function ENT:GetDroneCount()
 	if not self:CanWork() then return 0 end
 
