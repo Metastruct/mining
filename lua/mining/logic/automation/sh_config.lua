@@ -28,7 +28,7 @@ Ores.Automation = Ores.Automation or {
 	HudPadding = 10,
 	HudSepColor = Color(72, 72, 72, 255),
 	HudActionColor = Color(255, 125, 0, 255),
-	IngotWorth = 2,
+	IngotWorth = 1.2,
 	IngotSize = 5,
 	OilExtractionRate = 10 * 60, -- 1 fuel tank per 60 seconds
 }

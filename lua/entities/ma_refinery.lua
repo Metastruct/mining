@@ -21,6 +21,14 @@ end
 if SERVER then
 	resource.AddFile("materials/entities/ma_refinery.png")
 
+	local function get_stat(stat_name)
+		for _, v in pairs(Ores.__PStats) do
+			if v.VarName == stat_name then
+				return v
+			end
+		end
+	end
+
 	function ENT:Initialize()
 		self:SetModel("models/xqm/afterburner1huge.mdl")
 		self:SetMaterial("phoenix_storms/OfficeWindow_1-1")
@@ -40,6 +48,17 @@ if SERVER then
 		_G.MA_Orchestrator.RegisterOutput(self, "ores", "ORE", "Ores", "Refined ores output.")
 		_G.MA_Orchestrator.RegisterOutput(self, "rejects", "DETONITE", "Rejects", "The rejects in the refinement process.")
 
+		local raw_max_chance = 20
+		local max_chance = raw_max_chance
+		if self.CPPIGetOwner then
+			local owner = self:CPPIGetOwner()
+			if IsValid(owner) then
+				local stat = get_stat("MagicFindChance")
+				local stat_value = stat.VarBase + (stat.VarStep * owner:GetNWInt(ms.Ores._nwPickaxePrefix .. stat.VarName, 0))
+				max_chance = stat_value * 100
+			end
+		end
+
 		local refinery_timer_tick = 0
 		_G.MA_Orchestrator.EntityTimer("ma_refinery", self, 1, 0, function()
 			if not self:CanWork() then return end
@@ -57,11 +76,14 @@ if SERVER then
 
 			if #self.OreQueue > 1 then
 				local efficiency = self:GetNW2Int("Energy", 0) / 100
-				local refined = math.random(0, 100) < (20 * efficiency)
-				local rejected = math.random(0, 100) < 20
+				local refined = math.random(0, 100) < (max_chance * efficiency)
+				local rejected = math.random(0, 100) < raw_max_chance
 
 				if refined then
-					self.OreQueue[1] = math.min(4, self.OreQueue[1] + 1)
+					local ore_data = Ores.__R[self.OreQueue[1]]
+					if ore_data and isnumber(ore_data.NextRarityId) then
+						self.OreQueue[1] = ore_data.NextRarityId
+					end
 				elseif rejected then
 					table.remove(self.OreQueue, 1)
 					self.RejectCount = self.RejectCount + 2
