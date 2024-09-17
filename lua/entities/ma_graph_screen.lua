@@ -5,7 +5,7 @@ Ores = Ores or {}
 
 ENT.Type = "anim"
 ENT.Base = "base_anim"
-ENT.PrintName = "Graph Screen"
+ENT.PrintName = "Graph Terminal"
 ENT.Author = "Earu"
 ENT.Category = "Mining"
 ENT.RenderGroup = RENDERGROUP_OPAQUE
@@ -23,25 +23,49 @@ if SERVER then
 		self:SetMoveType(MOVETYPE_VPHYSICS)
 		self:PhysicsInit(SOLID_VPHYSICS)
 		self:SetSolid(SOLID_VPHYSICS)
+		self:SetUseType(SIMPLE_USE)
 		self:PhysWake()
+		self:SetNWBool("IsTurnedOn", false)
 
 		Ores.Automation.PrepareForDuplication(self)
+	end
+
+	function ENT:Use(activator)
+		if not IsValid(activator) then return end
+		if not activator:IsPlayer() then return end
+
+		local current_state = self:GetNWBool("IsTurnedOn", false)
+		self:SetNWBool("IsTurnedOn", not current_state)
 	end
 end
 
 if CLIENT then
+	surface.CreateFont("ma_terminal_wait_title", {
+		font = "Sevastopol Interface",
+		size = 100,
+		weight = 800,
+		outline = false,
+	})
+
 	surface.CreateFont("ma_terminal_connection", {
-		font = "Arial",
+		font = "Sevastopol Interface",
 		size = 20,
 		weight = 800,
-		outline = true,
+		outline = false,
 	})
 
 	surface.CreateFont("ma_terminal_node", {
-		font = "Roboto",
+		font = "Sevastopol Interface",
 		size = 25,
 		weight = 500,
-		outline = true,
+		outline = false,
+	})
+
+	surface.CreateFont("ma_terminal_legend", {
+		font = "Sevastopol Interface",
+		size = 15,
+		weight = 500,
+		outline = false,
 	})
 
 	local MAX_MAP_SIZE = 32768
@@ -83,11 +107,11 @@ if CLIENT then
 		local grid_size = 10 * coef_w
 		local time = CurTime()
 
-		surface.SetDrawColor(0, 0, 0, 255)
+		surface.SetDrawColor(24, 48, 26, 255)
 		surface.DrawRect(0, 0, real_width, real_height)
 
 		for i = 1, real_width / grid_size do
-			surface.SetDrawColor(36, 36, 36, 255)
+			surface.SetDrawColor(32, 69, 39, 255)
 			surface.DrawLine(grid_size * i, 0, grid_size * i, real_height)
 			surface.DrawLine(0, grid_size * i, real_width, grid_size * i)
 		end
@@ -95,7 +119,7 @@ if CLIENT then
 		for _, ent in ipairs(ply_ents) do
 			if ent:GetClass() == "ma_graph_screen" then continue end
 			local pos = ent:WorldSpaceCenter() + MAX_MAP_OFFSET
-			local pos_x, pos_y = (pos.x - min_x) * coef_w + graph_padding, (pos.y - min_y) * coef_h + graph_padding
+			local pos_x, pos_y = (pos.x - min_x) * coef_w + graph_padding, (pos.y - min_y) * coef_h + graph_padding * 2
 
 			local data = _G.MA_Orchestrator.LinkData[ent:EntIndex()]
 			if not data then continue end
@@ -107,7 +131,7 @@ if CLIENT then
 				if not IsValid(target_ent) then continue end
 
 				local target_pos = target_ent:WorldSpaceCenter() + MAX_MAP_OFFSET
-				local target_pos_x, target_pos_y = (target_pos.x - min_x) * coef_w + graph_padding, (target_pos.y - min_y) * coef_h + graph_padding
+				local target_pos_x, target_pos_y = (target_pos.x - min_x) * coef_w + graph_padding, (target_pos.y - min_y) * coef_h + graph_padding * 2
 				local target_canot_work = isfunction(target_ent.CanWork) and not target_ent:CanWork(time)
 
 				if not target_canot_work then
@@ -141,7 +165,7 @@ if CLIENT then
 
 				surface.SetFont("ma_terminal_connection")
 				if not target_canot_work then
-					surface.SetTextColor(0, 255, 0, 255)
+					surface.SetTextColor(52, 141, 97, 255)
 				else
 					surface.SetTextColor(255, 0, 0, 255)
 				end
@@ -156,14 +180,14 @@ if CLIENT then
 		for _, ent in ipairs(ply_ents) do
 			if ent:GetClass() == "ma_graph_screen" then continue end
 			local pos = ent:WorldSpaceCenter() + MAX_MAP_OFFSET
-			local pos_x, pos_y = (pos.x - min_x) * coef_w + graph_padding, (pos.y - min_y) * coef_h + graph_padding
+			local pos_x, pos_y = (pos.x - min_x) * coef_w + graph_padding, (pos.y - min_y) * coef_h + graph_padding * 2
 
-			surface.SetDrawColor(0, 0, 0, 255)
+			surface.SetDrawColor(0, 0, 0, 200)
 			surface.DrawRect(pos_x - 20, pos_y - 20, 40, 40)
 			if isfunction(ent.CanWork) and not ent:CanWork(time) then
 				surface.SetDrawColor(255, 0, 0)
 			else
-				surface.SetDrawColor(0, 255, 0)
+				surface.SetDrawColor(18, 183, 104, 255)
 			end
 			surface.DrawOutlinedRect(pos_x - 20, pos_y - 20, 40, 40, 2)
 
@@ -179,19 +203,19 @@ if CLIENT then
 			surface.DrawText(ent_name)
 		end
 
-		local i = 0
+		local i = 1
 		local legend_margin = 100
 		local legend_width = table.Count(legend) * (40 + legend_margin)
 
-		surface.SetDrawColor(36, 36, 36, 255)
-		surface.DrawRect(real_width / 2 - legend_width / 2 - 80, real_height - 140, legend_width + 20, 120)
+		surface.SetDrawColor(0, 0, 0, 200)
+		surface.DrawRect(real_width / 2 - legend_width / 2, real_height - 140, legend_width + 20, 120)
 
 		for symbol, name in pairs(legend) do
-			local pos_x, pos_y = real_width / 2 - legend_width / 2 + i * (40 + legend_margin), real_height - 100
+			local pos_x, pos_y = real_width / 2 - legend_width / 2 + i * (40 + legend_margin) - 60, real_height - 100
 
-			surface.SetDrawColor(0, 0, 0, 255)
+			surface.SetDrawColor(0, 0, 0, 200)
 			surface.DrawRect(pos_x - 20, pos_y - 20, 40, 40)
-			surface.SetDrawColor(0, 255, 0, 255)
+			surface.SetDrawColor(18, 183, 104, 255)
 			surface.DrawOutlinedRect(pos_x - 20, pos_y - 20, 40, 40, 2)
 
 			surface.SetFont("ma_terminal_node")
@@ -199,13 +223,55 @@ if CLIENT then
 			surface.SetTextPos(pos_x - tw / 2, pos_y - th / 2)
 			surface.DrawText(symbol)
 
-			surface.SetFont("DermaDefault")
+			surface.SetFont("ma_terminal_legend")
 			tw, th = surface.GetTextSize(name)
 			surface.SetTextPos(pos_x - tw / 2, pos_y + 40 + 5)
 			surface.DrawText(name)
 
 			i = i + 1
 		end
+
+		surface.SetDrawColor(17, 185, 106, 255)
+		surface.DrawRect(graph_padding / 2, graph_padding / 2, real_width - graph_padding, 40)
+		surface.SetDrawColor(14, 92, 61, 255)
+		surface.DrawRect(real_width - (graph_padding + 15), graph_padding / 2 + 2.5, 35, 35)
+
+		surface.SetFont("ma_terminal_node")
+		surface.SetTextColor(23, 47, 25, 255)
+		surface.SetTextPos(graph_padding / 2 + 5, graph_padding / 2 + 5)
+		surface.DrawText("MINING OPERATION")
+	end
+
+	local USE_KEY = (input.LookupBinding("+use") or "?"):upper()
+	local function wait_screen(ply, real_width, real_height)
+		surface.SetDrawColor(24, 48, 26, 255)
+		surface.DrawRect(0, 0, real_width, real_height)
+
+		surface.SetFont("ma_terminal_wait_title")
+		local text = "YOUR MINING OPERATION"
+		local tw, th = surface.GetTextSize(text)
+
+		local pos_x, pos_y = real_width / 2 - tw / 2, real_height / 2 - th / 2
+		surface.SetDrawColor(17, 185, 106, 255)
+		surface.DrawRect(pos_x - 5, pos_y - 5, tw + 10, th + 10)
+
+		surface.SetTextColor(23, 47, 25, 255)
+		surface.SetTextPos(pos_x, pos_y)
+		surface.DrawText(text)
+
+		surface.SetTextColor(255, 255, 255, 255)
+		surface.SetFont("ma_terminal_node")
+		text = "Powered by Metastruct & " .. ply:Nick()
+		tw, _ = surface.GetTextSize(text)
+		pos_x, pos_y = real_width / 2 - tw / 2, real_height / 2 + th / 2 + 50
+		surface.SetTextPos(pos_x, pos_y)
+		surface.DrawText(text)
+
+		text = ("(Press [%s] to continue)"):format(USE_KEY)
+		tw, _ = surface.GetTextSize(text)
+		pos_x, pos_y = real_width / 2 - tw / 2, real_height - 50
+		surface.SetTextPos(pos_x, pos_y)
+		surface.DrawText(text)
 	end
 
 	function ENT:Draw()
@@ -218,7 +284,11 @@ if CLIENT then
 		local scale = (maxs.x * 2) / 1440
 
 		cam.Start3D2D(self:GetPos() + self:GetRight() * -maxs.x + self:GetForward() * -maxs.y + self:GetUp() * maxs.z, self:GetAngles(), scale)
-			graph(ply, 1440, 1440)
+			if self:GetNWBool("IsTurnedOn", false) then
+				graph(ply, 1440, 1440)
+			else
+				wait_screen(ply, 1440, 1440)
+			end
 		cam.End3D2D()
 	end
 end
