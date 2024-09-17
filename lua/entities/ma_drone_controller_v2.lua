@@ -22,16 +22,19 @@ function ENT:CanWork()
 end
 
 local MAX_DETONITE = 60
+local MAX_DRONES = 3
 function ENT:GetDroneCount()
 	if not self:CanWork() then return 0 end
 
 	local amount = self:GetNW2Int("Detonite", 0) / MAX_DETONITE
+	if amount > 0 then return MAX_DRONES end
+
 	if amount < 0.33 then
-		return 1
+		return MAX_DRONES - 2
 	elseif amount >= 0.33 and amount < 0.66 then
-		return 2
+		return MAX_DRONES - 1
 	elseif amount >= 0.66 then
-		return 3
+		return MAX_DRONES
 	end
 end
 
@@ -80,7 +83,7 @@ if SERVER then
 			})
 
 			_G.WireLib.TriggerOutput(self, "DroneCount", 0)
-			_G.WireLib.TriggerOutput(self, "MaxDroneCount", 3)
+			_G.WireLib.TriggerOutput(self, "MaxDroneCount", MAX_DRONES)
 			_G.WireLib.TriggerOutput(self, "Detonite", 0)
 			_G.WireLib.TriggerOutput(self, "MaxDetonite", MAX_DETONITE)
 		end
@@ -101,7 +104,7 @@ if SERVER then
 			controller_timer_tick = controller_timer_tick + 1
 
 			local drone_count = self:GetDroneCount()
-			if controller_timer_tick % 30 == 0 then
+			if controller_timer_tick % (MAX_DRONES * 10) == 0 then
 				local cur_detonite = self:GetNW2Int("Detonite", 0)
 				local new_detonite = math.max(0, cur_detonite - drone_count)
 				self:SetNW2Int("Detonite", new_detonite)
