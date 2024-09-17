@@ -170,7 +170,7 @@ end
 function Ores.GetPlayerMultiplier(self)
 	assert(self and self:IsPlayer(), "[Ores] First argument is not a player")
 
-	local rawMult = math.Clamp(SERVER and Ores.WorthMultiplier or (Ores.SpecialDay and Ores.SpecialDay.WorthMultiplier or 1), 1, 5) + self:GetNWFloat(Ores._nwMult, 0)
+	local rawMult = math.Clamp(SERVER and Ores.WorthMultiplier or (Ores.SpecialDay and Ores.SpecialDay.WorthMultiplier or 1), 1, 5) + math.min(3, self:GetNWFloat(Ores._nwMult, 0))
 	return math.min(5, rawMult)
 end
 
