@@ -12,6 +12,7 @@ ENT.RenderGroup = RENDERGROUP_OPAQUE
 ENT.Spawnable = true
 ENT.ClassName = "ma_graph_screen"
 ENT.IconOverride = "entities/ma_graph_screen.png"
+ENT.TurnedOn = false
 
 if SERVER then
 	resource.AddFile("materials/entities/ma_graph_screen.png")
@@ -25,17 +26,8 @@ if SERVER then
 		self:SetSolid(SOLID_VPHYSICS)
 		self:SetUseType(SIMPLE_USE)
 		self:PhysWake()
-		self:SetNWBool("IsTurnedOn", false)
 
 		Ores.Automation.PrepareForDuplication(self)
-	end
-
-	function ENT:Use(activator)
-		if not IsValid(activator) then return end
-		if not activator:IsPlayer() then return end
-
-		local current_state = self:GetNWBool("IsTurnedOn", false)
-		self:SetNWBool("IsTurnedOn", not current_state)
 	end
 end
 
@@ -284,11 +276,24 @@ if CLIENT then
 		local scale = (maxs.x * 2) / 1440
 
 		cam.Start3D2D(self:GetPos() + self:GetRight() * -maxs.x + self:GetForward() * -maxs.y + self:GetUp() * maxs.z, self:GetAngles(), scale)
-			if self:GetNWBool("IsTurnedOn", false) then
+			if self.TurnedOn then
 				graph(ply, 1440, 1440)
 			else
 				wait_screen(ply, 1440, 1440)
 			end
 		cam.End3D2D()
 	end
+
+	hook.Add("PlayerBindPress", "ma_graph_screen", function(ply, bind, pressed)
+		if not pressed then return end
+		if not bind:find("+use") then return end
+		if ply ~= LocalPlayer() then return end
+
+		local tr = ply:GetEyeTrace()
+		if not IsValid(tr.Entity) then return end
+		if tr.Entity:GetClass() ~= "ma_graph_screen" then return end
+
+		tr.Entity.TurnedOn = not tr.Entity.TurnedOn
+		print(tr.Entity.TurnedOn)
+	end)
 end
