@@ -1,7 +1,7 @@
 module("ms", package.seeall)
 Ores = Ores or {}
 
-resource.AddFile("materials/mining/automation/hud_frame.png")
+resource.AddFile("resource/fonts/Sevastopol-Interface.ttf")
 
 Ores.Automation = Ores.Automation or {
 	BatteryCapacity = 150,
