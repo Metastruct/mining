@@ -159,10 +159,11 @@ function Ores.GivePlayerOre(pl, rarity, amount)
 
 	amount = math.floor(amount)
 
+	local ret = hook.Run("PlayerReceivedOre", pl, amount, rarity)
+	if ret == false then return end -- dont give ore if we got false
+
 	local nw = Ores._nwPrefix .. Ores.__R[rarity].Name
 	pl:SetNWInt(nw, pl:GetNWInt(nw, 0) + amount)
-
-	hook.Run("PlayerReceivedOre", pl, amount, rarity)
 	pl._receivedOre = true
 end
 

@@ -190,44 +190,7 @@ if SERVER then
 		end
 	end
 
-	local transformer_index = 1
-	local function check_transformer_to_use(ply, base_transformer)
-		local transformers = {}
-		for _, t in ipairs(ents.FindByClass("ma_transformer_v2")) do
-			if t:CPPIGetOwner() ~= ply then continue end
-			if not t:GetNWBool("Wiremod_Active", true) then continue end
-
-			table.insert(transformers, t)
-		end
-
-		table.sort(transformers, function(a, b) return a:GetCreationTime() > b:GetCreationTime() end)
-
-		local transformer = transformers[transformer_index % (#transformers + 1)]
-		if not transformer then
-			transformer_index = 1
-			return transformers[transformer_index] == base_transformer
-		end
-
-		return base_transformer == transformer
-	end
-
 	function ENT:Think()
-		if not self.CPPIGetOwner then return end
-		if not self:GetNWBool("Wiremod_Active", true) then return end
-
-		local owner = self:CPPIGetOwner()
-		if not IsValid(owner) then return end
-
-		local argonite_rarity = Ores.GetOreRarityByName("Argonite")
-		local amount = math.min(Ores.Automation.BatteryCapacity, ms.Ores.GetPlayerOre(owner, argonite_rarity))
-		if amount < 1 then return end
-
-		if check_transformer_to_use(owner, self) then
-			self:AddArgonite(amount)
-			ms.Ores.TakePlayerOre(owner, argonite_rarity, amount)
-
-			transformer_index = transformer_index + 1
-		end
 	end
 
 	function ENT:CreateBattery()
@@ -242,6 +205,43 @@ if SERVER then
 			self:SetNWBool("Wiremod_Active", tobool(state))
 		end
 	end
+
+	local transformer_index = 1
+	local function get_transformer_to_use(ply)
+		local transformers = {}
+		for _, t in ipairs(ents.FindByClass("ma_transformer_v2")) do
+			if t:CPPIGetOwner() ~= ply then continue end
+			if not t:CanWork() then continue end
+
+			table.insert(transformers, t)
+		end
+
+		table.sort(transformers, function(a, b) return a:GetCreationTime() > b:GetCreationTime() end)
+
+		local transformer = transformers[transformer_index % (#transformers + 1)]
+		if not transformer then
+			transformer_index = 1
+			return transformers[transformer_index]
+		end
+
+		return transformer
+	end
+
+	hook.Add("PlayerReceivedOre", "ma_transformer_v2", function(ply, amount, rarity)
+		if Ores.GetOreRarityByName("Argonite") ~= rarity then return end
+
+		amount = math.min(Ores.Automation.BatteryCapacity, amount)
+		if amount < 1 then return end
+
+		local transformer = get_transformer_to_use(ply)
+		if not IsValid(transformer) then return end
+
+		transformer_index = transformer_index + 1
+
+		transformer:AddArgonite(amount)
+
+		return false
+	end)
 end
 
 if CLIENT then
