@@ -3,14 +3,14 @@ Ores = Ores or {}
 
 local scale = math.max(0.6, ScrW() / 2560)
 surface.CreateFont("mining_automation_hud", {
-	font = "Arial",
+	font = "Sevastopol Interface",
 	extended = true,
 	weight = 600,
 	size = 25 * scale
 })
 
 surface.CreateFont("mining_automation_hud2", {
-	font = "Arial",
+	font = "Sevastopol Interface",
 	extended = true,
 	weight = 500,
 	size = 20 * scale
@@ -60,7 +60,8 @@ local function drawEntityInfoFrame(ent, data)
 
 	local x, y = pos.x - total_width / 2, pos.y - total_height / 2
 	blur_rect(x, y, total_width * scale, total_height * scale, 10, 2)
-	surface.SetDrawColor(0, 0, 0, 220)
+
+	surface.SetDrawColor(0, 0, 0, 200)
 	surface.DrawRect(x, y, total_width, total_height)
 
 	local offset = Ores.Automation.HudPadding + FRAME_PADDING
@@ -131,8 +132,8 @@ local function drawEntityInfoFrame(ent, data)
 		end
 
 		if line_data.Border == true then
-			surface.SetDrawColor(Ores.Automation.HudSepColor)
-			surface.DrawRect(x + Ores.Automation.HudPadding, y + offset, total_width - Ores.Automation.HudPadding * 2, 2)
+			--surface.SetDrawColor(Ores.Automation.HudSepColor)
+			--surface.DrawRect(x, y + offset, total_width, 2)
 			offset = offset + Ores.Automation.HudPadding
 		end
 	end
