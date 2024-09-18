@@ -151,12 +151,7 @@ if CLIENT then
 		size = math.max(13, 15 * COEF_H),
 	})
 
-	local opened_frame
 	function Ores.Automation.OpenTerminal(active_tab_name)
-		if IsValid(opened_frame) then
-			opened_frame:Remove()
-		end
-
 		local ply = LocalPlayer()
 		local cur_lvl = ply:GetNWInt("ms.Ores.MiningAutomation", 0)
 		local cur_points = ply:GetNWInt(ms.Ores._nwPoints, 0)
@@ -167,7 +162,6 @@ if CLIENT then
 		frame:SetSize(1000 * COEF_W, 760 * COEF_H)
 		frame:Center()
 		frame:MakePopup()
-		opened_frame = frame
 
 		hook.Add("OnPauseMenuShow", frame, function()
 			frame:Remove()
@@ -176,35 +170,11 @@ if CLIENT then
 			return false
 		end)
 
-		local MONITOR_MODEL = "models/props_lab/monitor01b.mdl"
-		-- depth, width, height
-		local MONITOR_SCALE = Vector(0.1, 2, 1.5)
 		function frame:Paint(w, h)
-			cam.Start3D(ply:EyePos(), ply:EyeAngles())
-
-			local pos = ply:EyePos() + ply:GetAimVector() * 16 + ply:GetUp() * 0.65 + ply:GetRight() * -2.1
-			local ang = ply:EyeAngles()
-			ang:RotateAroundAxis(ply:GetRight(), 180)
-
-			-- Draw the model
-			local ent = ClientsideModel(MONITOR_MODEL, RENDERGROUP_OPAQUE)
-			if ent then
-				ent:SetMaterial("Models/props_combine/CombineThumper001")
-				ent:SetPos(pos)
-				ent:SetAngles(ang)
-
-				local mtx = Matrix()
-				mtx:Scale(MONITOR_SCALE)
-				ent:EnableMatrix("RenderMultiply", mtx)
-
-				render.SetLightingMode(2)
-				ent:DrawModel()
-				render.SetLightingMode(0)
-
-				SafeRemoveEntity(ent)
-			end
-
-			cam.End3D()
+			surface.DisableClipping(true)
+			surface.SetDrawColor(72, 72, 72, 255)
+			surface.DrawRect(-20, -20, w + 40, h + 40)
+			surface.DisableClipping(false)
 
 			surface.SetDrawColor(23, 47, 25, 255)
 			surface.DrawRect(0, 0, w, h)
