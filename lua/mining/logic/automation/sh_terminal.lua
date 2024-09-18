@@ -382,14 +382,14 @@ if CLIENT then
 			end
 
 			function stat_upgrade:DoClick()
-				if not can_upgrade then return end
+				if not can_upgrade and not max_lvl then return end
 
 				net.Start(NET_MSG)
 				net.WriteInt(NET_MSG_TYPE_UPGRADE, 8)
 				net.SendToServer()
 
 				-- keep the UI up to date
-				cur_lvl = cur_lvl + 1
+				cur_lvl = math.min(50, cur_lvl + 1)
 				cur_points = math.max(0, ply:GetNWInt(ms.Ores._nwPoints, 0) - upgrade_cost)
 				upgrade_cost = math.floor(math.max(2000, cur_lvl * 2000))
 				can_upgrade = cur_points >= upgrade_cost
