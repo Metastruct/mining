@@ -27,6 +27,7 @@ local function init_items()
 			local function activate(self)
 				if CLIENT then return end
 
+				local owner = self.Owner
 				if not IsValid(owner) then
 					SafeRemoveEntity(self)
 					return
@@ -126,6 +127,29 @@ if SERVER then
 		end
 
 		ply:TakeItem(class_name .. "_item", 1, "Mining Terminal")
+	end)
+
+	-- need this otherwise some stuff doesnt call PlayerSpawnSENT
+	hook.Add("OnEntityCreated", "ma_terminal", function(ent)
+		if not ent.CPPIGetOwner then return end
+		if not Ores.Automation.PurchaseData[class_name] then return end
+
+		timer.Simple(0, function()
+			if not IsValid(ent) then return end
+
+			local owner = ent:CPPIGetOwner()
+			if not IsValid(owner) then return end
+			if not owner.GetItemCount then return end
+			if not owner.TakeItem then return end
+
+			local count = owner:GetItemCount(class_name .. "_item")
+			if not isnumber(count) or count < 1 then
+				SafeRemoveEntity(ent)
+				return
+			end
+
+			ply:TakeItem(class_name .. "_item", 1, "Mining Terminal")
+		end)
 	end)
 end
 
