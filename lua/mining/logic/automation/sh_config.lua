@@ -48,8 +48,8 @@ Ores.Automation = Ores.Automation or {
 		ma_smelter_v2 = 60000,
 		ma_minter_v2 = 10000,
 		ma_refinery = 80000,
-		ma_chip_router = 60000,
-		ma_drone_controller = 90000,
+		ma_chip_router_v2 = 60000,
+		ma_drone_controller_v2 = 90000,
 	}
 }
 
