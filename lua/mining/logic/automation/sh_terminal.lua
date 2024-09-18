@@ -166,7 +166,7 @@ if CLIENT then
 
 		hook.Add("OnPauseMenuShow", frame, function()
 			frame:Remove()
-			surface.PlaySound("buttons/weapon_confirm.wav")
+			surface.PlaySound("buttons/lightswitch2.wav")
 
 			return false
 		end)
