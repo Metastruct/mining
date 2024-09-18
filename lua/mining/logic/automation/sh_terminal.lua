@@ -20,7 +20,7 @@ local function init_items()
 			ITEM.DontReturnToInventory = true
 			ITEM.State = "entity"
 			ITEM.Inventory = {
-				name = ent_table.PrintName,
+				name = ent_table.PrintName .. " Materials Crate",
 				info = ("A crate containing materials necessary to build a %s"):format(ent_table.PrintName:lower())
 			}
 
@@ -29,18 +29,28 @@ local function init_items()
 
 				local owner = self.Owner
 				if not IsValid(owner) then
-					SafeRemoveEntity(self)
+					self:Remove()
 					return
 				end
 
 				if not owner:IsPlayer() then
-					SafeRemoveEntity(self)
+					self:Remove()
 					return
 				end
 
 				local tr = owner:GetEyeTrace()
-				ent_table:SpawnFunction(owner, tr, class_name)
-				SafeRemoveEntity(self)
+				local ent = ents.Create(class_name)
+				ent:SetPos(tr.HitPos + tr.HitNormal * 100)
+				ent:Activate()
+				ent:Spawn()
+				ent:DropToFloor()
+
+				local phys = ent:GetPhysicsObject()
+				if IsValid(phys) then
+					phys:EnableMotion(false)
+				end
+
+				self:Remove()
 			end
 
 			ITEM.OnDrop = activate
