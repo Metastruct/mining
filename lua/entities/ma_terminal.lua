@@ -100,7 +100,7 @@ if CLIENT then
 		ang:RotateAroundAxis(self:GetForward(), -90)
 		ang:RotateAroundAxis(self:GetRight(), 4.5)
 
-		cam.Start3D2D(self:GetPos() + self:GetRight() * 9.4 + self:GetForward() * 11.7 + self:GetUp() * 12, ang, scale / 1.5)
+		cam.Start3D2D(self:GetPos() + self:GetRight() * 9.4 + self:GetForward() * 11.72 + self:GetUp() * 12, ang, scale / 1.5)
 			self:WaitScreen(w, h)
 		cam.End3D2D()
 	end
