@@ -123,10 +123,9 @@ if SERVER then
 
 		local count = ply:GetItemCount(class_name .. "_item")
 		if not isnumber(count) or count < 1 then
+			Ores.SendChatMessage(ply, 1, "You don't own enough materials to create a " .. ent.PrintName .. "! You can get some at the mining terminal.")
 			return false
 		end
-
-		ply:TakeItem(class_name .. "_item", 1, "Mining Terminal")
 	end)
 
 	-- need this otherwise some stuff doesnt call PlayerSpawnSENT
