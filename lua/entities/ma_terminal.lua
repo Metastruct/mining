@@ -55,7 +55,7 @@ if SERVER then
 	end
 
 	hook.Add("InitPostEntity", "ma_terminal_persist", spawn_terminal_ent)
-	hook.Add("PostCleanupMap", "mining_extractor_npc", spawn_terminal_ent)
+	hook.Add("PostCleanupMap", "ma_terminal_persist", spawn_terminal_ent)
 end
 
 if CLIENT then
