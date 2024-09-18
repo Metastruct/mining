@@ -33,6 +33,29 @@ if SERVER then
 		ply:EmitSound("buttons/lightswitch2.wav")
 		ply:ConCommand("mining_automation_terminal")
 	end
+
+	local OFFSET = Vector (-732.35546875, 1174.9536132812, -346.5419921875)
+	local ANG = Angle (-0.053716506808996, -52.610984802246, 0.0758056640625)
+	local function spawn_terminal_ent()
+		local trigger = ms and ms.GetTrigger and ms.GetTrigger("cave1")
+		if not IsValid(trigger) then return end
+
+		local base_pos = trigger:GetPos()
+		local terminal = ents.Create("ma_terminal")
+		terminal:SetPos(base_pos - OFFSET)
+		terminal:SetAngles(ANG)
+		terminal:Spawn()
+		terminal.ms_notouch = true
+
+		local phys = terminal:GetPhysicsObject()
+		if IsValid(phys) then
+			phys:EnableMotion(false)
+			phys:EnableCollisions(false)
+		end
+	end
+
+	hook.Add("InitPostEntity", "ma_terminal_persist", spawn_terminal_ent)
+	hook.Add("PostCleanupMap", "mining_extractor_npc", spawn_terminal_ent)
 end
 
 if CLIENT then
