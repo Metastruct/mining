@@ -123,7 +123,10 @@ if SERVER then
 
 		local count = ply:GetItemCount(class_name .. "_item")
 		if not isnumber(count) or count < 1 then
-			Ores.SendChatMessage(ply, 1, "You don't own enough materials to create a " .. ent.PrintName .. "! You can get some at the mining terminal.")
+			local ent_table = scripted_ents.Get(class_name)
+			local name = ent_table and ent_table.PrintName or class_name
+
+			Ores.SendChatMessage(ply, 1, "You don't own enough materials to create a " .. name .. "! You can get some at the mining terminal.")
 			return false
 		end
 	end)
