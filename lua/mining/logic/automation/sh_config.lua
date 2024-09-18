@@ -31,6 +31,26 @@ Ores.Automation = Ores.Automation or {
 	IngotWorth = 1.2,
 	IngotSize = 5,
 	OilExtractionRate = 10 * 60, -- 1 fuel tank per 60 seconds
+	UnlockData = { -- indexes in this table are multiplied by 10
+		[1] = { "ma_drill_v2", "ma_gen_v2", "ma_transformer_v2", "ma_storage_v2" },
+		[2] = { "ma_merger_v2"  },
+		[3] = { "ma_oil_extractor_v2", "ma_smelter_v2" },
+		[4] = { "ma_minter_v2", "ma_refinery" },
+		[5] = { "ma_chip_router_v2", "ma_drone_controller_v2" },
+	},
+	PurchaseData = {
+		ma_drill_v2 = 10000,
+		ma_gen_v2 = 40000,
+		ma_transformer_v2 = 20000,
+		ma_storage_v2 = 5000,
+		ma_merger_v2 = 1000,
+		ma_oil_extractor_v2 = 25000,
+		ma_smelter_v2 = 60000,
+		ma_minter_v2 = 10000,
+		ma_refinery = 80000,
+		ma_chip_router = 60000,
+		ma_drone_controller = 90000,
+	}
 }
 
 if Ores.Automation.EnergyMaterial:IsError() then
