@@ -157,6 +157,7 @@ if CLIENT then
 		local cur_points = ply:GetNWInt(ms.Ores._nwPoints, 0)
 		local upgrade_cost = math.floor(math.max(2000, cur_lvl * 2000))
 		local can_upgrade = cur_points >= upgrade_cost
+		local max_lvl = cur_lvl == 50
 
 		local frame = vgui.Create("DPanel")
 		frame:SetSize(1000 * COEF_W, 760 * COEF_H)
@@ -172,8 +173,14 @@ if CLIENT then
 
 		function frame:Paint(w, h)
 			surface.DisableClipping(true)
-			surface.SetDrawColor(72, 72, 72, 255)
+
+			surface.SetDrawColor(50, 50, 50, 255)
 			surface.DrawRect(-20, -20, w + 40, h + 40)
+
+			surface.SetDrawColor(36, 36, 36, 255)
+			surface.DrawOutlinedRect(-20, -20, w + 40, h + 40, 1)
+			surface.DrawOutlinedRect(-4, -4, w + 8, h + 8, 4)
+
 			surface.DisableClipping(false)
 
 			surface.SetDrawColor(23, 47, 25, 255)
@@ -313,14 +320,14 @@ if CLIENT then
 			stat_name:Dock(LEFT)
 			stat_name:DockMargin(5 * COEF_W, 20 * COEF_H, 20 * COEF_W, 20 * COEF_H)
 			stat_name:SetWide(400)
-			stat_name:SetText(("CURRENT LVL %d %s"):format(cur_lvl, can_upgrade and "[UPGRADE POSSIBLE]" or ""))
+			stat_name:SetText(("CURRENT LVL %d %s"):format(cur_lvl, (can_upgrade and not max_lvl) and "[UPGRADE POSSIBLE]" or ""))
 			stat_name:SetColor(COLOR_WHITE)
 			stat_name:SetFont("ma_terminal_header")
 
 			local stat_upgrade = header:Add("DButton")
 			stat_upgrade:Dock(FILL)
 			stat_upgrade:DockMargin(20 * COEF_W, 20 * COEF_H, 5 * COEF_W, 20 * COEF_H)
-			stat_upgrade:SetText((can_upgrade and "UPGRADE (%s .PTS)" or "NOT ENOUGH POINTS (%s .PTS)"):format(string.Comma(upgrade_cost)))
+			stat_upgrade:SetText(not max_lvl and (can_upgrade and "UPGRADE (%s .PTS)" or "NOT ENOUGH POINTS (%s .PTS)"):format(string.Comma(upgrade_cost)) or "MAXED")
 			stat_upgrade:SetTextColor(can_upgrade and COLOR_BLACK or COLOR_WHITE)
 			stat_upgrade:SetFont("ma_terminal_header")
 
@@ -410,6 +417,8 @@ if CLIENT then
 			content_right:Dock(FILL)
 			function content_right:Paint() end
 
+			local coins = ply:GetCoins()
+			local inv = ply.GetInventory and ply:GetInventory() or {}
 			for i = 1, #Ores.Automation.UnlockData do
 				local class_names = Ores.Automation.UnlockData[i]
 				for j, class_name in ipairs(class_names) do
@@ -423,54 +432,66 @@ if CLIENT then
 					local has_lvl = cur_lvl >= lvl_required
 					local real_purchase_value = purchase_value * ms.Ores.GetPlayerMultiplier(ply)
 					local is_first = (i == 1 and j == 1)
+					local equipment_count = inv[class_name .. "_item"] and inv[class_name .. "_item"].count or 0
+
 					local equipment = content_left:Add("DLabel")
 					equipment:SetTall(20)
 					equipment:Dock(TOP)
 					equipment:DockMargin(20 * COEF_W, is_first and 20 * COEF_H or 5 * COEF_H, 20 * COEF_W, 5 * COEF_H)
 					equipment:SetFont("ma_terminal_content")
-					equipment:SetText(ent_table.PrintName:upper())
+					equipment:SetText(equipment_count > 0 and ("%s (OWNED X%d)"):format(ent_table.PrintName:upper(), equipment_count) or ent_table.PrintName:upper())
 
 					local purchase_btn = content_right:Add("DButton")
 					purchase_btn:SetTall(20)
 					purchase_btn:Dock(TOP)
 					purchase_btn:DockMargin(20 * COEF_W, is_first and 20 * COEF_H or 5 * COEF_H, 20 * COEF_W, 5 * COEF_H)
 					purchase_btn:SetFont("ma_terminal_content")
-					purchase_btn:SetTextColor((not has_lvl or real_purchase_value > ply:GetCoins()) and COLOR_WHITE or COLOR_BLACK)
+					purchase_btn:SetTextColor((not has_lvl or real_purchase_value > coins) and COLOR_WHITE or COLOR_BLACK)
+
 					if has_lvl then
-						purchase_btn:SetText(real_purchase_value > ply:GetCoins()
+						purchase_btn:SetText(real_purchase_value > coins
 							and ("NOT ENOUGH COINS (%sc)"):format(string.Comma(real_purchase_value))
 							or ("PURCHASE (%sc)"):format(string.Comma(real_purchase_value))
 						)
 
 						function purchase_btn:DoClick()
-							if real_purchase_value > ply:GetCoins() then return end
+							if real_purchase_value > coins then return end
 
 							net.Start(NET_MSG)
 							net.WriteInt(NET_MSG_TYPE_PURCHASE, 8)
 							net.WriteString(class_name)
 							net.SendToServer()
 
-							local coins = math.max(0, ply:GetCoins() - real_purchase_value)
-							self:SetTextColor(real_purchase_value > coins and COLOR_WHITE or COLOR_BLACK)
-							self:SetText(real_purchase_value > coins
-								and ("NOT ENOUGH COINS (%sc)"):format(string.Comma(real_purchase_value))
-								or ("PURCHASE (%sc)"):format(string.Comma(real_purchase_value))
-							)
+							equipment_count = equipment_count + 1
+							coins = math.max(0, coins - real_purchase_value)
+
+							equipment:SetText(equipment_count > 0 and ("%s (OWNED X%d)"):format(ent_table.PrintName:upper(), equipment_count) or ent_table.PrintName:upper())
+
+							if real_purchase_value > coins then
+								self:SetTextColor(COLOR_WHITE)
+								self:SetText(("NOT ENOUGH COINS (%sc)"):format(string.Comma(real_purchase_value)))
+							else
+								self:SetTextColor(COLOR_BLACK)
+								self:SetText(("PURCHASE (%sc)"):format(string.Comma(real_purchase_value)))
+							end
 
 							surface.PlaySound("buttons/weapon_confirm.wav")
 						end
 					else
-						print(class_name, "LOCKED")
 						purchase_btn:SetText("LOCKED")
 					end
 
 					function purchase_btn:Paint(w, h)
-						if real_purchase_value > ply:GetCoins() or not has_lvl then
+						if real_purchase_value > coins or not has_lvl then
 							surface.SetDrawColor(COLOR_WARN:Unpack())
 							surface.DrawOutlinedRect(0, 0, w, h)
+							self:SetTextColor(COLOR_WHITE)
+							self:SetText(has_lvl and ("NOT ENOUGH COINS (%sc)"):format(string.Comma(real_purchase_value)) or "LOCKED")
 						else
 							surface.SetDrawColor(COLOR_WHITE:Unpack())
 							surface.DrawRect(0, 0, w, h)
+							self:SetTextColor(COLOR_BLACK)
+							self:SetText(("PURCHASE (%sc)"):format(string.Comma(real_purchase_value)))
 						end
 					end
 				end
