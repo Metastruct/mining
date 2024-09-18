@@ -132,6 +132,8 @@ if SERVER then
 	-- need this otherwise some stuff doesnt call PlayerSpawnSENT
 	hook.Add("OnEntityCreated", "ma_terminal", function(ent)
 		if not ent.CPPIGetOwner then return end
+
+		local class_name = ent:GetClass()
 		if not Ores.Automation.PurchaseData[class_name] then return end
 
 		timer.Simple(0, function()
@@ -148,7 +150,7 @@ if SERVER then
 				return
 			end
 
-			ply:TakeItem(class_name .. "_item", 1, "Mining Terminal")
+			owner:TakeItem(class_name .. "_item", 1, "Mining Terminal")
 		end)
 	end)
 end
