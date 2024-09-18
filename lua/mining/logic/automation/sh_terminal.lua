@@ -21,7 +21,7 @@ local function init_items()
 			ITEM.State = "entity"
 			ITEM.Inventory = {
 				name = ent_table.PrintName,
-				info = ("A create containing materials necessary to build a %s"):format(ent_table.PrintName:lower())
+				info = ("A crate containing materials necessary to build a %s"):format(ent_table.PrintName:lower())
 			}
 
 			local function activate(self)
@@ -59,7 +59,7 @@ hook.Add("InitPostEntity", "ma_terminal", function()
 end)
 
 -- debug
-hooks.InitPostEntity.ma_terminal()
+hook.GetTable().InitPostEntity.ma_terminal()
 
 if SERVER then
 	util.AddNetworkString(NET_MSG)
@@ -125,7 +125,7 @@ if SERVER then
 			return false
 		end
 
-		ply:TakeItem(class .. "_item", 1, "Mining Terminal")
+		ply:TakeItem(class_name .. "_item", 1, "Mining Terminal")
 	end)
 end
 
