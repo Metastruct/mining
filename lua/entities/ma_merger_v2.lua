@@ -73,7 +73,7 @@ if SERVER then
 			_G.MA_Orchestrator.RegisterInput(self, "ores_" .. i, "ORE", "Ores " .. i, "Standard ore input.")
 		end
 
-		_G.MA_Orchestrator.EntityTimer("ma_merger_v2", self, 1, 0, function()
+		_G.MA_Orchestrator.EntityTimer("ma_merger_v2", self, 0.5, 0, function()
 			if #self.OreQueue > 1 then
 				local output_data = _G.MA_Orchestrator.GetOutputData(self, "ores")
 				_G.MA_Orchestrator.SendOutputReadySignal(output_data)
