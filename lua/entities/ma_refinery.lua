@@ -60,10 +60,10 @@ if SERVER then
 		end
 
 		local refinery_timer_tick = 0
-		_G.MA_Orchestrator.EntityTimer("ma_refinery", self, 1, 0, function()
+		_G.MA_Orchestrator.EntityTimer("ma_refinery", self, 0.5, 0, function()
 			if not self:CanWork() then return end
 
-			refinery_timer_tick = refinery_timer_tick + 1
+			refinery_timer_tick = refinery_timer_tick + 0.5
 			if refinery_timer_tick % 5 == 0 then
 				local cur_fuel = self:GetNW2Int("Fuel", 0)
 				local new_fuel = math.max(0, cur_fuel - 1)
