@@ -76,6 +76,8 @@ if SERVER then
 		self:PhysicsInit(SOLID_VPHYSICS)
 		self:PhysWake()
 
+		self:SetCollisionGroup(COLLISION_GROUP_WORLD)
+
 		self:StartMotionController()
 		self.ShadowParams = {}
 		self.NextTargetCheck = 0
