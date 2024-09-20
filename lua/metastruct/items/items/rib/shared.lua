@@ -31,7 +31,10 @@ if SERVER then
 			end
 		end)
 
+		ply:TakeItem("rib", 1)
 		self:Remove()
+
+		return false
 	end
 end
 
