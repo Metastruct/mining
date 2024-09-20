@@ -51,6 +51,11 @@ if SERVER then
 			local ore_data = Ores.__R[rarity]
 			if ore_data then
 				local earnings = ore_data.Worth
+				local owner = self.CPPIGetOwner and self:CPPIGetOwner()
+				if IsValid(owner) and owner:GetNWString("MA_BloodDeal", "") == "MINTER_DEAL" then
+					earnings = earnings * 1.25
+				end
+
 				local cur_coins = self:GetNWInt("MintedCoins", 0)
 				local new_amount = cur_coins + math.ceil(earnings)
 				self:SetNWInt("MintedCoins", new_amount)
@@ -73,6 +78,11 @@ if SERVER then
 			local ore_data = Ores.__R[rarity]
 			if ore_data then
 				local earnings = ore_data.Worth * Ores.Automation.IngotSize * ingot_worth
+				local owner = self.CPPIGetOwner and self:CPPIGetOwner()
+				if IsValid(owner) and owner:GetNWString("MA_BloodDeal", "") == "MINTER_DEAL" then
+					earnings = earnings * 1.25
+				end
+
 				local cur_coins = self:GetNWInt("MintedCoins", 0)
 				local new_amount = cur_coins + math.ceil(earnings)
 				self:SetNWInt("MintedCoins", new_amount)

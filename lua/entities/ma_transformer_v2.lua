@@ -12,6 +12,7 @@ ENT.RenderGroup = RENDERGROUP_OPAQUE
 ENT.Spawnable = true
 ENT.ClassName = "ma_transformer_v2"
 ENT.IconOverride = "entities/ma_transformer_v2.png"
+ENT.BatteryIndex = 0
 
 function ENT:CanWork()
 	return self:GetNWBool("Wiremod_Active", true)
@@ -194,6 +195,15 @@ if SERVER then
 	end
 
 	function ENT:CreateBattery()
+		self.BatteryIndex = self.BatteryIndex + 1
+
+		-- if we got the minter deal, make one battery out of two fail
+		local owner = self.CPPIGetOwner and self:CPPIGetOwner()
+		if IsValid(owner) and owner:GetNWString("MA_BloodDeal", "") == "MINTER_DEAL" and self.BatteryIndex % 2 == 0 then
+			self:EmitSound(")buttons/button11.wav", 100)
+			return
+		end
+
 		local output_data = _G.MA_Orchestrator.GetOutputData(self, "battery")
 		_G.MA_Orchestrator.SendOutputReadySignal(output_data)
 
