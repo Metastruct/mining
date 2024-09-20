@@ -50,6 +50,9 @@ if SERVER then
 
 		self.MA_Exploding = true
 
+		self:SetNWBool("IsPowered", false)
+		self:SetColor(Color(255, 0, 0))
+
 		local i = 0
 		timer.Create(("ma_drill_exploding_[%d]"):format(self:EntIndex()), 0.5, 4, function()
 			if not IsValid(self) then return end
