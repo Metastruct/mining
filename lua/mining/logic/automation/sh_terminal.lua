@@ -25,17 +25,9 @@ local function init_items()
 
 			function ITEM:OnEquip(ply)
 				local tr = ply:GetEyeTrace()
-				if not tr.Hit then return false end
-
-				local spawn_pos = tr.HitPos + tr.HitNormal * 100
-				local ent = ents.Create(class_name)
-				ent:SetPos(spawn_pos)
-				ent:Activate()
-				ent:Spawn()
-
-				local phys = ent:GetPhysicsObject()
-				if IsValid(phys) then
-					phys:EnableMotion(false)
+				local ent = scripted_ents.Get(class_name):SpawnFunction(ply, tr, class_name)
+				if ent.CPPISetOwner then
+					ent:CPPISetOwner(ply)
 				end
 
 				self:Remove()
