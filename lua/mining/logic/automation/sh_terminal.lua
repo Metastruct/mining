@@ -36,6 +36,8 @@ local function init_items()
 		msitems.EndItem()
 	end
 
+	if not SERVER then return end
+
 	-- none of the item hooks work so remove item entities....
 	hook.Add("OnEntityCreated", "ma_terminal_remove_bad_items", function(ent)
 		local class_name = ent:GetClass()
