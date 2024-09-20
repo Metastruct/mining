@@ -22,7 +22,10 @@ if SERVER then
 		ply:SetNWBool("MA_BloodDeal", "MINTER_DEAL")
 		ms.Ores.SendChatMessage(ply, "The deal is on, mortal...")
 
+		ply:TakeItem("skull", 1)
 		self:Remove()
+
+		return false
 	end
 end
 
