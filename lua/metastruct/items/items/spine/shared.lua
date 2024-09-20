@@ -3,6 +3,7 @@ msitems.StartItem("spine")
 ITEM.State = "entity"
 ITEM.WorldModel = "models/Gibs/HGIBS_spine.mdl"
 ITEM.EquipSound = "ui/item_helmet_pickup.wav"
+ITEM.DontReturnToInventory = true
 
 ITEM.Inventory = {
 	name = "Spine Totem",
@@ -108,9 +109,7 @@ if SERVER then
 			end
 		end)
 
-		ply:TakeItem("spine", 1)
 		self:Remove()
-
 		return false
 	end
 end

@@ -17,6 +17,10 @@ if SERVER then
 		self:SetSolid(SOLID_VPHYSICS)
 		self:PhysWake()
 	end
+
+	function ITEM:PreDrop()
+		return false
+	end
 end
 
 msitems.EndItem()
