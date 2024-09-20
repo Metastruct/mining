@@ -18,7 +18,7 @@ local ITEMS = {
 		price = 60,
 		description = "Old remains of what looks like a human spine, you don't even dare to imagine how it was obtained.",
 		deal = {
-			bonus = "Drills are 50% faster.",
+			bonus = "Ores mined by drills have 50% chance to be of better quality for 1h.",
 			malus = "Drills have a chance to break-down and explode.",
 		},
 	},
