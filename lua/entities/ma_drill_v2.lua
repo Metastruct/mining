@@ -156,6 +156,15 @@ if SERVER then
 		if not self:CanWork(time) then return end
 
 		local ore_rarity = Ores.SelectRarityFromSpawntable()
+
+		local owner = self.CPPIGetOwner and self:CPPIGetOwner()
+		if IsValid(owner) and owner:GetNWString("MA_BloodDeal", "") == "DRILL_DEAL" and math.random() > 0.5 then
+			local ore_data = Ores.__R[ore_rarity]
+			if ore_data and ore_data.NextRarityId then
+				ore_rarity = ore_data.NextRarityId
+			end
+		end
+
 		table.insert(self.OreQueue, 1, ore_rarity)
 
 		-- keep an internal storage of the last 50 ores
