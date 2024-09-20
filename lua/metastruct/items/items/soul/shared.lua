@@ -19,6 +19,7 @@ if SERVER then
 	end
 
 	function ITEM:PreDrop()
+		self:Remove()
 		return false
 	end
 end
