@@ -3,6 +3,7 @@ msitems.StartItem("skull")
 ITEM.State = "entity"
 ITEM.WorldModel = "models/Gibs/HGIBS.mdl"
 ITEM.EquipSound = "ui/item_helmet_pickup.wav"
+ITEM.DontReturnToInventory = true
 
 ITEM.Inventory = {
 	name = "Skull Totem",
@@ -22,9 +23,7 @@ if SERVER then
 		ply:SetNWBool("MA_BloodDeal", "MINTER_DEAL")
 		ms.Ores.SendChatMessage(ply, "The deal is on, mortal...")
 
-		ply:TakeItem("skull", 1)
 		self:Remove()
-
 		return false
 	end
 end
