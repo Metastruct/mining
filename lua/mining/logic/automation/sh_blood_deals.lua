@@ -465,6 +465,7 @@ if CLIENT then
 						net.SendToServer()
 					end
 
+					menu_toggled = false
 					frame:Remove()
 					surface.PlaySound("ambient/voices/squeal1.wav")
 					surface.PlaySound("ambient/atmosphere/cave_hit2.wav")
