@@ -18,7 +18,7 @@ if SERVER then
 		self:PhysWake()
 	end
 
-	function ITEM:OnUse(ply)
+	function ITEM:OnEquip(ply)
 		ply:SetNWBool("MA_BloodDeal", "SHOP_DEAL")
 		ms.Ores.SendChatMessage(ply, "The deal is on, you have 20 minutes, mortal...")
 

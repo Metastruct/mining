@@ -23,40 +23,16 @@ local function init_items()
 				name = ent_table.PrintName .. " Materials Crate",
 				info = ("A crate containing materials necessary to build a %s"):format(ent_table.PrintName:lower())
 			}
-
-			local function activate(self)
-				if CLIENT then return end
-
-				local owner = self.Owner
-				if not IsValid(owner) then
-					self:Remove()
-					return
-				end
-
-				if not owner:IsPlayer() then
-					self:Remove()
-					return
-				end
-
-				local tr = owner:GetEyeTrace()
-				local ent = ents.Create(class_name)
-				ent:SetPos(tr.HitPos + tr.HitNormal * 100)
-				ent:Activate()
-				ent:Spawn()
-				ent:DropToFloor()
-
-				local phys = ent:GetPhysicsObject()
-				if IsValid(phys) then
-					phys:EnableMotion(false)
-				end
-
-				self:Remove()
-			end
-
-			ITEM.OnDrop = activate
-			ITEM.OnUse = activate
 		msitems.EndItem()
 	end
+
+	-- none of the item hooks work so remove item entities....
+	hook.Add("OnEntityCreated", "ma_terminal_remove_bad_items", function(ent)
+		local class_name = ent:GetClass()
+		if class_name:match("ma%_.*%_item%_item%_sent$") then
+			SafeRemoveEntityDelayed(ent, 0.1)
+		end
+	end)
 end
 
 hook.Add("InitPostEntity", "ma_terminal", function()
