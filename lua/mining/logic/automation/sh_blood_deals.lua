@@ -232,9 +232,15 @@ if SERVER then
 	end)
 
 	hook.Add("OnEntityCreated", TAG, function(ent)
+		local class_name = ent:GetClass()
+		if ITEMS[class_name:gsub("_item_sent$", "")] then
+			SafeRemoveEntityDelayed(ent, 0)
+			return
+		end
+
 		if not IsValid(BLOOD_GOD_NPC) then return end
 
-		if ent:GetClass() == "mining_rock" then
+		if class_name  == "mining_rock" then
 			timer.Simple(0, function()
 				if not IsValid(ent) then return end
 
