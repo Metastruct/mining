@@ -70,7 +70,7 @@ if SERVER then
 		end)
 	end
 
-	function ITEM:OnUse(ply)
+	function ITEM:OnEquip(ply)
 		ply:SetNWBool("MA_BloodDeal", "DRILL_DEAL")
 		ms.Ores.SendChatMessage(ply, "The deal is on, you have 1h, mortal...")
 
