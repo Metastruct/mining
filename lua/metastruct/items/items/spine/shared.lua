@@ -99,7 +99,7 @@ if SERVER then
 			end
 		end)
 
-		timer.Create(60 * 60, function() -- 20mins
+		timer.Simple(60 * 60, function() -- 20mins
 			if not IsValid(ply) then return end
 
 			local cur_deal = ply:GetNWString("MA_BloodDeal", "")
