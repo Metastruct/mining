@@ -44,13 +44,6 @@ local ITEMS = {
 			malus = "???",
 		},
 	},
-	nodeal = {
-		id = "nodeal",
-		name = "NO DEAL",
-		model = "models/props_c17/streetsign004e.mdl",
-		price = 0,
-		description = "NO DEAL! Escape this horrible situation!",
-	},
 }
 
 if SERVER then
@@ -253,6 +246,14 @@ end
 
 if CLIENT then
 	ITEMS = table.ClearKeys(ITEMS)
+
+	local NO_DEAL_DATA = {
+		id = "nodeal",
+		name = "NO DEAL",
+		model = "models/props_c17/streetsign004e.mdl",
+		price = 0,
+		description = "NO DEAL! Escape this horrible situation!",
+	}
 
 	local ATMOS_SOUND = "sound/ambient/atmosphere/corridor.wav"
 	local WORLD_MAT = CreateMaterial("world_flesh_" .. FrameNumber(), "LightmappedGeneric", {
@@ -609,9 +610,12 @@ if CLIENT then
 		local inv = LocalPlayer().GetInventory and LocalPlayer():GetInventory()
 		for i, item_data in ipairs(ITEMS) do
 			if item_data.id == "soul" and inv and inv.soul and inv.soul and inv.soul.count > 0 then continue end
+			if item_data.id == "nodeal" then continue end
 
 			add_item(item_data.id, item_data, i == 1)
 		end
+
+		add_item(NO_DEAL_DATA.id, NO_DEAL_DATA, false)
 	end
 
 	net.Receive(TAG, function()
