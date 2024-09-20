@@ -106,14 +106,14 @@ if SERVER then
 			if not REVERSE_UNLOCK_DATA[class_name] then return end
 
 			-- if we made the shop deal dont check level
-			if not ply:GetNWBool("MA_ShopDeal", false) then
+			if ply:GetNWString("MA_BloodDeal", "") ~= "SHOP_DEAL" then
 				local lvl_required = REVERSE_UNLOCK_DATA[class_name]
 				if cur_lvl < lvl_required then return end
 			end
 
 			local price = Ores.Automation.PurchaseData[class_name] * Ores.GetPlayerMultiplier(ply)
 			-- if we have the shop deal, double the prices
-			if ply:GetNWBool("MA_ShopDeal", false) then
+			if ply:GetNWString("MA_BloodDeal", "") == "SHOP_DEAL" then
 				price = price * 2
 			end
 
@@ -475,9 +475,9 @@ if CLIENT then
 					if not ent_table then continue end
 
 					local lvl_required = i * 10
-					local has_lvl = ply:GetNWBool("MA_ShopDeal", false) or cur_lvl >= lvl_required
+					local has_lvl = ply:GetNWString("MA_BloodDeal", "") == "SHOP_DEAL" or cur_lvl >= lvl_required
 					local real_purchase_value = purchase_value * ms.Ores.GetPlayerMultiplier(ply)
-					if ply:GetNWBool("MA_ShopDeal", false) then
+					if ply:GetNWString("MA_BloodDeal", "") == "SHOP_DEAL" then
 						real_purchase_value = real_purchase_value * 2
 					end
 

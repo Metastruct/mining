@@ -19,14 +19,19 @@ if SERVER then
 	end
 
 	function ITEM:OnUse(ply)
-		ply:SetNWBool("MA_ShopDeal", true)
+		ply:SetNWBool("MA_BloodDeal", "SHOP_DEAL")
 		ms.Ores.SendChatMessage(ply, "The deal is on, you have 20 minutes, mortal...")
 
 		timer.Simple(60 * 20, function() -- 20mins
 			if not IsValid(ply) then return end
 
-			ply:SetNWBool("MA_ShopDeal", false)
+			local cur_deal = ply:GetNWString("MA_BloodDeal", "")
+			if cur_deal == "SHOP_DEAL" then
+				ply:SetNWString("MA_BloodDeal", "")
+			end
 		end)
+
+		self:Remove()
 	end
 end
 
