@@ -33,6 +33,10 @@ local function init_items()
 				self:Remove()
 				return false
 			end
+
+			function ITEM:PreDrop(ply)
+				return self:OnEquip(ply)
+			end
 		msitems.EndItem()
 	end
 
