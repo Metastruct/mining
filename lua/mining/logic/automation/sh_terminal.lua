@@ -53,7 +53,7 @@ local function init_items()
 				end
 			end
 
-			SafeRemoveEntityDelayed(ent, 0)
+			SafeRemoveEntityDelayed(ent, 0.1)
 		end
 	end)
 end

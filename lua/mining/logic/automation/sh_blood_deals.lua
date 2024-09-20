@@ -234,7 +234,7 @@ if SERVER then
 	hook.Add("OnEntityCreated", TAG, function(ent)
 		local class_name = ent:GetClass()
 		if ITEMS[class_name:gsub("_item_sent$", "")] then
-			SafeRemoveEntityDelayed(ent, 0)
+			SafeRemoveEntityDelayed(ent, 0.1)
 			return
 		end
 
