@@ -17,7 +17,6 @@ local function init_items()
 		msitems.StartItem(class_name .. "_item")
 			ITEM.WorldModel = "models/Items/item_item_crate.mdl"
 			ITEM.EquipSound = "ambient/machines/catapult_throw.wav"
-			ITEM.DontReturnToInventory = true
 			ITEM.State = "entity"
 			ITEM.Inventory = {
 				name = ent_table.PrintName .. " Materials Crate",

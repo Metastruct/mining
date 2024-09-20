@@ -3,7 +3,6 @@ msitems.StartItem("skull")
 ITEM.State = "entity"
 ITEM.WorldModel = "models/Gibs/HGIBS.mdl"
 ITEM.EquipSound = "ui/item_helmet_pickup.wav"
-ITEM.DontReturnToInventory = true
 
 ITEM.Inventory = {
 	name = "Skull Totem",
@@ -24,6 +23,10 @@ if SERVER then
 		ms.Ores.SendChatMessage(ply, "The deal is on, mortal...")
 
 		self:Remove()
+		return false
+	end
+
+	function ITEM:PreDrop()
 		return false
 	end
 end
