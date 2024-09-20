@@ -5,7 +5,7 @@ ITEM.WorldModel = "models/Gibs/HGIBS_spine.mdl"
 ITEM.EquipSound = "ui/item_helmet_pickup.wav"
 
 ITEM.Inventory = {
-	name = "Spine",
+	name = "Spine Totem",
 	info = "Ores mined by drills have 50% chance to be of better quality for 1h. Drills have a chance to break-down and explode."
 }
 
