@@ -25,17 +25,13 @@ local function init_items()
 
 			function ITEM:OnEquip(ply)
 				local tr = ply:GetEyeTrace()
-				local ent = scripted_ents.Get(class_name):SpawnFunction(ply, tr, class_name)
+				local ent = ent_table:SpawnFunction(ply, tr, class_name)
 				if ent.CPPISetOwner then
 					ent:CPPISetOwner(ply)
 				end
 
 				self:Remove()
 				return false
-			end
-
-			function ITEM:PreDrop(ply)
-				return self:OnEquip(ply)
 			end
 		msitems.EndItem()
 	end
@@ -44,7 +40,20 @@ local function init_items()
 	hook.Add("OnEntityCreated", "ma_terminal_remove_bad_items", function(ent)
 		local class_name = ent:GetClass()
 		if class_name:match("ma%_.*%_item%_item%_sent$") then
-			SafeRemoveEntityDelayed(ent, 0.1)
+			local owner = ent.CPPIGetOwner and ent:CPPIGetOwner()
+			if IsValid(owner) then
+				local tr = owner:GetEyeTrace()
+				local actual_class_name = class_name:gsub("_item_item_sent$", "")
+				local ent_table = scripted_ents.Get(actual_class_name)
+				if istable(ent_table) then
+					local new_ent = ent_table:SpawnFunction(owner, tr, actual_class_name)
+					if new_ent.CPPISetOwner then
+						new_ent:CPPISetOwner(owner)
+					end
+				end
+			end
+
+			SafeRemoveEntityDelayed(ent, 0)
 		end
 	end)
 end
