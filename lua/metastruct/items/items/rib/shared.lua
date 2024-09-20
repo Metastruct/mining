@@ -3,7 +3,6 @@ msitems.StartItem("rib")
 ITEM.State = "entity"
 ITEM.WorldModel = "models/Gibs/HGIBS_rib.mdl"
 ITEM.EquipSound = "ui/item_helmet_pickup.wav"
-ITEM.DontReturnToInventory = true
 
 ITEM.Inventory = {
 	name = "Rib Totem",
@@ -33,6 +32,10 @@ if SERVER then
 		end)
 
 		self:Remove()
+		return false
+	end
+
+	function ITEM:PreDrop()
 		return false
 	end
 end
