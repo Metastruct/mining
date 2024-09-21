@@ -19,7 +19,6 @@ Ores.Automation = Ores.Automation or {
 		ma_minter_v2 = true,
 		ma_oil_extractor_v2 = true,
 		ma_gen_v2 = true,
-		ma_chip_router_v2 = true,
 		ma_drone_controller_v2 = true,
 		ma_bomb_v2 = true,
 		ma_refinery = true,
@@ -37,7 +36,7 @@ Ores.Automation = Ores.Automation or {
 		[2] = { "ma_merger_v2"  },
 		[3] = { "ma_oil_extractor_v2", "ma_smelter_v2" },
 		[4] = { "ma_minter_v2", "ma_refinery" },
-		[5] = { "ma_chip_router_v2", "ma_drone_controller_v2" },
+		[5] = { "ma_drone_controller_v2" },
 	},
 	PurchaseData = {
 		ma_drill_v2 = 10000,
@@ -49,7 +48,6 @@ Ores.Automation = Ores.Automation or {
 		ma_smelter_v2 = 60000,
 		ma_minter_v2 = 10000,
 		ma_refinery = 80000,
-		ma_chip_router_v2 = 60000,
 		ma_drone_controller_v2 = 90000,
 	}
 }
