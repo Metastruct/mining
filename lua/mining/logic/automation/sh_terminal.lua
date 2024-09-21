@@ -148,6 +148,9 @@ if SERVER then
 		if not ply.TakeItem then return end
 		if not Ores.Automation.PurchaseData[class_name] then return end
 
+		-- dont go further if player is already hitting the limit
+		if not Ores.Automation.CheckLimit(ply, class_name) then return false end
+
 		local count = ply:GetItemCount(class_name .. "_item")
 		if not isnumber(count) or count < 1 then
 			local ent_table = scripted_ents.Get(class_name)
