@@ -122,6 +122,7 @@ local function spawnFallingRockDebris(pos, originalPos, rarityData)
 		for _, rarityDataChunk in ipairs(rarityData) do
 			if rarityDataChunk.Chance > chance then
 				rarity = rarityDataChunk.Rarity
+				break
 			end
 		end
 
