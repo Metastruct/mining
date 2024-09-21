@@ -143,6 +143,8 @@ local function spawnDetonite(tr)
 
 		function drop:PhysicsCollide(data)
 			if IsValid(data.Entity) and data.Entity:IsPlayer() then
+				if data.Entity._miningBlocked or (data.Entity._miningCooldown and data.Entity._miningCooldown > CurTime()) then return end
+
 				self:Consume(data.Entity)
 				return
 			end
@@ -164,6 +166,7 @@ local function spawnDetonite(tr)
 
 		function drop:Touch(ent)
 			if not ent:IsPlayer() then return end
+			if ent._miningBlocked or (ent._miningCooldown and ent._miningCooldown > CurTime()) then return end
 
 			self:Consume(ent)
 		end
