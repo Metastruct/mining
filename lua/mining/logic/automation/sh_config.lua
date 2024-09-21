@@ -2,6 +2,7 @@ module("ms", package.seeall)
 Ores = Ores or {}
 
 resource.AddFile("resource/fonts/Sevastopol-Interface.ttf")
+resource.AddFile("resource/fonts/Ghastly-Panic.ttf")
 
 Ores.Automation = Ores.Automation or {
 	BatteryCapacity = 150,
