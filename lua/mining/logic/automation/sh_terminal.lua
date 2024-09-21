@@ -189,13 +189,13 @@ if CLIENT then
 
 	surface.CreateFont("ma_terminal_content", {
 		font = "Sevastopol Interface",
-		size = math.max(13, 15 * COEF_H),
+		size = 15,
 		weight = 800,
 	})
 
 	surface.CreateFont("ma_terminal_btn", {
 		font = "Sevastopol Interface",
-		size = math.max(13, 15 * COEF_H),
+		size = 15,
 	})
 
 	function Ores.Automation.OpenTerminal(active_tab_name)
@@ -302,8 +302,8 @@ if CLIENT then
 
 			local sheet_data = sheet:AddSheet(name, container)
 			sheet_data.Button:SetText("")
-			sheet_data.Button:SetTall(80)
-			sheet_data.Button:SetWide(200)
+			sheet_data.Button:SetTall(80 * COEF_H)
+			sheet_data.Button:SetWide(200 * COEF_W)
 			sheet_data.Button:DockMargin(0, margin_top and 50 * COEF_H or 5 * COEF_H, 0, 0)
 
 			if active_tab_name == name then
@@ -355,9 +355,66 @@ if CLIENT then
 			return inner_panel
 		end
 
+		-- multiplier leaderboard
+		do
+			local ranking_panel = add_sheet("RANKING", "TOP 10 HIGHEST MINING MULTIPLIERS", true)
+
+			local content_left = ranking_panel:Add("DPanel")
+			content_left:Dock(LEFT)
+			content_left:SetWide(400 * COEF_W)
+			function content_left:Paint() end
+
+			local content_right = ranking_panel:Add("DPanel")
+			content_right:Dock(FILL)
+			function content_right:Paint() end
+
+			local column_header_left = content_left:Add("DLabel")
+			column_header_left:SetText("PLAYER")
+			column_header_left:SetTall(20)
+			column_header_left:Dock(TOP)
+			column_header_left:DockMargin(20 * COEF_W, 20 * COEF_H, 20 * COEF_W, 5 * COEF_H)
+			column_header_left:SetFont("ma_terminal_content")
+
+			local column_header_right = content_right:Add("DLabel")
+			column_header_right:SetText("MULTIPLIER")
+			column_header_right:SetTall(20)
+			column_header_right:Dock(TOP)
+			column_header_right:DockMargin(20 * COEF_W, 20 * COEF_H, 20 * COEF_W, 5 * COEF_H)
+			column_header_right:SetFont("ma_terminal_content")
+
+			local function add_player_rank(name, multiplier)
+				local ply_name = content_left:Add("DLabel")
+				ply_name:SetTall(20)
+				ply_name:Dock(TOP)
+				ply_name:DockMargin(20 * COEF_W, is_first and 20 * COEF_H or 5 * COEF_H, 20 * COEF_W, 5 * COEF_H)
+				ply_name:SetFont("ma_terminal_content")
+				ply_name:SetText(name)
+
+				local ply_mult = content_right:Add("DLabel")
+				ply_mult:SetTall(20)
+				ply_mult:Dock(TOP)
+				ply_mult:DockMargin(20 * COEF_W, is_first and 20 * COEF_H or 5 * COEF_H, 20 * COEF_W, 5 * COEF_H)
+				ply_mult:SetFont("ma_terminal_content")
+				ply_mult:SetText(tostring(multiplier))
+			end
+
+			local ranks = {}
+			for _, p in pairs(player.GetAll()) do
+				local mult = p:GetNWFloat(Ores._nwMult, 0)
+				table.insert(ranks, { name = p:Nick(), multiplier = mult })
+			end
+
+			table.sort(ranks, function(a, b) return a.multiplier > b.multiplier end)
+
+			for i = 1, 10 do
+				local rank_data = ranks[i]
+				add_player_rank(rank_data.name, rank_data.multiplier)
+			end
+		end
+
 		-- stat upgrade
 		do
-			local upgrade_panel = add_sheet("UPGRADE", "ACCESS NEW RESOURCES", true)
+			local upgrade_panel = add_sheet("UPGRADE", "ACCESS NEW RESOURCES")
 			local header = upgrade_panel:Add("DPanel")
 			header:Dock(TOP)
 			header:SetTall(60)
@@ -366,8 +423,8 @@ if CLIENT then
 			local stat_name = header:Add("DLabel")
 			stat_name:Dock(LEFT)
 			stat_name:DockMargin(5 * COEF_W, 20 * COEF_H, 20 * COEF_W, 20 * COEF_H)
-			stat_name:SetWide(400)
-			stat_name:SetText(("CURRENT LVL %d %s"):format(cur_lvl, (can_upgrade and not max_lvl) and "[UPGRADE POSSIBLE]" or ""))
+			stat_name:SetWide(300 * COEF_W)
+			stat_name:SetText(("CURRENT LVL %d"):format(cur_lvl))
 			stat_name:SetColor(COLOR_WHITE)
 			stat_name:SetFont("ma_terminal_header")
 
@@ -429,7 +486,8 @@ if CLIENT then
 			end
 
 			function stat_upgrade:DoClick()
-				if not can_upgrade and not max_lvl then return end
+				if not can_upgrade then return end
+				if max_lvl then return end
 
 				net.Start(NET_MSG)
 				net.WriteInt(NET_MSG_TYPE_UPGRADE, 8)
@@ -441,8 +499,8 @@ if CLIENT then
 				upgrade_cost = math.floor(math.max(2000, cur_lvl * 2000))
 				can_upgrade = cur_points >= upgrade_cost
 
-				stat_name:SetText(("CURRENT LVL %d %s"):format(cur_lvl, can_upgrade and "[UPGRADE POSSIBLE]" or ""))
-				self:SetText((can_upgrade and "UPGRADE (%s .PTS)" or "NOT ENOUGH POINTS (%s .PTS)"):format(string.Comma(upgrade_cost)))
+				stat_name:SetText(("CURRENT LVL %d"):format(cur_lvl))
+				self:SetText(not max_lvl and (can_upgrade and "UPGRADE (%s .PTS)" or "NOT ENOUGH POINTS (%s .PTS)"):format(string.Comma(upgrade_cost)) or "MAXED")
 				self:SetTextColor(can_upgrade and COLOR_BLACK or COLOR_WHITE)
 				build_unlock_list()
 
@@ -548,6 +606,7 @@ if CLIENT then
 				end
 			end
 		end
+
 
 		--add_sheet("GUIDE", "LEARN ABOUT AN EQUIPMENT")
 	end
