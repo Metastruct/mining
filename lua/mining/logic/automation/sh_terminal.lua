@@ -259,6 +259,7 @@ if CLIENT then
 		end
 	end
 
+	local prompt_opened = false
 	net.Receive(NET_MSG, function()
 		local msg_type = net.ReadInt(8)
 		if msg_type == NET_MSG_RANKING then
@@ -277,14 +278,24 @@ if CLIENT then
 					real_purchase_value = real_purchase_value * 2
 				end
 
-				Derma_Query(
-					("You are trying to spawn %s, which costs %d coins. Would you like to auto-buy your equipment next time?"):format(ent_table.PrintName, real_purchase_value),
-					"Auto-buy",
-					"Yes", function() CVAR_AUTOBUY:SetInt(1) end,
-					"No", function () end
-				)
+				-- necessary if someone pastes a dupe
+				if not prompt_opened then
+					prompt_opened = true
 
-				cookie.Set("mining_automation_autobuy_prompt", "1")
+					Derma_Query(
+						("You are trying to spawn %s, which costs %d coins. Would you like to auto-buy your equipment next time?"):format(ent_table.PrintName, real_purchase_value),
+						"Auto-buy",
+						"Yes", function()
+							CVAR_AUTOBUY:SetInt(1)
+							prompt_opened = false
+						end,
+						"No", function()
+							prompt_opened = false
+						end
+					)
+
+					cookie.Set("mining_automation_autobuy_prompt", "1")
+				end
 			end
 		end
 	end)
