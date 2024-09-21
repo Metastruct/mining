@@ -6,14 +6,14 @@ surface.CreateFont("mining_automation_hud", {
 	font = "Sevastopol Interface",
 	extended = true,
 	weight = 600,
-	size = 25 * scale
+	size = math.max(18, 25 * scale)
 })
 
 surface.CreateFont("mining_automation_hud2", {
 	font = "Sevastopol Interface",
 	extended = true,
 	weight = 500,
-	size = 20 * scale
+	size = math.max(16, 20 * scale)
 })
 
 function Ores.Automation.ShouldDrawText(ent)
@@ -59,7 +59,7 @@ local function drawEntityInfoFrame(ent, data)
 	if not pos.visible then return end
 
 	local x, y = pos.x - total_width / 2, pos.y - total_height / 2
-	blur_rect(x, y, total_width * scale, total_height * scale, 10, 2)
+	blur_rect(x, y, total_width, total_height, 10, 2)
 
 	surface.SetDrawColor(0, 0, 0, 200)
 	surface.DrawRect(x, y, total_width, total_height)
@@ -156,13 +156,8 @@ local function try_draw_ent(ent)
 end
 
 hook.Add("HUDPaint", "mining_automation_entity_info", function()
-	local mining_ents = ents.FindByClass("ma_*")
-	table.sort(mining_ents, function(e1, e2)
-		local eye_pos = LocalPlayer():EyePos()
-		return e1:WorldSpaceCenter():DistToSqr(eye_pos) > e2:WorldSpaceCenter():DistToSqr(eye_pos)
-	end)
+	local tr = LocalPlayer():GetEyeTrace()
+	if not IsValid(tr.Entity) then return end
 
-	for _, ent in ipairs(mining_ents) do
-		try_draw_ent(ent)
-	end
+	try_draw_ent(tr.Entity)
 end)
