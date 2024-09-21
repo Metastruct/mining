@@ -117,7 +117,9 @@ if SERVER then
 				self:Detonate()
 
 				Ores.MineCollapse(self:WorldSpaceCenter(), 60, {
-					[0] = 100,
+					[2] = 60,
+					[3] = 30,
+					[4] = 10,
 				}, activator)
 			end
 		end)
