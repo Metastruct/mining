@@ -82,7 +82,7 @@ if CLIENT then
 		surface.DrawRect(0, 0, real_width, real_height)
 
 		surface.SetFont("ma_terminal_world_title")
-		local text = "MINING AUTOMATION"
+		local text = "META MINING"
 		local tw, th = surface.GetTextSize(text)
 
 		local pos_x, pos_y = real_width / 2 - tw / 2, real_height / 2 - th / 2 - 200
