@@ -187,9 +187,7 @@ hook.Add("OnEntityCreated", "mining_automation", function(ent)
 	end)
 end)
 
-hook.Add("PlayerSpawnSENT", "mining_automation", function(ply, class_name)
-	if not class_name then return end
-
+function Ores.Automation.CheckLimit(ply, class_name)
 	if Ores.Automation.EntityClasses[class_name] then
 		if Ores.Automation.CustomLimits[class_name] and not ply:CheckLimit(class_name) then
 			return false
@@ -199,6 +197,14 @@ hook.Add("PlayerSpawnSENT", "mining_automation", function(ply, class_name)
 			return false
 		end
 	end
+
+	return true
+end
+
+hook.Add("PlayerSpawnSENT", "mining_automation", function(ply, class_name)
+	if not class_name then return end
+
+	if not Ores.Automation.CheckLimit(ply, class_name) then return false end
 end)
 
 hook.Add("InitPostEntity", "mining_automation", function()
