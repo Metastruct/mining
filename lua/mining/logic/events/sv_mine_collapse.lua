@@ -115,6 +115,10 @@ local function spawnFallingRockDebris(pos, originalPos, rarityData)
 
 		local chance = math.random(0, 100)
 		local rarity = 0
+		if #rarityData > 0 then
+			rarity = rarityData[1].Rarity or 0
+		end
+
 		for _, rarityDataChunk in ipairs(rarityData) do
 			if rarityDataChunk.Chance > chance then
 				rarity = rarityDataChunk.Rarity
