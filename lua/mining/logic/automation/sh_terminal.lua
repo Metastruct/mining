@@ -4,6 +4,7 @@ Ores = Ores or {}
 local NET_MSG = "MA_TERMINAL"
 local NET_MSG_TYPE_UPGRADE = 1
 local NET_MSG_TYPE_PURCHASE = 2
+local NET_MSG_RANKING = 3
 
 local REVERSE_UNLOCK_DATA = {}
 
@@ -174,9 +175,71 @@ if SERVER then
 			owner:TakeItem(class_name .. "_item", 1, "Mining Terminal")
 		end)
 	end)
+
+	local function send_ranking(ranking)
+		net.Start(NET_MSG)
+		net.WriteInt(NET_MSG_RANKING, 8)
+		net.WriteTable(ranking)
+		net.Broadcast()
+	end
+
+	local function refresh_ranking()
+		if not _G.co or not _G.db then return end
+
+		co(function()
+			local ret = db([[SELECT * FROM mining_savedata ORDER BY mult DESC LIMIT 10]])
+			if not ret then return end
+
+			local ranking = {}
+			for _, data in pairs(ret) do
+				table.insert(ranking, { AccountId = data.accountid, Multiplier = data.mult })
+			end
+
+			send_ranking(ranking)
+		end)
+	end
+
+	timer.Create("ma_terminal_ranking", 30, 0, refresh_ranking)
+	hook.Add("InitPostEntity", "ma_terminal_ranking", refresh_ranking)
 end
 
 if CLIENT then
+	local RANKING_DATA = {}
+	local function get_player_name(account_id, callback)
+		local steamid_64 = util.SteamID64FromAccountID(tonumber(account_id))
+		local ply = player.GetBySteamID64(steamid_64)
+		if IsValid(ply) then
+			local name = ply:Nick()
+			callback(name)
+			return
+		end
+
+		steamworks.RequestPlayerInfo(steamid_64, callback)
+	end
+
+	net.Receive(NET_MSG, function()
+		local msg_type = net.ReadInt(8)
+		if msg_type == NET_MSG_RANKING then
+			local new_ranking_data = {}
+			local rankings = net.ReadTable()
+			local count = #rankings
+			local req_count = 0
+			for _, data in pairs(rankings) do
+				get_player_name(data.AccountId, function(name)
+					table.insert(new_ranking_data, { Name = name, Multiplier = tostring(data.Multiplier) })
+					req_count = req_count + 1
+					if req_count >= count then
+						table.sort(new_ranking_data, function(a, b)
+							return tonumber(a.Multiplier) > tonumber(b.Multiplier)
+						end)
+
+						RANKING_DATA = new_ranking_data
+					end
+				end)
+			end
+		end
+	end)
+
 	local COEF_W, COEF_H = ScrW() / 2560, ScrH() / 1440
 	local COLOR_WHITE = Color(255, 255, 255, 255)
 	local COLOR_BLACK = Color(0, 0, 0, 255)
@@ -398,17 +461,14 @@ if CLIENT then
 				ply_mult:SetText(tostring(multiplier))
 			end
 
-			local ranks = {}
-			for _, p in pairs(player.GetAll()) do
-				local mult = p:GetNWFloat(Ores._nwMult, 0)
-				table.insert(ranks, { name = p:Nick(), multiplier = mult })
-			end
-
-			table.sort(ranks, function(a, b) return a.multiplier > b.multiplier end)
-
-			for i = 1, 10 do
-				local rank_data = ranks[i]
-				add_player_rank(rank_data.name, rank_data.multiplier)
+			if #RANKING_DATA == 0 then
+				add_player_rank("LOADING", 0)
+			else
+				for i = 1, 10 do
+					local rank_data = RANKING_DATA[i]
+					if not rank_data then continue end
+					add_player_rank(rank_data.Name, rank_data.Multiplier)
+				end
 			end
 		end
 
