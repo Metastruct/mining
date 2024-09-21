@@ -46,6 +46,21 @@ local ITEMS = {
 	},
 }
 
+ms.Ores.__R[666] = {
+	AmbientLevel = 78,
+	AmbientPitch = 65,
+	AmbientSound = "ambient/levels/citadel/field_loop3.wav",
+	AmbientVolume = 0.3,
+	Health = 10,
+	Hidden = true,
+	HudColor = Color(200, 0, 0),
+	Name = "Blood",
+	PhysicalColor = Color(55, 0, 0),
+	SparkleInterval = 0.3,
+	Worth = 0,
+	Suffix = "",
+}
+
 if SERVER then
 	util.AddNetworkString(TAG)
 	util.AddNetworkString(TAG .. "_npc")
