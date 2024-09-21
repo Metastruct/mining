@@ -117,9 +117,9 @@ if SERVER then
 				self:Detonate()
 
 				Ores.MineCollapse(self:WorldSpaceCenter(), 60, {
-					[2] = 60,
-					[3] = 30,
-					[4] = 10,
+					{ Rarity = 2, Chance = 60 },
+					{ Rarity = 3, Chance = 30 },
+					{ Rarity = 4, Chance = 10 },
 				}, activator)
 			end
 		end)
