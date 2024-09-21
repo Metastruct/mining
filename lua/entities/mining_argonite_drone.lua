@@ -232,7 +232,7 @@ if SERVER then
 			local dmg = DamageInfo()
 			dmg:SetAttacker(owner)
 			dmg:SetInflictor(self)
-			dmg:SetDamage(15)
+			dmg:SetDamage(7)
 			dmg:SetDamageType(DMG_ENERGYBEAM)
 
 			local effect_data = EffectData()
