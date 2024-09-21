@@ -5,6 +5,7 @@ local NET_MSG = "MA_TERMINAL"
 local NET_MSG_TYPE_UPGRADE = 1
 local NET_MSG_TYPE_PURCHASE = 2
 local NET_MSG_RANKING = 3
+local NET_MSG_AUTOBUY = 4
 
 local REVERSE_UNLOCK_DATA = {}
 
@@ -61,7 +62,7 @@ local function init_items()
 	end)
 end
 
-hook.Add("InitPostEntity", "ma_terminal", function()
+local function init()
 	for lvl_required, class_names in pairs(Ores.Automation.UnlockData) do
 		for _, class_name in ipairs(class_names) do
 			REVERSE_UNLOCK_DATA[class_name] = lvl_required * 10
@@ -69,15 +70,15 @@ hook.Add("InitPostEntity", "ma_terminal", function()
 	end
 
 	init_items()
-end)
+end
 
--- debug
-hook.GetTable().InitPostEntity.ma_terminal()
+hook.Add("InitPostEntity", "ma_terminal", init)
+init()
 
 if SERVER then
 	util.AddNetworkString(NET_MSG)
 
-	local function upgradeMiningAutomation(ply)
+	local function upgrade_mining_automation(ply)
 		ms.Ores.GetSavedPlayerDataAsync(ply, function(data)
 			local level = data.MiningAutomation
 			if level >= 50 then return end
@@ -97,35 +98,41 @@ if SERVER then
 		end, { "MiningAutomation" })
 	end
 
+	local function purchase_mining_equipment(ply, class_name)
+		if not ply.GetCoins or not ply.TakeCoins then return end
+		if not REVERSE_UNLOCK_DATA[class_name] then return end
+
+		local cur_lvl = ply:GetNWInt("ms.Ores.MiningAutomation", 0)
+
+		-- if we made the shop deal dont check level
+		if ply:GetNWString("MA_BloodDeal", "") ~= "SHOP_DEAL" then
+			local lvl_required = REVERSE_UNLOCK_DATA[class_name]
+			if cur_lvl < lvl_required then return false, "not unlocked" end
+		end
+
+		local price = Ores.Automation.PurchaseData[class_name] * Ores.GetPlayerMultiplier(ply)
+		-- if we have the shop deal, double the prices
+		if ply:GetNWString("MA_BloodDeal", "") == "SHOP_DEAL" then
+			price = price * 2
+		end
+
+		if ply:GetCoins() < price then return false, "not enough coins" end
+
+		if ply.GiveItem then
+			ply:GiveItem(class_name .. "_item", 1, "Mining Terminal")
+		end
+
+		ply:TakeCoins(price, "Mining Terminal: purchased " .. class_name)
+		return true
+	end
+
 	net.Receive(NET_MSG, function(_, ply)
 		local msg_type = net.ReadInt(8)
-		local cur_lvl = ply:GetNWInt("ms.Ores.MiningAutomation", 0)
 		if msg_type == NET_MSG_TYPE_UPGRADE then
-			upgradeMiningAutomation(ply)
+			upgrade_mining_automation(ply)
 		elseif msg_type == NET_MSG_TYPE_PURCHASE then
 			local class_name = net.ReadString()
-			if not ply.GetCoins or not ply.TakeCoins then return end
-			if not REVERSE_UNLOCK_DATA[class_name] then return end
-
-			-- if we made the shop deal dont check level
-			if ply:GetNWString("MA_BloodDeal", "") ~= "SHOP_DEAL" then
-				local lvl_required = REVERSE_UNLOCK_DATA[class_name]
-				if cur_lvl < lvl_required then return end
-			end
-
-			local price = Ores.Automation.PurchaseData[class_name] * Ores.GetPlayerMultiplier(ply)
-			-- if we have the shop deal, double the prices
-			if ply:GetNWString("MA_BloodDeal", "") == "SHOP_DEAL" then
-				price = price * 2
-			end
-
-			if ply:GetCoins() < price then return end
-
-			if ply.GiveItem then
-				ply:GiveItem(class_name .. "_item", 1, "Mining Terminal")
-			end
-
-			ply:TakeCoins(price, "Mining Terminal: purchased " .. class_name)
+			purchase_mining_equipment(ply, class_name)
 		end
 	end)
 
@@ -146,7 +153,22 @@ if SERVER then
 			local ent_table = scripted_ents.Get(class_name)
 			local name = ent_table and ent_table.PrintName or class_name
 
-			Ores.SendChatMessage(ply, 1, "You don't own enough materials to create a " .. name .. "! You can get some at the mining terminal.")
+			if ply:GetInfoNum("mining_automation_autobuy", 0) == 0 then
+				Ores.SendChatMessage(ply, 1, "You don't own enough materials to create a " .. name .. "! You can get some at the mining terminal.")
+
+				net.Start(NET_MSG)
+				net.WriteInt(NET_MSG_AUTOBUY, 8)
+				net.WriteString(class_name)
+				net.Send(ply)
+			else
+				local purchased, reason = purchase_mining_equipment(ply, class_name)
+				if purchased then return end
+
+				if purchased == false then
+					Ores.SendChatMessage(ply, 1, ("Could not auto-buy materials for %s: %s"):format(name, reason))
+				end
+			end
+
 			return false
 		end
 	end)
@@ -204,6 +226,7 @@ if SERVER then
 end
 
 if CLIENT then
+	local CVAR_AUTOBUY = CreateConVar("mining_automation_autobuy", "0", { FCVAR_ARCHIVE, FCVAR_USERINFO }, "Auto-buys mining equipment when you spawn it if possible.", 0, 1)
 	local RANKING_DATA = {}
 	local function get_player_name(account_id, callback)
 		local steamid_64 = util.SteamID64FromAccountID(tonumber(account_id))
@@ -217,25 +240,51 @@ if CLIENT then
 		steamworks.RequestPlayerInfo(steamid_64, callback)
 	end
 
+	local function update_ranking_data(rankings)
+		local new_ranking_data = {}
+		local count = #rankings
+		local req_count = 0
+		for _, data in pairs(rankings) do
+			get_player_name(data.AccountId, function(name)
+				table.insert(new_ranking_data, { Name = name, Multiplier = tostring(data.Multiplier) })
+				req_count = req_count + 1
+				if req_count >= count then
+					table.sort(new_ranking_data, function(a, b)
+						return tonumber(a.Multiplier) > tonumber(b.Multiplier)
+					end)
+
+					RANKING_DATA = new_ranking_data
+				end
+			end)
+		end
+	end
+
 	net.Receive(NET_MSG, function()
 		local msg_type = net.ReadInt(8)
 		if msg_type == NET_MSG_RANKING then
-			local new_ranking_data = {}
 			local rankings = net.ReadTable()
-			local count = #rankings
-			local req_count = 0
-			for _, data in pairs(rankings) do
-				get_player_name(data.AccountId, function(name)
-					table.insert(new_ranking_data, { Name = name, Multiplier = tostring(data.Multiplier) })
-					req_count = req_count + 1
-					if req_count >= count then
-						table.sort(new_ranking_data, function(a, b)
-							return tonumber(a.Multiplier) > tonumber(b.Multiplier)
-						end)
+			update_ranking_data(rankings)
+		elseif msg_type == NET_MSG_AUTOBUY then
+			local class_name = net.ReadString()
+			local purchase_value = Ores.Automation.PurchaseData[class_name]
+			local ent_table = scripted_ents.Get(class_name)
+			if purchase_value and istable(ent_table) and cookie.GetNumber("mining_automation_autobuy_prompt", 0) ~= 1 then
 
-						RANKING_DATA = new_ranking_data
-					end
-				end)
+				local ply = LocalPlayer()
+				local real_purchase_value = purchase_value * Ores.GetPlayerMultiplier(ply)
+				-- if we have the shop deal, double the prices
+				if ply:GetNWString("MA_BloodDeal", "") == "SHOP_DEAL" then
+					real_purchase_value = real_purchase_value * 2
+				end
+
+				Derma_Query(
+					("You are trying to spawn %s, which costs %d coins. Would you like to auto-buy your equipment next time?"):format(ent_table.PrintName, real_purchase_value),
+					"Auto-buy",
+					"Yes", function() CVAR_AUTOBUY:SetInt(1) end,
+					"No", function () end
+				)
+
+				cookie.Set("mining_automation_autobuy_prompt", "1")
 			end
 		end
 	end)
