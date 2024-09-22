@@ -324,6 +324,97 @@ if CLIENT then
 		size = 15,
 	})
 
+	local function add_sheet(sheet, name, title, margin_top, active_tab_name)
+		local container = vgui.Create("DPanel", sheet)
+
+		container:Dock(FILL)
+		container:DockMargin(20 * COEF_W, 0, 0, 0)
+		function container:Paint(w, h) end
+
+		local title_panel = container:Add("DLabel")
+		title_panel:Dock(TOP)
+		title_panel:DockMargin(5 * COEF_W, 20 * COEF_H, 5 * COEF_W, 5 * COEF_H)
+		title_panel:SetText("")
+		title_panel:SetTall(40)
+
+		function title_panel:Paint(w, h)
+			surface.SetDrawColor(20, 101, 64, 255)
+			surface.DrawRect(0, 0, w, h)
+
+			surface.SetDrawColor(255, 255, 255, 255)
+			surface.DrawOutlinedRect(0, 0, w, h)
+
+			surface.SetTextColor(255, 255, 255, 255)
+			surface.SetFont("ma_terminal_header")
+			surface.SetTextPos(5, 10)
+			surface.DrawText(title)
+		end
+
+		local inner_panel = container:Add("DPanel")
+		inner_panel:Dock(FILL)
+		inner_panel:DockMargin(5 * COEF_W, 5 * COEF_H, 5 * COEF_W, 5 * COEF_H)
+		function inner_panel:Paint(w, h)
+			surface.SetDrawColor(15, 180, 104)
+			surface.DrawOutlinedRect(0, 0, w, h)
+
+			surface.DrawRect(0, 0, w, 10)
+		end
+
+		local sheet_data = sheet:AddSheet(name, container)
+		sheet_data.Button:SetText("")
+		sheet_data.Button:SetTall(80 * COEF_H)
+		sheet_data.Button:SetWide(200 * COEF_W)
+		sheet_data.Button:DockMargin(0, margin_top and 50 * COEF_H or 5 * COEF_H, 0, 0)
+
+		if active_tab_name == name then
+			sheet:SetActiveButton(sheet_data.Button)
+		end
+
+		local old_DoClick = sheet_data.Button.DoClick
+		function sheet_data.Button:DoClick()
+			old_DoClick(self)
+			surface.PlaySound("buttons/button16.wav")
+		end
+
+		function sheet_data.Button:Paint(w, h)
+			surface.SetDrawColor(15, 180, 104)
+			surface.DrawOutlinedRect(0, 0, w, h)
+
+			if self == sheet:GetActiveButton() then
+				surface.SetTextColor(255, 255, 255)
+			else
+				surface.SetTextColor(15, 180, 104)
+			end
+
+			surface.SetFont("ma_terminal_header")
+			surface.SetTextPos(5, 5)
+			surface.DrawText(name)
+		end
+
+		function sheet_data.Button:PaintOver(w, h)
+			if self ~= sheet:GetActiveButton() then return end
+
+			surface.SetDrawColor(255, 255, 255)
+			surface.DrawOutlinedRect(0, 0, w, h)
+
+			surface.DisableClipping(true)
+			surface.DrawRect(-10, 0, 10, self:GetTall())
+			surface.DrawRect(self:GetWide(), 0, 10, self:GetTall())
+
+			local _, parent_y = sheet:LocalToScreen()
+			local _, self_y = self:LocalToScreen()
+			local target_y = -(self_y - parent_y) + 40
+
+			surface.DrawLine(w, h / 2, w + 20, h / 2)
+			surface.DrawLine(w + 20, h / 2, w + 20, target_y)
+			surface.DrawLine(w + 20, target_y, w + 40, target_y)
+
+			surface.DisableClipping(false)
+		end
+
+		return inner_panel
+	end
+
 	function Ores.Automation.OpenTerminal(active_tab_name)
 		local ply = LocalPlayer()
 		local cur_lvl = ply:GetNWInt("ms.Ores.MiningAutomation", 0)
@@ -333,7 +424,7 @@ if CLIENT then
 		local max_lvl = cur_lvl == 50
 
 		local frame = vgui.Create("DPanel")
-		frame:SetSize(1000 * COEF_W, 760 * COEF_H)
+		frame:SetSize(1400 * COEF_W, 1000 * COEF_H)
 		frame:Center()
 		frame:MakePopup()
 
@@ -389,101 +480,9 @@ if CLIENT then
 		local sheet = frame:Add("DColumnSheet")
 		sheet:Dock(FILL)
 
-		local function add_sheet(name, title, margin_top)
-			local container = vgui.Create("DPanel", sheet)
-
-			container:DockMargin(20 * COEF_W, 0, 0, 0)
-			function container:Paint(w, h) end
-
-			local title_panel = container:Add("DLabel")
-			title_panel:Dock(TOP)
-			title_panel:DockMargin(5 * COEF_W, 20 * COEF_H, 5 * COEF_W, 5 * COEF_H)
-			title_panel:SetText("")
-			title_panel:SetTall(40)
-
-			function title_panel:Paint(w, h)
-				surface.SetDrawColor(20, 101, 64, 255)
-				surface.DrawRect(0, 0, w, h)
-
-				surface.SetDrawColor(255, 255, 255, 255)
-				surface.DrawOutlinedRect(0, 0, w, h)
-
-				surface.SetTextColor(255, 255, 255, 255)
-				surface.SetFont("ma_terminal_header")
-				surface.SetTextPos(5, 10)
-				surface.DrawText(title)
-			end
-
-			local inner_panel = container:Add("DPanel")
-			inner_panel:Dock(FILL)
-			inner_panel:DockMargin(5 * COEF_W, 5 * COEF_H, 5 * COEF_W, 5 * COEF_H)
-			function inner_panel:Paint(w, h)
-				surface.SetDrawColor(15, 180, 104)
-				surface.DrawOutlinedRect(0, 0, w, h)
-
-				surface.DrawRect(0, 0, w, 10)
-			end
-
-			container:Dock(FILL)
-
-			local sheet_data = sheet:AddSheet(name, container)
-			sheet_data.Button:SetText("")
-			sheet_data.Button:SetTall(80 * COEF_H)
-			sheet_data.Button:SetWide(200 * COEF_W)
-			sheet_data.Button:DockMargin(0, margin_top and 50 * COEF_H or 5 * COEF_H, 0, 0)
-
-			if active_tab_name == name then
-				sheet:SetActiveButton(sheet_data.Button)
-			end
-
-			local old_DoClick = sheet_data.Button.DoClick
-			function sheet_data.Button:DoClick()
-				old_DoClick(self)
-				surface.PlaySound("buttons/button16.wav")
-			end
-
-			function sheet_data.Button:Paint(w, h)
-				surface.SetDrawColor(15, 180, 104)
-				surface.DrawOutlinedRect(0, 0, w, h)
-
-				if self == sheet:GetActiveButton() then
-					surface.SetTextColor(255, 255, 255)
-				else
-					surface.SetTextColor(15, 180, 104)
-				end
-
-				surface.SetFont("ma_terminal_header")
-				surface.SetTextPos(5, 5)
-				surface.DrawText(name)
-			end
-
-			function sheet_data.Button:PaintOver(w, h)
-				if self ~= sheet:GetActiveButton() then return end
-
-				surface.SetDrawColor(255, 255, 255)
-				surface.DrawOutlinedRect(0, 0, w, h)
-
-				surface.DisableClipping(true)
-				surface.DrawRect(-10, 0, 10, self:GetTall())
-				surface.DrawRect(self:GetWide(), 0, 10, self:GetTall())
-
-				local _, parent_y = sheet:LocalToScreen()
-				local _, self_y = self:LocalToScreen()
-				local target_y = -(self_y - parent_y) + 40
-
-				surface.DrawLine(w, h / 2, w + 20, h / 2)
-				surface.DrawLine(w + 20, h / 2, w + 20, target_y)
-				surface.DrawLine(w + 20, target_y, w + 40, target_y)
-
-				surface.DisableClipping(false)
-			end
-
-			return inner_panel
-		end
-
 		-- multiplier leaderboard
 		do
-			local ranking_panel = add_sheet("RANKING", "TOP 10 HIGHEST MINING MULTIPLIERS", true)
+			local ranking_panel = add_sheet(sheet, "RANKING", "TOP 10 HIGHEST MINING MULTIPLIERS", true, active_tab_name)
 
 			local content_left = ranking_panel:Add("DPanel")
 			content_left:Dock(LEFT)
@@ -512,14 +511,14 @@ if CLIENT then
 				local ply_name = content_left:Add("DLabel")
 				ply_name:SetTall(20)
 				ply_name:Dock(TOP)
-				ply_name:DockMargin(20 * COEF_W, is_first and 20 * COEF_H or 5 * COEF_H, 20 * COEF_W, 5 * COEF_H)
+				ply_name:DockMargin(20 * COEF_W, 5 * COEF_H, 20 * COEF_W, 5 * COEF_H)
 				ply_name:SetFont("ma_terminal_content")
 				ply_name:SetText(name)
 
 				local ply_mult = content_right:Add("DLabel")
 				ply_mult:SetTall(20)
 				ply_mult:Dock(TOP)
-				ply_mult:DockMargin(20 * COEF_W, is_first and 20 * COEF_H or 5 * COEF_H, 20 * COEF_W, 5 * COEF_H)
+				ply_mult:DockMargin(20 * COEF_W, 5 * COEF_H, 20 * COEF_W, 5 * COEF_H)
 				ply_mult:SetFont("ma_terminal_content")
 				ply_mult:SetText(tostring(multiplier))
 			end
@@ -537,7 +536,7 @@ if CLIENT then
 
 		-- stat upgrade
 		do
-			local upgrade_panel = add_sheet("UPGRADE", "ACCESS NEW RESOURCES")
+			local upgrade_panel = add_sheet(sheet, "UPGRADE", "ACCESS NEW RESOURCES", false, active_tab_name)
 			local header = upgrade_panel:Add("DPanel")
 			header:Dock(TOP)
 			header:SetTall(60)
@@ -635,7 +634,7 @@ if CLIENT then
 
 		-- equipment shop
 		do
-			local shop_panel = add_sheet("SHOP", "BUY MINING EQUIPMENT")
+			local shop_panel = add_sheet(sheet, "SHOP", "BUY MINING EQUIPMENT", false, active_tab_name)
 			local content_left = shop_panel:Add("DPanel")
 			content_left:Dock(LEFT)
 			content_left:SetWide(400 * COEF_W)
@@ -730,8 +729,127 @@ if CLIENT then
 			end
 		end
 
+		do
+			local guide_panel = add_sheet(sheet, "HELP", "LEARN ABOUT AUTOMATION", false, active_tab_name)
+			local guide_menu = guide_panel:Add("DColumnSheet")
+			guide_menu:Dock(FILL)
 
-		--add_sheet("GUIDE", "LEARN ABOUT AN EQUIPMENT")
+			local getting_started_panel = add_sheet(guide_menu, "INTRO", "GETTING STARTED")
+			getting_started_panel:Dock(FILL)
+
+			local intro_text = getting_started_panel:Add("RichText")
+			intro_text:DockMargin(20 * COEF_W, 20 * COEF_H, 20 * COEF_W, 0)
+			intro_text:Dock(FILL)
+			intro_text:SetFontInternal("ma_terminal_content")
+			intro_text:SetUnderlineFont("ma_terminal_content")
+			intro_text:AppendText([[WELCOME TO META MINING!
+
+Until now you may have descended in the mines to get your trusty crowbar and smash some rocks to get ores. While this is a great way to obtain ores it is also not the ONLY way.
+
+INTRODUCING AUTOMATION!
+
+Anywhere in MetaConstruct™ you can place mining equipment. This mining equipment can be used to automate mining. To start your first automation setup you need to head into the SHOP and buy some equipment (I would recommend starting buying drills!). If the equipment you want is locked you first need to unlock it by leveling up your mining automation level in the UGPRADE menu.
+
+To spawn mining equipment, open your spawnmenu (Q by default), head to the "entities" tab and "mining". There you will find all the equipment currently available.
+
+Once you have spawned your equipment you must link it all together, for that you can use the MINING LINKER. This is a tool also available in your spawnmenu, under "Mining". Using the MINING LINKER you can look at your spawned mining equipment and figure out what interfaces they have and what can be linked together.
+
+Each equipment has interfaces (e.g inputs and outputs). These interfaces connect between each others, for example the generator can be linked to drills to power them.
+One output may be connected to as many inputs as you want. However one input may only be connected to one output. In practise this means that I can link my generator to many drills but that I can't link my drill to many generators.
+
+THAT'S IT FOR THE BASICS AND GOOD LUCK!]])
+
+			function intro_text:PerformLayout()
+				self:SetFontInternal("ma_terminal_content")
+				self:SetUnderlineFont("ma_terminal_content")
+			end
+
+			local function add_entity_guide_page(class_name)
+				local ent_table = scripted_ents.Get(class_name)
+				if not istable(ent_table) then return end
+
+				local page_panel = add_sheet(guide_menu, ent_table.PrintName:upper(), ent_table.PrintName:upper())
+				local description = ent_table.Description or "No description provided."
+
+				local header = page_panel:Add("DPanel")
+				header:Dock(TOP)
+				header:DockMargin(5 * COEF_W, 20 * COEF_H, 5 * COEF_W, 20 * COEF_H)
+				header:SetTall(100)
+				function header:Paint() end
+
+				local picture = header:Add("ContentIcon")
+				picture:Dock(LEFT)
+				picture:SetMaterial("entities/" .. class_name .. ".png")
+				picture:SetName(ent_table.PrintName)
+
+				local text = header:Add("DLabel")
+				text:Dock(FILL)
+				text:DockMargin(10 * COEF_W, 0, 0, 0, 0)
+				text:SetText(description)
+				text:SetWrap(true)
+				text:SetFont("ma_terminal_content")
+
+				local interfaces_container = page_panel:Add("DScrollPanel")
+				interfaces_container:Dock(FILL)
+
+				local ma_data = ent_table.MiningAutomationData
+				local input_count, output_count =
+					ma_data.Inputs and table.Count(ma_data.Inputs) or 0,
+					ma_data.Outputs and table.Count(ma_data.Outputs) or 0
+
+				if input_count > 0 then
+					local inputs = interfaces_container:Add("DLabel")
+					inputs:SetText(("INPUTS (%d):"):format(input_count))
+					inputs:SetFont("ma_terminal_content")
+					inputs:Dock(TOP)
+					inputs:DockMargin(20 * COEF_W, 20 * COEF_H, 0, 0)
+
+					for _, input_data in pairs(ma_data.Inputs) do
+						local input_name = interfaces_container:Add("DLabel")
+						input_name:SetText("- " .. input_data.Name)
+						input_name:SetFont("ma_terminal_content")
+						input_name:Dock(TOP)
+						input_name:DockMargin(20 * COEF_W, 5 * COEF_H, 0, 0)
+
+						local input_desc = interfaces_container:Add("DLabel")
+						input_desc:SetText("    " .. input_data.Description)
+						input_desc:SetFont("ma_terminal_content")
+						input_desc:Dock(TOP)
+						input_desc:DockMargin(20 * COEF_W, 0, 0, 0)
+						input_desc:SetWrap(true)
+						input_desc:SetTall(30)
+					end
+				end
+
+				if output_count > 0 then
+					local outputs = interfaces_container:Add("DLabel")
+					outputs:SetText(("OUTPUTS (%d):"):format(output_count))
+					outputs:SetFont("ma_terminal_content")
+					outputs:Dock(TOP)
+					outputs:DockMargin(20 * COEF_W, 20 * COEF_H, 0, 0, 0)
+
+					for _, output_data in pairs(ma_data.Outputs) do
+						local output_name = interfaces_container:Add("DLabel")
+						output_name:SetText("- " .. output_data.Name)
+						output_name:SetFont("ma_terminal_content")
+						output_name:Dock(TOP)
+						output_name:DockMargin(20 * COEF_W, 5 * COEF_H, 0, 0)
+
+						local output_desc = interfaces_container:Add("DLabel")
+						output_desc:SetText("    " .. output_data.Description)
+						output_desc:SetFont("ma_terminal_content")
+						output_desc:Dock(TOP)
+						output_desc:DockMargin(20 * COEF_W, 0, 0, 0)
+						output_desc:SetWrap(true)
+						output_desc:SetTall(30)
+					end
+				end
+			end
+
+			for class_name, _ in pairs(_G.MA_Orchestrator.WatchedClassNames) do
+				add_entity_guide_page(class_name)
+			end
+		end
 	end
 
 	concommand.Add("mining_automation_terminal", function()
