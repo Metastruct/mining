@@ -14,6 +14,12 @@ ENT.ClassName = "ma_smelter_v2"
 ENT.IconOverride = "entities/ma_smelter_v2.png"
 ENT.Description = "The smelter will turn your ores into their corresponding ingots. Ingots have more value than normal ores. The smelter needs both energy and fuel to function."
 
+require("ma_orchestrator")
+_G.MA_Orchestrator.RegisterInput(ENT, "ores", "ORE", "Ores", "Standard ore input.")
+_G.MA_Orchestrator.RegisterInput(ENT, "power", "ENERGY", "Energy", "Standard energy input.")
+_G.MA_Orchestrator.RegisterInput(ENT, "oil", "OIL", "Oil", "Standard oil input.")
+_G.MA_Orchestrator.RegisterOutput(ENT, "ingots", "INGOT", "Ingots", "Standard ingot output.")
+
 function ENT:CanWork()
 	if not self:GetNWBool("Wiremod_Active", true) then return false end
 	return self:GetNW2Int("Fuel", 0) > 0 and self:GetNWBool("IsPowered", false)
@@ -86,11 +92,6 @@ if SERVER then
 		self.NextSoundCheck = 0
 		self.Ores = {}
 		self.IngotQueue = {}
-
-		_G.MA_Orchestrator.RegisterInput(self, "ores", "ORE", "Ores", "Standard ore input.")
-		_G.MA_Orchestrator.RegisterInput(self, "power", "ENERGY", "Energy", "Standard energy input.")
-		_G.MA_Orchestrator.RegisterInput(self, "oil", "OIL", "Oil", "Standard oil input.")
-		_G.MA_Orchestrator.RegisterOutput(self, "ingots", "INGOT", "Ingots", "Standard ingot output.")
 
 		_G.MA_Orchestrator.EntityTimer("ma_smelter_v2_fuel", self, 5, 0, function()
 			if not self:CanWork() then return end
@@ -293,11 +294,6 @@ if CLIENT then
 	end
 
 	function ENT:Initialize()
-		_G.MA_Orchestrator.RegisterInput(self, "ores", "ORE", "Ores", "Standard ore input.")
-		_G.MA_Orchestrator.RegisterInput(self, "power", "ENERGY", "Energy", "Standard energy input.")
-		_G.MA_Orchestrator.RegisterInput(self, "oil", "OIL", "Oil", "Standard oil input.")
-		_G.MA_Orchestrator.RegisterOutput(self, "ingots", "INGOT", "Ingots", "Standard ingot output.")
-
 		self.Wheel = addWheelEntity(self, self:GetRight() * -4 + self:GetForward() * -6)
 
 		local ang = self:GetAngles()

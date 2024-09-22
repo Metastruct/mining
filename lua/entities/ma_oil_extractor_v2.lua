@@ -15,6 +15,10 @@ ENT.NextTraceCheck = 0
 ENT.IconOverride = "entities/ma_oil_extractor_v2.png"
 ENT.Description = "The oil extractor digs for oil. Once the process is complete it outputs fuel barrels that can be used for other machines. It needs energy to function."
 
+require("ma_orchestrator")
+_G.MA_Orchestrator.RegisterInput(ENT, "power", "ENERGY", "Energy", "Standard energyy input. More energy equals more ores!")
+_G.MA_Orchestrator.RegisterOutput(ENT, "oil", "OIL", "Oil", "Standard oil output.")
+
 function ENT:CanWork(time)
 	if not self:GetNWBool("Wiremod_Active", true) then return false end
 	if not self:GetNWBool("IsPowered", false) then return false end
@@ -89,9 +93,6 @@ if SERVER then
 			self:Activate()
 			Ores.Automation.ReplicateOwnership(self, self)
 		end)
-
-		_G.MA_Orchestrator.RegisterInput(self, "power", "ENERGY", "Energy", "Standard energyy input. More energy equals more ores!")
-		_G.MA_Orchestrator.RegisterOutput(self, "oil", "OIL", "Oil", "Standard oil output.")
 
 		Ores.Automation.PrepareForDuplication(self)
 
@@ -247,9 +248,6 @@ if CLIENT then
 	end
 
 	function ENT:Initialize()
-		_G.MA_Orchestrator.RegisterInput(self, "power", "ENERGY", "Energy", "Standard energyy input. More energy equals more ores!")
-		_G.MA_Orchestrator.RegisterOutput(self, "oil", "OIL", "Oil", "Standard oil output.")
-
 		self.NextTraceCheck = 0
 		self.Wheel = addWheelEntity(self, self:GetUp() * -75)
 	end

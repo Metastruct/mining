@@ -14,6 +14,14 @@ ENT.ClassName = "ma_refinery"
 ENT.IconOverride = "entities/ma_refinery.png"
 ENT.Description = "The refinery can make your ores more precious (ex: copper -> silver). It also has a chance to produce rejects in the form of detonite. It needs both energy and fuel to function."
 
+require("ma_orchestrator")
+_G.MA_Orchestrator.RegisterInput(ENT, "oil", "OIL", "Oil", "Standard oil input. More oil equals better chance at refined ores!")
+_G.MA_Orchestrator.RegisterInput(ENT, "power", "ENERGY", "Energy", "Standard energy input. More energy equals better chance at refined ores!")
+_G.MA_Orchestrator.RegisterInput(ENT, "ores", "ORE", "Ores", "Standard ores input.")
+
+_G.MA_Orchestrator.RegisterOutput(ENT, "ores", "ORE", "Ores", "Refined ores output.")
+_G.MA_Orchestrator.RegisterOutput(ENT, "rejects", "DETONITE", "Rejects", "The rejects in the refinement process.")
+
 function ENT:CanWork()
 	if not self:GetNWBool("Wiremod_Active", true) then return false end
 	return self:GetNW2Int("Fuel", 0) > 0 and self:GetNWBool("IsPowered", false)
@@ -41,13 +49,6 @@ if SERVER then
 		self.OreQueue = {}
 		self.RejectCount = 0
 		self.NextSoundCheck = 0
-
-		_G.MA_Orchestrator.RegisterInput(self, "oil", "OIL", "Oil", "Standard oil input. More oil equals better chance at refined ores!")
-		_G.MA_Orchestrator.RegisterInput(self, "power", "ENERGY", "Energy", "Standard energy input. More energy equals better chance at refined ores!")
-		_G.MA_Orchestrator.RegisterInput(self, "ores", "ORE", "Ores", "Standard ores input.")
-
-		_G.MA_Orchestrator.RegisterOutput(self, "ores", "ORE", "Ores", "Refined ores output.")
-		_G.MA_Orchestrator.RegisterOutput(self, "rejects", "DETONITE", "Rejects", "The rejects in the refinement process.")
 
 		local raw_max_chance = 20
 		local max_chance = raw_max_chance
@@ -247,13 +248,6 @@ if CLIENT then
 	end
 
 	function ENT:Initialize()
-		_G.MA_Orchestrator.RegisterInput(self, "oil", "OIL", "Oil", "Standard oil input. More oil equals better chance at refined ores!")
-		_G.MA_Orchestrator.RegisterInput(self, "power", "ENERGY", "Energy", "Standard energy input. More energy equals better chance at refined ores!")
-		_G.MA_Orchestrator.RegisterInput(self, "ores", "ORE", "Ores", "Standard ores input.")
-
-		_G.MA_Orchestrator.RegisterOutput(self, "ores", "ORE", "Ores", "Refined ores output.")
-		_G.MA_Orchestrator.RegisterOutput(self, "rejects", "DETONITE", "Rejects", "The rejects in the refinement process.")
-
 		self.Wheel = addWheelEntity(self, self:GetUp() * -30)
 	end
 

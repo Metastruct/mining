@@ -15,6 +15,9 @@ ENT.ClassName = "ma_drone_controller_v2"
 ENT.IconOverride = "entities/ma_drone_controller_v2.png"
 ENT.Description = "The drone controller manages drones that mine argonite for you. It's powered by detonite."
 
+require("ma_orchestrator")
+_G.MA_Orchestrator.RegisterInput(ENT, "detonite", "DETONITE", "detonite", "Detonite input required to power the drones.")
+
 function ENT:CanWork()
 	if not self:GetNWBool("Wiremod_Active", true) then return false end
 	if self:GetNW2Int("Detonite", 0) > 0 then return true end
@@ -95,8 +98,6 @@ if SERVER then
 
 			Ores.Automation.ReplicateOwnership(self, self)
 		end)
-
-		_G.MA_Orchestrator.RegisterInput(self, "detonite", "DETONITE", "detonite", "Detonite input required to power the drones.")
 
 		local controller_timer_tick = 0
 		_G.MA_Orchestrator.EntityTimer("mining_argonite_drone_hive", self, 1, 0, function()
@@ -199,10 +200,6 @@ if SERVER then
 end
 
 if CLIENT then
-	function ENT:Initialize()
-		_G.MA_Orchestrator.RegisterInput(self, "detonite", "DETONITE", "detonite", "Detonite input required to power the drones.")
-	end
-
 	function ENT:OnDrawEntityInfo()
 		if not self.MiningFrameInfo then
 			self.MiningFrameInfo = {

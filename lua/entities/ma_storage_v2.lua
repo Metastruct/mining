@@ -14,6 +14,10 @@ ENT.ClassName = "mining_ore_storage"
 ENT.IconOverride = "entities/ma_storage_v2.png"
 ENT.Description = "The resource depot is used to store your ores and ingots. Nothing special here."
 
+require("ma_orchestrator")
+_G.MA_Orchestrator.RegisterInput(ENT, "ores", "ORE", "Ores", "Standard ore input.")
+_G.MA_Orchestrator.RegisterInput(ENT, "ingots", "INGOT", "Ingots", "Standard ingot input.")
+
 if SERVER then
 	resource.AddFile("materials/entities/ma_storage_v2.png")
 
@@ -26,9 +30,6 @@ if SERVER then
 		self:SetUseType(SIMPLE_USE)
 		self:PhysWake()
 		self.Ores = {}
-
-		_G.MA_Orchestrator.RegisterInput(self, "ores", "ORE", "Ores", "Standard ore input.")
-		_G.MA_Orchestrator.RegisterInput(self, "ingots", "INGOT", "Ingots", "Standard ingot input.")
 
 		Ores.Automation.PrepareForDuplication(self)
 
@@ -115,11 +116,6 @@ if SERVER then
 end
 
 if CLIENT then
-	function ENT:Initialize()
-		_G.MA_Orchestrator.RegisterInput(self, "ores", "ORE", "Ores", "Standard ore input.")
-		_G.MA_Orchestrator.RegisterInput(self, "ingots", "INGOT", "Ingots", "Standard ingot input.")
-	end
-
 	function ENT:Draw()
 		self:DrawModel()
 	end

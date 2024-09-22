@@ -1,45 +1,42 @@
 local orchestrator = _G.MA_Orchestrator or {}
 _G.MA_Orchestrator = orchestrator
 orchestrator.WatchedEntities = orchestrator.WatchedEntities or {}
+orchestrator.WatchedClassNames = orchestrator.WatchedClassNames or {}
 
-function orchestrator.RegisterInput(ent, id, type, name, description)
-	if not IsValid(ent) then return end
+function orchestrator.RegisterInput(ent_table, id, type, name, description)
+	assert(isstring(ent_table.ClassName), "ENT.ClassName was not provided")
 
-	ent.MiningAutomationData = ent.MiningAutomationData or {}
-	ent.MiningAutomationData.Inputs = ent.MiningAutomationData.Inputs or {}
+	ent_table.MiningAutomationData = ent_table.MiningAutomationData or {}
+	ent_table.MiningAutomationData.Inputs = ent_table.MiningAutomationData.Inputs or {}
 
-	ent.MiningAutomationData.Inputs[id] = {
+	ent_table.MiningAutomationData.Inputs[id] = {
 		Id = id,
 		Name = name,
 		Description = description,
 		Type = type,
-		Ent = ent,
+		Ent = NULL,
 		Link = { Ent = NULL, Id = "" },
 	}
 
-	if SERVER then
-		orchestrator.WatchedEntities[ent] = true
-	end
+	orchestrator.WatchedClassNames[ent_table.ClassName] = true
 end
 
-function orchestrator.RegisterOutput(ent, id, type, name, description)
-	if not IsValid(ent) then return end
+function orchestrator.RegisterOutput(ent_table, id, type, name, description)
+	assert(isstring(ent_table.ClassName), "ENT.ClassName was not provided")
 
-	ent.MiningAutomationData = ent.MiningAutomationData or {}
-	ent.MiningAutomationData.Outputs = ent.MiningAutomationData.Outputs or {}
+	ent_table.MiningAutomationData = ent_table.MiningAutomationData or {}
+	ent_table.MiningAutomationData.Outputs = ent_table.MiningAutomationData.Outputs or {}
 
-	ent.MiningAutomationData.Outputs[id] = {
+	ent_table.MiningAutomationData.Outputs[id] = {
 		Id = id,
 		Name = name,
 		Description = description,
 		Type = type,
-		Ent = ent,
+		Ent = NULL,
 		Links = {},
 	}
 
-	if SERVER then
-		orchestrator.WatchedEntities[ent] = true
-	end
+	orchestrator.WatchedClassNames[ent_table.ClassName] = true
 end
 
 function orchestrator.GetOutputs(ent)
@@ -346,6 +343,20 @@ if SERVER then
 		end
 
 		orchestrator.WatchedEntities[ent] = nil
+	end)
+
+	hook.Add("OnEntityCreated", "ma_orchestrator", function(ent)
+		if not orchestrator.WatchedClassNames[ent:GetClass()] then return end
+
+		for _, output_data in ipairs(orchestrator.GetOutputs()) do
+			output_data.Ent = ent
+		end
+
+		for _, input_data in ipairs(orchestrator.GetInputs()) do
+			input_data.Ent = ent
+		end
+
+		orchestrator.WatchedEntities[ent] = true
 	end)
 
 	hook.Add("PlayerFullyConnected", "ma_orchestrator", orchestrator.SendLinkData)

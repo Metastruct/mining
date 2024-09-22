@@ -15,6 +15,9 @@ ENT.IconOverride = "entities/ma_transformer_v2.png"
 ENT.BatteryIndex = 0
 ENT.Description = "The argonite transformer is used to turn the argonite you collect into batteries. Batteries are typically used in tandem with a generator."
 
+require("ma_orchestrator")
+_G.MA_Orchestrator.RegisterOutput(ENT, "battery", "BATTERY", "Battery", "Outputs batteries created with the argonite stored by the transformer.")
+
 function ENT:CanWork()
 	return self:GetNWBool("Wiremod_Active", true)
 end
@@ -146,8 +149,6 @@ if SERVER then
 			end
 		end)
 
-		_G.MA_Orchestrator.RegisterOutput(self, "battery", "BATTERY", "Battery", "Outputs batteries created with the argonite stored by the transformer.")
-
 		Ores.Automation.PrepareForDuplication(self)
 		timer.Simple(0, function()
 			if not IsValid(self) then return end
@@ -256,10 +257,6 @@ if SERVER then
 end
 
 if CLIENT then
-	function ENT:Initialize()
-		_G.MA_Orchestrator.RegisterOutput(self, "battery", "BATTERY", "Battery", "Outputs batteries created with the argonite stored by the transformer.")
-	end
-
 	function ENT:Draw()
 		self:DrawModel()
 	end
