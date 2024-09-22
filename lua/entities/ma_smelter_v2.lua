@@ -92,6 +92,8 @@ if SERVER then
 		_G.MA_Orchestrator.RegisterOutput(self, "ingots", "INGOT", "Ingots", "Standard ingot output.")
 
 		_G.MA_Orchestrator.EntityTimer("ma_smelter_v2_fuel", self, 5, 0, function()
+			if not self:CanWork() then return end
+
 			local cur_fuel = self:GetNW2Int("Fuel", 0)
 			local new_fuel = math.max(0, cur_fuel - 1)
 			self:SetNW2Int("Fuel", new_fuel)
