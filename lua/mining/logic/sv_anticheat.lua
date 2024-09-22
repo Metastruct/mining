@@ -101,6 +101,20 @@ util.OnInitialize(function()
 
 	local chipClasses = {}
 
+	if istable(scripted_ents.Get("gmod_wire_teleporter")) then
+		hook.Add("OnEntityCreated", "ms.Ores_ChipChecks", function(ent)
+			if ent:GetClass() ~= "gmod_wire_teleporter" then return end
+			if not ent.CPPIGetOwner then return end
+
+			local owner = ent:CPPIGetOwner()
+			if not IsValid(owner) then return end
+
+			addToChipsOwned(owner, ent)
+		end)
+
+		chipClasses.gmod_wire_teleporter = true
+	end
+
 	if istable(_G.E2Lib) then
 		local registerCallback = _G.E2Lib.registerCallback or registerCallback
 
