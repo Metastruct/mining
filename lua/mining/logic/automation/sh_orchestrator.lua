@@ -334,11 +334,11 @@ if SERVER then
 	hook.Add("EntityRemoved", "ma_orchestrator", function(ent)
 		if not orchestrator.WatchedEntities[ent] then return end
 
-		for _, output_data in ipairs(orchestrator.GetOutputs()) do
+		for _, output_data in ipairs(orchestrator.GetOutputs(ent)) do
 			orchestrator.UnlinkOutput(output_data)
 		end
 
-		for _, input_data in ipairs(orchestrator.GetInputs()) do
+		for _, input_data in ipairs(orchestrator.GetInputs(ent)) do
 			orchestrator.UnlinkInput(input_data)
 		end
 
@@ -348,11 +348,11 @@ if SERVER then
 	hook.Add("OnEntityCreated", "ma_orchestrator", function(ent)
 		if not orchestrator.WatchedClassNames[ent:GetClass()] then return end
 
-		for _, output_data in ipairs(orchestrator.GetOutputs()) do
+		for _, output_data in ipairs(orchestrator.GetOutputs(ent)) do
 			output_data.Ent = ent
 		end
 
-		for _, input_data in ipairs(orchestrator.GetInputs()) do
+		for _, input_data in ipairs(orchestrator.GetInputs(ent)) do
 			input_data.Ent = ent
 		end
 
