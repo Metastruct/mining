@@ -12,6 +12,7 @@ ENT.RenderGroup = RENDERGROUP_OPAQUE
 ENT.Spawnable = true
 ENT.ClassName = "ma_smelter_v2"
 ENT.IconOverride = "entities/ma_smelter_v2.png"
+ENT.Description = "The smelter will turn your ores into their corresponding ingots. Ingots have more value than normal ores. The smelter needs both energy and fuel to function."
 
 function ENT:CanWork()
 	if not self:GetNWBool("Wiremod_Active", true) then return false end

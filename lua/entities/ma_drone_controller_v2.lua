@@ -13,6 +13,7 @@ ENT.Spawnable = true
 ENT.AdminOnly = false
 ENT.ClassName = "ma_drone_controller_v2"
 ENT.IconOverride = "entities/ma_drone_controller_v2.png"
+ENT.Description = "The drone controller manages drones that mine argonite for you. It's powered by detonite."
 
 function ENT:CanWork()
 	if not self:GetNWBool("Wiremod_Active", true) then return false end

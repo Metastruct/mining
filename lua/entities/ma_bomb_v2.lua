@@ -12,6 +12,7 @@ ENT.RenderGroup = RENDERGROUP_OPAQUE
 ENT.Spawnable = true
 ENT.ClassName = "ma_bomb_v2"
 ENT.IconOverride = "entities/ma_bomb_v2.png"
+ENT.Description = "Detonite bombs are used to blow the walls of the mine. Sometimes ores might appear after detonated."
 
 if SERVER then
 	resource.AddFile("materials/entities/ma_bomb_v2.png")

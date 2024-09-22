@@ -13,6 +13,7 @@ ENT.Spawnable = true
 ENT.ClassName = "ma_drill_v2"
 ENT.IconOverride = "entities/ma_drill_v2.png"
 ENT.NextTraceCheck = 0
+ENT.Description = "Drills are used to collect ores automatically. Place one next to a surface and power it and it will start collecting ores. Drills are more efficient depending on how much energy they have access to."
 
 function ENT:CanWork(time)
 	if not self:GetNWBool("Wiremod_Active", true) then return false end

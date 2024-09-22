@@ -13,6 +13,7 @@ ENT.Spawnable = true
 ENT.ClassName = "ma_oil_extractor_v2"
 ENT.NextTraceCheck = 0
 ENT.IconOverride = "entities/ma_oil_extractor_v2.png"
+ENT.Description = "The oil extractor digs for oil. Once the process is complete it outputs fuel barrels that can be used for other machines. It needs energy to function."
 
 function ENT:CanWork(time)
 	if not self:GetNWBool("Wiremod_Active", true) then return false end
