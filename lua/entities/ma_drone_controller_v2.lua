@@ -43,7 +43,7 @@ if SERVER then
 
 	function ENT:Initialize()
 		self:SetModel("models/hunter/blocks/cube075x075x075.mdl")
-		self:SetMaterial("models/props_lab/projector_noise")
+		self:SetMaterial("effects/tvscreen_noise002a")
 		self:SetColor(Color(255, 0, 0, 255))
 
 		self:SetMoveType(MOVETYPE_VPHYSICS)
