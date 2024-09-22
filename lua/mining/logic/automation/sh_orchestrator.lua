@@ -62,7 +62,7 @@ function orchestrator.GetInputs(ent)
 		local ret = {}
 		for _, input_data in pairs(ent.MiningAutomationData.Inputs) do
 			input_data.Ent = ent
-			table.insert(input_data_data)
+			table.insert(ret, input_data)
 		end
 
 		return ret
