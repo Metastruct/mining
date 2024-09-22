@@ -267,7 +267,7 @@ function ENT:OnTakeDamage(dmg)
 		end
 	end
 
-	hook.Run("PlayerDestroyedMiningRock", attacker, self)
+	hook.Run("PlayerDestroyedMiningRock", attacker, self, inflictor)
 	SafeRemoveEntity(self) -- Possible some naughty hook removes self for us
 end
 
