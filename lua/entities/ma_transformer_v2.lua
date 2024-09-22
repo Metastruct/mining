@@ -13,6 +13,7 @@ ENT.Spawnable = true
 ENT.ClassName = "ma_transformer_v2"
 ENT.IconOverride = "entities/ma_transformer_v2.png"
 ENT.BatteryIndex = 0
+ENT.Description = "The argonite transformer is used to turn the argonite you collect into batteries. Batteries are typically used in tandem with a generator."
 
 function ENT:CanWork()
 	return self:GetNWBool("Wiremod_Active", true)

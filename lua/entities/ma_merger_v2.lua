@@ -13,6 +13,7 @@ ENT.Spawnable = true
 ENT.ClassName = "ma_merger_v2"
 ENT.IconOverride = "entities/ma_merger_v2.png"
 ENT.NextCanWorkCheck = 0
+ENT.Description = "The merger allows you to merge multiple ore outputs into one. It's usually used with drills."
 
 local INPUT_AMOUNT = 6
 

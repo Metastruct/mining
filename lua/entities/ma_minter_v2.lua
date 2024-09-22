@@ -12,6 +12,7 @@ ENT.Category = "Mining"
 ENT.PrintName = "Coin Minter"
 ENT.ClassName = "mining_coin_minter"
 ENT.IconOverride = "entities/ma_minter_v2.png"
+ENT.Description = "The minter turns your ores into coins automatically. Giving it ingots will result in more coins."
 
 if SERVER then
 	resource.AddFile("materials/entities/ma_minter_v2.png")

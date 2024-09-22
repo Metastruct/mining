@@ -12,6 +12,7 @@ ENT.RenderGroup = RENDERGROUP_OPAQUE
 ENT.Spawnable = true
 ENT.ClassName = "ma_gen_v2"
 ENT.IconOverride = "entities/ma_gen_v2.png"
+ENT.Description = "The generate is the energy source of any automation setup. It's powered with argonite batteries."
 
 function ENT:CanWork()
 	if not self:GetNWBool("Wiremod_Active", true) then return false end

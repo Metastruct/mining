@@ -12,6 +12,7 @@ ENT.RenderGroup = RENDERGROUP_OPAQUE
 ENT.Spawnable = true
 ENT.ClassName = "mining_ore_storage"
 ENT.IconOverride = "entities/ma_storage_v2.png"
+ENT.Description = "The resource depot is used to store your ores and ingots. Nothing special here."
 
 if SERVER then
 	resource.AddFile("materials/entities/ma_storage_v2.png")

@@ -13,6 +13,7 @@ ENT.Spawnable = true
 ENT.ClassName = "ma_graph_screen"
 ENT.IconOverride = "entities/ma_graph_screen.png"
 ENT.TurnedOn = false
+ENT.Description = "The graph screen helps you debug your automation setup and keep track of what's happening in it."
 
 if SERVER then
 	resource.AddFile("materials/entities/ma_graph_screen.png")
