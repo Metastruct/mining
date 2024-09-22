@@ -60,9 +60,9 @@ function orchestrator.GetInputs(ent)
 
 	if ent.MiningAutomationData and ent.MiningAutomationData.Inputs then
 		local ret = {}
-		for _, output_data in pairs(ent.MiningAutomationData.Outputs) do
-			output_data.Ent = ent
-			table.insert(ret, output_data)
+		for _, input_data in pairs(ent.MiningAutomationData.Inputs) do
+			input_data.Ent = ent
+			table.insert(input_data_data)
 		end
 
 		return ret
