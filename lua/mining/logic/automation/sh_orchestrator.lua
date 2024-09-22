@@ -438,14 +438,14 @@ if CLIENT then
 	end
 
 	surface.CreateFont("ma_hud_title", {
-		font = "Arial",
+		font = "Sevastopol Interface",
 		extended = false,
 		size = 25,
 		weight = 600,
 	})
 
 	surface.CreateFont("ma_hud_text", {
-		font = "Arial",
+		font = "Sevastopol Interface",
 		extended = true,
 		size = 20,
 		weight = 500,
