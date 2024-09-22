@@ -14,6 +14,10 @@ ENT.ClassName = "mining_coin_minter"
 ENT.IconOverride = "entities/ma_minter_v2.png"
 ENT.Description = "The minter turns your ores into coins automatically. Giving it ingots will result in more coins."
 
+require("ma_orchestrator")
+_G.MA_Orchestrator.RegisterInput(ENT, "ores", "ORE", "Ores", "Standard ore input.")
+_G.MA_Orchestrator.RegisterInput(ENT, "ingots", "INGOT", "Ingots", "Standard ingot input.")
+
 if SERVER then
 	resource.AddFile("materials/entities/ma_minter_v2.png")
 
@@ -26,9 +30,6 @@ if SERVER then
 		self:PhysWake()
 		self:SetNWInt("MintedCoins", 0)
 		self:SetUseType(SIMPLE_USE)
-
-		_G.MA_Orchestrator.RegisterInput(self, "ores", "ORE", "Ores", "Standard ore input.")
-		_G.MA_Orchestrator.RegisterInput(self, "ingots", "INGOT", "Ingots", "Standard ingot input.")
 
 		Ores.Automation.PrepareForDuplication(self)
 
@@ -140,11 +141,6 @@ if SERVER then
 end
 
 if CLIENT then
-	function ENT:Initialize()
-		_G.MA_Orchestrator.RegisterInput(self, "ores", "ORE", "Ores", "Standard ore input.")
-		_G.MA_Orchestrator.RegisterInput(self, "ingots", "INGOT", "Ingots", "Standard ingot input.")
-	end
-
 	function ENT:OnDrawEntityInfo()
 		if not self.MiningFrameInfo then
 			local data = {

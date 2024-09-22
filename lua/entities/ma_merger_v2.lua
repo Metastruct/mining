@@ -16,6 +16,11 @@ ENT.NextCanWorkCheck = 0
 ENT.Description = "The merger allows you to merge multiple ore outputs into one. It's usually used with drills."
 
 local INPUT_AMOUNT = 6
+require("ma_orchestrator")
+_G.MA_Orchestrator.RegisterOutput(ENT, "ores", "ORE", "Ores", "Merged ores output.")
+for i = 1, INPUT_AMOUNT do
+	_G.MA_Orchestrator.RegisterInput(ENT, "ores_" .. i, "ORE", "Ores " .. i, "Standard ore input.")
+end
 
 -- TODO: make this less complex to check
 local function is_output_working(self, input_data, time)
@@ -69,11 +74,6 @@ if SERVER then
 		self:PhysWake()
 		self.OreQueue = {}
 
-		_G.MA_Orchestrator.RegisterOutput(self, "ores", "ORE", "Ores", "Merged ores output.")
-		for i = 1, INPUT_AMOUNT do
-			_G.MA_Orchestrator.RegisterInput(self, "ores_" .. i, "ORE", "Ores " .. i, "Standard ore input.")
-		end
-
 		_G.MA_Orchestrator.EntityTimer("ma_merger_v2", self, 0.5, 0, function()
 			if #self.OreQueue > 1 then
 				local output_data = _G.MA_Orchestrator.GetOutputData(self, "ores")
@@ -103,18 +103,5 @@ if SERVER then
 		if #self.OreQueue > 50 then
 			table.remove(self.OreQueue, #self.OreQueue)
 		end
-	end
-end
-
-if CLIENT then
-	function ENT:Initialize()
-		_G.MA_Orchestrator.RegisterOutput(self, "ores", "ORE", "Ores", "Merged ores output.")
-		for i = 1, INPUT_AMOUNT do
-			_G.MA_Orchestrator.RegisterInput(self, "ores_" .. i, "ORE", "Ores " .. i, "Standard ore input.")
-		end
-	end
-
-	function ENT:Draw()
-		self:DrawModel()
 	end
 end

@@ -15,6 +15,10 @@ ENT.IconOverride = "entities/ma_drill_v2.png"
 ENT.NextTraceCheck = 0
 ENT.Description = "Drills are used to collect ores automatically. Place one next to a surface and power it and it will start collecting ores. Drills are more efficient depending on how much energy they have access to."
 
+require("ma_orchestrator")
+_G.MA_Orchestrator.RegisterInput(ENT, "power", "ENERGY", "Energy", "Standard energy input. More energy equals more ores!")
+_G.MA_Orchestrator.RegisterOutput(ENT, "ores", "ORE", "Ores", "Standard ore output.")
+
 function ENT:CanWork(time)
 	if not self:GetNWBool("Wiremod_Active", true) then return false end
 	if not self:GetNWBool("IsPowered", false) then return false end
@@ -59,9 +63,6 @@ if SERVER then
 		self.Frame:Spawn()
 		self.Frame.PhysgunDisabled = true
 		self.Frame:SetParent(self)
-
-		_G.MA_Orchestrator.RegisterInput(self, "power", "ENERGY", "Energy", "Standard energy input. More energy equals more ores!")
-		_G.MA_Orchestrator.RegisterOutput(self, "ores", "ORE", "Ores", "Standard ore output.")
 
 		timer.Simple(0, function()
 			if not IsValid(self) then return end
@@ -228,9 +229,6 @@ if CLIENT then
 	end
 
 	function ENT:Initialize()
-		_G.MA_Orchestrator.RegisterInput(self, "power", "ENERGY", "Energy", "Standard energyy input. More energy equals more ores!")
-		_G.MA_Orchestrator.RegisterOutput(self, "ores", "ORE", "Ores", "The mined ores, you can link this to several entities like the Ore Storage.")
-
 		self.NextTraceCheck = 0
 		self.Saws = {
 			addSawEntity(self, self:GetForward() * -40 + self:GetRight() * 10),

@@ -14,6 +14,10 @@ ENT.ClassName = "ma_gen_v2"
 ENT.IconOverride = "entities/ma_gen_v2.png"
 ENT.Description = "The generate is the energy source of any automation setup. It's powered with argonite batteries."
 
+require("ma_orchestrator")
+_G.MA_Orchestrator.RegisterInput(ENT, "battery", "BATTERY", "Battery", "Argonite batteries are given to the generator so that it may store and distribute power!")
+_G.MA_Orchestrator.RegisterOutput(ENT, "power", "ENERGY", "Energy", "Standard energy output.")
+
 function ENT:CanWork()
 	if not self:GetNWBool("Wiremod_Active", true) then return false end
 	if not self:GetNWBool("IsPowered", true) then return false end
@@ -64,9 +68,6 @@ if SERVER then
 
 			Ores.Automation.ReplicateOwnership(self, self)
 		end)
-
-		_G.MA_Orchestrator.RegisterInput(self, "battery", "BATTERY", "Battery", "Argonite batteries are given to the generator so that it may store and distribute power!")
-		_G.MA_Orchestrator.RegisterOutput(self, "power", "ENERGY", "Energy", "Standard energy output.")
 
 		_G.MA_Orchestrator.EntityTimer("ma_gen_v2", self, 10, 0, function()
 			local output_data = _G.MA_Orchestrator.GetOutputData(self, "power")
@@ -180,9 +181,6 @@ if CLIENT then
 	end
 
 	function ENT:Initialize()
-		_G.MA_Orchestrator.RegisterInput(self, "battery", "BATTERY", "Battery", "Argonite batteries are given to the generator so that it may store and distribute power!")
-		_G.MA_Orchestrator.RegisterOutput(self, "power", "ENERGY", "Energy", "Standard energy output.")
-
 		self.Wheel = addWheelEntity(self, self:GetForward() * 48 + self:GetRight() * 2)
 
 		local ang = self:GetAngles()
