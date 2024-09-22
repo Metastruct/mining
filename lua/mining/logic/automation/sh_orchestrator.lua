@@ -43,7 +43,13 @@ function orchestrator.GetOutputs(ent)
 	if not IsValid(ent) then return {} end
 
 	if ent.MiningAutomationData and ent.MiningAutomationData.Outputs then
-		return table.ClearKeys(ent.MiningAutomationData.Outputs)
+		local ret = {}
+		for _, output_data in pairs(ent.MiningAutomationData.Outputs) do
+			output_data.Ent = ent
+			table.insert(ret, output_data)
+		end
+
+		return ret
 	else
 		return {}
 	end
@@ -53,7 +59,13 @@ function orchestrator.GetInputs(ent)
 	if not IsValid(ent) then return {} end
 
 	if ent.MiningAutomationData and ent.MiningAutomationData.Inputs then
-		return table.ClearKeys(ent.MiningAutomationData.Inputs)
+		local ret = {}
+		for _, output_data in pairs(ent.MiningAutomationData.Outputs) do
+			output_data.Ent = ent
+			table.insert(ret, output_data)
+		end
+
+		return ret
 	else
 		return {}
 	end
@@ -61,13 +73,23 @@ end
 
 function orchestrator.GetInputData(ent, id)
 	if ent.MiningAutomationData and ent.MiningAutomationData.Inputs and ent.MiningAutomationData.Inputs[id] then
-		return ent.MiningAutomationData.Inputs[id]
+		local input_data = ent.MiningAutomationData.Inputs[id]
+		if input_data then
+			input_data.Ent = ent
+		end
+
+		return input_data
 	end
 end
 
 function orchestrator.GetOutputData(ent, id)
 	if ent.MiningAutomationData and ent.MiningAutomationData.Outputs and ent.MiningAutomationData.Outputs[id] then
-		return ent.MiningAutomationData.Outputs[id]
+		local output_data = ent.MiningAutomationData.Outputs[id]
+		if output_data then
+			output_data.Ent = ent
+		end
+
+		return output_data
 	end
 end
 
@@ -347,14 +369,6 @@ if SERVER then
 
 	hook.Add("OnEntityCreated", "ma_orchestrator", function(ent)
 		if not orchestrator.WatchedClassNames[ent:GetClass()] then return end
-
-		for _, output_data in ipairs(orchestrator.GetOutputs(ent)) do
-			output_data.Ent = ent
-		end
-
-		for _, input_data in ipairs(orchestrator.GetInputs(ent)) do
-			input_data.Ent = ent
-		end
 
 		orchestrator.WatchedEntities[ent] = true
 	end)
