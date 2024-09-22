@@ -77,7 +77,7 @@ if SERVER then
 			if #self.OreQueue > 1 then
 				local efficiency = self:GetNW2Int("Energy", 0) / 100
 				local refined = math.random(0, 100) < (max_chance * efficiency)
-				local rejected = math.random(0, 100) < raw_max_chance
+				local rejected = math.random(0, 100) < (raw_max_chance + 10)
 
 				if refined then
 					local ore_data = Ores.__R[self.OreQueue[1]]
