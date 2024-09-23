@@ -196,7 +196,7 @@ function SWEP:Initialize()
 	self:RefreshStats()
 
 	local owner = self:GetOwner()
-	if IsValid(owner) and owner:GetNWFloat(Ores._nwMult, 0) > 3 then
+	if IsValid(owner) and owner:GetNWFloat(ms.Ores._nwMult, 0) > 3 then
 		self:SetMaterial("models/props_doomsday/australium_bar")
 		self:AttachSparkles()
 	end
