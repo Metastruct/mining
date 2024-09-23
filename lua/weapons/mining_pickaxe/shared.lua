@@ -39,6 +39,8 @@ SWEP.IgnoredEnts = {
 	mining_ore = true
 }
 
+PrecacheParticleSystem("player_australium_sparkles")
+
 function SWEP:RefreshStats()
 	if not _G.ms then return end
 	local owner = self:GetOwner()
@@ -168,11 +170,17 @@ if CLIENT then
 	end
 else
 	function SWEP:DoDamage(tr, dmgScale, isShockwave)
+		local dmgAmount = math.ceil(20 * (dmgScale or 1))
+		local owner = self:GetOwner()
+		if IsValid(owner) and owner:GetNWFloat(ms.Ores._nwMult, 0) > 3 then
+			dmgAmount = dmgAmount * 2
+		end
+
 		local dmgType = isShockwave and bit.bor(DMG_CLUB, DMG_NEVERGIB) or DMG_CLUB
 		local dmg = DamageInfo()
 		dmg:SetAttacker(self:GetOwner())
 		dmg:SetInflictor(self)
-		dmg:SetDamage(math.ceil(20 * (dmgScale or 1)))
+		dmg:SetDamage(dmgAmount)
 		dmg:SetDamageType(dmgType)
 		dmg:SetDamagePosition(tr.HitPos)
 		dmg:SetDamageForce(tr.Normal * 32)
