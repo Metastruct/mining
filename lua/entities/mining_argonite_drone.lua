@@ -220,7 +220,7 @@ if SERVER then
 
 		local timer_name = ("mining_argonite_drone_[%d]_target_[%d]"):format(self:EntIndex(), target:EntIndex())
 		if not timer.Exists(timer_name) then
-			timer.Create(timer_name, 20, 1, function()
+			timer.Create(timer_name, 40, 1, function()
 				if not IsValid(self) then return end
 				if target == self:GetTarget() then
 					self:MoveOn(target)
