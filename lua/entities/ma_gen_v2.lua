@@ -39,14 +39,7 @@ if SERVER then
 		local generator = net.ReadEntity()
 		if not IsValid(generator) then return end
 
-		local required_points = math.floor(BASE_KICKSTART_PRICE * math.max(1, Ores.GetPlayerMultiplier(ply) - 2))
-		local point_balance = ply:GetNWInt(Ores._nwPoints, 0)
-		if required_points > point_balance then return end
-
-		Ores.Print(ply, ("kickstarted a generator using %d pts"):format(required_points))
-		Ores.TakePlayerPoints(ply, required_points)
-
-		generator:SetNW2Int("Energy", 100)
+		generator:Kickstart(ply)
 	end)
 
 	ENT.NextSoundCheck = 0
@@ -157,6 +150,26 @@ if SERVER then
 		if self.SndLoop and self.SndLoop ~= -1 then
 			self:StopLoopingSound(self.SndLoop)
 		end
+	end
+
+	function ENT:Kickstart(ply)
+		local required_points = math.floor(BASE_KICKSTART_PRICE * math.max(1, Ores.GetPlayerMultiplier(ply) - 2))
+		local point_balance = ply:GetNWInt(Ores._nwPoints, 0)
+		if required_points > point_balance then return end
+
+		Ores.Print(ply, ("kickstarted a generator using %d pts"):format(required_points))
+		Ores.TakePlayerPoints(ply, required_points)
+
+		self:SetNW2Int("Energy", 100)
+	end
+
+	-- this should automatically kickstart if the activator is using a different thing then +use
+	function ENT:Use(activator, caller)
+		if not IsValid(activator) then return end
+		if not activator:IsPlayer() then return end
+		if caller == activator then return end
+
+		self:Kickstart(activator)
 	end
 end
 
