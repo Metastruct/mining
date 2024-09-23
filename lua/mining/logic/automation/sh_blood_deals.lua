@@ -263,6 +263,12 @@ if SERVER then
 			end)
 		end
 	end)
+
+	hook.Add("CanPlayerTradeOreRarity", TAG, function(ply, rarity)
+		if rarity ~= 666 then return end
+
+		return false
+	end)
 end
 
 if CLIENT then

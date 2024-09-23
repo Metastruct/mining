@@ -87,8 +87,12 @@ local function tradeOres(pl)
 	local count = 0
 
 	for k, v in next, Ores.__R do
+		local ret = hook.Run("CanPlayerTradeOreRarity", ply, k)
+		if ret == false then continue end
+
 		local n = Ores.GetPlayerOre(pl, k)
 		if n <= 0 then continue end
+
 		count = count + n
 		Ores.TakePlayerOre(pl, k, n)
 		earnings = earnings + (n * v.Worth)
