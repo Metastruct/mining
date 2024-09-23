@@ -180,9 +180,26 @@ else
 	end
 end
 
+function ITEM:AttachSparkles()
+	if self.__sparkling then return end
+
+	timer.Simple(0, function()
+		if not IsValid(self) then return end
+
+		ParticleEffectAttach("player_australium_sparkles", PATTACH_ABSORIGIN_FOLLOW, self, 0)
+		self.__sparkling = true
+	end)
+end
+
 function SWEP:Initialize()
 	self:SetHoldType(self.HoldType)
 	self:RefreshStats()
+
+	local owner = self:GetOwner()
+	if IsValid(owner) and owner:GetNWFloat(Ores._nwMult, 0) > 3 then
+		self:SetMaterial("models/props_doomsday/australium_bar")
+		self:AttachSparkles()
+	end
 end
 
 function SWEP:Deploy()
