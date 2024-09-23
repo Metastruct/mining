@@ -194,12 +194,6 @@ end
 function SWEP:Initialize()
 	self:SetHoldType(self.HoldType)
 	self:RefreshStats()
-
-	local owner = self:GetOwner()
-	if IsValid(owner) and owner:GetNWFloat(ms.Ores._nwMult, 0) > 3 then
-		self:SetMaterial("models/props_doomsday/australium_bar")
-		self:AttachSparkles()
-	end
 end
 
 function SWEP:Deploy()
@@ -215,6 +209,12 @@ function SWEP:Deploy()
 	self:SendWeaponAnim(ACT_VM_DRAW)
 	self.NextVMIdle = CurTime() + 0.6
 	self:RefreshStats()
+
+	local owner = self:GetOwner()
+	if IsValid(owner) and owner:GetNWFloat(ms.Ores._nwMult, 0) > 3 then
+		self:SetMaterial("models/props_doomsday/australium_bar")
+		self:AttachSparkles()
+	end
 
 	return true
 end
