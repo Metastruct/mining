@@ -180,7 +180,7 @@ else
 	end
 end
 
-function ITEM:AttachSparkles()
+function SWEP:AttachSparkles()
 	if self.__sparkling then return end
 
 	timer.Simple(0, function()
