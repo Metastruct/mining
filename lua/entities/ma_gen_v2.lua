@@ -19,14 +19,14 @@ _G.MA_Orchestrator.RegisterInput(ENT, "battery", "BATTERY", "Battery", "Argonite
 _G.MA_Orchestrator.RegisterOutput(ENT, "power", "ENERGY", "Energy", "Standard energy output.")
 
 function ENT:CanWork()
-	if not self:GetNWBool("Wiremod_Active", true) then return false end
-	if not self:GetNWBool("IsPowered", true) then return false end
 	if self:GetEnergyLevel() == 0 then return false end
 
 	return true
 end
 
 function ENT:GetEnergyLevel()
+	if not self:GetNWBool("Wiremod_Active", true) then return 0 end
+
 	return self:GetNW2Float("Energy", 0)
 end
 
@@ -61,7 +61,6 @@ if SERVER then
 		self:PhysWake()
 		self.NextSoundCheck = 0
 		self.NextLinkCheck = 0
-		self:SetNWBool("IsPowered", true)
 
 		timer.Simple(0, function()
 			if not IsValid(self) then return end
@@ -83,7 +82,10 @@ if SERVER then
 			local cur_energy = self:GetNW2Float("Energy", 0)
 			local new_energy = math.max(0, cur_energy - drain)
 			self:SetNW2Float("Energy", new_energy)
-			_G.WireLib.TriggerOutput(self, "Energy", new_energy)
+
+			if _G.WireLib then
+				_G.WireLib.TriggerOutput(self, "Energy", new_energy)
+			end
 		end)
 
 		Ores.Automation.PrepareForDuplication(self)
@@ -113,7 +115,10 @@ if SERVER then
 		local cur_energy = self:GetNW2Float("Energy", 0)
 		local new_energy = math.min(100, cur_energy + replenish)
 		self:SetNW2Float("Energy", new_energy)
-		_G.WireLib.TriggerOutput(self, "Energy", new_energy)
+
+		if _G.WireLib then
+			_G.WireLib.TriggerOutput(self, "Energy", new_energy)
+		end
 	end
 
 	function ENT:TriggerInput(port, state)
