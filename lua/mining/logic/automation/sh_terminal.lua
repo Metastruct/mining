@@ -98,9 +98,9 @@ if SERVER then
 		end, { "MiningAutomation" })
 	end
 
-	local function purchase_mining_equipment(ply, class_name)
-		if not ply.GetCoins or not ply.TakeCoins then return end
-		if not REVERSE_UNLOCK_DATA[class_name] then return end
+	function Ores.Automation.PurchaseMiningEquipment(ply, class_name)
+		if not ply.GetCoins or not ply.TakeCoins then return false, "coins not available" end
+		if not REVERSE_UNLOCK_DATA[class_name] then return false, "item doesnt exist or is not for sell" end
 
 		local cur_lvl = ply:GetNWInt("ms.Ores.MiningAutomation", 0)
 
@@ -126,13 +126,20 @@ if SERVER then
 		return true
 	end
 
+	function Ores.Automation.PromptAutobuy(ply, class_name)
+		net.Start(NET_MSG)
+		net.WriteInt(NET_MSG_AUTOBUY, 8)
+		net.WriteString(class_name)
+		net.Send(ply)
+	end
+
 	net.Receive(NET_MSG, function(_, ply)
 		local msg_type = net.ReadInt(8)
 		if msg_type == NET_MSG_TYPE_UPGRADE then
 			upgrade_mining_automation(ply)
 		elseif msg_type == NET_MSG_TYPE_PURCHASE then
 			local class_name = net.ReadString()
-			purchase_mining_equipment(ply, class_name)
+			Ores.Automation.PurchaseMiningEquipment(ply, class_name)
 		end
 	end)
 
@@ -141,64 +148,6 @@ if SERVER then
 			if not IsValid(ply) then return end
 			ply:SetNWInt("ms.Ores.MiningAutomation", data.MiningAutomation)
 		end, { "MiningAutomation" })
-	end)
-
-	hook.Add("PlayerSpawnSENT", "ma_terminal", function(ply, class_name)
-		if not ply.GetItemCount then return end
-		if not ply.TakeItem then return end
-		if not Ores.Automation.PurchaseData[class_name] then return end
-
-		-- dont go further if player is already hitting the limit
-		if not Ores.Automation.CheckLimit(ply, class_name) then return false end
-
-		local count = ply:GetItemCount(class_name .. "_item")
-		if not isnumber(count) or count < 1 then
-			local ent_table = scripted_ents.Get(class_name)
-			local name = ent_table and ent_table.PrintName or class_name
-
-			if ply:GetInfoNum("mining_automation_autobuy", 0) == 0 then
-				Ores.SendChatMessage(ply, 1, "You don't own enough materials to create a " .. name .. "! You can get some at the mining terminal.")
-
-				net.Start(NET_MSG)
-				net.WriteInt(NET_MSG_AUTOBUY, 8)
-				net.WriteString(class_name)
-				net.Send(ply)
-			else
-				local purchased, reason = purchase_mining_equipment(ply, class_name)
-				if purchased then return end
-
-				if purchased == false then
-					Ores.SendChatMessage(ply, 1, ("Could not auto-buy materials for %s: %s"):format(name, reason))
-				end
-			end
-
-			return false
-		end
-	end)
-
-	-- need this otherwise some stuff doesnt call PlayerSpawnSENT
-	hook.Add("OnEntityCreated", "ma_terminal", function(ent)
-		if not ent.CPPIGetOwner then return end
-
-		local class_name = ent:GetClass()
-		if not Ores.Automation.PurchaseData[class_name] then return end
-
-		timer.Simple(0, function()
-			if not IsValid(ent) then return end
-
-			local owner = ent:CPPIGetOwner()
-			if not IsValid(owner) then return end
-			if not owner.GetItemCount then return end
-			if not owner.TakeItem then return end
-
-			local count = owner:GetItemCount(class_name .. "_item")
-			if not isnumber(count) or count < 1 then
-				SafeRemoveEntity(ent)
-				return
-			end
-
-			owner:TakeItem(class_name .. "_item", 1, "Mining Terminal")
-		end)
 	end)
 
 	local function send_ranking(ranking)
