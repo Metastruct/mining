@@ -168,6 +168,17 @@ if CLIENT then
 			self.ParticleEmitter = nil
 		end
 	end
+
+	function SWEP:ViewModelDrawn(ent)
+		if not ms then return end
+		if not ms.Ores then return end
+
+		local owner = self:GetOwner()
+		if IsValid(owner) and owner:GetNWFloat(ms.Ores._nwMult, 0) > 3 then
+			ent:SetMaterial("models/props_doomsday/australium_bar")
+			self.AttachSparkles(ent)
+		end
+	end
 else
 	function SWEP:DoDamage(tr, dmgScale, isShockwave)
 		local dmgAmount = math.ceil(20 * (dmgScale or 1))
