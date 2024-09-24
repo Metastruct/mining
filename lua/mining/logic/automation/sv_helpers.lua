@@ -149,44 +149,6 @@ function Ores.Automation.RegisterCustomLimit(class_name, amount)
 	Ores.Automation.CustomLimits[class_name] = amount
 end
 
-Ores.Automation.RegisterCustomLimit("ma_drill_v2", 12)
-Ores.Automation.RegisterCustomLimit("ma_drone_controller_v2", 1)
-Ores.Automation.RegisterCustomLimit("ma_chip_router_v2", 1)
-Ores.Automation.RegisterCustomLimit("ma_refinery", 2)
-
-CreateConVar("sbox_maxmining_automation", "40", FCVAR_ARCHIVE, "Maximum amount of mining automation entities a player can have", 0, 100)
-hook.Add("OnEntityCreated", "mining_automation", function(ent)
-	local class_name = ent:GetClass()
-	if not Ores.Automation.EntityClasses[class_name] then return end
-	if not ent.CPPIGetOwner then return end
-
-	timer.Simple(1, function()
-		if not IsValid(ent) then return end
-
-		local ply = ent:CPPIGetOwner()
-		if not IsValid(ply) then
-			SafeRemoveEntity(ent)
-			return
-		end
-
-		if Ores.Automation.CustomLimits[class_name] then
-			if ply:CheckLimit(class_name) then
-				ply:AddCount(class_name, ent)
-			else
-				SafeRemoveEntity(ent)
-			end
-
-			return
-		end
-
-		if ply:CheckLimit("mining_automation") then
-			ply:AddCount("mining_automation", ent)
-		else
-			SafeRemoveEntity(ent)
-		end
-	end)
-end)
-
 function Ores.Automation.CheckLimit(ply, class_name)
 	if Ores.Automation.EntityClasses[class_name] then
 		if Ores.Automation.CustomLimits[class_name] and not ply:CheckLimit(class_name) then
@@ -200,6 +162,60 @@ function Ores.Automation.CheckLimit(ply, class_name)
 
 	return true
 end
+
+Ores.Automation.RegisterCustomLimit("ma_drill_v2", 12)
+Ores.Automation.RegisterCustomLimit("ma_drone_controller_v2", 1)
+Ores.Automation.RegisterCustomLimit("ma_chip_router_v2", 1)
+Ores.Automation.RegisterCustomLimit("ma_refinery", 2)
+
+CreateConVar("sbox_maxmining_automation", "40", FCVAR_ARCHIVE, "Maximum amount of mining automation entities a player can have", 0, 100)
+
+hook.Add("OnEntityCreated", "mining_automation", function(ent)
+	local class_name = ent:GetClass()
+	if not Ores.Automation.EntityClasses[class_name] then return end
+	if not ent.CPPIGetOwner then return end
+
+	timer.Simple(0, function()
+		if not IsValid(ent) then return end
+
+		local ply = ent:CPPIGetOwner()
+		if not IsValid(ply) then
+			SafeRemoveEntity(ent)
+			return
+		end
+
+		-- if we reach limit, remove
+		if not Ores.Automation.CheckLimit(ply, class_name) then
+			SafeRemoveEntity(ent)
+			return
+		end
+
+		if not ply.GetItemCount then return end
+		if not Ores.Automation.PurchaseData[class_name] then return end
+
+		local count = ply:GetItemCount(class_name .. "_item")
+		if not isnumber(count) or count < 1 then
+			local name = ent.PrintName or class_name
+
+			if ply:GetInfoNum("mining_automation_autobuy", 0) == 0 then
+				Ores.SendChatMessage(ply, 1, "You don't own enough materials to create a " .. name .. "! You can get some at the mining terminal.")
+				Ores.Automation.PromptAutobuy(ply, class_name)
+
+				SafeRemoveEntity(ent)
+				return
+			else
+				local purchased, reason = Ores.Automation.PurchaseMiningEquipment(ply, class_name)
+				if purchased then return end
+
+				if purchased == false then
+					Ores.SendChatMessage(ply, 1, ("Could not auto-buy materials for %s: %s"):format(name, reason))
+					SafeRemoveEntity(ent)
+					return
+				end
+			end
+		end
+	end)
+end)
 
 hook.Add("PlayerSpawnSENT", "mining_automation", function(ply, class_name)
 	if not class_name then return end
