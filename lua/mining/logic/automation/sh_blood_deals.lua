@@ -92,7 +92,7 @@ if SERVER then
 		if item_id == "nodeal" then return end
 		if not ITEMS[item_id] then return end
 		if not IsValid(npc) then return end
-		if npc:GetClass() ~= "lua_npc" and npc:GetClass() ~= "player" then return end
+		if npc:GetClass() ~= "lua_npc" then return end
 
 		local item = ITEMS[item_id]
 		local cur_blood = ms.Ores.GetPlayerOre(ply, 666)
@@ -123,6 +123,7 @@ if SERVER then
 
 		local npc = ply:GetEyeTrace().Entity
 		if not npc:IsValid() then return end
+		if npc:GetClass() ~= "lua_npc" then return end
 
 		if npc.role == "bloodgod" and npc:GetPos():DistToSqr(ply:GetPos()) <= MAX_NPC_DIST then
 			net.Start(TAG)
@@ -823,7 +824,7 @@ if CLIENT then
 	local flesh_world_state = false
 	hook.Add("Think", TAG .. "_flesh_world_state", function()
 		local npc = Entity(NPC_INDEX)
-		local new_state = menu_toggled or (LocalPlayer().IsInZone and LocalPlayer():IsInZone("cave") and IsValid(npc) and npc.IsBloodGod)
+		local new_state = menu_toggled or (LocalPlayer().IsInZone and LocalPlayer():IsInZone("cave") and IsValid(npc) and npc.IsBloodGod and npc:GetClass() == "lua_npc")
 		if new_state ~= flesh_world_state then
 			if new_state then
 				start_flesh_world()
