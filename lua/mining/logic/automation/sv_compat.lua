@@ -163,9 +163,18 @@ function Ores.Automation.CheckLimit(ply, class_name)
 	return true
 end
 
+function Ores.Automation.AddCount(ply, class_name, ent)
+	if Ores.Automation.EntityClasses[class_name] then
+		if Ores.Automation.CustomLimits[class_name] then
+			ply:AddCount(class_name, ent)
+		end
+
+		ply:AddCount("mining_automation", ent)
+	end
+end
+
 Ores.Automation.RegisterCustomLimit("ma_drill_v2", 12)
 Ores.Automation.RegisterCustomLimit("ma_drone_controller_v2", 1)
-Ores.Automation.RegisterCustomLimit("ma_chip_router_v2", 1)
 Ores.Automation.RegisterCustomLimit("ma_refinery", 2)
 
 CreateConVar("sbox_maxmining_automation", "40", FCVAR_ARCHIVE, "Maximum amount of mining automation entities a player can have", 0, 100)
@@ -190,6 +199,7 @@ hook.Add("OnEntityCreated", "mining_automation", function(ent)
 			return
 		end
 
+		if not ply.TakeItem then return end
 		if not ply.GetItemCount then return end
 		if not Ores.Automation.PurchaseData[class_name] then return end
 
@@ -205,7 +215,11 @@ hook.Add("OnEntityCreated", "mining_automation", function(ent)
 				return
 			else
 				local purchased, reason = Ores.Automation.PurchaseMiningEquipment(ply, class_name)
-				if purchased then return end
+				if purchased then
+					ply:TakeItem(class_name .. "_item", 1)
+					Ores.Automation.AddCount(ply, class_name, ent)
+					return
+				end
 
 				if purchased == false then
 					Ores.SendChatMessage(ply, 1, ("Could not auto-buy materials for %s: %s"):format(name, reason))
@@ -213,6 +227,9 @@ hook.Add("OnEntityCreated", "mining_automation", function(ent)
 					return
 				end
 			end
+		else
+			ply:TakeItem(class_name .. "_item", 1)
+			Ores.Automation.AddCount(ply, class_name, ent)
 		end
 	end)
 end)
