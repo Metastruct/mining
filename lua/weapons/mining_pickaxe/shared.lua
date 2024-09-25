@@ -172,6 +172,7 @@ if CLIENT then
 	function SWEP:ViewModelDrawn(ent)
 		if not ms then return end
 		if not ms.Ores then return end
+		if self:GetClass() ~= "mining_pickaxe" then return end
 
 		local owner = self:GetOwner()
 		if IsValid(owner) and owner:GetNWFloat(ms.Ores._nwMult, 0) > 3 then
