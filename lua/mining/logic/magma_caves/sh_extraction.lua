@@ -36,30 +36,35 @@ if CLIENT then
 		surface.SetTextPos(x + dist, y + dist)
 		surface.SetTextColor(shadowColor)
 		surface.DrawText(txt)
+
 		surface.SetTextPos(x - dist, y)
 		surface.SetTextColor(color)
 		surface.DrawText(txt)
 	end
 
 	local function drawOutlinedRect(x, y, w, h, outlineColor, color)
-		x, y, w, h = math.Round(x), math.Round(y), math.Round(w), math.Round(h)
+		surface.SetDrawColor(color)
+		surface.DrawRect(x, y, w, h)
 
 		surface.SetDrawColor(outlineColor)
-		surface.DrawRect(x, y + 1, 1, h - 2) -- left
-		surface.DrawRect(x + 1, y, w - 2, 1) -- top
-		surface.DrawRect(w - 1, y + 1, 1, h - 2) -- right
-		surface.DrawRect(x + 1, y + h - 1, w - 2, 1) -- bottom
-		surface.SetDrawColor(color)
-		surface.DrawRect(x + 1, y + 1, w - 2, h - 2)
+		surface.DrawOutlinedRect(x, y, w, h)
 	end
 
 	local function drawButton(self, w, h)
-		drawOutlinedRect(0, 0, w, h, Color(0, 0, 0, 127), self:IsDown() and Color(0, 127, 255) or (self:IsHovered() and Color(205, 205, 205) or Color(192, 192, 192)))
-		drawOutlinedRect(0, 0 + h * 0.5, w, h, Color(0, 0, 0, 0), Color(0, 0, 0, 32))
+		if self:IsHovered() then
+			self:SetColor(Color(0, 0, 0, 255))
+		else
+			self:SetColor(Color(255, 255, 255, 255))
+		end
+
+		drawOutlinedRect(0, 0, w, h,
+			Color(255, 255, 255, 0),
+			self:IsHovered() and Color(255,255,255,255) or Color(36, 36, 36, 220)
+		)
 	end
 
 	local function drawPanelList(self, w, h)
-		drawOutlinedRect(0, 0, w, h, Color(0, 0, 0, 192), Color(0, 0, 0, 127))
+		drawOutlinedRect(0, 0, w, h, Color(0, 0, 0, 0), Color(0, 0, 0, 0))
 	end
 
 	surface.CreateFont("msOresExtractorTitle", {
@@ -67,6 +72,22 @@ if CLIENT then
 		size = 24,
 		weight = 800
 	})
+
+	local BLUR = Material("pp/blurscreen")
+	local function blur_rect(x, y, w, h, layers, quality)
+		surface.SetMaterial(BLUR)
+		surface.SetDrawColor(255, 255, 255)
+
+		render.SetScissorRect(x, y, x + w, y + h, true)
+			for i = 1, layers do
+				BLUR:SetFloat("$blur", (i / layers) * quality)
+				BLUR:Recompute()
+
+				render.UpdateScreenEffectTexture()
+				surface.DrawTexturedRect(0, 0, ScrW(), ScrH())
+			end
+		render.SetScissorRect(0, 0, 0, 0, false)
+	end
 
 	local function showExtractorMenu(npc, remaining)
 		local frame = vgui.Create("DFrame")
@@ -83,15 +104,22 @@ if CLIENT then
 		frame.btnMaxim:Hide()
 		frame.btnMinim:Hide()
 
-		function frame.btnClose:Paint(w, h)
-			drawButton(self, w, h)
-		end
+		hook.Add("HUDPaint", frame, function()
+			if not frame:IsVisible() then return end
+
+			local x, y = frame:LocalToScreen()
+			local w, h = frame:GetSize()
+			blur_rect(x, y, w, h, 10, 2)
+		end)
+
+		function frame.btnClose:Paint(w, h) end
 
 		function frame:Paint(w, h)
-			drawOutlinedRect(0, 0, w, h, Color(24, 24, 24), Color(86, 86, 86))
+			drawOutlinedRect(0, 0, w, h, Color(0, 0, 0, 255), Color(0, 0, 0, 240))
 
-			surface.SetDrawColor(Color(0, 0, 0, 127))
+			surface.SetDrawColor(Color(0, 0, 0, 200))
 			surface.DrawRect(1, 1, w - 2, 32)
+
 			surface.SetFont("msOresExtractorTitle")
 			local txt = self.lblTitle:GetText()
 			local txtW = surface.GetTextSize(txt)
