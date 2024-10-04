@@ -169,15 +169,23 @@ if CLIENT then
 		end
 	end
 
-	function SWEP:ViewModelDrawn(ent)
-		if not ms then return end
-		if not ms.Ores then return end
-		if self:GetClass() ~= "mining_pickaxe" then return end
+	local GOLD_MAT = Material("models/props_doomsday/australium_bar")
+	function SWEP:PreDrawViewModel(vm, wep, ply)
+		if wep:GetClass() ~= "mining_pickaxe" then
+			return
+		end
 
-		local owner = self:GetOwner()
-		if IsValid(owner) and owner:GetNWFloat(ms.Ores._nwMult, 0) > 3 then
-			ent:SetMaterial("models/props_doomsday/australium_bar")
-			self.AttachSparkles(ent)
+		if IsValid(ply) and ply:GetNWFloat(ms.Ores._nwMult, 0) > 3 then
+			self.AttachSparkles(vm)
+			render.MaterialOverride(GOLD_MAT)
+		end
+	end
+
+	function SWEP:PostDrawViewModel(vm, ply, wep)
+		if wep:GetClass() ~= "mining_pickaxe" then return end
+
+		if IsValid(ply) and ply:GetNWFloat(ms.Ores._nwMult, 0) > 3 then
+			render.MaterialOverride()
 		end
 	end
 else
@@ -202,10 +210,13 @@ end
 
 function SWEP:AttachSparkles()
 	if self.__sparkling then return end
+	if self.__creatingSparkles then return end
 
+	self.__creatingSparkles = true
 	timer.Simple(0, function()
 		if not IsValid(self) then return end
 
+		self.__creatingSparkles = false
 		ParticleEffectAttach("player_australium_sparkles", PATTACH_ABSORIGIN_FOLLOW, self, 0)
 		self.__sparkling = true
 	end)
