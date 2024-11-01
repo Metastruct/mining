@@ -170,7 +170,7 @@ Ores.RegisterRockEvent({
 			-- Check for nearby players before teleporting
 			local nearbyPlayers = false
 			for _, ply in ipairs(player.GetAll()) do
-				if ply:GetPos():Distance(ent:GetPos()) < 1000 then
+				if ent:GetPos():DistToSqr(ply:GetPos()) <= 300 * 300 then
 					nearbyPlayers = true
 					break
 				end

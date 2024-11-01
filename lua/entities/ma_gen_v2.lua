@@ -257,7 +257,8 @@ if CLIENT then
 
 		if bind == "+use" and pressed then
 			local tr = ply:GetEyeTrace()
-			if IsValid(tr.Entity) and tr.Entity:GetClass() == "ma_gen_v2" and tr.Entity:WorldSpaceCenter():Distance(EyePos()) <= 300 then
+			local ent = tr.Entity
+			if IsValid(ent) and ent:GetClass() == "ma_gen_v2" and ent:WorldSpaceCenter():DistToSqr(EyePos()) <= 300 * 300 then
 				local required_points = math.floor(BASE_KICKSTART_PRICE * math.max(1, Ores.GetPlayerMultiplier(ply) - 2))
 				local point_balance = ply:GetNWInt(Ores._nwPoints, 0)
 				if required_points > point_balance then
