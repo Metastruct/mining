@@ -1,8 +1,8 @@
 module("ms", package.seeall)
 Ores = Ores or {}
 
-local TELEPORT_INTERVAL_MIN = 4  -- Minimum seconds between teleports
-local TELEPORT_INTERVAL_MAX = 10  -- Maximum seconds between teleports
+local TELEPORT_INTERVAL_MIN = 3  -- Minimum seconds between teleports
+local TELEPORT_INTERVAL_MAX = 8  -- Maximum seconds between teleports
 local TELEPORT_RANGE = 500      -- Maximum teleport distance
 local QUANTUM_CHANCE = 2        -- 2% chance for a rock to be quantum
 
@@ -167,7 +167,18 @@ Ores.RegisterRockEvent({
 				return
 			end
 
-			teleportRock(ent)
+			-- Check for nearby players before teleporting
+			local nearbyPlayers = false
+			for _, ply in ipairs(player.GetAll()) do
+				if ply:GetPos():Distance(ent:GetPos()) < 1000 then
+					nearbyPlayers = true
+					break
+				end
+			end
+
+			if nearbyPlayers then
+				teleportRock(ent)
+			end
 		end)
 	end,
 
