@@ -88,6 +88,10 @@ if SERVER then
 	ms.Ores.RegisterRockEvent({
 		Id = "toxic_gas",
 		Chance = TOXIC_GAS_CHANCE,
+		CheckValid = function(ent)
+			if ent:WaterLevel() > 1 then return false end
+			return true
+		end,
 		OnDamaged = function(ent, dmg)
 			local attacker = dmg:GetAttacker()
 			if not IsValid(attacker) then return end
