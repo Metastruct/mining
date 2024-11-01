@@ -7,6 +7,7 @@ local maxDist = 16384
 
 local achievementMaxStatId = "mining_maxstat"
 
+util.AddNetworkString("ms.Ores_StartMinerMenu")
 hook.Add("KeyPress","ms.Ores_NPCUse",function(pl,key)
 	if key ~= IN_USE then return end
 
