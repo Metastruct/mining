@@ -39,7 +39,7 @@ if SERVER then
                 if event.CheckValid and not event.CheckValid(ent) then continue end
 
                 if math.random(0, 100) <= event.Chance then
-                    ent.RockEvent = id
+                    ent:SetNWString("RockEvent", id)
                     if event.OnMarked then
                         event.OnMarked(ent)
 
@@ -59,9 +59,10 @@ if SERVER then
 
     -- Handle rock damage
     hook.Add("EntityTakeDamage", "mining_rock_events", function(ent, dmg)
-        if not ent.RockEvent then return end
+        local eventId = ent:GetNWString("RockEvent", "")
+        if eventId == "" then return end
 
-        local event = EVENTS[ent.RockEvent]
+        local event = EVENTS[eventId]
         if not event or not event.OnDamaged then return end
 
         event.OnDamaged(ent, dmg)
@@ -69,7 +70,7 @@ if SERVER then
         -- Network to clients
         net.Start("mining_rock_event")
         net.WriteString("OnDamaged")
-        net.WriteString(ent.RockEvent)
+        net.WriteString(eventId)
         net.WriteEntity(ent)
         net.WriteFloat(dmg:GetDamage())
         net.Broadcast()
@@ -77,9 +78,10 @@ if SERVER then
 
     -- Handle rock destruction
     hook.Add("PlayerDestroyedMiningRock", "mining_rock_events", function(ply, rock, inflictor)
-        if not rock.RockEvent then return end
+        local eventId = rock:GetNWString("RockEvent", "")
+        if eventId == "" then return end
 
-        local event = EVENTS[rock.RockEvent]
+        local event = EVENTS[eventId]
         if not event then return end
 
         if event.OnDestroyed then
@@ -88,7 +90,7 @@ if SERVER then
             -- Network to clients
             net.Start("mining_rock_event")
             net.WriteString("OnDestroyed")
-            net.WriteString(rock.RockEvent)
+            net.WriteString(eventId)
             net.WriteEntity(ply)
             net.WriteEntity(rock)
             net.WriteEntity(inflictor)
