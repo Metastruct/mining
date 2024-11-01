@@ -2,7 +2,7 @@ module("ms", package.seeall)
 Ores = Ores or {}
 
 if SERVER then
-	local TOXIC_GAS_CHANCE = 3 -- 3% chance
+	local TOXIC_GAS_CHANCE = 4 -- 4% chance
 	local TOXIC_GAS_DAMAGE = 10
 	local TOXIC_GAS_INTERVAL = 1
 	local TOXIC_GAS_DURATION = 60
@@ -85,7 +85,7 @@ if SERVER then
 		end)
 	end
 
-	ms.Ores.RegisterRockEvent({
+	Ores.RegisterRockEvent({
 		Id = "toxic_gas",
 		Chance = TOXIC_GAS_CHANCE,
 		CheckValid = function(ent)
