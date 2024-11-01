@@ -95,7 +95,8 @@ Ores.RegisterRockEvent({
 		npc:EmitSound("physics/concrete/boulder_impact_hard" .. math.random(3, 4) .. ".wav", 100)
 
 		SafeRemoveEntity(ent)
-	end
+	end,
+	OnDestroyed = function() end
 })
 
 -- Keep the NPC damage and kill hooks
