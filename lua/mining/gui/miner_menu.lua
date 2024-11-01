@@ -71,14 +71,14 @@ PANEL.PaintFunctions = {
 
 		if IsValid(self.ModelPanel) then
 			surface.SetFont("DermaDefault")
-			local txt = string.Comma(LocalPlayer():GetCoins())
-			local txtW = surface.GetTextSize(txt)
+			local coinsTxt = string.Comma(LocalPlayer():GetCoins())
+			local coinsTxtW = surface.GetTextSize(coinsTxt)
 			surface.SetDrawColor(Color(192, 192, 192))
 			surface.SetMaterial(coinsIcon)
-			surface.DrawTexturedRect(self.ModelPanel:GetWide() * 0.5 - txtW * 0.5 - 16 * 0.5 + 4 - 2, 32 * 0.5 - 16 * 0.5 + 2, 16, 16)
-			surface.SetTextPos(self.ModelPanel:GetWide() * 0.5 - txtW * 0.5 + 16 * 0.5 + 4 + 2, 32 * 0.5 - 16 * 0.5 + 3)
+			surface.DrawTexturedRect(self.ModelPanel:GetWide() * 0.5 - coinsTxtW * 0.5 - 16 * 0.5 + 4 - 2, 32 * 0.5 - 16 * 0.5 + 2, 16, 16)
+			surface.SetTextPos(self.ModelPanel:GetWide() * 0.5 - coinsTxtW * 0.5 + 16 * 0.5 + 4 + 2, 32 * 0.5 - 16 * 0.5 + 3)
 			surface.SetTextColor(Color(127, 192, 127))
-			surface.DrawText(txt)
+			surface.DrawText(coinsTxt)
 		end
 	end,
 	PanelList = function(self, w, h)
@@ -116,8 +116,8 @@ function PANEL:Init()
 		blur_rect(x, y, w, h, 10, 2)
 	end)
 
-	self.Close = function(self)
-		self:MakeMove()
+	self.Close = function(s)
+		s:MakeMove()
 	end
 
 	self:SetTitle("MINER")
@@ -330,13 +330,13 @@ function PANEL:Init()
 	self.NPCModelPanel:Dock(LEFT)
 	self.NPCModelPanel:SetWide(self.TopPanel:GetTall())
 
-	self.NPCModelPanel.LayoutEntity = function(self, ent)
+	self.NPCModelPanel.LayoutEntity = function(_, ent)
 		ent:SetFlexWeight(math.random(ent:GetFlexNum()), math.random(100))
 		ent:SetFlexScale(math.Rand(1, 2.25))
 	end
 
-	self.NPCModelPanel.Paint = function(self, w, h)
-		DModelPanel.Paint(self, w, h)
+	self.NPCModelPanel.Paint = function(s, w, h)
+		DModelPanel.Paint(s, w, h)
 		--Paint.PanelList(self, w, h)
 	end
 
@@ -345,7 +345,7 @@ function PANEL:Init()
 	self.PlyModelPanel:SetWide(self.TopPanel:GetTall())
 	self.PlyModelPanel:SetModel(LocalPlayer():GetModel())
 
-	self.PlyModelPanel.LayoutEntity = function(self, ent)
+	self.PlyModelPanel.LayoutEntity = function(_, ent)
 		ent:SetFlexWeight(math.random(ent:GetFlexNum()), math.random(100))
 		ent:SetFlexScale(math.Rand(1, 2.25))
 	end
@@ -355,8 +355,8 @@ function PANEL:Init()
 	self.PlyModelPanel:SetCamPos(Vector(1, 0.3, 0.3) * 200)
 	self.PlyModelPanel:SetFOV(4)
 
-	self.PlyModelPanel.Paint = function(self, w, h)
-		DModelPanel.Paint(self, w, h)
+	self.PlyModelPanel.Paint = function(s, w, h)
+		DModelPanel.Paint(s, w, h)
 		--Paint.PanelList(self, w, h)
 	end
 end
@@ -584,9 +584,9 @@ PANEL.Query = DermaPopup(Derma_Query)
 derma.DefineControl(tag, "The miner menu.", PANEL, "DFrame")
 PANEL = nil
 
-usermessage.Hook("ms.Ores_StartMinerMenu", function(umsg)
-	local npc = umsg:ReadEntity()
-	local id = umsg:ReadShort()
+net.Receive("ms.Ores_StartMinerMenu", function()
+	local npc = net.ReadEntity()
+	local id = net.ReadInt(16)
 
 	if not IsValid(g_MinerMenu) then
 		g_MinerMenu = vgui.Create(tag)

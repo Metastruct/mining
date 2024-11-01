@@ -18,7 +18,10 @@ hook.Add("KeyPress","ms.Ores_NPCUse",function(pl,key)
 	then
 		if Instances and not Instances.ShouldInteract(pl,npc) then return end
 
-		SendUserMessage("ms.Ores_StartMinerMenu",pl,npc,npc.roleinfo.id)
+		net.Start("ms.Ores_StartMinerMenu")
+		net.WriteEntity(npc)
+		net.WriteInt(npc.roleinfo.id, 16)
+		net.Send(pl)
 
 		if pl.LookAt then
 			pl:LookAt(npc,1,2)
@@ -36,7 +39,7 @@ local function getCloseMiner(pl)
 
 	local npc = NULL
 	local dist = maxDist
-	for ent,_ in next,(NPCS_REGISTERED.miner or {}) do
+	for ent,_ in next, NPCS_REGISTERED.miner or {} do
 		if not IsValid(ent) then continue end
 
 		local d = pos:DistToSqr(ent:GetPos())
@@ -72,12 +75,12 @@ concommand.Add("mining_upgrade",function(pl,_,args)
 	local stat = Ores.__PStats[k]
 	if not stat then return end
 
-	local level = pl:GetNWInt(Ores._nwPickaxePrefix..stat.VarName,0)
+	local level = pl:GetNWInt(Ores._nwPickaxePrefix .. stat.VarName,0)
 
 	-- Stat is already at max level
 	if level >= maxLevel then return end
 
-	level = level+1
+	level = level + 1
 
 	local points = pl:GetNWInt(Ores._nwPoints,0)
 	local cost = Ores.StatPrice(k,level)
@@ -93,7 +96,7 @@ concommand.Add("mining_upgrade",function(pl,_,args)
 	pl:SetNWInt(Ores._nwPoints,points)
 
 	Ores.SetSavedPlayerData(pl,stat.VarName,level)
-	pl:SetNWInt(Ores._nwPickaxePrefix..stat.VarName,level)
+	pl:SetNWInt(Ores._nwPickaxePrefix .. stat.VarName,level)
 
 	if level == maxLevel and MetAchievements and MetAchievements.UnlockAchievement then
 		MetAchievements.UnlockAchievement(pl,achievementMaxStatId)
