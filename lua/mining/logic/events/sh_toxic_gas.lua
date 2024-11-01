@@ -5,7 +5,7 @@ if SERVER then
 	local TOXIC_GAS_CHANCE = 3 -- 3% chance
 	local TOXIC_GAS_DAMAGE = 10
 	local TOXIC_GAS_INTERVAL = 1
-	local TOXIC_GAS_DURATION = 15
+	local TOXIC_GAS_DURATION = 60
 	local TOXIC_GAS_RADIUS = 300
 
 	util.AddNetworkString("ToxicGasEffect")
@@ -53,7 +53,7 @@ if SERVER then
 					if ply:IsPlayer() then
 						-- Apply resistance based on player's toxic resistance level
 						local resistance = ply:GetNWInt("ms.Ores.ToxicResistance", 0)
-						local damage = TOXIC_GAS_DAMAGE --TOXIC_GAS_DAMAGE * (1 - (resistance / 50))
+						local damage = TOXIC_GAS_DAMAGE * (1 - (resistance / 50))
 
 						if damage > 0 then
 							local dmg = DamageInfo()
