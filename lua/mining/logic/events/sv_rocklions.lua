@@ -67,7 +67,7 @@ end
 
 -- Register the rocklion event
 local ANTLION_CHANCE = 10
-ms.Ores.RegisterRockEvent({
+Ores.RegisterRockEvent({
 	Id = "rocklion",
 	Chance = ANTLION_CHANCE,
 	CheckValid = function(ent)

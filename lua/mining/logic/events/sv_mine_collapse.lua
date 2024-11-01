@@ -301,7 +301,7 @@ end)
 end)]]
 
 local nextIncidentRock = 0
-ms.Ores.RegisterRockEvent({
+Ores.RegisterRockEvent({
 	Id = "collapse",
 	Chance = COLLAPSE_CHANCE,
 	CheckValid = function(ent)
