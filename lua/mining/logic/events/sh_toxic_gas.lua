@@ -10,7 +10,7 @@ if SERVER then
 
 	util.AddNetworkString("ToxicGasEffect")
 
-	local function createToxicGas(pos, ang)
+	function Ores.CreateToxicGas(pos, ang)
 		local gasCloud = ents.Create("env_smokestack")
 		if not IsValid(gasCloud) then return end
 
@@ -85,48 +85,31 @@ if SERVER then
 		end)
 	end
 
-	-- Hook into rock creation similar to mine collapse
-	hook.Add("OnEntityCreated", "mining_toxic_gas", function(ent)
-		if not IsValid(ent) then return end
-		if ent:GetClass() ~= "mining_rock" then return end
+	ms.Ores.RegisterRockEvent({
+		Id = "toxic_gas",
+		Chance = TOXIC_GAS_CHANCE,
+		OnDamaged = function(ent, dmg)
+			ent:EmitSound("ambient/gas/steam_loop1.wav", 60, math.random(90, 110))
+			timer.Simple(math.Rand(0.1, 0.3), function()
+				if IsValid(ent) then
+					ent:StopSound("ambient/gas/steam_loop1.wav")
+				end
+			end)
 
-		timer.Simple(0, function()
-			if not IsValid(ent) then return end
-			if ent:GetClass() == "mining_rock" and not ent.OriginalRock then return end
+			local effectdata = EffectData()
+			effectdata:SetOrigin(ent:GetPos())
+			effectdata:SetScale(10)
+			util.Effect("GlassImpact", effectdata, true, true)
+		end,
+		OnDestroyed = function(ply, rock, inflictor)
+			if ply.IsInZone and not ply:IsInZone("cave") then return end
+			if IsValid(inflictor) and not inflictor:IsWeapon() then return end
 
-			if math.random(0, 100) <= TOXIC_GAS_CHANCE then
-				ent.GasIncident = true
-			end
-		end)
-	end)
-
-	hook.Add("EntityTakeDamage", "mining_toxic_gas", function(ent)
-		if not ent.GasIncident then return end
-		if not ent.OriginalRock then return end
-
-		ent:EmitSound("ambient/gas/steam_loop1.wav", 60, math.random(90, 110))
-		timer.Simple(math.Rand(0.1, 0.3), function()
-			if IsValid(ent) then
-				ent:StopSound("ambient/gas/steam_loop1.wav")
-			end
-		end)
-
-		local effectdata = EffectData()
-		effectdata:SetOrigin(ent:GetPos())
-		effectdata:SetScale(10)
-		util.Effect("GlassImpact", effectdata, true, true)
-	end)
-
-	hook.Add("PlayerDestroyedMiningRock", "mining_toxic_gas", function(ply, rock, inflictor)
-		if not rock.GasIncident then return end
-		if not rock.OriginalRock then return end
-		if ply.IsInZone and not ply:IsInZone("cave") then return end
-		if IsValid(inflictor) and not inflictor:IsWeapon() then return end
-
-		rock:StopSound("ambient/gas/steam_loop1.wav")
-		local direction = (rock:WorldSpaceCenter() - ply:EyePos()):Angle()
-		createToxicGas(rock:WorldSpaceCenter(), direction)
-	end)
+			rock:StopSound("ambient/gas/steam_loop1.wav")
+			local direction = (rock:WorldSpaceCenter() - ply:EyePos()):Angle()
+			Ores.CreateToxicGas(rock:WorldSpaceCenter(), direction)
+		end
+	})
 end
 
 if CLIENT then

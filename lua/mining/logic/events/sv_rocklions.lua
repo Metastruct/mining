@@ -65,8 +65,29 @@ local function createOreDrops(rarity, pos, ent, amount)
 	end
 end
 
-hook.Add("EntityTakeDamage", "mining_antlions", function(ent, dmg)
-	if ent.AntlionRock and ent:GetClass() == "mining_rock" then
+-- Register the rocklion event
+local ANTLION_CHANCE = 10
+ms.Ores.RegisterRockEvent({
+	Id = "rocklion",
+	Chance = ANTLION_CHANCE,
+	CheckValid = function(ent)
+		if ent:WaterLevel() > 1 then return false end
+
+		local trigger = ms and ms.GetTrigger and ms.GetTrigger("cave1")
+		if not trigger then return false end
+
+		local zMax = trigger:GetPos().z + 100
+		if ent:GetPos().z > zMax then return false end
+
+		return true
+	end,
+	OnMarked = function(ent)
+		ent.AntlionRock = true
+		ent.PreventSplit = true
+	end,
+	OnDamaged = function(ent, dmg)
+		if not ent.AntlionRock then return end
+
 		local rarity = ent:GetRarity()
 		local npc = Ores.SpawnRockyAntlion(ent:GetPos(), rarity)
 
@@ -74,7 +95,12 @@ hook.Add("EntityTakeDamage", "mining_antlions", function(ent, dmg)
 		npc:EmitSound("physics/concrete/boulder_impact_hard" .. math.random(3, 4) .. ".wav", 100)
 
 		SafeRemoveEntity(ent)
-	elseif ent:IsNPC() and ent:GetClass() == "Rocklion" and ent.MiningRarity then
+	end
+})
+
+-- Keep the NPC damage and kill hooks
+hook.Add("EntityTakeDamage", "mining_antlions", function(ent, dmg)
+	if ent:IsNPC() and ent:GetClass() == "Rocklion" and ent.MiningRarity then
 		if CurTime() >= ent.NextOreDrop and ent.OreDropCount <= 5 then
 			local atck = dmg:GetAttacker()
 			local oreAmount = math.random(1, 2)
@@ -86,29 +112,6 @@ hook.Add("EntityTakeDamage", "mining_antlions", function(ent, dmg)
 
 		ent:EmitSound("physics/metal/metal_grenade_impact_hard2.wav")
 	end
-end)
-
-local ANTLION_CHANCE = 10
-hook.Add("OnEntityCreated", "mining_antlions", function(ent)
-	if not IsValid(ent) then return end
-	if ent:GetClass() ~= "mining_rock" then return end
-
-	timer.Simple(0, function()
-		if not IsValid(ent) then return end
-		if ent:GetClass() == "mining_rock" and not ent.OriginalRock then return end
-		if ent:WaterLevel() > 1 then return end
-
-		local trigger = ms and ms.GetTrigger and ms.GetTrigger("cave1")
-		if not trigger then return end
-
-		local zMax = trigger:GetPos().z + 100
-		if ent:GetPos().z > zMax then return end
-
-		if math.random(0, 100) <= ANTLION_CHANCE then
-			ent.AntlionRock = true
-			ent.PreventSplit = true
-		end
-	end)
 end)
 
 hook.Add("OnNPCKilled", "mining_antlions", function(npc, atck)
