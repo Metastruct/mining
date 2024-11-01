@@ -1,4 +1,7 @@
 AddCSLuaFile()
+
+local CL_GOLDEN_PICKAXE = CreateConVar("mining_goldenpickaxe", "1", FCVAR_ARCHIVE, "Enable golden pickaxe effect when multiplier is high enough")
+
 SWEP.PrintName = "Mining Pickaxe"
 SWEP.DrawCrosshair = true
 SWEP.DrawAmmo = false
@@ -175,7 +178,7 @@ if CLIENT then
 			return
 		end
 
-		if IsValid(ply) and ply:GetNWFloat(ms.Ores._nwMult, 0) > 3 then
+		if CL_GOLDEN_PICKAXE:GetBool() and IsValid(ply) and ply:GetNWFloat(ms.Ores._nwMult, 0) > 3 then
 			self.AttachSparkles(vm)
 			render.MaterialOverride(GOLD_MAT)
 		end
@@ -184,7 +187,7 @@ if CLIENT then
 	function SWEP:PostDrawViewModel(vm, ply, wep)
 		if wep:GetClass() ~= "mining_pickaxe" then return end
 
-		if IsValid(ply) and ply:GetNWFloat(ms.Ores._nwMult, 0) > 3 then
+		if CL_GOLDEN_PICKAXE:GetBool() and IsValid(ply) and ply:GetNWFloat(ms.Ores._nwMult, 0) > 3 then
 			render.MaterialOverride()
 		end
 	end
@@ -242,7 +245,7 @@ function SWEP:Deploy()
 	self:RefreshStats()
 
 	local owner = self:GetOwner()
-	if IsValid(owner) and owner:GetNWFloat(ms.Ores._nwMult, 0) > 3 then
+	if CL_GOLDEN_PICKAXE:GetBool() and IsValid(owner) and owner:GetNWFloat(ms.Ores._nwMult, 0) > 3 then
 		self:SetMaterial("models/props_doomsday/australium_bar")
 		self:AttachSparkles()
 	end
