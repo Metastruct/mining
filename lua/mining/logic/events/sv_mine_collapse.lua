@@ -16,7 +16,6 @@ local CAVE_TRIGGER_NAMES = { "cave1", "volcano" }
 local RUMBLE_DURATION = 5
 local TUNNEL_RADIUS = 150
 local COLLAPSE_CHANCE = 2.5
-local OK_CLASSES = { mining_rock = true, mining_xen_crystal = true }
 local COLLAPSE_DURATION = 3 * 60
 local COLLAPSE_DMG_RADIUS = 300
 local COLLAPSE_MIN_INTERVAL = 5 * 60
@@ -279,22 +278,6 @@ function Ores.MineCollapse(pos, delay, rarityData, ply)
 	end)
 end
 
-local nextIncidentRock = 0
-hook.Add("OnEntityCreated", "mining_collapse", function(ent)
-	if not IsValid(ent) then return end
-	if not OK_CLASSES[ent:GetClass()] then return end
-
-	timer.Simple(0, function()
-		if not IsValid(ent) then return end
-		if ent:GetClass() == "mining_rock" and not ent.OriginalRock then return end
-
-		if math.random(0, 100) <= COLLAPSE_CHANCE and nextIncidentRock <= CurTime() then
-			ent.MiningIncident = true
-			nextIncidentRock = CurTime() + COLLAPSE_MIN_INTERVAL
-		end
-	end)
-end)
-
 hook.Add("PlayerSpawn", "mining_collapse", function(ply)
 	if not ply.KilledInMiningIncident then return end
 
@@ -308,23 +291,6 @@ hook.Add("PlayerSpawn", "mining_collapse", function(ply)
 	ply.KilledInMiningIncident = nil
 end)
 
-hook.Add("EntityTakeDamage", "mining_collapse", function(ent)
-	if not ent.MiningIncident then return end
-	if not ent.OriginalRock then return end
-
-	playSoundForDuration("ambient/atmosphere/terrain_rumble1.wav", 4)
-	playSoundForDuration("ambience/rocketrumble1.wav", 4)
-end)
-
-hook.Add("PlayerDestroyedMiningRock", "mining_collapse", function(ply, rock, inflictor)
-	if not rock.MiningIncident then return end
-	if not rock.OriginalRock then return end
-	if ply.IsInZone and not ply:IsInZone("cave") then return end
-	if IsValid(inflictor) and not inflictor:IsWeapon() then return end
-
-	Ores.MineCollapse(ply:EyePos(), COLLAPSE_DURATION, nil, ply)
-end)
-
 -- after the core goes off it weakens the cave structures
 --[[hook.Add("MGNCoreExploded", "mining_collapse", function()
 	for _, rock in ipairs(ents.FindByClass("mining_rock")) do
@@ -333,3 +299,27 @@ end)
 		rock.MiningIncident = true
 	end
 end)]]
+
+local nextIncidentRock = 0
+ms.Ores.RegisterRockEvent({
+	Id = "collapse",
+	Chance = COLLAPSE_CHANCE,
+	CheckValid = function(ent)
+		if ent:WaterLevel() > 1 then return false end
+		if nextIncidentRock > CurTime() then return false end
+		return true
+	end,
+	OnMarked = function(ent)
+		nextIncidentRock = CurTime() + COLLAPSE_MIN_INTERVAL
+	end,
+	OnDamaged = function(ent, dmg)
+		playSoundForDuration("ambient/atmosphere/terrain_rumble1.wav", 4)
+		playSoundForDuration("ambience/rocketrumble1.wav", 4)
+	end,
+	OnDestroyed = function(ply, rock, inflictor)
+		if ply.IsInZone and not ply:IsInZone("cave") then return end
+		if IsValid(inflictor) and not inflictor:IsWeapon() then return end
+
+		ms.Ores.MineCollapse(ply:EyePos(), COLLAPSE_DURATION, nil, ply)
+	end
+})
