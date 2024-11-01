@@ -149,7 +149,7 @@ if SERVER then
 			if ent:GetRarity() ~= argonite_rarity then continue end
 			if IsValid(ent.ArgoniteDrone) then continue end
 
-			local dist = ent:WorldSpaceCenter():Distance(self:WorldSpaceCenter())
+			local dist = ent:WorldSpaceCenter():DistToSqr(self:WorldSpaceCenter())
 			if dist < mindist then
 				mindist = dist
 				target = ent
