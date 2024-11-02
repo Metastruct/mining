@@ -36,7 +36,7 @@ local function createSwirlRing(ent, config, ringName)
 	local sprites = {}
 	for i = 1, config.points do
 		local sprite = ents.Create("env_sprite")
-		sprite:SetPos(ent:GetPos())
+		sprite:SetPos(ent:WorldSpaceCenter())
 		sprite:SetParent(ent)
 		sprite:SetKeyValue("model", "sprites/light_glow02.vmt")
 		sprite:SetKeyValue("scale", tostring(config.scale))
@@ -78,7 +78,7 @@ end
 
 -- Helper function to find a valid teleport position
 local function findTeleportPosition(rock)
-	local originalPos = rock:GetPos()
+	local originalPos = rock:WorldSpaceCenter()
 	local attempts = 0
 	local maxAttempts = 10
 
@@ -187,7 +187,7 @@ local function teleportRock(ent)
 	local newPos = findTeleportPosition(ent)
 	if not newPos then return end
 
-	local oldPos = ent:GetPos()
+	local oldPos = ent:WorldSpaceCenter()
 
 	-- Pre-teleport effects
 	doTeleportEffects(oldPos, ent)
@@ -219,8 +219,8 @@ Ores.RegisterRockEvent({
 		if not trigger then return false end
 
 		-- Don't allow quantum rocks too high in the cave
-		local zMax = trigger:GetPos().z + trigger:OBBMaxs().z - 200
-		if ent:GetPos().z > zMax then return false end
+		local zMax = trigger:WorldSpaceCenter().z + trigger:OBBMaxs().z - 200
+		if ent:WorldSpaceCenter().z > zMax then return false end
 
 		return true
 	end,
@@ -265,7 +265,7 @@ Ores.RegisterRockEvent({
 					local z = config.height + math.sin(math.rad(pointAngle + angle) * 2) * 5
 					local offset = Vector(x, y, z)
 
-					sprite:SetPos(ent:GetPos() + offset)
+					sprite:SetPos(ent:WorldSpaceCenter() + offset)
 					sprite:SetKeyValue("scale", tostring(config.scale * pulseMod))
 				end
 			end
@@ -278,7 +278,7 @@ Ores.RegisterRockEvent({
 			-- Add multiple tesla arcs at slightly offset positions
 			for i = 1, 3 do
 				local offset = VectorRand() * 50
-				createTeslaBurst(ent:GetPos() + offset, math.Rand(1, 2))
+				createTeslaBurst(ent:WorldSpaceCenter() + offset, math.Rand(1, 2))
 			end
 
 			-- Randomized energy sounds
@@ -301,7 +301,7 @@ Ores.RegisterRockEvent({
 			-- Check for nearby players before teleporting
 			local nearbyPlayers = false
 			for _, ply in ipairs(player.GetAll()) do
-				if ent:GetPos():DistToSqr(ply:GetPos()) <= 300 * 300 then
+				if ent:WorldSpaceCenter():DistToSqr(ply:GetPos()) <= 300 * 300 then
 					nearbyPlayers = true
 					break
 				end
@@ -337,7 +337,7 @@ Ores.RegisterRockEvent({
 
 		-- Add destruction effect
 		local effectdata = EffectData()
-		effectdata:SetOrigin(rock:GetPos())
+		effectdata:SetOrigin(rock:WorldSpaceCenter())
 		effectdata:SetScale(2)
 		util.Effect("cball_explode", effectdata)
 	end
