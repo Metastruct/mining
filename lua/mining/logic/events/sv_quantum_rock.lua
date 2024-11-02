@@ -25,7 +25,7 @@ local function findTeleportPosition(rock)
 			mask = MASK_SOLID_BRUSHONLY
 		})
 
-		if tr.Hit and not tr.StartSolid and util.IsInWorld(tr.HitPos) then
+		if tr.Hit and not tr.StartSolid and util.IsInWorld(tr.HitPos) and tr.HitTexture == "**displacement**" then
 			return tr.HitPos + (tr.HitNormal * 10)
 		end
 

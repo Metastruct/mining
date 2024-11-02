@@ -68,7 +68,7 @@ local function generateArgoniteRocks()
 			mask = MASK_SOLID_BRUSHONLY,
 		})
 
-		if tr.Hit and util.IsInWorld(tr.HitPos) then
+		if tr.Hit and util.IsInWorld(tr.HitPos) and tr.HitTexture == "**displacement**" then
 			local rock = ents.Create("mining_rock")
 			rock:SetPos(tr.HitPos + tr.HitNormal * 10)
 			rock:SetSize(math.random() > 0.33 and 1 or 2)
