@@ -4,52 +4,7 @@ Ores = Ores or {}
 local TELEPORT_INTERVAL_MIN = 3  -- Minimum seconds between teleports
 local TELEPORT_INTERVAL_MAX = 8  -- Maximum seconds between teleports
 local TELEPORT_RANGE = 500      -- Maximum teleport distance
-local QUANTUM_CHANCE = 2        -- 2% chance for a rock to be quantum-- Add at the top with other local variables
-local SWIRL_CONFIG = {
-	inner = {
-		points = 8,
-		radius = 20,
-		speed = 2,
-		color = Color(0, 255, 0, 200),
-		scale = 0.15,
-		height = 0
-	},
-	middle = {
-		points = 12,
-		radius = 35,
-		speed = -1.5,  -- Negative for opposite rotation
-		color = Color(0, 255, 100, 150),
-		scale = 0.2,
-		height = 15
-	},
-	outer = {
-		points = 16,
-		radius = 50,
-		speed = 1,
-		color = Color(0, 200, 0, 100),
-		scale = 0.25,
-		height = 30
-	}
-}
-
-local function createSwirlRing(ent, config, ringName)
-	local sprites = {}
-	for i = 1, config.points do
-		local sprite = ents.Create("env_sprite")
-		sprite:SetPos(ent:WorldSpaceCenter())
-		sprite:SetParent(ent)
-		sprite:SetKeyValue("model", "sprites/light_glow02.vmt")
-		sprite:SetKeyValue("scale", tostring(config.scale))
-		sprite:SetKeyValue("rendermode", "9") -- 9 = Worldspace glow
-		sprite:SetKeyValue("rendercolor", string.format("%d %d %d", config.color.r, config.color.g, config.color.b))
-		sprite:SetKeyValue("renderamt", tostring(config.color.a))
-		sprite:SetKeyValue("spawnflags", "1")
-		sprite:Spawn()
-		sprite:Activate()
-		table.insert(sprites, sprite)
-	end
-	return sprites
-end
+local QUANTUM_CHANCE = 2        -- 2% chance for a rock to be quantum
 
 local function createTeslaBurst(pos, scale)
 	local tesla = ents.Create("point_tesla")
@@ -75,7 +30,6 @@ local function createTeslaBurst(pos, scale)
 	end)
 end
 
-
 -- Helper function to find a valid teleport position
 local function findTeleportPosition(rock)
 	local originalPos = rock:WorldSpaceCenter()
@@ -95,7 +49,7 @@ local function findTeleportPosition(rock)
 			mask = MASK_SOLID_BRUSHONLY
 		})
 
-		if tr.Hit and not tr.StartSolid and util.IsInWorld(tr.HitPos) and tr.HitTexture == "**displacement**" then
+		if tr.Hit and not tr.StartSolid and util.IsInWorld(tr.HitPos) and not tr.HitTexture:match("^TOOLS%/") then
 			return tr.HitPos + (tr.HitNormal * 10)
 		end
 
@@ -211,16 +165,9 @@ Ores.RegisterRockEvent({
 	Id = "quantum",
 	Chance = QUANTUM_CHANCE,
 	CheckValid = function(ent)
+		local detoniteRarity = Ores.GetOreRarityByName("Detonite")
 		local rarity = ent.GetRarity and ent:GetRarity() or -1
-		if not Ores.__R[rarity] then return false end
-		if rarity > 5 then return false end
-
-		local trigger = ms and ms.GetTrigger and ms.GetTrigger("cave1")
-		if not trigger then return false end
-
-		-- Don't allow quantum rocks too high in the cave
-		local zMax = trigger:WorldSpaceCenter().z + trigger:OBBMaxs().z - 200
-		if ent:WorldSpaceCenter().z > zMax then return false end
+		if detoniteRarity and rarity == detoniteRarity then return false end
 
 		return true
 	end,
@@ -228,48 +175,6 @@ Ores.RegisterRockEvent({
 	OnMarked = function(ent)
 		-- Keep existing trail with adjusted values
 		util.SpriteTrail(ent, 0, Color(0, 255, 0, 150), false, 15, 0.5, 2, 1 / (15 + 1) * 0.5, "trails/laser.vmt")
-
-		-- Initialize swirl storage
-		ent.swirlEffects = {}
-
-		-- Create all swirl rings
-		for ringName, config in pairs(SWIRL_CONFIG) do
-			ent.swirlEffects[ringName] = createSwirlRing(ent, config, ringName)
-		end
-
-		-- Create timer to animate the swirls
-		local swirlTimerName = "quantum_swirl_" .. ent:EntIndex()
-		local angle = 0
-		local pulsePhase = 0
-
-		timer.Create(swirlTimerName, 0.02, 0, function()
-			if not IsValid(ent) then
-				timer.Remove(swirlTimerName)
-				return
-			end
-
-			angle = angle + 1
-			pulsePhase = pulsePhase + 0.05
-
-			for ringName, sprites in pairs(ent.swirlEffects) do
-				local config = SWIRL_CONFIG[ringName]
-				local ringAngle = angle * config.speed
-				local pulseMod = math.sin(pulsePhase) * 0.2 + 1 -- Pulsing effect
-
-				for i, sprite in ipairs(sprites) do
-					if not IsValid(sprite) then continue end
-
-					local pointAngle = ringAngle + ((i-1) * (360 / config.points))
-					local x = math.cos(math.rad(pointAngle)) * (config.radius * pulseMod)
-					local y = math.sin(math.rad(pointAngle)) * (config.radius * pulseMod)
-					local z = config.height + math.sin(math.rad(pointAngle + angle) * 2) * 5
-					local offset = Vector(x, y, z)
-
-					sprite:SetPos(ent:WorldSpaceCenter() + offset)
-					sprite:SetKeyValue("scale", tostring(config.scale * pulseMod))
-				end
-			end
-		end)
 
 		-- Add occasional energy burst effect
 		timer.Create("quantum_burst_" .. ent:EntIndex(), math.random(2, 4), 0, function()
@@ -319,19 +224,7 @@ Ores.RegisterRockEvent({
 	end,
 
 	OnDestroyed = function(ply, rock, inflictor)
-		-- Clean up swirl sprites
-		if rock.swirlEffects then
-			for _, sprites in pairs(rock.swirlEffects) do
-				for _, sprite in ipairs(sprites) do
-					if IsValid(sprite) then
-						sprite:Remove()
-					end
-				end
-			end
-		end
-
 		-- Clean up timers
-		timer.Remove("quantum_swirl_" .. rock:EntIndex())
 		timer.Remove("quantum_burst_" .. rock:EntIndex())
 		timer.Remove("quantum_rock_" .. rock:EntIndex())
 
