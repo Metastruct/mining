@@ -93,17 +93,6 @@ if SERVER then
 			return true
 		end,
 		OnDamaged = function(ent, dmg)
-			local attacker = dmg:GetAttacker()
-			if not IsValid(attacker) then return end
-			if not attacker:IsPlayer() then return end
-
-			attacker:EmitSound("ambient/gas/steam_loop1.wav", 60, math.random(90, 110))
-			timer.Simple(math.Rand(0.1, 0.3), function()
-				if IsValid(ent) then
-					attacker:StopSound("ambient/gas/steam_loop1.wav")
-				end
-			end)
-
 			local effectdata = EffectData()
 			effectdata:SetOrigin(ent:GetPos())
 			effectdata:SetScale(10)
