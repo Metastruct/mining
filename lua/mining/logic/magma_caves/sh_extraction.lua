@@ -302,21 +302,19 @@ if CLIENT then
 					net.SendToServer()
 
 					label:SetText(("TOXIC RES. -  Lvl. %d (+%d%%) - %s"):format(level, level, string.Comma(level * RARITY_DATA[ARGONITE_RARITY]) .. "points"))
+					if level < 50 then return end
 
-					if level >= 50 then
-						self:SetEnabled(false)
-						self:SetText("Maxed")
-						self.__maxed = true
+					self:SetEnabled(false)
+					self:SetText("Maxed")
+					self.__maxed = true
 
-						local congrats = CreateSound(pl, "music/hl1_song3.mp3")
-						congrats:PlayEx(1, 250)
+					local congrats = CreateSound(pl, "music/hl1_song3.mp3")
+					congrats:PlayEx(1, 250)
 
-						timer.Simple(5, function()
-							if congrats:IsPlaying() then
-								congrats:FadeOut(10)
-							end
-						end)
-					end
+					timer.Simple(5, function()
+						if not congrats:IsPlaying() then return end
+						congrats:FadeOut(10)
+					end)
 				end
 			else
 				btn:SetEnabled(false)
