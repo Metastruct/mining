@@ -13,7 +13,7 @@ function Ores.RefreshPlayerData(pl)
 
 		local hasMaxedStat = false
 		for k,v in next,Ores.__PStats do
-			pl:SetNWInt(Ores._nwPickaxePrefix..v.VarName,data[v.VarName])
+			pl:SetNWInt(Ores._nwPickaxePrefix .. v.VarName,data[v.VarName])
 
 			hasMaxedStat = hasMaxedStat or data[v.VarName] >= maxLevel
 		end
