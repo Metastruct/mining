@@ -4,7 +4,77 @@ Ores = Ores or {}
 local TELEPORT_INTERVAL_MIN = 3  -- Minimum seconds between teleports
 local TELEPORT_INTERVAL_MAX = 8  -- Maximum seconds between teleports
 local TELEPORT_RANGE = 500      -- Maximum teleport distance
-local QUANTUM_CHANCE = 2        -- 2% chance for a rock to be quantum
+local QUANTUM_CHANCE = 2        -- 2% chance for a rock to be quantum-- Add at the top with other local variables
+local SWIRL_CONFIG = {
+	inner = {
+		points = 8,
+		radius = 20,
+		speed = 2,
+		color = Color(0, 255, 0, 200),
+		scale = 0.15,
+		height = 0
+	},
+	middle = {
+		points = 12,
+		radius = 35,
+		speed = -1.5,  -- Negative for opposite rotation
+		color = Color(0, 255, 100, 150),
+		scale = 0.2,
+		height = 15
+	},
+	outer = {
+		points = 16,
+		radius = 50,
+		speed = 1,
+		color = Color(0, 200, 0, 100),
+		scale = 0.25,
+		height = 30
+	}
+}
+
+local function createSwirlRing(ent, config, ringName)
+	local sprites = {}
+	for i = 1, config.points do
+		local sprite = ents.Create("env_sprite")
+		sprite:SetPos(ent:GetPos())
+		sprite:SetParent(ent)
+		sprite:SetKeyValue("model", "sprites/light_glow02.vmt")
+		sprite:SetKeyValue("scale", tostring(config.scale))
+		sprite:SetKeyValue("rendermode", "9") -- 9 = Worldspace glow
+		sprite:SetKeyValue("rendercolor", string.format("%d %d %d", config.color.r, config.color.g, config.color.b))
+		sprite:SetKeyValue("renderamt", tostring(config.color.a))
+		sprite:SetKeyValue("spawnflags", "1")
+		sprite:Spawn()
+		sprite:Activate()
+		table.insert(sprites, sprite)
+	end
+	return sprites
+end
+
+local function createTeslaBurst(pos, scale)
+	local tesla = ents.Create("point_tesla")
+	tesla:SetPos(pos)
+	tesla:SetKeyValue("texture", "trails/electric.vmt")
+	tesla:SetKeyValue("m_Color", "0 255 0")
+	tesla:SetKeyValue("m_flRadius", tostring(60 * scale))
+	tesla:SetKeyValue("interval_min", "0.1")
+	tesla:SetKeyValue("interval_max", "0.2")
+	tesla:SetKeyValue("beamcount_min", tostring(3 * scale))
+	tesla:SetKeyValue("beamcount_max", tostring(6 * scale))
+	tesla:SetKeyValue("thick_min", tostring(2 * scale))
+	tesla:SetKeyValue("thick_max", tostring(4 * scale))
+	tesla:SetKeyValue("lifetime_min", "0.1")
+	tesla:SetKeyValue("lifetime_max", "0.2")
+	tesla:Spawn()
+	tesla:Activate()
+	tesla:Fire("TurnOn", "", 0)
+	tesla:Fire("DoSpark", "", 0)
+
+	timer.Simple(0.3, function()
+		if IsValid(tesla) then tesla:Remove() end
+	end)
+end
+
 
 -- Helper function to find a valid teleport position
 local function findTeleportPosition(rock)
@@ -156,8 +226,69 @@ Ores.RegisterRockEvent({
 	end,
 
 	OnMarked = function(ent)
-		-- Add visual identifier
-		util.SpriteTrail(ent, 0, Color(0, 255, 0, 255), false, 30, 1, 3, 1 / (15 + 1) * 0.5, "trails/laser.vmt")
+		-- Keep existing trail with adjusted values
+		util.SpriteTrail(ent, 0, Color(0, 255, 0, 150), false, 15, 0.5, 2, 1 / (15 + 1) * 0.5, "trails/laser.vmt")
+
+		-- Initialize swirl storage
+		ent.swirlEffects = {}
+
+		-- Create all swirl rings
+		for ringName, config in pairs(SWIRL_CONFIG) do
+			ent.swirlEffects[ringName] = createSwirlRing(ent, config, ringName)
+		end
+
+		-- Create timer to animate the swirls
+		local swirlTimerName = "quantum_swirl_" .. ent:EntIndex()
+		local angle = 0
+		local pulsePhase = 0
+
+		timer.Create(swirlTimerName, 0.02, 0, function()
+			if not IsValid(ent) then
+				timer.Remove(swirlTimerName)
+				return
+			end
+
+			angle = angle + 1
+			pulsePhase = pulsePhase + 0.05
+
+			for ringName, sprites in pairs(ent.swirlEffects) do
+				local config = SWIRL_CONFIG[ringName]
+				local ringAngle = angle * config.speed
+				local pulseMod = math.sin(pulsePhase) * 0.2 + 1 -- Pulsing effect
+
+				for i, sprite in ipairs(sprites) do
+					if not IsValid(sprite) then continue end
+
+					local pointAngle = ringAngle + ((i-1) * (360 / config.points))
+					local x = math.cos(math.rad(pointAngle)) * (config.radius * pulseMod)
+					local y = math.sin(math.rad(pointAngle)) * (config.radius * pulseMod)
+					local z = config.height + math.sin(math.rad(pointAngle + angle) * 2) * 5
+					local offset = Vector(x, y, z)
+
+					sprite:SetPos(ent:GetPos() + offset)
+					sprite:SetKeyValue("scale", tostring(config.scale * pulseMod))
+				end
+			end
+		end)
+
+		-- Add occasional energy burst effect
+		timer.Create("quantum_burst_" .. ent:EntIndex(), math.random(2, 4), 0, function()
+			if not IsValid(ent) then return end
+
+			-- Add multiple tesla arcs at slightly offset positions
+			for i = 1, 3 do
+				local offset = VectorRand() * 50
+				createTeslaBurst(ent:GetPos() + offset, math.Rand(1, 2))
+			end
+
+			-- Randomized energy sounds
+			local sounds = {
+				"ambient/energy/spark" .. math.random(1, 6) .. ".wav",
+				"ambient/energy/zap" .. math.random(1, 3) .. ".wav"
+			}
+
+			ent:EmitSound(table.Random(sounds), 75, math.random(90, 110), 0.3)
+		end)
 
 		-- Create timer for random teleportation
 		local timerName = "quantum_rock_" .. ent:EntIndex()
@@ -188,7 +319,26 @@ Ores.RegisterRockEvent({
 	end,
 
 	OnDestroyed = function(ply, rock, inflictor)
-		-- Cleanup timer
+		-- Clean up swirl sprites
+		if rock.swirlEffects then
+			for _, sprites in pairs(rock.swirlEffects) do
+				for _, sprite in ipairs(sprites) do
+					if IsValid(sprite) then
+						sprite:Remove()
+					end
+				end
+			end
+		end
+
+		-- Clean up timers
+		timer.Remove("quantum_swirl_" .. rock:EntIndex())
+		timer.Remove("quantum_burst_" .. rock:EntIndex())
 		timer.Remove("quantum_rock_" .. rock:EntIndex())
+
+		-- Add destruction effect
+		local effectdata = EffectData()
+		effectdata:SetOrigin(rock:GetPos())
+		effectdata:SetScale(2)
+		util.Effect("cball_explode", effectdata)
 	end
 })
