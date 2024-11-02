@@ -44,15 +44,13 @@ function ENT:OnTakeDamage(dmg)
 	local now = CurTime()
 
 	if self._nextDamaged > now then return end
-	self._nextDamaged = now+0.015
+	self._nextDamaged = now + 0.015
 
 	local attacker = dmg:GetAttacker()
 	if not (attacker:IsValid() and attacker:IsPlayer()) then return end
 	if attacker._miningBlocked or (attacker._miningCooldown and attacker._miningCooldown > now) then return end
 	if attacker.IsAFK and attacker:IsAFK() then return end
 	if attacker:GetShootPos():DistToSqr(dmg:GetDamagePosition()) > 16384 then return end
-
-	local isPickaxe = false
 
 	local wep = attacker:GetActiveWeapon()
 	if not wep:IsValid() then return end
@@ -72,19 +70,19 @@ function ENT:OnTakeDamage(dmg)
 	attacker._miningCooldown = now
 
 	self:SetUnlodged(true)
-	self:AllowGracePeriod(attacker,60)
+	self:AllowGracePeriod(attacker, 60)
 
-	self.Expiry = now+180
+	self.Expiry = now + 180
 
-	self:EmitSound(")physics/concrete/concrete_break"..math.random(2,3)..".wav",70,math.random(130,145),0.75)
-	self:EmitSound(")ambient/atmosphere/cave_hit2.wav",80,86)
+	self:EmitSound(")physics/concrete/concrete_break" .. math.random(2, 3) .. ".wav", 70, math.random(130, 145), 0.75)
+	self:EmitSound(")ambient/atmosphere/cave_hit2.wav", 80, 86)
 
 	if self.PhysObject then
 		self.PhysObject:EnableMotion(true)
 		self.PhysObject:Wake()
 
 		if self.WallNormal then
-			self.PhysObject:SetVelocity((self.WallNormal*128)+(attacker:GetAimVector()*16))
+			self.PhysObject:SetVelocity((self.WallNormal * 128) + (attacker:GetAimVector() * 16))
 		end
 	end
 end
@@ -109,12 +107,12 @@ function ENT:Use(pl)
 		self:EmitSound("physics/glass/glass_cup_break1.wav",70,math.random(75,90),0.5)
 		SafeRemoveEntity(self)
 
-		local newMult = math.Round(pl:GetNWFloat(ms.Ores._nwMult,0)+0.02,3)
+		local newMult = math.Round(pl:GetNWFloat(ms.Ores._nwMult,0) + 0.02, 3)
 
 		pl:SetNWFloat(ms.Ores._nwMult,newMult)
 		ms.Ores.SetSavedPlayerData(pl,"mult",newMult)
 
-		ms.Ores.SendChatMessage(pl,2,("The Xen Crystal's energy was taken - your multiplier is now x%s!"):format(1+newMult))
+		ms.Ores.SendChatMessage(pl, 2, ("The Xen Crystal's energy was taken - your multiplier is now x%s!"):format(1 + newMult))
 	else
 		self:EmitSound("ambient/atmosphere/hole_hit4.wav",70,105)
 	end
@@ -122,7 +120,7 @@ end
 
 function ENT:AllowGracePeriod(pl,dur)
 	self.GraceOwner = pl or NULL
-	self.GraceOwnerExpiry = CurTime()+(dur or 10)
+	self.GraceOwnerExpiry = CurTime() + (dur or 10)
 end
 
 function ENT:Depart(force)
@@ -131,19 +129,19 @@ function ENT:Depart(force)
 	local soundLevel = 98
 	self:EmitSound(")mining/xen_despawning.mp3",soundLevel)
 
-    timer.Simple(3,function()
-        if not self:IsValid() or (not force and self:GetUnlodged()) then return end
+	timer.Simple(3,function()
+		if not self:IsValid() or (not force and self:GetUnlodged()) then return end
 
-        self:EmitSound(")mining/xen_despawn.mp3",soundLevel)
+		self:EmitSound(")mining/xen_despawn.mp3",soundLevel)
 
-        self:SetDeparting(true)
-        self:SetSolid(SOLID_NONE)
+		self:SetDeparting(true)
+		self:SetSolid(SOLID_NONE)
 
-        self.PhysObject = nil
-        self:PhysicsDestroy()
+		self.PhysObject = nil
+		self:PhysicsDestroy()
 
-        SafeRemoveEntityDelayed(self,1.25)
-    end)
+		SafeRemoveEntityDelayed(self,1.25)
+	end)
 end
 
 function ENT:Think()
@@ -162,7 +160,7 @@ function ENT:Think()
 
 			for k,v in next,player.GetHumans() do
 				if pos:DistToSqr(v:GetPos()) <= dist then
-					self.Expiry = now+30
+					self.Expiry = now + 30
 
 					remove = false
 					break
@@ -175,7 +173,7 @@ function ENT:Think()
 		end
 	end
 
-	self:NextThink(now+1)
+	self:NextThink(now + 1)
 	return true
 end
 
@@ -197,7 +195,7 @@ function ENT:CheckExistence()
 
 		if not util.IsInWorld(pos) or util.TraceLine({
 			start = pos,
-			endpos = pos-(vector_up*128),
+			endpos = pos-(vector_up * 128),
 			mask = MASK_SOLID_BRUSHONLY
 		}).HitNoDraw then
 			-- Outside the world or believed to be if there is nodraw underneath it

@@ -10,8 +10,8 @@ local spriteBonusInner = Material("sprites/physg_glow1")
 local particleColScale = 2
 local renderBounds = Vector(128,128,128)
 
-local gravityGlow = vector_up*15
-local gravityRock = vector_up*-500
+local gravityGlow = vector_up * 15
+local gravityRock = vector_up * -500
 
 ENT.RenderGroup = RENDERGROUP_TRANSLUCENT
 
@@ -32,17 +32,17 @@ local function RandomModelMeshPos(self)
 	end
 
 	local verts = modelMesh.triangles
-	local startId = 1+(math.floor(math.random(#verts)/3)*3)
-	if startId > #verts-3 then
-		startId = startId-3
+	local startId = 1 + (math.floor(math.random(#verts) / 3) * 3)
+	if startId > #verts - 3 then
+		startId = startId - 3
 	end
 
-	local v1,v2,v3 = verts[startId].pos,verts[startId+1].pos,verts[startId+2].pos
+	local v1,v2,v3 = verts[startId].pos,verts[startId + 1].pos,verts[startId + 2].pos
 	local midPos = Vector(
-		(v1.x+v2.x+v3.x)/3,
-		(v1.y+v2.y+v3.y)/3,
-		(v1.z+v2.z+v3.z)/3
-	)+(verts[startId].normal*0.25)
+		(v1.x + v2.x + v3.x) / 3,
+		(v1.y + v2.y + v3.y) / 3,
+		(v1.z + v2.z + v3.z) / 3
+	) + (verts[startId].normal * 0.25)
 
 	return {
 		Pos = midPos,
@@ -54,8 +54,8 @@ local function SendBonusSpots(self)
 	self.BonusSpots = {}
 
 	math.randomseed(self:GetBonusSpotSeed())
-	for i=1,self:GetBonusSpotCount() do
-		self.BonusSpots[#self.BonusSpots+1] = RandomModelMeshPos(self)
+	for i = 1, self:GetBonusSpotCount() do
+		self.BonusSpots[#self.BonusSpots + 1] = RandomModelMeshPos(self)
 	end
 
 	net.Start("mining_rock.BonusSpot")
@@ -73,15 +73,15 @@ function ENT:RecreateParticleEmitter()
 	end
 
 	self.ParticleEmitter = ParticleEmitter(self:GetCorrectedPos())
-	self._nextRefresh = RealTime()+2
+	self._nextRefresh = RealTime() + 2
 end
 
 function ENT:GetParticleColor(rarity)
 	local rSettings = ms.Ores.__R[rarity]
 	if rSettings then
-		return rSettings.PhysicalColor.r*particleColScale,rSettings.PhysicalColor.g*particleColScale,rSettings.PhysicalColor.b*particleColScale
+		return rSettings.PhysicalColor.r * particleColScale, rSettings.PhysicalColor.g * particleColScale, rSettings.PhysicalColor.b * particleColScale
 	else
-		return 255,255,255
+		return 255, 255, 255
 	end
 end
 
@@ -113,7 +113,7 @@ function ENT:Initialize()
 		self.AmbientSettings = {
 			Path = rSettings.AmbientSound,
 			Pitch = rSettings.AmbientPitch or 100,
-			Volume = (rSettings.AmbientVolume or 0.2)*math.Clamp(self:GetSize()+1,1,3),
+			Volume = (rSettings.AmbientVolume or 0.2) * math.Clamp(self:GetSize() + 1, 1, 3),
 			Level = rSettings.AmbientLevel or 75
 		}
 
@@ -123,7 +123,7 @@ function ENT:Initialize()
 	end
 
 	if self:IsEffectActive(EF_ITEM_BLINK) then
-		self.FadeTime = RealTime()+8
+		self.FadeTime = RealTime() + 8
 	end
 
 	self._initialized = true
@@ -146,13 +146,13 @@ function ENT:Draw()
 	if rSettings then
 		rCol = rSettings.PhysicalColor
 
-		local colVec = rCol:ToVector()*((math.abs(math.sin(now))*0.5)+2)
-		render.SetColorModulation(colVec.x,colVec.y,colVec.z)
+		local colVec = rCol:ToVector() * ((math.abs(math.sin(now)) * 0.5) + 2)
+		render.SetColorModulation(colVec.x, colVec.y, colVec.z)
 	end
 
 	-- Spawn Fading
 	if self.FadeTime then
-		render.SetBlend(1-((self.FadeTime-now)*0.125))
+		render.SetBlend(1 - ((self.FadeTime - now) * 0.125))
 
 		if self.FadeTime < now then
 			self.FadeTime = nil
@@ -162,13 +162,13 @@ function ENT:Draw()
 	-- Damage Wiggle
 	if self:GetHealthEx() != self._lastHealthEx then
 		self._lastHealthEx = self:GetHealthEx()
-		self._hitWiggle = now+0.35
+		self._hitWiggle = now + 0.35
 	end
 
 	local wiggle
 	if self._hitWiggle then
 		if self._hitWiggle > now then
-			wiggle = VectorRand()*(self._hitWiggle-now)*1.5
+			wiggle = VectorRand() * ((self._hitWiggle - now) * 1.5)
 		else
 			self._hitWiggle = nil
 		end
@@ -178,7 +178,7 @@ function ENT:Draw()
 	render.SuppressEngineLighting(true)
 
 	if wiggle then
-		cam.Start3D(EyePos()+wiggle)
+		cam.Start3D(EyePos() + wiggle)
 			self:DrawModel()
 		cam.End3D()
 	else
@@ -191,8 +191,8 @@ function ENT:Draw()
 		eAng:RotateAroundAxis(eAng:Up(),-90)
 		eAng:RotateAroundAxis(eAng:Forward(),90)
 
-		local rot = (now*720)%360
-		local size = 10+math.sin(now*4)*2
+		local rot = (now * 720) % 360
+		local size = 10 + (math.sin(now * 4) * 2)
 
 		for k,v in next,self.BonusSpots do
 			if v.Hit then continue end
@@ -200,46 +200,46 @@ function ENT:Draw()
 			local nAng = Vector(v.Normal)
 			nAng:Rotate(self:GetAngles())
 
-			local pos = Vector(v.Pos+(wiggle or vector_origin))
+			local pos = Vector(v.Pos + (wiggle or vector_origin))
 			pos:Rotate(self:GetAngles())
 
-			local wPos = self:GetPos()+pos
+			local wPos = self:GetPos() + pos
 
-			if bit.band(self:GetBonusSpotHit(),2^k) != 0 then
+			if bit.band(self:GetBonusSpotHit(), 2^k) != 0 then
 				v.Hit = true
 
 				if self.ParticleEmitter and self.ParticleEmitter:IsValid() and not self:IsDormant() then
 					local r,g,b = self:GetParticleColor(self:GetRarity())
 
-					for i=1,24 do
+					for i = 1,24 do
 						local p = self.ParticleEmitter:Add(spriteGlow,wPos)
-						if p then
-							p:SetDieTime(4)
+						if not p then continue end
 
-							p:SetColor(r,g,b)
+						p:SetDieTime(4)
 
-							p:SetStartSize(5)
-							p:SetEndSize(0)
-							p:SetRoll(math.random(-5,5))
+						p:SetColor(r,g,b)
 
-							p:SetCollide(true)
-							p:SetGravity(gravityGlow)
-							p:SetVelocity((nAng+(VectorRand()*0.4))*math.random(32,64))
-						end
+						p:SetStartSize(5)
+						p:SetEndSize(0)
+						p:SetRoll(math.random(-5,5))
+
+						p:SetCollide(true)
+						p:SetGravity(gravityGlow)
+						p:SetVelocity((nAng + (VectorRand() * 0.4)) * math.random(32, 64))
 					end
 				end
 
 				continue
 			end
 
-			cam.Start3D2D(wPos,eAng,1)
-				surface.SetDrawColor(0,0,0)
+			cam.Start3D2D(wPos, eAng, 1)
+				surface.SetDrawColor(0, 0, 0)
 				surface.SetMaterial(spriteBonusBack)
-				surface.DrawTexturedRectRotated(0,0,size*1.75,size*1.75,0)
+				surface.DrawTexturedRectRotated(0, 0, size * 1.75, size * 1.75, 0)
 
-				surface.SetDrawColor(rCol.r,rCol.g,rCol.b,120)
+				surface.SetDrawColor(rCol.r, rCol.g, rCol.b, 120)
 				surface.SetMaterial(spriteBonusOuter)
-				surface.DrawTexturedRectRotated(0,0,size*2.5,size*2.5,-rot)
+				surface.DrawTexturedRectRotated(0, 0, size * 2.5, size * 2.5, -rot)
 
 				surface.SetDrawColor(rCol.r,rCol.g,rCol.b)
 				surface.SetMaterial(spriteBonusInner)
@@ -248,7 +248,7 @@ function ENT:Draw()
 
 			nAng = nAng:Angle()
 
-			wPos = wPos+nAng:Forward()*4
+			wPos = wPos + nAng:Forward() * 4
 			cam.Start3D2D(wPos,nAng,1)
 				surface.DrawTexturedRectRotated(0,0,64,3,0)
 			cam.End3D2D()
@@ -276,9 +276,9 @@ function ENT:Draw()
 			l.g = g
 			l.b = b
 			l.brightness = 0
-			l.Size = self.FadeTime and 1000-((self.FadeTime-now)*125) or 333*math.Clamp(self:GetSize()+1,1,3)
+			l.Size = self.FadeTime and 1000 - ((self.FadeTime - now) * 125) or (333 * math.Clamp(self:GetSize() + 1, 1, 3))
 			l.Decay = 500
-			l.DieTime = CurTime()+0.5
+			l.DieTime = CurTime() + 0.5
 		end
 	end
 
@@ -297,22 +297,22 @@ function ENT:OnRemove()
 	if self.ParticleEmitter and self.ParticleEmitter:IsValid() then
 		if not self:IsDormant() then
 			local pos = self:GetCorrectedPos()
-			local rad = 8*math.Clamp(self:GetSize()+1,1,3)
+			local rad = 8 * math.Clamp(self:GetSize() + 1, 1, 3)
 
 			local r,g,b = self:GetParticleColor(self:GetRarity())
 
 			self.ParticleEmitter:SetPos(pos)
 
-			for i=1,64 do
-				local p = self:CreateRockParticle(pos+(VectorRand()*rad))
+			for i = 1,64 do
+				local p = self:CreateRockParticle(pos + (VectorRand() * rad))
 				if p then
 					p:SetColor(r,g,b)
-					p:SetVelocity((pos-p:GetPos()):GetNormalized()*-64)
+					p:SetVelocity((pos-p:GetPos()):GetNormalized() * -64)
 				end
 			end
 
-			for i=1,16 do
-				local p = self.ParticleEmitter:Add(spriteGlow,pos+(VectorRand()*rad))
+			for i = 1,16 do
+				local p = self.ParticleEmitter:Add(spriteGlow, pos + (VectorRand() * rad))
 				if p then
 					p:SetDieTime(4)
 
@@ -324,7 +324,7 @@ function ENT:OnRemove()
 
 					p:SetCollide(true)
 					p:SetGravity(gravityGlow)
-					p:SetVelocity((pos-p:GetPos()):GetNormalized()*-32)
+					p:SetVelocity((pos-p:GetPos()):GetNormalized() * -32)
 				end
 			end
 		end
@@ -342,7 +342,7 @@ end
 
 function ENT:Think()
 	if self:IsDormant() then
-		self:SetNextClientThink(CurTime()+2)
+		self:SetNextClientThink(CurTime() + 2)
 		return true
 	end
 
@@ -355,7 +355,7 @@ function ENT:Think()
 
 	if self.ParticleEmitter and self.ParticleEmitter:IsValid() then
 		local pos = self:GetCorrectedPos()
-		local rad = 8*math.Clamp(self:GetSize()+1,1,3)
+		local rad = 8 * math.Clamp(self:GetSize() + 1, 1, 3)
 
 		local rarity = self:GetRarity()
 		local rSettings = ms.Ores.__R[rarity]
@@ -363,7 +363,7 @@ function ENT:Think()
 
 		self.ParticleEmitter:SetPos(pos)
 
-		local p = self.ParticleEmitter:Add(spriteGlow,pos+(VectorRand()*rad))
+		local p = self.ParticleEmitter:Add(spriteGlow,pos + (VectorRand() * rad))
 		if p then
 			p:SetDieTime(4)
 
@@ -374,12 +374,12 @@ function ENT:Think()
 			p:SetRoll(math.random(-5,5))
 
 			p:SetCollide(true)
-			p:SetGravity(vector_up*5)
+			p:SetGravity(vector_up * 5)
 		end
 
-		self:SetNextClientThink(CurTime()+(rSettings and rSettings.SparkleInterval or 1))
+		self:SetNextClientThink(CurTime() + (rSettings and rSettings.SparkleInterval or 1))
 	else
-		self:SetNextClientThink(CurTime()+2)
+		self:SetNextClientThink(CurTime() + 2)
 	end
 
 	return true
