@@ -171,8 +171,35 @@ Ores.RegisterRockEvent({
 
 		return true
 	end,
-
 	OnMarked = function(ent)
+		if CLIENT then
+			local startTime = CurTime()
+			local heatwave = Material("sprites/heatwave")
+			hook.Add("HUDPaint", ent, function()
+				local center = ent:WorldSpaceCenter()
+				local pos = center:ToScreen()
+				if not pos.visible then return end
+
+				local tr = LocalPlayer():GetEyeTrace()
+				if tr.Entity ~= ent then return end
+
+				local time = CurTime() - startTime
+				local distortScale = math.sin(time * 2) * 0.4 + 1.25
+				local mins, maxs = ent:GetModelBounds()
+				local width = math.abs(maxs.x - mins.x)
+				local height = math.abs(maxs.z - mins.z)
+				local screenScale = math.max(0, 1000 / center:Distance(EyePos()))  -- Scale based on distance from camera
+				local size = math.max(width, height) * screenScale * distortScale
+				if size <= 0 then return end
+
+				surface.SetDrawColor(0, 255, 255, 50)
+				surface.SetMaterial(heatwave)
+				surface.DrawTexturedRect(pos.x - size / 2, pos.y - size / 2, size, size)
+			end)
+
+			return
+		end
+
 		-- Keep existing trail with adjusted values
 		util.SpriteTrail(ent, 0, Color(0, 255, 0, 150), false, 15, 0.5, 2, 1 / (15 + 1) * 0.5, "trails/laser.vmt")
 
@@ -216,14 +243,20 @@ Ores.RegisterRockEvent({
 				teleportRock(ent)
 			end
 		end)
+
+		createQuantumDistortion(ent)
 	end,
 
 	OnDamaged = function(ent, dmg)
+		if CLIENT then return end
+
 		-- Teleport when damaged
 		teleportRock(ent)
 	end,
 
 	OnDestroyed = function(ply, rock, inflictor)
+		if CLIENT then return end
+
 		-- Clean up timers
 		timer.Remove("quantum_burst_" .. rock:EntIndex())
 		timer.Remove("quantum_rock_" .. rock:EntIndex())
