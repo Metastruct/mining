@@ -412,6 +412,23 @@ if CLIENT then
 			surface.DrawText("FOLDERS")
 		end
 
+		local close_btn = frame:Add("DButton")
+		close_btn:SetSize(20, 20)
+		close_btn:SetPos(frame:GetWide() - 25, 5)
+		close_btn:SetText("X")
+		close_btn:SetTextColor(COLOR_BLACK)
+		close_btn:SetFont("ma_terminal_header")
+
+		function close_btn:Paint(w, h)
+			surface.SetDrawColor(COLOR_WHITE)
+			surface.DrawRect(0, 0, w, h)
+		end
+
+		function close_btn:DoClick()
+			frame:Remove()
+			surface.PlaySound("buttons/lightswitch2.wav")
+		end
+
 		local TERMINAL_MAT = Material("effects/combine_binocoverlay")
 		function frame:PaintOver(w, h)
 			surface.SetMaterial(TERMINAL_MAT)
