@@ -1,7 +1,7 @@
 include("shared.lua")
 
 local spriteGlow = Material("particle/fire")
-local gravityGlow = vector_up*5
+local gravityGlow = vector_up * 5
 local particleColScale = 2
 
 ENT._nextRefresh = 0
@@ -13,13 +13,13 @@ function ENT:RecreateParticleEmitter()
 	end
 
 	self.ParticleEmitter = ParticleEmitter(self:GetPos())
-	self._nextRefresh = RealTime()+2
+	self._nextRefresh = RealTime() + 2
 end
 
 function ENT:GetParticleColor(rarity)
 	local rSettings = ms.Ores.__R[rarity]
 	if rSettings then
-		return rSettings.PhysicalColor.r*particleColScale,rSettings.PhysicalColor.g*particleColScale,rSettings.PhysicalColor.b*particleColScale
+		return rSettings.PhysicalColor.r * particleColScale,rSettings.PhysicalColor.g * particleColScale,rSettings.PhysicalColor.b * particleColScale
 	else
 		return 255,255,255
 	end
@@ -29,7 +29,7 @@ function ENT:GetSpritePos()
 	local offset = Vector(self.SpriteOffset)
 	offset:Rotate(self:GetAngles())
 
-	return self:GetPos()+offset
+	return self:GetPos() + offset
 end
 
 function ENT:Initialize()
@@ -42,11 +42,11 @@ function ENT:Draw()
 	local rSettings = ms.Ores.__R[self:GetRarity()]
 	if rSettings then
 		local pos = self:GetSpritePos()
-		local sin = (math.abs(math.sin(now))*0.5)+2
-		local sizesin = ((math.abs(math.sin(now*10))*0.25)+1)*16
+		local sin = (math.abs(math.sin(now)) * 0.5) + 2
+		local sizesin = ((math.abs(math.sin(now * 10)) * 0.25) + 1) * 16
 
 		local col = ColorAlpha(rSettings.PhysicalColor,100)
-		local colVec = col:ToVector()*sin
+		local colVec = col:ToVector() * sin
 
 		render.SetMaterial(spriteGlow)
 
@@ -79,7 +79,7 @@ function ENT:Think()
 
 		self.ParticleEmitter:SetPos(pos)
 
-		local p = self.ParticleEmitter:Add(spriteGlow,pos+(VectorRand()*1.5))
+		local p = self.ParticleEmitter:Add(spriteGlow,pos + (VectorRand() * 1.5))
 		if p then
 			p:SetDieTime(4)
 
@@ -93,9 +93,9 @@ function ENT:Think()
 			p:SetGravity(gravityGlow)
 		end
 
-		self:SetNextClientThink(CurTime()+((rSettings and rSettings.SparkleInterval or 1)*2))
+		self:SetNextClientThink(CurTime() + ((rSettings and rSettings.SparkleInterval or 1) * 2))
 	else
-		self:SetNextClientThink(CurTime()+2)
+		self:SetNextClientThink(CurTime() + 2)
 	end
 
 	return true
