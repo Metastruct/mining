@@ -89,7 +89,7 @@ if SERVER then
 	end
 
 	function ENT:FindClosestNode(pos)
-		local min_dist = 2e9
+		local min_dist = math.huge
 		local min_node = pos
 		for _, node in ipairs(NODES) do
 			local sqrt_dist = node:DistToSqr(pos)
@@ -143,7 +143,7 @@ if SERVER then
 
 	function ENT:GetClosestRock()
 		local target = NULL
-		local mindist = 2e6 * 2e6
+		local mindist = math.huge
 		local argonite_rarity = self.RarityOverride or ms.Ores.GetOreRarityByName("argonite")
 		for _, ent in ipairs(ents.FindByClass("mining_rock")) do
 			if ent:GetRarity() ~= argonite_rarity then continue end
