@@ -121,7 +121,7 @@ local function teleportRock(ent)
 
 	-- Pre-teleport effects
 	doTeleportEffects(oldPos, ent)
-	timer.Simple(0.5, function()
+	timer.Simple(0, function()
 		if not IsValid(ent) then return end
 
 		ent:EmitSound("ambient/machines/teleport3.wav", 75, 100, 1)
@@ -184,8 +184,6 @@ Ores.RegisterRockEvent({
 
 	OnDamaged = function(ent, dmg)
 		-- Teleport when damaged
-		if math.random() < 0.8 then return end
-
 		teleportRock(ent)
 	end,
 
