@@ -314,15 +314,15 @@ function SWEP:PrimaryAttack()
 						ignoreworld = true
 					})
 
-					if rockTr.Hit then
-						-- Edit the HitPos to prevent ores from spawning in the ground
-						rockTr.HitPos = v.GetCorrectedPos and rockPos or rockTr.HitPos + (vector_up * 4)
-						self:DoHitEffect(rockTr, v)
+					if not rockTr.Hit then continue end
 
-						if SERVER then
-							self:DoDamage(rockTr, math.min((1 - rockTr.Fraction) * 1.5, 1) * 0.5, true)
-						end
-					end
+					-- Edit the HitPos to prevent ores from spawning in the ground
+					rockTr.HitPos = v.GetCorrectedPos and rockPos or rockTr.HitPos + (vector_up * 4)
+					self:DoHitEffect(rockTr, v)
+
+					if not SERVER then continue end
+
+					self:DoDamage(rockTr, math.min((1 - rockTr.Fraction) * 1.5, 1) * 0.5, true)
 				end
 
 				-- Coal spawn

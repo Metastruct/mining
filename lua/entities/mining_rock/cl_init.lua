@@ -129,6 +129,20 @@ function ENT:Initialize()
 	self._initialized = true
 end
 
+local function CreateBonusParticle(emitter, pos, normal, r, g, b)
+	local p = emitter:Add(spriteGlow, pos)
+	if not p then return end
+
+	p:SetDieTime(4)
+	p:SetColor(r, g, b)
+	p:SetStartSize(5)
+	p:SetEndSize(0)
+	p:SetRoll(math.random(-5, 5))
+	p:SetCollide(true)
+	p:SetGravity(gravityGlow)
+	p:SetVelocity((normal + (VectorRand() * 0.4)) * math.random(32, 64))
+end
+
 function ENT:Draw()
 	if not self._drawn then
 		if self:GetBonusSpotCount() > 0 and not self.BonusSpots then
@@ -212,20 +226,7 @@ function ENT:Draw()
 					local r,g,b = self:GetParticleColor(self:GetRarity())
 
 					for i = 1,24 do
-						local p = self.ParticleEmitter:Add(spriteGlow,wPos)
-						if not p then continue end
-
-						p:SetDieTime(4)
-
-						p:SetColor(r,g,b)
-
-						p:SetStartSize(5)
-						p:SetEndSize(0)
-						p:SetRoll(math.random(-5,5))
-
-						p:SetCollide(true)
-						p:SetGravity(gravityGlow)
-						p:SetVelocity((nAng + (VectorRand() * 0.4)) * math.random(32, 64))
+						CreateBonusParticle(self.ParticleEmitter, wPos, nAng, r, g, b)
 					end
 				end
 
