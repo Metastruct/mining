@@ -11,6 +11,10 @@ local tag = "ms.Ores_Fun"
 local col, maxDist = Vector(0, 1, 0.9), 129600 --360hu
 local me
 
+local function isHalloween()
+	return os.date("%m") == "10"
+end
+
 local function getBehindPlayer()
 	local backDir = -EyeVector()
 	backDir.z = 0
@@ -146,6 +150,7 @@ end
 local timerId = tag .. "_Him"
 hook.Add("PlayerEnteredZone", tag, function(pl, zone)
 	if zone ~= "cave" then return end
+	if not isHalloween() then return end
 
 	timer.Create(timerId, 30, 0, function()
 		if math.random() <= 0.01 or Ores._himm then
