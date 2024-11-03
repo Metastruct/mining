@@ -52,10 +52,14 @@ local function createGhostEffect(pos)
     end)
 end
 
+local function isHalloween()
+    return os.date("%m") == "10"
+end
+
 local EVENT = {
     Id = "haunted_rock",
     Chance = GHOST_CHANCE,
-
+    CheckValid = isHalloween,
     OnMarked = function(rock)
         -- Create ambient ghost sounds
         timer.Create("HauntedRockAmbient" .. rock:EntIndex(), math.random(4, 8), 0, function()
@@ -67,13 +71,11 @@ local EVENT = {
         -- Add ghostly particle trail
         util.SpriteTrail(rock, 0, Color(180, 200, 255, 100), false, 15, 0, 2, 1 / (15 + 1) * 0.5, "trails/plasma.vmt")
     end,
-
     OnDamaged = function(rock, dmg)
         -- Play a random spooky sound when damaged
         rock:EmitSound(table.Random(GHOST_SOUNDS), 75, math.random(90, 120), 0.5)
         createGhostEffect(rock:GetPos() + VectorRand() * 20)
     end,
-
     OnDestroyed = function(ply, rock, attacker)
         timer.Remove("HauntedRockAmbient" .. rock:EntIndex())
 
@@ -87,10 +89,13 @@ local EVENT = {
         ghost:SetPos(rock:GetPos())
         ghost:SetRenderMode(RENDERMODE_TRANSALPHA)
         ghost:SetColor(Color(180, 200, 255, 180))
+        ghost:SetNotSolid(true)
+        ghost:SetCollisionGroup(COLLISION_GROUP_DEBRIS)
         ghost:Spawn()
         ghost:Give("weapon_crowbar")
         ghost:SetMaxHealth(1e9)
         ghost:SetHealth(1e9)
+        ghost:SetKeyValue("classname", "Ghost Miner")
 
         -- Track ghost NPC
         ghost.IsMiningGhost = true
@@ -128,14 +133,4 @@ local EVENT = {
     end
 }
 
-local function isOctober()
-    return os.date("%m") == "10"
-end
-
-local function isFridayThe13th()
-    return os.date("%w") == "5" and os.date("%d") == "13"
-end
-
-if isOctober() or isFridayThe13th() then
-    ms.Ores.RegisterRockEvent(EVENT)
-end
+ms.Ores.RegisterRockEvent(EVENT)
