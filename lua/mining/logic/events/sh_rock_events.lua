@@ -1,5 +1,8 @@
+module("ms", package.seeall)
+Ores = Ores or {}
+
 -- Shared event registration and handling system for mining rock events
-local EVENTS = {}
+local EVENTS = Ores.GetRockEvents and Ores.GetRockEvents() or {}
 
 if SERVER then
     util.AddNetworkString("mining_rock_event")
@@ -34,24 +37,33 @@ if SERVER then
             if not IsValid(ent) then return end
             if ent:GetClass() == "mining_rock" and not ent.OriginalRock then return end
 
-            -- Only allow one event per rock
+            local pickedEvents = {}
             for id, event in pairs(EVENTS) do
                 if event.CheckValid and not event.CheckValid(ent) then continue end
 
                 if math.random(0, 100) <= event.Chance then
-                    ent:SetNWString("RockEvent", id)
-                    if event.OnMarked then
-                        event.OnMarked(ent)
+                    table.insert(pickedEvents, id)
+                end
+            end
 
-                        -- Network to clients
-                        net.Start("mining_rock_event")
-                        net.WriteString("OnMarked")
-                        net.WriteString(id)
-                        net.WriteEntity(ent)
-                        net.Broadcast()
-                    end
+            table.sort(pickedEvents, function(a, b)
+                return EVENTS[a].Chance < EVENTS[b].Chance
+            end)
 
-                    break
+            if #pickedEvents > 0 then
+                local eventId = pickedEvents[1] -- Prioritize lower chance events
+                local event = EVENTS[eventId]
+
+                ent:SetNWString("RockEvent", eventId)
+                if event.OnMarked then
+                    event.OnMarked(ent)
+
+                    -- Network to clients
+                    net.Start("mining_rock_event")
+                    net.WriteString("OnMarked")
+                    net.WriteString(eventId)
+                    net.WriteEntity(ent)
+                    net.Broadcast()
                 end
             end
         end)
@@ -130,6 +142,6 @@ if CLIENT then
 end
 
 -- Make functions available globally
-ms.Ores.RegisterRockEvent = RegisterRockEvent
-ms.Ores.GetRockEvents = GetEvents
-ms.Ores.GetRockEvent = GetEvent
+Ores.RegisterRockEvent = RegisterRockEvent
+Ores.GetRockEvents = GetEvents
+Ores.GetRockEvent = GetEvent
