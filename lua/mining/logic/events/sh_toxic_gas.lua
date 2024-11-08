@@ -50,7 +50,8 @@ if SERVER then
 
 			if CurTime() >= nextDamage then
 				for _, ply in ipairs(ents.FindInSphere(pos, TOXIC_GAS_RADIUS)) do
-					if not IsValid(ply) or not ply:Alive() then continue end
+					if not IsValid(ply) then continue end
+					if ply:IsPlayer() and not ply:Alive() then continue end
 
 					-- Apply resistance based on player's toxic resistance level
 					local resistance = ply:GetNWInt("ms.Ores.ToxicResistance", 0)
