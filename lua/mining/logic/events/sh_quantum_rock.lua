@@ -243,8 +243,6 @@ Ores.RegisterRockEvent({
 				teleportRock(ent)
 			end
 		end)
-
-		createQuantumDistortion(ent)
 	end,
 
 	OnDamaged = function(ent, dmg)
