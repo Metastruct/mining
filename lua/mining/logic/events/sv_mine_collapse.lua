@@ -144,7 +144,7 @@ local function caveRecipientFilter()
 	local filter = RecipientFilter()
 	for _, triggerName in ipairs(CAVE_TRIGGER_NAMES) do
 		local trigger = ms.GetTrigger(triggerName)
-		if not trigger then continue end
+		if not IsValid(trigger) then continue end
 
 		for ply, _ in pairs(trigger:GetPlayers() or {}) do
 			filter:AddPlayer(ply)

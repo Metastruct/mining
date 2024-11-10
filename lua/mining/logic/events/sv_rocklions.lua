@@ -74,7 +74,7 @@ Ores.RegisterRockEvent({
 		if ent:WaterLevel() > 1 then return false end
 
 		local trigger = ms and ms.GetTrigger and ms.GetTrigger("cave1")
-		if not trigger then return false end
+		if not IsValid(trigger) then return false end
 
 		local zMax = trigger:GetPos().z + 100
 		if ent:GetPos().z > zMax then return false end
