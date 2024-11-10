@@ -69,8 +69,10 @@ if SERVER then
 
 					ply:EmitSound("player/pl_pain" .. math.random(5, 7) .. ".wav")
 
-					net.Start("ToxicGasEffect")
-					net.Send(ply)
+					if ply:IsPlayer() then
+						net.Start("ToxicGasEffect")
+						net.Send(ply)
+					end
 				end
 				nextDamage = CurTime() + TOXIC_GAS_INTERVAL
 			end
