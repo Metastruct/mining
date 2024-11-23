@@ -60,7 +60,7 @@ local function generateArgoniteRocks()
 		end
 
 		if localEndPos.z > localPos.z + 200 then continue end
-		local rock = Ores.SpawnRock(SPAWN_TYPES.ARGONITE, localPos, {
+		local rock = ms.Ores.SpawnRock(SPAWN_TYPES.ARGONITE, localPos, {
 			rarity = ARGONITE_RARITY,
 			direction = (localEndPos - localPos):GetNormalized(),
 		})
