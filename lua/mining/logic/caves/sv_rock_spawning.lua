@@ -60,7 +60,7 @@ function Ores.SelectRarityFromSpawntable()
 end
 
 -- Add to top of file
-local SPAWN_TYPES = {
+SPAWN_TYPES = {
 	NORMAL = 1,
 	ARGONITE = 2,
 }
