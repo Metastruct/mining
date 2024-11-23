@@ -49,12 +49,12 @@ if SERVER then
 			end
 
 			if CurTime() >= nextDamage then
-				for _, ply in ipairs(ents.FindInSphere(pos, TOXIC_GAS_RADIUS)) do
-					if not IsValid(ply) then continue end
-					if ply:IsPlayer() and not ply:Alive() then continue end
+				for _, ent in ipairs(ents.FindInSphere(pos, TOXIC_GAS_RADIUS)) do
+					if not IsValid(ent) then continue end
+					if ent:IsPlayer() and not ent:Alive() then continue end
 
 					-- Apply resistance based on player's toxic resistance level
-					local resistance = ply:GetNWInt("ms.Ores.ToxicResistance", 0)
+					local resistance = ent:GetNWInt("ms.Ores.ToxicResistance", 0)
 					local damage = TOXIC_GAS_DAMAGE * (1 - (resistance / 50))
 					if damage <= 0 then continue end
 
@@ -64,14 +64,15 @@ if SERVER then
 					dmg:SetAttacker(gasCloud)
 					dmg:SetInflictor(gasCloud)
 
-					local takeDamageInfo = ply.ForceTakeDamageInfo or ply.TakeDamageInfo
-					takeDamageInfo(ply, dmg)
+					local takeDamageInfo = ent.ForceTakeDamageInfo or ent.TakeDamageInfo
+					takeDamageInfo(ent, dmg)
 
-					ply:EmitSound("player/pl_pain" .. math.random(5, 7) .. ".wav")
 
-					if ply:IsPlayer() then
+					if ent:IsPlayer() then
+						ent:EmitSound("player/pl_pain" .. math.random(5, 7) .. ".wav")
+
 						net.Start("ToxicGasEffect")
-						net.Send(ply)
+						net.Send(ent)
 					end
 				end
 				nextDamage = CurTime() + TOXIC_GAS_INTERVAL
