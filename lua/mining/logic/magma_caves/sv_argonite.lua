@@ -48,6 +48,7 @@ local function generateArgoniteRocks()
 
 	for curStep = 1, STEPS do
 		if count >= MAX_ARGON then return end
+
 		if math.random() > 0.6 then continue end
 
 		local localPos = pos + (pos - nextPos):GetNormalized() * (curStep * stepDist)
@@ -60,13 +61,51 @@ local function generateArgoniteRocks()
 		end
 
 		if localEndPos.z > localPos.z + 200 then continue end
-		local rock = ms.Ores.SpawnRock(ms.Ores.SPAWN_TYPES.ARGONITE, localPos, {
-			rarity = ARGONITE_RARITY,
-			direction = (localEndPos - localPos):GetNormalized(),
+
+		local tr = util.TraceLine({
+			start = localPos,
+			endpos = localEndPos,
+			mask = MASK_SOLID_BRUSHONLY,
 		})
 
-		if IsValid(rock) then
+		if tr.Hit and util.IsInWorld(tr.HitPos) and tr.HitTexture == "**displacement**" then
+			local rock = ents.Create("mining_rock")
+			rock:SetPos(tr.HitPos + tr.HitNormal * 10)
+			rock:SetSize(math.random() > 0.33 and 1 or 2)
+			rock:SetRarity(ARGONITE_RARITY)
+			rock:Spawn()
+			rock:PhysWake()
+			rock:DropToFloor()
+
+			if rock:IsStuckEx() or rock:WaterLevel() > 0 then
+				SafeRemoveEntity(rock)
+				continue
+			end
+
+			rock.OriginalRock = true
+
 			count = count + 1
+
+			rock:DropToFloor()
+			rock:AddEffects(EF_ITEM_BLINK)
+
+			local snd = CreateSound(rock, ")ambient/levels/labs/teleport_winddown1.wav")
+			snd:SetDSP(16)
+			snd:SetSoundLevel(80)
+			snd:ChangePitch(math.random(150, 180))
+			snd:Play()
+
+			timer.Simple(0.5, function()
+				if not IsValid(rock) then return end
+
+				rock:DropToFloor()
+				rock:RemoveEffects(EF_ITEM_BLINK)
+
+				if not IsValid(trigger) then return end
+				if not trigger:GetEntities()[rock] then
+					SafeRemoveEntity(rock)
+				end
+			end)
 		end
 	end
 end

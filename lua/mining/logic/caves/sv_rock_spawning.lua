@@ -59,52 +59,24 @@ function Ores.SelectRarityFromSpawntable()
 	end
 end
 
--- Add to top of file
-Ores.SPAWN_TYPES = {
-	NORMAL = 1,
-	ARGONITE = 2,
-}
+function Ores.GenerateMiningRock(startPos, rarity)
+	if rarity then
+		assert(isnumber(rarity) and Ores.__R and Ores.__R[rarity], "[Ores] Rarity argument is invalid")
+	end
 
--- Configuration for different spawn types
-Ores.SPAWN_CONFIG = {
-	[Ores.SPAWN_TYPES.NORMAL] = {
-		trace_dist = 5000,
-		offset = 10,
-		min_size = 1,
-		max_size = 2,
-		effects = true,
-		sound = true
-	},
-	[Ores.SPAWN_TYPES.ARGONITE] = {
-		trace_dist = 300,
-		offset = 10,
-		min_size = 1,
-		max_size = 2,
-		effects = true,
-		sound = true,
-		texture_check = "**displacement**"
-	},
-}
+	local normal = VectorRand()
+	normal.z = -math.abs(normal.z)
 
--- Unified rock spawning function
-function Ores.SpawnRock(spawnType, startPos, options)
-	options = options or {}
-	local config = Ores.SPAWN_CONFIG[spawnType]
-
-	-- Validate config
-	if not config then return end
-
-	-- Setup trace
 	local traceTbl = {
 		start = startPos,
-		endpos = startPos + (options.direction or VectorRand()) * config.trace_dist,
+		endpos = startPos + (normal * 5000),
 		mask = MASK_SOLID_BRUSHONLY
 	}
 
 	local t = util.TraceLine(traceTbl)
 	if t.StartSolid or not t.Hit then return end -- No ground found?
 
-	if not traceMatWhitelist[t.MatType] or (config.texture_check and t.HitTexture ~= config.texture_check) then
+	if not traceMatWhitelist[t.MatType] then
 		local wallNormal = t.HitNormal
 		traceTbl.start = t.HitPos
 		traceTbl.endpos = t.HitPos + ((wallNormal - wallNormal:Angle():Up() * 0.75) * 5000)
@@ -114,74 +86,63 @@ function Ores.SpawnRock(spawnType, startPos, options)
 		if mult < 0 then
 			mult = 0
 		end
+
+		t.HitPos = t.HitPos + (wallNormal * 48 * mult)
 	end
 
-	-- Distance checks
 	local dist = 6400
+
 	for k in next, Ores.SpawnedRocks do
 		if t.HitPos:DistToSqr(k:GetCorrectedPos()) < dist then return end
 	end
 
-	for _, v in next, player.GetAll() do
+	for k, v in next, player.GetAll() do
 		if t.HitPos:DistToSqr(v:GetPos()) < dist then return end
 	end
 
-	-- Create rock entity
-	local rock = ents.Create("mining_rock")
-	rock:SetPos(t.HitPos + (t.HitNormal * config.offset))
-	rock:SetAngles(options.angles or AngleRand())
-	rock.OriginalRock = true
+	local ent = ents.Create("mining_rock")
+	ent:SetPos(t.HitPos + (t.HitNormal * 10))
+	ent:SetAngles(AngleRand())
+	ent.OriginalRock = true
+	local rand = math.random()
+	ent:SetSize(rand < 0.33 and 1 or 2)
 
-	-- Set size
-	local size = options.size or (math.random() < 0.33 and config.min_size or config.max_size)
-	rock:SetSize(size)
-
-	-- Set rarity
-	rock:SetRarity(options.rarity or Ores.SelectRarityFromSpawntable())
-
-	-- Apply effects if enabled
-	if config.effects then
-		rock:AddEffects(EF_ITEM_BLINK)
-		timer.Simple(0.5, function()
-			if rock:IsValid() then
-				rock:RemoveEffects(EF_ITEM_BLINK)
-			end
-		end)
+	if isnumber(rarity) then
+		ent:SetRarity(rarity)
+	else
+		ent:SetRarity(Ores.SelectRarityFromSpawntable())
 	end
 
-	-- Set bonus spots
+	ent:AddEffects(EF_ITEM_BLINK) -- Shh, I'm setting this so clients know to fade it in without using net
+
+	timer.Simple(0.5, function()
+		if ent:IsValid() then
+			ent:RemoveEffects(EF_ITEM_BLINK)
+		end
+	end)
+
 	if Ores.Settings.BonusSpots:GetBool() then
-		rock:SetBonusSpotCount(math.random(0, 2))
+		ent:SetBonusSpotCount(math.random(0, 2))
 	end
 
-	rock:Spawn()
+	ent:Spawn()
 
-	-- Track spawned rock
 	if Ores.SpawnedRocks then
-		Ores.SpawnedRocks[rock] = true
+		Ores.SpawnedRocks[ent] = true
 	end
 
-	-- Play spawn sound if enabled
-	if config.sound then
-		local snd = CreateSound(rock, ")ambient/levels/labs/teleport_winddown1.wav")
-		snd:SetDSP(16)
-		snd:SetSoundLevel(80)
-		snd:ChangePitch(math.random(150, 180))
-		snd:Play()
-	end
+	local snd = CreateSound(ent, ")ambient/levels/labs/teleport_winddown1.wav")
+	snd:SetDSP(16)
+	snd:SetSoundLevel(80)
+	snd:ChangePitch(math.random(150, 180))
+	snd:Play()
 
-	return rock
-end
-
-function Ores.GenerateMiningRock(startPos, rarity)
-	return Ores.SpawnRock(Ores.SPAWN_TYPES.NORMAL, startPos, {
-		rarity = rarity,
-		direction = Vector(0, 0, -1)  -- Spawn downwards for normal rocks
-	})
+	return ent
 end
 
 -- Utility function for getting the cave trigger
 local mineTrigger
+
 function Ores.GetMineTrigger()
 	if not GetTrigger then return NULL end
 
