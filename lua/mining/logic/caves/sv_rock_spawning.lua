@@ -60,14 +60,14 @@ function Ores.SelectRarityFromSpawntable()
 end
 
 -- Add to top of file
-SPAWN_TYPES = {
+Ores.SPAWN_TYPES = {
 	NORMAL = 1,
 	ARGONITE = 2,
 }
 
 -- Configuration for different spawn types
-local SPAWN_CONFIG = {
-	[SPAWN_TYPES.NORMAL] = {
+Ores.SPAWN_CONFIG = {
+	[Ores.SPAWN_TYPES.NORMAL] = {
 		trace_dist = 5000,
 		offset = 10,
 		min_size = 1,
@@ -75,7 +75,7 @@ local SPAWN_CONFIG = {
 		effects = true,
 		sound = true
 	},
-	[SPAWN_TYPES.ARGONITE] = {
+	[Ores.SPAWN_TYPES.ARGONITE] = {
 		trace_dist = 300,
 		offset = 10,
 		min_size = 1,
@@ -89,7 +89,7 @@ local SPAWN_CONFIG = {
 -- Unified rock spawning function
 function Ores.SpawnRock(spawnType, startPos, options)
 	options = options or {}
-	local config = SPAWN_CONFIG[spawnType]
+	local config = Ores.SPAWN_CONFIG[spawnType]
 
 	-- Validate config
 	if not config then return end
@@ -174,7 +174,7 @@ function Ores.SpawnRock(spawnType, startPos, options)
 end
 
 function Ores.GenerateMiningRock(startPos, rarity)
-	return Ores.SpawnRock(SPAWN_TYPES.NORMAL, startPos, {
+	return Ores.SpawnRock(Ores.SPAWN_TYPES.NORMAL, startPos, {
 		rarity = rarity,
 		direction = Vector(0, 0, -1)  -- Spawn downwards for normal rocks
 	})
