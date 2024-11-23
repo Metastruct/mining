@@ -119,16 +119,16 @@ function Ores.SpawnRock(spawnType, startPos, options)
 	-- Distance checks
 	local dist = 6400
 	for k in next, Ores.SpawnedRocks do
-		if tr.HitPos:DistToSqr(k:GetCorrectedPos()) < dist then return end
+		if t.HitPos:DistToSqr(k:GetCorrectedPos()) < dist then return end
 	end
 
 	for _, v in next, player.GetAll() do
-		if tr.HitPos:DistToSqr(v:GetPos()) < dist then return end
+		if t.HitPos:DistToSqr(v:GetPos()) < dist then return end
 	end
 
 	-- Create rock entity
 	local rock = ents.Create("mining_rock")
-	rock:SetPos(tr.HitPos + (tr.HitNormal * config.offset))
+	rock:SetPos(t.HitPos + (t.HitNormal * config.offset))
 	rock:SetAngles(options.angles or AngleRand())
 	rock.OriginalRock = true
 
