@@ -520,7 +520,7 @@ if CLIENT then
 			local stat_upgrade = header:Add("DButton")
 			stat_upgrade:Dock(FILL)
 			stat_upgrade:DockMargin(20 * COEF_W, 20 * COEF_H, 5 * COEF_W, 20 * COEF_H)
-			stat_upgrade:SetText(not max_lvl and (can_upgrade and "UPGRADE (%s .PTS)" or "NOT ENOUGH POINTS (%s .PTS)"):format(string.Comma(upgrade_cost)) or "MAXED")
+			stat_upgrade:SetText(not max_lvl and (can_upgrade and "UPGRADE (%s .PTS)" or "NOT ENOUGH POINTS (%s .PTS)"):format(string.Comma(math.Round(upgrade_cost))) or "MAXED")
 			stat_upgrade:SetTextColor(can_upgrade and COLOR_BLACK or COLOR_WHITE)
 			stat_upgrade:SetFont("ma_terminal_header")
 
@@ -589,7 +589,7 @@ if CLIENT then
 				can_upgrade = cur_points >= upgrade_cost
 
 				stat_name:SetText(("CURRENT LVL %d"):format(cur_lvl))
-				self:SetText(not max_lvl and (can_upgrade and "UPGRADE (%s .PTS)" or "NOT ENOUGH POINTS (%s .PTS)"):format(string.Comma(upgrade_cost)) or "MAXED")
+				self:SetText(not max_lvl and (can_upgrade and "UPGRADE (%s .PTS)" or "NOT ENOUGH POINTS (%s .PTS)"):format(string.Comma(math.Round(upgrade_cost))) or "MAXED")
 				self:SetTextColor(can_upgrade and COLOR_BLACK or COLOR_WHITE)
 				build_unlock_list()
 
@@ -648,8 +648,8 @@ if CLIENT then
 
 					if has_lvl then
 						purchase_btn:SetText(real_purchase_value > coins
-							and ("NOT ENOUGH COINS (%sc)"):format(string.Comma(real_purchase_value))
-							or ("PURCHASE (%sc)"):format(string.Comma(real_purchase_value))
+							and ("NOT ENOUGH COINS (%sc)"):format(string.Comma(math.Round(real_purchase_value)))
+							or ("PURCHASE (%sc)"):format(string.Comma(math.Round(real_purchase_value)))
 						)
 
 						function purchase_btn:DoClick()
@@ -667,10 +667,10 @@ if CLIENT then
 
 							if real_purchase_value > coins then
 								self:SetTextColor(COLOR_WHITE)
-								self:SetText(("NOT ENOUGH COINS (%sc)"):format(string.Comma(real_purchase_value)))
+								self:SetText(("NOT ENOUGH COINS (%sc)"):format(string.Comma(math.Round(real_purchase_value))))
 							else
 								self:SetTextColor(COLOR_BLACK)
-								self:SetText(("PURCHASE (%sc)"):format(string.Comma(real_purchase_value)))
+								self:SetText(("PURCHASE (%sc)"):format(string.Comma(math.Round(real_purchase_value))))
 							end
 
 							surface.PlaySound("buttons/weapon_confirm.wav")
@@ -684,12 +684,12 @@ if CLIENT then
 							surface.SetDrawColor(COLOR_WARN:Unpack())
 							surface.DrawOutlinedRect(0, 0, w, h)
 							self:SetTextColor(COLOR_WHITE)
-							self:SetText(has_lvl and ("NOT ENOUGH COINS (%sc)"):format(string.Comma(real_purchase_value)) or "LOCKED")
+							self:SetText(has_lvl and ("NOT ENOUGH COINS (%sc)"):format(string.Comma(math.Round(real_purchase_value))) or "LOCKED")
 						else
 							surface.SetDrawColor(COLOR_WHITE:Unpack())
 							surface.DrawRect(0, 0, w, h)
 							self:SetTextColor(COLOR_BLACK)
-							self:SetText(("PURCHASE (%sc)"):format(string.Comma(real_purchase_value)))
+							self:SetText(("PURCHASE (%sc)"):format(string.Comma(math.Round(real_purchase_value))))
 						end
 					end
 				end
