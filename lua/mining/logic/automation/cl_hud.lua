@@ -145,7 +145,7 @@ end
 
 local function try_draw_ent(ent)
 	local class_name = ent:GetClass()
-	if not Ores.Automation.EntityClasses[class_name] and not ENTITY_INFO_EXTRAS[class_name] then return end
+	if not class_name:match("^ma_") and not ENTITY_INFO_EXTRAS[class_name] then return end
 	if not Ores.Automation.ShouldDrawText(ent) then return end
 	if not isfunction(ent.OnDrawEntityInfo) then return end
 
