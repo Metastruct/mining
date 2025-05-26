@@ -102,7 +102,6 @@ if SERVER then
 		if item.price > cur_blood then
 			ms.Ores.SendChatMessage(ply, "Do you take me for an idiot mortal? Come back with blood.")
 			ply:Kill()
-			remove_blood_god(npc)
 			return
 		end
 
@@ -114,6 +113,7 @@ if SERVER then
 
 		if ply.GiveItem then
 			ply:GiveItem(item_id, 1, "bloodgod")
+			ms.Ores.SendChatMessage(ply, "A " .. item.name .. " has been added to your inventory. Equip it to use its effects.")
 		end
 
 		ms.Ores.SendChatMessage(player.GetAll(), "The creature made a deal with " .. ply:Nick() .. ". But it will probably be back soon... (1h)")
