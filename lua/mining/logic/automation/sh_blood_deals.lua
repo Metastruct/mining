@@ -82,6 +82,11 @@ if SERVER then
 		local item_id = net.ReadString()
 		local npc = net.ReadEntity()
 
+		if not IsValid(npc) then return end
+		if npc:GetClass() ~= "lua_npc" then return end
+		if npc.role ~= "bloodgod" then return end
+		if ply:GetPos():DistToSqr(npc:GetPos()) > 300 * 300 then return end
+
 		local inv = ply.GetInventory and ply:GetInventory()
 		if inv and inv.soul and inv.soul > 0 then
 			-- player got soul back, disable deals
@@ -91,8 +96,6 @@ if SERVER then
 
 		if item_id == "nodeal" then return end
 		if not ITEMS[item_id] then return end
-		if not IsValid(npc) then return end
-		if npc:GetClass() ~= "lua_npc" then return end
 
 		local item = ITEMS[item_id]
 		local cur_blood = ms.Ores.GetPlayerOre(ply, 666)
