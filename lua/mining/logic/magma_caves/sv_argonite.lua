@@ -39,7 +39,7 @@ local function getBasePos()
 	local trigger = ms and ms.GetTrigger and ms.GetTrigger("volcano")
 	if not IsValid(trigger) then
 		if _G.landmark and _G.landmark.get("AutoInstance0volcano") then
-			BASE_POS = _G.landmark.get("AutoInstance0volcano"):GetPos()
+			BASE_POS = _G.landmark.get("AutoInstance0volcano")
 		end
 	else
 		BASE_POS = trigger:GetPos()
