@@ -32,15 +32,29 @@ local function getArgoniteRockCount()
 	return curArgoniteCount
 end
 
+local BASE_POS
+local function getBasePos()
+	if BASE_POS then return BASE_POS end
+
+	local trigger = ms and ms.GetTrigger and ms.GetTrigger("volcano")
+	if not IsValid(trigger) then
+		if _G.landmark and _G.landmark.get("AutoInstance0volcano") then
+			BASE_POS = _G.landmark.get("AutoInstance0volcano"):GetPos()
+		end
+	else
+		BASE_POS = trigger:GetPos()
+	end
+
+	return BASE_POS
+end
 
 local function generateArgoniteRocks()
 	local count = getArgoniteRockCount()
 	if count >= MAX_ARGON then return end
 
-	local trigger = ms and ms.GetTrigger and ms.GetTrigger("volcano")
-	if not IsValid(trigger) then return end
+	local basePos = getBasePos()
+	if not basePos then return end
 
-	local basePos = trigger:GetPos()
 	local i = math.random(#GRAPH)
 	local pos = basePos + GRAPH[i]
 	local nextPos = basePos + (GRAPH[i + 1] or GRAPH[1])
