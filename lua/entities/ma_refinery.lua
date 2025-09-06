@@ -12,7 +12,7 @@ ENT.RenderGroup = RENDERGROUP_OPAQUE
 ENT.Spawnable = true
 ENT.ClassName = "ma_refinery"
 ENT.IconOverride = "entities/ma_refinery.png"
-ENT.Description = "The refinery can make your ores more precious (ex: copper -> silver). It also has a chance to produce rejects in the form of detonite. It needs both energy and fuel to function."
+ENT.Description = "The refinery can make your ores more precious (ex: copper -> silver). This is a probability based process. Upgrading 'Magic Find' will increase the chance of refined ores. It also has a chance to produce rejects in the form of detonite. It needs both energy and fuel to function."
 
 require("ma_orchestrator")
 _G.MA_Orchestrator.RegisterInput(ENT, "oil", "OIL", "Oil", "Standard oil input. More oil equals better chance at refined ores!")

@@ -13,7 +13,7 @@ ENT.Spawnable = true
 ENT.ClassName = "ma_oil_extractor_v2"
 ENT.NextTraceCheck = 0
 ENT.IconOverride = "entities/ma_oil_extractor_v2.png"
-ENT.Description = "The oil extractor digs for oil. Once the process is complete it outputs fuel barrels that can be used for other machines. It needs energy to function."
+ENT.Description = "The oil extractor digs for oil to make fuel barrels. A barrel is output every now and then. It needs energy to function."
 
 require("ma_orchestrator")
 _G.MA_Orchestrator.RegisterInput(ENT, "power", "ENERGY", "Energy", "Standard energyy input. More energy equals more ores!")
