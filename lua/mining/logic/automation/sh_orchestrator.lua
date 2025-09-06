@@ -267,6 +267,8 @@ if SERVER then
 				orchestrator.SendPartialLinkData(owner, true, output_data, input_data)
 			end
 		end
+
+		table.Empty(output_data.Links)
 	end
 
 	function orchestrator.UnlinkInput(input_data)
