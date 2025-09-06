@@ -12,7 +12,7 @@ ENT.RenderGroup = RENDERGROUP_OPAQUE
 ENT.Spawnable = true
 ENT.ClassName = "ma_gen_v2"
 ENT.IconOverride = "entities/ma_gen_v2.png"
-ENT.Description = "The generate is the energy source of any automation setup. It's powered with argonite batteries."
+ENT.Description = "The generator is the energy source of any automation setup. It's powered with argonite batteries typically from an argonite transformer."
 
 require("ma_orchestrator")
 _G.MA_Orchestrator.RegisterInput(ENT, "battery", "BATTERY", "Battery", "Argonite batteries are given to the generator so that it may store and distribute power!")
