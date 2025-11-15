@@ -693,7 +693,7 @@ if CLIENT then
 
 	surface.CreateFont("BIGFONT", {
 		font = "Tahoma",
-		size = "150"
+		size = 150
 	})
 
 	local SPOOK_TEXT = "B̴̮̉ḻ̷͑o̸̬̓o̷̧͂d̵̙̆.̷̰͑.̷̓ͅ.̴͈̍ ̴͚͘f̴͔͘o̶̤̽r̸̡͘ ̴͉̎t̸͙̿ḧ̴̙́e̶̜͂ ̸̠͛b̶̝̈l̶̼̆o̷͖͊ö̸͇́ď̷̲ ̴͙̉g̶̩̍o̶̫̓d̷̻̋.̵̯̊.̴̩͋.̶̖͆"
