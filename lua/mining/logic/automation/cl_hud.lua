@@ -69,7 +69,7 @@ local function drawEntityInfoFrame(ent, data)
 		if line_data.Type == "Action" then
 			surface.SetFont("mining_automation_hud")
 
-			local key = (input.LookupBinding(line_data.Binding, true) or "?"):upper()
+			local key = (input.LookupBinding(line_data.Binding) or "?"):upper()
 			local text = ("[ %s ] %s"):format(key, line_data.Text)
 			local tw, th = surface.GetTextSize(text)
 

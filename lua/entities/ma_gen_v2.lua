@@ -264,7 +264,7 @@ if CLIENT then
 				if required_points > point_balance then
 					chat.AddText(Color(230, 130, 65), " ♦ [Ores] ", color_white, ("You do not have enough points to kickstart this generator (required: %s pts | balance: %s pts)"):format(
 						string.Comma(required_points),
-						string.Comma(pointBalance)
+						string.Comma(point_balance)
 					))
 					return
 				end
