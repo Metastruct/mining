@@ -188,6 +188,13 @@ if CLIENT then
 			surface.DrawOutlinedRect(pos_x - 20, pos_y - 20, 40, 40, 2)
 
 			surface.SetFont("ma_terminal_node")
+
+			if is_malfunctioning then
+				surface.SetTextColor(255, 200, 0, 255)
+				surface.SetTextPos(pos_x + 22, pos_y - 20)
+				surface.DrawText("⚠")
+			end
+
 			surface.SetTextColor(255, 255, 255, 255)
 
 			local words = ent.PrintName:Split(" ")
@@ -197,12 +204,6 @@ if CLIENT then
 			local tw, th = surface.GetTextSize(ent_name)
 			surface.SetTextPos(pos_x - tw / 2, pos_y - th / 2)
 			surface.DrawText(ent_name)
-
-			if is_malfunctioning then
-				surface.SetTextColor(255, 200, 0, 255)
-				surface.SetTextPos(pos_x + 22, pos_y - 20)
-				surface.DrawText("⚠")
-			end
 		end
 
 		local i = 1
