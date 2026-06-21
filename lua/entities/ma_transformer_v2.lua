@@ -144,7 +144,9 @@ if SERVER then
 			end
 
 			if self.BatteriesToProduce > 0 then
-				self:CreateBattery()
+				if not self:GetNWBool("IsMalfunctioning", false) or math.random() <= Ores.Automation.MalfunctionEfficiencyCap then
+					self:CreateBattery()
+				end
 				self.BatteriesToProduce = math.max(0, self.BatteriesToProduce - 1)
 			end
 		end)

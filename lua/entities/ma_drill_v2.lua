@@ -177,6 +177,11 @@ if SERVER then
 		local output_data = _G.MA_Orchestrator.GetOutputData(self, "ores")
 		_G.MA_Orchestrator.SendOutputReadySignal(output_data)
 
+		if self:GetNWBool("IsMalfunctioning", false) then
+			self.NextDrilledOre = time + Ores.Automation.BaseOreProductionRate / Ores.Automation.MalfunctionEfficiencyCap
+			return
+		end
+
 		-- efficiency goes up the more its powered:
 		-- at less than 33% -> 10s,
 		-- less than 66% -> 8s

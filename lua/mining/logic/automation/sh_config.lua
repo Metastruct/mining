@@ -50,7 +50,10 @@ Ores.Automation = Ores.Automation or {
 		ma_minter_v2 = 10000,
 		ma_refinery = 80000,
 		ma_drone_controller_v2 = 90000,
-	}
+	},
+	MalfunctionChance = 0.02,
+	MalfunctionCheckInterval = 300,
+	MalfunctionEfficiencyCap = 0.2,
 }
 
 if Ores.Automation.EnergyMaterial:IsError() then
