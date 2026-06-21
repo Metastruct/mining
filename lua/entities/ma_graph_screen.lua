@@ -174,11 +174,14 @@ if CLIENT then
 			if ent:GetClass() == "ma_graph_screen" then continue end
 			local pos = ent:WorldSpaceCenter() + MAX_MAP_OFFSET
 			local pos_x, pos_y = (pos.x - min_x) * coef_w + graph_padding, (pos.y - min_y) * coef_h + graph_padding * 2
+			local is_malfunctioning = ent:GetNWBool("IsMalfunctioning", false)
 
 			surface.SetDrawColor(0, 0, 0, 200)
 			surface.DrawRect(pos_x - 20, pos_y - 20, 40, 40)
 			if isfunction(ent.CanWork) and not ent:CanWork(time) then
 				surface.SetDrawColor(255, 0, 0)
+			elseif is_malfunctioning then
+				surface.SetDrawColor(255, 200, 0, 255)
 			else
 				surface.SetDrawColor(18, 183, 104, 255)
 			end
@@ -194,6 +197,12 @@ if CLIENT then
 			local tw, th = surface.GetTextSize(ent_name)
 			surface.SetTextPos(pos_x - tw / 2, pos_y - th / 2)
 			surface.DrawText(ent_name)
+
+			if is_malfunctioning then
+				surface.SetTextColor(255, 200, 0, 255)
+				surface.SetTextPos(pos_x + 22, pos_y - 20)
+				surface.DrawText("⚠")
+			end
 		end
 
 		local i = 1
