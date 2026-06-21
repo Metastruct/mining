@@ -3,8 +3,15 @@ Ores = Ores or {}
 
 util.AddNetworkString("MA_Malfunction")
 
+local NO_MALFUNCTION = {
+	ma_merger_v2 = true,
+	ma_storage_v2 = true,
+	ma_bomb_v2 = true
+}
+
 timer.Create("MA_MalfunctionCheck", Ores.Automation.MalfunctionCheckInterval, 0, function()
 	for class in pairs(Ores.Automation.EntityClasses) do
+		if NO_MALFUNCTION[class] then continue end
 		for _, ent in ipairs(ents.FindByClass(class)) do
 			if ent:GetNWBool("IsMalfunctioning", false) then continue end
 			if math.random() >= Ores.Automation.MalfunctionChance then continue end
