@@ -53,6 +53,9 @@ if SERVER then
 			local ore_data = Ores.__R[rarity]
 			if ore_data then
 				local earnings = ore_data.Worth
+				if self:GetNWBool("IsMalfunctioning", false) then
+					earnings = earnings * Ores.Automation.MalfunctionEfficiencyCap
+				end
 				local owner = self.CPPIGetOwner and self:CPPIGetOwner()
 				if IsValid(owner) and owner:GetNWString("MA_BloodDeal", "") == "MINTER_DEAL" then
 					earnings = earnings * 1.25
@@ -80,6 +83,9 @@ if SERVER then
 			local ore_data = Ores.__R[rarity]
 			if ore_data then
 				local earnings = ore_data.Worth * Ores.Automation.IngotSize * ingot_worth
+				if self:GetNWBool("IsMalfunctioning", false) then
+					earnings = earnings * Ores.Automation.MalfunctionEfficiencyCap
+				end
 				local owner = self.CPPIGetOwner and self:CPPIGetOwner()
 				if IsValid(owner) and owner:GetNWString("MA_BloodDeal", "") == "MINTER_DEAL" then
 					earnings = earnings * 1.25

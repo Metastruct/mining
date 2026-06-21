@@ -78,6 +78,9 @@ if SERVER then
 
 			if #self.OreQueue > 1 then
 				local efficiency = self:GetNW2Int("Energy", 0) / 100
+				if self:GetNWBool("IsMalfunctioning", false) then
+					efficiency = math.min(efficiency, Ores.Automation.MalfunctionEfficiencyCap)
+				end
 				local refined = math.random(0, 100) < (max_chance * efficiency)
 				local rejected = math.random(0, 100) < (raw_max_chance + 10)
 

@@ -169,7 +169,7 @@ if SERVER then
 		if time < self.NextOil then return end
 		if not self:CanWork(time) then return end
 
-		self.NextOil = CurTime() + 1
+		self.NextOil = CurTime() + (self:GetNWBool("IsMalfunctioning", false) and (1 / Ores.Automation.MalfunctionEfficiencyCap) or 1)
 		self.ExtractedOil = self.ExtractedOil + 1
 
 		if self.ExtractedOil >= Ores.Automation.OilExtractionRate then

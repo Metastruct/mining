@@ -59,6 +59,24 @@ local function drawEntityInfoFrame(ent, data)
 	if not pos.visible then return end
 
 	local x, y = pos.x - total_width / 2, pos.y - total_height / 2
+
+	if ent:GetNWBool("IsMalfunctioning", false) then
+		local warn_text = "⚠  Equipment is malfunctioning"
+		surface.SetFont("mining_automation_hud")
+		local tw, th = surface.GetTextSize(warn_text)
+		local warn_w = math.max(total_width, tw + Ores.Automation.HudPadding * 4)
+		local warn_h = th + Ores.Automation.HudPadding * 2
+		local warn_x = pos.x - warn_w / 2
+		local warn_y = y - warn_h - 4
+
+		blur_rect(warn_x, warn_y, warn_w, warn_h, 10, 2)
+		surface.SetDrawColor(180, 140, 0, 160)
+		surface.DrawRect(warn_x, warn_y, warn_w, warn_h)
+		surface.SetTextColor(255, 230, 50, 255)
+		surface.SetTextPos(warn_x + Ores.Automation.HudPadding * 2, warn_y + Ores.Automation.HudPadding)
+		surface.DrawText(warn_text)
+	end
+
 	blur_rect(x, y, total_width, total_height, 10, 2)
 
 	surface.SetDrawColor(0, 0, 0, 200)
@@ -160,4 +178,8 @@ hook.Add("HUDPaint", "mining_automation_entity_info", function()
 	if not IsValid(tr.Entity) then return end
 
 	try_draw_ent(tr.Entity)
+end)
+
+net.Receive("MA_Malfunction", function()
+	chat.AddText(Color(255, 200, 0), " ♦ [Ores] ", color_white, "A machine is malfunctioning! Whack it into shape!")
 end)

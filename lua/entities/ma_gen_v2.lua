@@ -27,7 +27,11 @@ end
 function ENT:GetEnergyLevel()
 	if not self:GetNWBool("Wiremod_Active", true) then return 0 end
 
-	return self:GetNW2Float("Energy", 0)
+	local energy = self:GetNW2Float("Energy", 0)
+	if self:GetNWBool("IsMalfunctioning", false) then
+		energy = math.min(energy, 100 * Ores.Automation.MalfunctionEfficiencyCap)
+	end
+	return energy
 end
 
 local BASE_KICKSTART_PRICE = 350000

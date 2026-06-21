@@ -108,7 +108,8 @@ if SERVER then
 			local drone_count = self:GetDroneCount()
 			if controller_timer_tick % (MAX_DRONES * 10) == 0 then
 				local cur_detonite = self:GetNW2Int("Detonite", 0)
-				local new_detonite = math.max(0, cur_detonite - drone_count)
+				local drain = self:GetNWBool("IsMalfunctioning", false) and math.ceil(drone_count / Ores.Automation.MalfunctionEfficiencyCap) or drone_count
+				local new_detonite = math.max(0, cur_detonite - drain)
 				self:SetNW2Int("Detonite", new_detonite)
 
 				if _G.WireLib then
