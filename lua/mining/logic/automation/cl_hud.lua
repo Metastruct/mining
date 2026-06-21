@@ -183,3 +183,22 @@ end)
 net.Receive("MA_Malfunction", function()
 	chat.AddText(Color(255, 200, 0), " ♦ [Ores] ", color_white, "A machine is malfunctioning! Whack it into shape!")
 end)
+
+local malfunction_fx_ents = {}
+timer.Create("MA_MalfunctionTrack", 1, 0, function()
+	malfunction_fx_ents = {}
+	for class in pairs(Ores.Automation.EntityClasses) do
+		for _, ent in ipairs(ents.FindByClass(class)) do
+			if ent:GetNWBool("IsMalfunctioning", false) then
+				malfunction_fx_ents[#malfunction_fx_ents + 1] = ent
+			end
+		end
+	end
+end)
+
+timer.Create("MA_MalfunctionFX", 0.35, 0, function()
+	for _, ent in ipairs(malfunction_fx_ents) do
+		if not IsValid(ent) then continue end
+		ParticleEffect("ExplosionCore_wall", ent:GetPos() + Vector(0, 0, 30), Angle(-90, 0, 0))
+	end
+end)
