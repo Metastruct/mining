@@ -41,6 +41,44 @@ hook.Add("InitPostEntity", tag, function()
     hook.Remove("InitPostEntity", tag)
 end)
 
+local function quickClass(className, printName, opts)
+    opts = opts or {}
+    opts.PrintName = printName
+    opts.ClassName = className
+    opts.Type = opts.Type or "anim"
+	scripted_ents.Register(opts, className)
+
+	if CLIENT then
+		language.Add(className, printName)
+	end
+end
+
+if SERVER then
+    function QC_AttachInflictor(ent, className)
+        if not IsValid(ent) then return end
+
+        local inflictorEnt = ents.Create(className)
+		if IsValid(inflictorEnt) then
+			ent.__qc_inflictor = inflictorEnt
+			inflictorEnt:SetNoDraw(true)
+			inflictorEnt:SetCollisionGroup(COLLISION_GROUP_IN_VEHICLE)
+			inflictorEnt:Spawn()
+			inflictorEnt:SetParent(ghost)
+		end
+    end
+
+    function QC_GetInflictor(ent)
+        if not IsValid(ent) then return end
+        if IsValid(ent.__qc_inflictor) then return ent.__qc_inflictor end
+        return ent
+    end
+end
+
+quickClass("mining_toxic_gas", "Toxic Gas Cloud")
+quickClass("mining_ghost_miner", "Ghost Miner")
+quickClass("mining_falling_rock", "Rock")
+quickClass("mining_argonite", "Argonite")
+
 -- File initialisation starts here...
 includeShared("mining/logic/sh_ores")
 includeServer("mining/logic/sv_ores")

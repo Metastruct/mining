@@ -128,9 +128,8 @@ local argoniteEntity
 local function getArgoniteEntity()
 	if IsValid(argoniteEntity) then return argoniteEntity end
 
-	argoniteEntity = ents.Create("prop_physics")
+	argoniteEntity = ents.Create("mining_argonite")
 	argoniteEntity:SetModel("models/props_junk/PopCan01a.mdl")
-	argoniteEntity:SetKeyValue("classname", "Argonite")
 	argoniteEntity:Spawn()
 
 	return argoniteEntity

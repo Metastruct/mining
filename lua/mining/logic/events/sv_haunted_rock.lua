@@ -15,6 +15,15 @@ hook.Add("PlayerShouldTakeDamage", "HauntedRockGhostDamage", function(ply, attac
     end
 end)
 
+hook.Add("EntityTakeDamage", "HauntedRockGhostDamage", function(_, dmg)
+    local atck = dmg:GetAttacker()
+    if IsValid(atck) and atck.IsMiningGhost then
+        local inflictor = QC_GetInflictor(atck)
+        dmg:SetAttacker(inflictor)
+        dmg:SetInflictor(inflictor)
+    end
+end)
+
 local function createGhostEffect(pos)
     -- Create tesla effect
     local tesla = ents.Create("point_tesla")
@@ -95,7 +104,7 @@ local EVENT = {
         ghost:Give("weapon_crowbar")
         ghost:SetMaxHealth(1e9)
         ghost:SetHealth(1e9)
-        ghost:SetKeyValue("classname", "Ghost Miner")
+  		QC_AttachInflictor(ghost, "mining_ghost_miner")
 
         -- Track ghost NPC
         ghost.IsMiningGhost = true

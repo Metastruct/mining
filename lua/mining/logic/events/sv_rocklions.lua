@@ -17,8 +17,8 @@ function Ores.SpawnRockyAntlion(pos, rarity)
 	npc:DropToFloor()
 	npc:AddRelationship("player D_HT 99")
 	npc:SetHealth(100)
-	npc:SetKeyValue("classname", "Rocklion")
 
+	npc.IsRocklion = true
 	npc.MiningRarity = rarity
 	npc.NextOreDrop = 0
 	npc.OreDropCount = 0
@@ -101,7 +101,7 @@ Ores.RegisterRockEvent({
 
 -- Keep the NPC damage and kill hooks
 hook.Add("EntityTakeDamage", "mining_antlions", function(ent, dmg)
-	if ent:IsNPC() and ent:GetClass() == "Rocklion" and ent.MiningRarity then
+	if ent:IsNPC() and ent.IsRocklion and ent.MiningRarity then
 		if CurTime() >= ent.NextOreDrop and ent.OreDropCount <= 5 then
 			local atck = dmg:GetAttacker()
 			local oreAmount = math.random(1, 2)
@@ -116,7 +116,7 @@ hook.Add("EntityTakeDamage", "mining_antlions", function(ent, dmg)
 end)
 
 hook.Add("OnNPCKilled", "mining_antlions", function(npc, atck)
-	if npc:GetClass() == "Rocklion" and npc.MiningRarity then
+	if npc.IsRocklion and npc.MiningRarity then
 		createOreDrops(npc.MiningRarity, npc:GetPos(), atck, math.random(1, 4))
 
 		atck:EmitSound("physics/concrete/boulder_impact_hard" .. math.random(1, 2) .. ".wav", 100)

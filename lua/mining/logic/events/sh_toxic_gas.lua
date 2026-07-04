@@ -32,7 +32,8 @@ if SERVER then
 		gasCloud:Spawn()
 		gasCloud:Activate()
 		gasCloud:EmitSound("ambient/gas/steam2.wav", 75, 100)
-		gasCloud:SetKeyValue("classname", "Toxic Gas Cloud")
+		
+		QC_AttachInflictor(gasCloud, "mining_toxic_gas")
 
 		local endTime = CurTime() + TOXIC_GAS_DURATION
 		local nextDamage = CurTime()
@@ -58,11 +59,12 @@ if SERVER then
 					local damage = TOXIC_GAS_DAMAGE * (1 - (resistance / 50))
 					if damage <= 0 then continue end
 
+					local inflictor = QC_GetInflictor(gasCloud)
 					local dmg = DamageInfo()
 					dmg:SetDamage(damage)
 					dmg:SetDamageType(DMG_POISON)
-					dmg:SetAttacker(gasCloud)
-					dmg:SetInflictor(gasCloud)
+					dmg:SetAttacker(inflictor)
+					dmg:SetInflictor(inflictor)
 
 					local takeDamageInfo = ent.ForceTakeDamageInfo or ent.TakeDamageInfo
 					takeDamageInfo(ent, dmg)
