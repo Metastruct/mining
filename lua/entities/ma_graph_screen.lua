@@ -245,7 +245,7 @@ if CLIENT then
 		surface.DrawText("MINING OPERATION")
 	end
 
-	local USE_KEY = (input.LookupBinding("+use") or "?"):upper()
+	local USE_KEY = (input.LookupBinding("+use", false) or "?"):upper()
 	local function wait_screen(ply, real_width, real_height)
 		surface.SetDrawColor(24, 48, 26, 255)
 		surface.DrawRect(0, 0, real_width, real_height)

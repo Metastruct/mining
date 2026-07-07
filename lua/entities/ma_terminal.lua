@@ -75,7 +75,7 @@ if CLIENT then
 		outline = false,
 	})
 
-	local USE_KEY = (input.LookupBinding("+use") or "?"):upper()
+	local USE_KEY = (input.LookupBinding("+use", false) or "?"):upper()
 	local TERMINAL_MAT = Material("effects/combine_binocoverlay")
 	function ENT:WaitScreen(real_width, real_height)
 		surface.SetDrawColor(24, 48, 26, 255)
