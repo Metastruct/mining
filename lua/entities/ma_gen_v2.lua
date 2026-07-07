@@ -259,7 +259,7 @@ if CLIENT then
 		local wep = ply:GetActiveWeapon()
 		if IsValid(wep) and wep:GetClass() == "weapon_physgun" then return end
 
-		if bind == "+use" and pressed then
+		if bind:match("%+use") and pressed then
 			local tr = ply:GetEyeTrace()
 			local ent = tr.Entity
 			if IsValid(ent) and ent:GetClass() == "ma_gen_v2" and ent:WorldSpaceCenter():DistToSqr(EyePos()) <= 300 * 300 then
