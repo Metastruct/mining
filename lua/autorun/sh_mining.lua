@@ -1,51 +1,51 @@
 -- Small helpers similar to those found in "metastruct/preinit.lua" of the metastruct repo
 local function includeShared(f)
-    if SERVER then
-        AddCSLuaFile(f .. ".lua")
-    end
+	if SERVER then
+		AddCSLuaFile(f .. ".lua")
+	end
 
-    include(f .. ".lua")
+	include(f .. ".lua")
 end
 
 local function includeClient(f)
-    if SERVER then
-        AddCSLuaFile(f .. ".lua")
-    else
-        include(f .. ".lua")
-    end
+	if SERVER then
+		AddCSLuaFile(f .. ".lua")
+	else
+		include(f .. ".lua")
+	end
 end
 
 local function includeServer(f)
-    if SERVER then
-        include(f .. ".lua")
-    end
+	if SERVER then
+		include(f .. ".lua")
+	end
 end
 
 local guiFiles = {}
 
 local function includeGuiFile(f)
-    if SERVER then
-        AddCSLuaFile(f .. ".lua")
-    else
-        guiFiles[#guiFiles + 1] = f .. ".lua"
-    end
+	if SERVER then
+		AddCSLuaFile(f .. ".lua")
+	else
+		guiFiles[#guiFiles + 1] = f .. ".lua"
+	end
 end
 
 local tag = "ms.Ores.IncludeGui"
 
 hook.Add("InitPostEntity", tag, function()
-    for k, v in next, guiFiles do
-        include(v)
-    end
+	for k, v in next, guiFiles do
+		include(v)
+	end
 
-    hook.Remove("InitPostEntity", tag)
+	hook.Remove("InitPostEntity", tag)
 end)
 
 local function quickClass(className, printName, opts)
-    opts = opts or {}
-    opts.PrintName = printName
-    opts.ClassName = className
-    opts.Type = opts.Type or "anim"
+	opts = opts or {}
+	opts.PrintName = printName
+	opts.ClassName = className
+	opts.Type = opts.Type or "anim"
 	scripted_ents.Register(opts, className)
 
 	if CLIENT then
@@ -54,24 +54,24 @@ local function quickClass(className, printName, opts)
 end
 
 if SERVER then
-    function QC_AttachInflictor(ent, className)
-        if not IsValid(ent) then return end
+	function QC_AttachInflictor(ent, className)
+		if not IsValid(ent) then return end
 
-        local inflictorEnt = ents.Create(className)
+		local inflictorEnt = ents.Create(className)
 		if IsValid(inflictorEnt) then
 			ent.__qc_inflictor = inflictorEnt
 			inflictorEnt:SetNoDraw(true)
 			inflictorEnt:SetCollisionGroup(COLLISION_GROUP_IN_VEHICLE)
 			inflictorEnt:Spawn()
-			inflictorEnt:SetParent(ghost)
+			inflictorEnt:SetParent(ent)
 		end
-    end
+	end
 
-    function QC_GetInflictor(ent)
-        if not IsValid(ent) then return end
-        if IsValid(ent.__qc_inflictor) then return ent.__qc_inflictor end
-        return ent
-    end
+	function QC_GetInflictor(ent)
+		if not IsValid(ent) then return end
+		if IsValid(ent.__qc_inflictor) then return ent.__qc_inflictor end
+		return ent
+	end
 end
 
 quickClass("mining_toxic_gas", "Toxic Gas Cloud")
