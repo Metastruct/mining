@@ -15,7 +15,6 @@ SWEP.SlotPos = 1
 SWEP.AutoSwitchFrom = false
 SWEP.AutoSwitchTo = false
 SWEP.Spawnable = true
-SWEP.Category = "Mining"
 SWEP.HoldType = "melee2"
 SWEP.Primary = {}
 SWEP.Primary.ClipSize = -1
