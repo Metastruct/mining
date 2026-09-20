@@ -181,22 +181,38 @@ if CLIENT then
 	local CVAR_AUTOBUY = CreateConVar("mining_automation_autobuy", "0", { FCVAR_ARCHIVE, FCVAR_USERINFO }, "Auto-buys mining equipment when you spawn it if possible.", 0, 1)
 	local RANKING_DATA = {}
 	local function get_player_name(account_id, callback)
+		local done = false
 		local steamid_64 = util.SteamID64FromAccountID(tonumber(account_id))
 		local ply = player.GetBySteamID64(steamid_64)
 		if IsValid(ply) then
+			done = true
 			local name = ply:Nick()
 			callback(name)
 			return
 		end
 
-		steamworks.RequestPlayerInfo(steamid_64, callback)
+		steamworks.RequestPlayerInfo(steamid_64, function(name)
+			if done then return end
+			callback(name)
+			done = true
+		end)
+
+		timer.Simple(5, function()
+			if done then return end
+			-- timeout ??
+			callback("UNKNOWN (timeout)")
+			done = true
+		end)
 	end
 
 	local function update_ranking_data(rankings)
 		local new_ranking_data = {}
 		local count = #rankings
 		local req_count = 0
-		for _, data in pairs(rankings) do
+		local i = 1
+		timer.Create("ma_terminal_ranking_names", 0.5, count, function()
+			local data = rankings[i]
+			i = i + 1
 			get_player_name(data.AccountId, function(name)
 				table.insert(new_ranking_data, { Name = name, Multiplier = tostring(data.Multiplier) })
 				req_count = req_count + 1
@@ -208,7 +224,7 @@ if CLIENT then
 					RANKING_DATA = new_ranking_data
 				end
 			end)
-		end
+		end)
 	end
 
 	local prompt_opened = false
