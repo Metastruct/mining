@@ -5,6 +5,7 @@ ENT.ClassName = "mining_rock"
 
 ENT.Spawnable = false
 ENT.PhysgunDisabled = true
+ENT.RenderGroup = RENDERGROUP_BOTH
 ENT.m_tblToolsAllowed = {}
 function ENT:CanConstruct() return false end
 function ENT:CanTool() return false end

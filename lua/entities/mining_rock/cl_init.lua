@@ -13,8 +13,6 @@ local renderBounds = Vector(128,128,128)
 local gravityGlow = vector_up * 15
 local gravityRock = vector_up * -500
 
-ENT.RenderGroup = RENDERGROUP_TRANSLUCENT
-
 ENT._nextRefresh = 0
 ENT._initialized = false
 ENT._drawn = false

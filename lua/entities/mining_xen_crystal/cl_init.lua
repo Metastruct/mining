@@ -13,8 +13,6 @@ local renderBounds = Vector(128,128,128)
 local gravityGlow = vector_up*15
 local gravityFleck = vector_up*-500
 
-ENT.RenderGroup = RENDERGROUP_TRANSLUCENT
-
 ENT.GlowColor = Color(0,255,0)
 ENT.GlowColorFaded = ColorAlpha(ENT.GlowColor,100)
 ENT.ShineColor = Color(225,255,100)

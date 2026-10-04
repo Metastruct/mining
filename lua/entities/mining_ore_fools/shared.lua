@@ -5,6 +5,7 @@ ENT.ClassName = "mining_ore_fools"
 
 ENT.WeaponUp = Vector(0,0,3)
 ENT.WeaponRotatedOffset = Vector(0,-4.25,0)
+ENT.RenderGroup = RENDERGROUP_BOTH
 
 function ENT:SetupDataTables()
 	self.BaseClass.SetupDataTables(self)

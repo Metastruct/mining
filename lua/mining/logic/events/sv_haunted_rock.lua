@@ -1,6 +1,8 @@
 -- Haunted Rock Event
 local GHOST_CHANCE = 10 -- 10% chance for a rock to be haunted
 local GHOST_MODEL = "models/Humans/Group01/male_07.mdl"
+local GHOST_DAMAGE = 10
+local GHOST_ATTACK_RANGE = 60
 local GHOST_SOUNDS = {
     "ambient/voices/crying_loop1.wav",
     "ambient/voices/crying_loop2.wav",
