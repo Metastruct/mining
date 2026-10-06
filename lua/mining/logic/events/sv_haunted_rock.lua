@@ -100,8 +100,10 @@ local EVENT = {
         end
 
         -- Create ghost NPC
-        local ghost = ents.Create("npc_citizen")
-        ghost:SetModel(is_police_ghost and "models/police.mdl" or GHOST_MODEL)
+        local ghost = ents.Create(is_police_ghost and "npc_metropolice" or "npc_citizen")
+        if not is_police_ghost then
+            ghost:SetModel(GHOST_MODEL)
+        end
         ghost:SetPos(rock:GetPos())
         ghost:SetRenderMode(RENDERMODE_TRANSALPHA)
         ghost:SetColor(Color(180, 200, 255, 180))
