@@ -196,6 +196,9 @@ if CLIENT then
 	end
 
 	function ENT:OnDrawEntityInfo()
+		-- Don't draw if further than 250 units away
+		if EyePos():DistToSqr(self:WorldSpaceCenter()) > 250 * 250 then return end
+
 		local color = Ores.__R[Ores.GetOreRarityByName("Argonite")].PhysicalColor
 		local pos = self:WorldSpaceCenter():ToScreen()
 		local text = ("%d%%"):format((self:GetNWInt("ArgoniteCount", 0) / CONTAINER_CAPACITY) * 100)
