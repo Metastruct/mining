@@ -94,9 +94,14 @@ local EVENT = {
         ms.Ores.GivePlayerOre(ply, rock:GetRarity(), 2)
         ply:EmitSound("ambient/atmosphere/cave_hit" .. math.random(1,6) .. ".wav")
 
+        local is_police_ghost = math.random(1, 100) <= 10
+        if is_police_ghost and MetaCards and MetaCards.SpawnCard then
+            MetaCards.SpawnCard(rock:GetPos(), "mine_ghost", false, 10)
+        end
+
         -- Create ghost NPC
         local ghost = ents.Create("npc_citizen")
-        ghost:SetModel(GHOST_MODEL)
+        ghost:SetModel(is_police_ghost and "models/police.mdl" or GHOST_MODEL)
         ghost:SetPos(rock:GetPos())
         ghost:SetRenderMode(RENDERMODE_TRANSALPHA)
         ghost:SetColor(Color(180, 200, 255, 180))
