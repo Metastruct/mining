@@ -10,20 +10,27 @@ local NO_MALFUNCTION = {
 }
 
 timer.Create("MA_MalfunctionCheck", Ores.Automation.MalfunctionCheckInterval, 0, function()
+	local candidates = {}
 	for class in pairs(Ores.Automation.EntityClasses) do
 		if NO_MALFUNCTION[class] then continue end
 		for _, ent in ipairs(ents.FindByClass(class)) do
 			if ent:GetNWBool("IsMalfunctioning", false) then continue end
-			if math.random() >= Ores.Automation.MalfunctionChance then continue end
-
-			ent:SetNWBool("IsMalfunctioning", true)
 
 			local owner = ent.CPPIGetOwner and ent:CPPIGetOwner()
-			if IsValid(owner) then
-				net.Start("MA_Malfunction")
-				net.Send(owner)
-			end
+			if not IsValid(owner) then continue end
+
+			candidates[owner] = candidates[owner] or {}
+			table.insert(candidates[owner], ent)
 		end
+	end
+
+	for owner, owned in pairs(candidates) do
+		if math.random() >= Ores.Automation.MalfunctionChance then continue end
+
+		owned[math.random(#owned)]:SetNWBool("IsMalfunctioning", true)
+
+		net.Start("MA_Malfunction")
+		net.Send(owner)
 	end
 end)
 
